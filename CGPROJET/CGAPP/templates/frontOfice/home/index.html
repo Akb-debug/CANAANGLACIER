@@ -1,0 +1,353 @@
+{% extends 'frontOfice/base.html' %}
+{% load static %}
+
+{% block title %}Accueil - Canaan Glacier | Glaces artisanales premium{% endblock %}
+
+{% block extra_css %}
+<style>
+   
+    
+    .product-card {
+        transition: all 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(0, 191, 255, 0.15);
+    }
+    
+    .category-card {
+        height: 100%;
+        transition: transform 0.3s ease;
+        border: 1px solid var(--light);
+    }
+    
+    .category-card:hover {
+        transform: scale(1.03);
+    }
+    
+    .badge-promo {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: var(--cta);
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+    
+    .section-title {
+        position: relative;
+        padding-bottom: 15px;
+        margin-bottom: 2rem;
+    }
+    
+    .section-title:after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background: var(--primary);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+    
+    .newsletter-box {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        border-radius: 15px;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Section Hero -->
+<section class=" position-relative overflow-hidden vh-100">
+    <!-- Dégradé de fond animé -->
+    <div class="gradient-bg position-absolute top-0 start-0 w-100 h-100"></div>
+    
+    <!-- Bulles décoratives -->
+    <div class="bubble x1"></div>
+    <div class="bubble x2"></div>
+    <div class="bubble x3"></div>
+    <div class="bubble x4"></div>
+    
+    <div class="container h-100 position-relative" style="z-index: 2;">
+        <div class="row h-100 align-items-center justify-content-center g-0">
+            <div class="col-xl-8 col-lg-10 text-center px-3">
+                <!-- Titre principal avec effet de découpe -->
+                <h1 class="display-2 fw-bold mb-4 text-white text-clip">
+                    <span class="d-block">CANAA<span class="text-primary">N GLACIER</span></span>
+                    <span class="d-block fs-1 mt-3">L'EXCELLENCE GLACÉE</span>
+                </h1>
+                
+                <!-- Séparateur décoratif -->
+                <div class="separator mx-auto my-4">
+                    <svg width="150" height="8" viewBox="0 0 150 8" fill="none">
+                        <path d="M0 4H150" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="paint0_linear" x1="0" y1="4" x2="150" y2="4">
+                                <stop stop-color="#00BFFF"/>
+                                <stop offset="1" stop-color="#FFA500"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                
+                <!-- Sous-titre -->
+                <p class="lead fs-3 mb-5 text-light">
+                    <span class="d-block">Crèmes glacées <span class="text-primary fw-bold">artisanales</span></span>
+                    <span class="d-block">Livraison express à Lomé en <span class="text-cta fw-bold">120 minutes</span></span>
+                </p>
+                
+                <!-- Boutons CTA -->
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{% url 'produits' %}" class="btn btn-cta btn-lg px-4 py-3 rounded-pill shadow hover-lift">
+                        <i class="bi bi-ice-cream me-2"></i> Explorer la carte
+                    </a>
+                    <a href="#nouveautes" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill hover-lift">
+                        <i class="bi bi-stars me-2"></i> Nos nouveautés
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Flèche indicateur -->
+    <a href="#content" class="position-absolute bottom-0 start-50 translate-middle-x mb-4 z-3 text-white scroll-indicator">
+        <i class="bi bi-chevron-down fs-1"></i>
+    </a>
+</section>
+
+<style>
+    .hero-fullscreen {
+        width: 100vw;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .gradient-bg {
+        background: linear-gradient(135deg, 
+            rgba(0, 33, 71, 0.95) 0%, 
+            rgba(0, 191, 255, 0.85) 50%, 
+            rgba(255, 165, 0, 0.75) 100%);
+        animation: gradientShift 15s ease infinite;
+        background-size: 300% 300%;
+    }
+    
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    .scroll-indicator {
+        animation: bounce 2s infinite;
+        opacity: 0.8;
+        transition: all 0.3s;
+    }
+    
+    .scroll-indicator:hover {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+        40% { transform: translateY(-20px) translateX(-50%); }
+        60% { transform: translateY(-10px) translateX(-50%); }
+    }
+    
+    /* Reste du CSS identique à la version précédente */
+</style>
+
+<!-- Section Catégories -->
+<section class="mb-5 py-4">
+    <div class="container">
+        <h2 class="text-center section-title">Nos Univers Gourmands</h2>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <a href="#" class="text-decoration-none">
+                    <div class="card category-card h-100">
+                        <img src="https://images.unsplash.com/photo-1570197788417-0e82375c9371?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Glaces classiques" style="height: 180px; object-fit: cover;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-accent">Classiques</h5>
+                            <p class="card-text text-muted small">Nos recettes traditionnelles revisitées</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a href="#" class="text-decoration-none">
+                    <div class="card category-card h-100">
+                        <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Créations exotiques" style="height: 180px; object-fit: cover;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-accent">Exotiques</h5>
+                            <p class="card-text text-muted small">Saveurs tropicales et locales</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a href="#" class="text-decoration-none">
+                    <div class="card category-card h-100">
+                        <img src="https://images.unsplash.com/photo-1488900128323-21503983a07e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Glaces vegan" style="height: 180px; object-fit: cover;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-accent">Vegan</h5>
+                            <p class="card-text text-muted small">100% végétal, 100% plaisir</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a href="#" class="text-decoration-none">
+                    <div class="card category-card h-100">
+                        <img src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Desserts glacés" style="height: 180px; object-fit: cover;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-accent">Desserts</h5>
+                            <p class="card-text text-muted small">Coupelles et gourmandises</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Nouveautés -->
+<section id="nouveautes" class="mb-5 py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title">Nos Nouveautés</h2>
+            <a href="{% url 'produits' %}" class="btn btn-outline-primary">Voir tout</a>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card product-card h-100">
+                    <span class="badge badge-promo">Nouveau</span>
+                    <img src="https://images.unsplash.com/photo-1560008581-09826d1de69e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Mango Tango" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">Mango Tango</h5>
+                        <p class="card-text text-muted small">Mangue locale et fruit de la passion</p>
+                    </div>
+                    <div class="card-footer bg-white border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-primary">4 500 FCFA</span>
+                            <a href="#" class="btn btn-sm btn-cta">
+                                <i class="bi bi-cart-plus"></i> Ajouter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 3 autres produits similaires -->
+        </div>
+    </div>
+</section>
+
+<!-- Section Avantages -->
+<section class="mb-5 py-5">
+    <div class="container">
+        <h2 class="text-center section-title mb-5">Pourquoi choisir Canaan Glacier</h2>
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="feature-icon">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <h3 class="h5 text-accent">Produits locaux</h3>
+                    <p class="text-muted">Nous utilisons des fruits frais provenant directement des producteurs togolais</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="feature-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h3 class="h5 text-accent">Fabrication artisanale</h3>
+                    <p class="text-muted">Chaque glace est préparée à la main avec des méthodes traditionnelles</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4">
+                    <div class="feature-icon">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <h3 class="h5 text-accent">Livraison express</h3>
+                    <p class="text-muted">Recevez vos glaces en moins de 2h dans tout Lomé</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Newsletter -->
+<section class="mb-5 py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 newsletter-box p-5 text-white">
+                <div class="row align-items-center">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                        <h2 class="mb-3">Abonnez-vous à notre newsletter</h2>
+                        <p class="mb-0">Recevez en exclusivité nos nouveautés, offres spéciales et conseils glacés !</p>
+                    </div>
+                    <div class="col-md-6">
+                        <form class="row g-2">
+                            <div class="col-8">
+                                <input type="email" class="form-control" placeholder="Votre email">
+                            </div>
+                            <div class="col-4">
+                                <button type="submit" class="btn btn-light w-100">S'abonner</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Animation des cartes au scroll
+document.addEventListener('DOMContentLoaded', function() {
+    const animateOnScroll = function() {
+        const elements = document.querySelectorAll('.product-card, .category-card');
+        
+        elements.forEach(element => {
+            const elementPosition = element.getBoundingClientRect().top;
+            const screenPosition = window.innerHeight / 1.2;
+            
+            if(elementPosition < screenPosition) {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }
+        });
+    };
+    
+    // Initial state
+    const cards = document.querySelectorAll('.product-card, .category-card');
+    cards.forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    });
+    
+    window.addEventListener('scroll', animateOnScroll);
+    animateOnScroll(); // Run once on load
+});
+</script>
+{% endblock %}

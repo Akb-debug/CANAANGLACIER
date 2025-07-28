@@ -1,0 +1,71 @@
+{% load static %}
+<footer class="bg-dark text-white pt-5 pb-3">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Colonne 1 - A propos -->
+            <div class="col-md-4">
+                <h5 class="text-uppercase text-primary mb-4">Canaan Glacier</h5>
+                <p class="small">Depuis 2023, nous créons des glaces artisanales avec des ingrédients 100% naturels pour votre plus grand plaisir.</p>
+                <div class="mt-4">
+                    <a href="#" class="text-white me-3"><i class="bi bi-facebook fs-5"></i></a>
+                    <a href="#" class="text-white me-3"><i class="bi bi-instagram fs-5"></i></a>
+                    <a href="#" class="text-white me-3"><i class="bi bi-twitter fs-5"></i></a>
+                    <a href="#" class="text-white"><i class="bi bi-tiktok fs-5"></i></a>
+                </div>
+            </div>
+
+            <!-- Colonne 2 - Liens rapides -->
+            <div class="col-md-2">
+                <h5 class="text-uppercase text-primary mb-4">Navigation</h5>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a href="{% url 'home' %}" class="text-white text-decoration-none">Accueil</a></li>
+                    <li class="mb-2"><a href="{% url 'produits' %}" class="text-white text-decoration-none">Nos produits</a></li>
+                    <li class="mb-2"><a href="{% url 'produits' %}?sort=popularite" class="text-white text-decoration-none">Best-sellers</a></li>
+                    <li class="mb-2"><a href="{% url 'produits' %}?nouveautes=1" class="text-white text-decoration-none">Nouveautés</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Contact</a></li>
+                </ul>
+            </div>
+
+            <!-- Colonne 3 - Informations -->
+            <div class="col-md-3">
+                <h5 class="text-uppercase text-primary mb-4">Informations</h5>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Conditions générales</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Politique de confidentialité</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Livraisons et retours</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">FAQ</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Recrutement</a></li>
+                </ul>
+            </div>
+
+            <!-- Colonne 4 - Contact -->
+            <div class="col-md-3">
+                <h5 class="text-uppercase text-primary mb-4">Contactez-nous</h5>
+                <address class="small">
+                    <p class="mb-2"><i class="bi bi-geo-alt-fill text-primary me-2"></i> 123 Rue des Délices, Lomé</p>
+                    <p class="mb-2"><i class="bi bi-telephone-fill text-primary me-2"></i> +228 90 00 00 00</p>
+                    <p class="mb-2"><i class="bi bi-envelope-fill text-primary me-2"></i> contact@canaanglacier.com</p>
+                </address>
+                <h6 class="text-uppercase text-primary mt-4 mb-2">Newsletter</h6>
+                <form class="d-flex">
+                    <input type="email" class="form-control form-control-sm" placeholder="Votre email">
+                    <button type="submit" class="btn btn-sm btn-primary ms-2"><i class="bi bi-send"></i></button>
+                </form>
+            </div>
+        </div>
+
+        <hr class="my-4 bg-light">
+
+        <!-- Copyright + Paiements -->
+        <div class="row">
+            <div class="col-md-6 text-center text-md-start small">
+                &copy; 2023 Canaan Glacier. Tous droits réservés.
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <img src="{% static 'images/paiements/mobile-money.png' %}" alt="Mobile Money" height="30" class="me-2">
+                <img src="{% static 'images/paiements/visa.png' %}" alt="Visa" height="30" class="me-2">
+                <img src="{% static 'images/paiements/mastercard.png' %}" alt="Mastercard" height="30">
+            </div>
+        </div>
+    </div>
+</footer>

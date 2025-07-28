@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary: #00BFFF;    /* Bleu glacier */
+            --secondary: #FFFFFF;  /* Blanc pur */
+            --accent: #002147;    /* Bleu nuit */
+            --light: #F5F5F5;     /* Gris clair */
+            --cta: #FFA500;       /* Orange CTA */
+            --font-main: 'Montserrat', sans-serif;
+            --font-alt: 'Roboto', sans-serif;
+        }
+        
+        body {
+            font-family: var(--font-main);
+        }
+        
+        .promo-bar {
+            background-color: var(--accent);
+            color: white;
+            font-size: 0.9rem;
+            padding: 8px 0;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .promo-content {
+            display: inline-block;
+            animation: scroll 25s linear infinite;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        .navbar {
+            background-color: var(--secondary) !important;
+            box-shadow: 0 2px 10px rgba(0, 33, 71, 0.1);
+        }
+        
+        .navbar-brand span {
+            font-family: var(--font-main);
+            font-weight: 700;
+        }
+        
+        .text-primary {
+            color: var(--primary) !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .badge-accent {
+            background-color: var(--cta);
+            color: white;
+        }
+        
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dropdown-item:focus, .dropdown-item:hover {
+            background-color: var(--light);
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <!-- Barre promotionnelle animée -->
+    <div class="promo-bar">
+        <div class="promo-content">
+            <span class="me-4"><i class="bi bi-truck me-2"></i>Livraison express en 2h max dans tout Lomé</span>
+            <span class="me-4"><i class="bi bi-gift me-2"></i>10% de réduction avec le code BIENVENUE</span>
+            <span class="me-4"><i class="bi bi-telephone me-2"></i>Service client : +228 99 66 75 72</span>
+            <span><i class="bi bi-credit-card me-2"></i>Paiement sécurisé par T-Money, Flooz et carte bancaire</span>
+        </div>
+    </div>
+
+    <!-- Navigation principale -->
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <!-- Logo + Nom -->
+                <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+                    <img src="https://via.placeholder.com/40x40/00BFFF/FFFFFF?text=CG" alt="" height="40" class="me-2">
+                    <span class="fw-bold" style="color: var(--primary);">CANAA<span style="color: var(--accent);">N GLACIER</span></span>
+                </a>
+
+                <!-- Bouton mobile -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Menu principal -->
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'home' %}">Accueil</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">A propos</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                Nos Glaces
+                            </a>
+                            <ul class="dropdown-menu">
+                                {% for categorie in categories %}
+                                <li><a class="dropdown-item" href="{% url 'produits_par_categorie' categorie.slug %}">{{ categorie.nom }}</a></li>
+                                {% if forloop.counter == 6 %}<li><hr class="dropdown-divider"></li>{% endif %}
+                                {% endfor %}
+                                <li><a class="dropdown-item text-primary" href="{% url 'produits' %}">Tous nos produits</a></li>
+                            </ul>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Contact</a>
+                        </li>
+                    </ul>
+
+                    <!-- Actions utilisateur -->
+                    <div class="d-flex align-items-center">
+                        <!-- Barre de recherche -->
+                        <form class="d-none d-lg-block me-3" action="#" method="get">
+                            <div class="input-group" style="width: 200px;">
+                                <input type="text" name="q" class="form-control form-control-sm" placeholder="Rechercher...">
+                                <button class="btn btn-sm btn-outline-primary" type="submit">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Panier -->
+                        <a href="#" class="btn btn-sm btn-outline-primary position-relative me-2">
+                            <i class="bi bi-cart3"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill badge-accent">
+                                {% if request.user.is_authenticated %}
+                                    {{ request.user.client.panier.commande_set.count|default:0 }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </span>
+                        </a>
+
+                        <!-- Compte utilisateur -->
+                        {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown">
+                                <span class="d-none d-sm-inline me-2">{{ user.first_name|default:user.username }}</span>
+                                <i class="bi bi-person-circle fs-5" style="color: var(--accent);"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Mon compte</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-list-check me-2"></i>Mes commandes</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                            </ul>
+                        </div>
+                        {% else %}
+                        <div class="d-flex">
+                            <a href="#" class="btn btn-sm btn-outline-primary me-2">Connexion</a>
+                            <a href="#" class="btn btn-sm btn-primary">Inscription</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
