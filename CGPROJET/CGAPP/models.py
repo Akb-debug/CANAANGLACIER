@@ -112,13 +112,37 @@ class LignePanier(models.Model):
     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
     quantite = models.PositiveIntegerField(default=1)
 
+class AdresseLivraison(models.Model):
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    rue = models.CharField(max_length=255)
+    ville = models.CharField(max_length=100)
+    code_postal = models.CharField(max_length=20)
+    pays = models.CharField(max_length=100)
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.rue}, {self.ville} {self.code_postal}, {self.pays}"
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=20, unique=True)
+    reduction = models.DecimalField(max_digits=5, decimal_places=2)
+    actif = models.BooleanField(default=True)
+    date_expiration = models.DateField()
+
+    def __str__(self):
+        return self.code
+
 class Commande(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
-    date_commande = models.DateTimeField(auto_now_add=True)
-    total = models.DecimalField(max_digits=8, decimal_places=2)
-    statut = models.CharField(max_length=20, default='En attente')
+    date_creation = models.DateTimeField(auto_now_add=True)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    adresse_livraison = models.ForeignKey(AdresseLivraison, on_delete=models.SET_NULL, null=True)
+    methode_paiement = models.CharField(max_length=50)
+    statut = models.CharField(max_length=20, default='en_attente')
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
 
-
+    def __str__(self):
+        return f"Commande #{self.id} - {self.utilisateur.username}"
 # -------------------- PAIEMENT --------------------
 class Paiement(models.Model):
     commande = models.OneToOneField(Commande, on_delete=models.CASCADE)

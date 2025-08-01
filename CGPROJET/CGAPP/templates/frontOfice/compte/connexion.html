@@ -122,6 +122,8 @@
                                 <hr class="my-4">
                                 <p class="mb-0">Pas encore de compte ? <a href="{% url 'inscription' %}" class="text-primary fw-bold">S'inscrire</a></p>
                             </div>
+                                
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
                         </form>
                     </div>
                 </div>

@@ -180,6 +180,23 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Produit, Panier, LignePanier, Commande
 
+def base_view(request):
+    cart_items_count = 0
+    if request.user.is_authenticated:
+        panier = Panier.objects.filter(utilisateur=request.user).first()
+    else:
+        panier = Panier.objects.filter(session_id=request.session.session_key).first()
+    
+    if panier:
+        cart_items_count = panier.lignes.count()
+    
+    return render(request, 'base.html', {'cart_items_count': cart_items_count})
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Produit, Panier, LignePanier, Commande
+
 def ajouter_au_panier(request, produit_id):
     produit = get_object_or_404(Produit, id=produit_id)
 
@@ -193,8 +210,11 @@ def ajouter_au_panier(request, produit_id):
     if not created:
         ligne.quantite += 1
         ligne.save()
+        messages.success(request, f"Quantité de {produit.nom} augmentée dans votre panier")
+    else:
+        messages.success(request, f"{produit.nom} ajouté à votre panier")
 
-    return redirect('panier')
+    return redirect('produits')
 
 def voir_panier(request):
     if request.user.is_authenticated:
@@ -219,6 +239,7 @@ def augmenter_quantite(request, ligne_id):
     
     ligne.quantite += 1
     ligne.save()
+    messages.success(request, f"Quantité de {ligne.produit.nom} augmentée à {ligne.quantite}")
     return redirect('panier')
 
 def diminuer_quantite(request, ligne_id):
@@ -230,8 +251,11 @@ def diminuer_quantite(request, ligne_id):
     if ligne.quantite > 1:
         ligne.quantite -= 1
         ligne.save()
+        messages.success(request, f"Quantité de {ligne.produit.nom} diminuée à {ligne.quantite}")
     else:
+        produit_nom = ligne.produit.nom
         ligne.delete()
+        messages.warning(request, f"{produit_nom} retiré de votre panier")
     return redirect('panier')
 
 def supprimer_du_panier(request, ligne_id):
@@ -240,7 +264,9 @@ def supprimer_du_panier(request, ligne_id):
     else:
         ligne = get_object_or_404(LignePanier, id=ligne_id, panier__session_id=request.session.session_key)
     
+    produit_nom = ligne.produit.nom
     ligne.delete()
+    messages.warning(request, f"{produit_nom} retiré de votre panier")
     return redirect('panier')
 
 def vider_panier(request):
@@ -249,28 +275,16 @@ def vider_panier(request):
     else:
         panier = get_object_or_404(Panier, session_id=request.session.session_key)
     
+    count = panier.lignes.count()
     panier.lignes.all().delete()
+    
+    if count > 0:
+        messages.warning(request, "Votre panier a été vidé")
+    else:
+        messages.info(request, "Votre panier était déjà vide")
+    
     return redirect('panier')
 
-@login_required
-def valider_panier(request):
-    panier = Panier.objects.filter(utilisateur=request.user).first()
-    if not panier or not panier.lignes.exists():
-        return redirect('produits')
-
-    total = sum(l.produit.prix * l.quantite for l in panier.lignes.all())
-    commande = Commande.objects.create(utilisateur=request.user, total=total)
-
-    # Création des lignes de commande (optionnel)
-    for ligne in panier.lignes.all():
-        commande.lignes.create(
-            produit=ligne.produit,
-            quantite=ligne.quantite,
-            prix_unitaire=ligne.produit.prix
-        )
-
-    panier.delete()
-    return render(request, 'frontOfice/commandes/confirmation.html', {'commande': commande})
 
 # Checkout
 class CheckoutView(LoginRequiredMixin, View):
@@ -344,5 +358,78 @@ class ProfileView(LoginRequiredMixin, UpdateView):
         return self.request.user
 
 
-    def commande_confirmation(request):
-        return render(request, 'commande/confirmation.html')  
+    from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Commande, AdresseLivraison, Coupon
+
+@login_required(login_url='connexion') 
+def valider_commande(request):
+    # Récupérer le panier de l'utilisateur
+    panier = get_object_or_404(Panier, utilisateur=request.user)
+    
+    if request.method == 'POST':
+        # Traitement du formulaire de commande
+        adresse_id = request.POST.get('adresse_id')
+        methode_paiement = request.POST.get('methode_paiement')
+        coupon_code = request.POST.get('coupon_code')
+        
+        # Création de la commande
+        total = panier.total
+        commande = Commande.objects.create(
+            utilisateur=request.user,
+            total=total,
+            adresse_livraison_id=adresse_id,
+            methode_paiement=methode_paiement
+        )
+        
+        # Redirection vers la page de confirmation
+        return redirect('suivi_commande', commande_id=commande.id)
+    
+    # Afficher le formulaire de commande
+    return render(request, 'frontOfice/commandes/confirmation.html')
+
+@login_required
+def suivi_commande(request, commande_id):
+    commande = get_object_or_404(Commande, id=commande_id, utilisateur=request.user)
+    return render(request, 'frontOfice/commandes/suivi.html', {'commande': commande})
+
+@login_required
+def ajouter_adresse(request):
+    if request.method == 'POST':
+        # Traitement du formulaire d'adresse
+        rue = request.POST.get('rue')
+        ville = request.POST.get('ville')
+        code_postal = request.POST.get('code_postal')
+        pays = request.POST.get('pays')
+        
+        adresse = AdresseLivraison.objects.create(
+            utilisateur=request.user,
+            rue=rue,
+            ville=ville,
+            code_postal=code_postal,
+            pays=pays
+        )
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'adresse_id': adresse.id})
+        
+        return redirect('valider_commande')
+    
+    return render(request, 'frontOfice/commandes/ajouter_adresse.html')
+
+@login_required
+def appliquer_coupon(request):
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        code = request.POST.get('code')
+        try:
+            coupon = Coupon.objects.get(code=code, actif=True)
+            return JsonResponse({
+                'success': True,
+                'reduction': coupon.reduction,
+                'code': coupon.code
+            })
+        except Coupon.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Code coupon invalide'})
+    
+    return JsonResponse({'success': False, 'error': 'Requête invalide'})

@@ -1,4 +1,5 @@
 {% load static %}
+{% load cart_tags %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -152,17 +153,29 @@
                             </div>
                         </form>
                         
+                        
                         <!-- Panier -->
-                        <a href="{% url 'panier' %}" class="btn btn-sm btn-outline-primary position-relative me-2">
-                            <i class="bi bi-cart3"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill badge-accent">
-                                {% if request.user.is_authenticated %}
-                                    {{ request.user.client.panier.commande_set.count|default:0 }}
-                                {% else %}
-                                    0
-                                {% endif %}
-                            </span>
-                        </a>
+                      <!-- Panier -->
+                    <a href="{% url 'panier' %}" class="btn btn-sm btn-outline-primary position-relative me-2">
+                        <i class="bi bi-cart3"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill badge-accent">
+                            {% if request.user.is_authenticated %}
+                                {% with panier=request.user.panier_set.first %}
+                                    {{ panier.lignes.count|default:0 }}
+                                {% endwith %}
+                            {% else %}
+                                {% with panier=request.session.session_key|default:None %}
+                                    {% if panier %}
+                                        {% with panier_obj=panier|get_panier_by_session %}
+                                            {{ panier_obj.lignes.count|default:0 }}
+                                        {% endwith %}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        </span>
+                    </a>
 
                         <!-- Compte utilisateur -->
                         {% if user.is_authenticated %}

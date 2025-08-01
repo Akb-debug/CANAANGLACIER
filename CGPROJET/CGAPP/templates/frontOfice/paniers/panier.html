@@ -45,7 +45,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ ligne.produit.prix }} €</td>
+                                    <td>{{ ligne.produit.prix }} FCFA</td>
                                     <td>
                                         <div class="input-group" style="width: 120px;">
                                             <form method="post" action="{% url 'diminuer_quantite' ligne.id %}" class="d-inline">
@@ -61,7 +61,7 @@
                                     </td>
                                     <td>
                                         {% with total_item=ligne.produit.prix|multiply:ligne.quantite %}
-                                            {{ total_item }} €
+                                            {{ total_item }}FCFA
                                         {% endwith %}
                                     </td>
                                     <td>
@@ -100,7 +100,7 @@
 
                     <div class="d-flex justify-content-between mb-2">
                         <span>Sous-total</span>
-                        <span>{{ total|default:"0.00" }} €</span>
+                        <span>{{ total|default:"0.00" }} FCFA</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
                         <span>Livraison</span>
@@ -109,10 +109,10 @@
                     <hr>
                     <div class="d-flex justify-content-between fw-bold mb-4">
                         <span>Total</span>
-                        <span>{{ total|default:"0.00" }} €</span>
+                        <span>{{ total|default:"0.00" }} FCFA</span>
                     </div>
 
-                    <a href="{% url 'valider_panier' %}" class="btn btn-primary w-100 py-2">
+                    <a href="{% url 'valider_commande' %}" class="btn btn-primary w-100 py-2">
                         Passer la commande <i class="bi bi-arrow-right ms-2"></i>
                     </a>
 

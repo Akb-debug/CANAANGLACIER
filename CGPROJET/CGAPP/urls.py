@@ -27,8 +27,13 @@ urlpatterns = [
     path('panier/diminuer/<int:ligne_id>/', views.diminuer_quantite, name='diminuer_quantite'),
     path('panier/supprimer/<int:ligne_id>/', views.supprimer_du_panier, name='supprimer_du_panier'),
     path('panier/vider/', views.vider_panier, name='vider_panier'),
-    path('panier/valider/', views.valider_panier, name='valider_panier'),
+    #path('panier/valider/', views.valider_panier, name='valider_panier'),
 
+    # URLs pour la commande
+    path('commande/valider/', views.valider_commande, name='valider_commande'),
+    path('commande/suivi/<int:commande_id>/', views.suivi_commande, name='suivi_commande'),
+    path('commande/ajouter-adresse/', views.ajouter_adresse, name='ajouter_adresse'),
+    path('commande/appliquer-coupon/', views.appliquer_coupon, name='appliquer_coupon'),
     # Page de paiement (checkout)
     path('checkout/', views.CheckoutView.as_view(), name='checkout'),
     # Compte
