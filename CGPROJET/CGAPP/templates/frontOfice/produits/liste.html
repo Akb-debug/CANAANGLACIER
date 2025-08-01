@@ -1,0 +1,48 @@
+{% extends 'frontOfice/base.html' %}
+{% block title %}Nos Glaces - Canaan Glacier{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h1 class="display-5">Nos Délices Glacés</h1>
+    </div>
+    <div class="col-md-6 text-end">
+        <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Catégories
+            </button>
+            <ul class="dropdown-menu">
+                {% for categorie in categories %}
+                <li><a class="dropdown-item" href="{% url 'produits_par_categorie' categorie.slug %}">{{ categorie.nom }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for produit in produits %}
+    <div class="col-md-6 col-lg-4 col-xl-3">
+        <div class="card h-100 shadow-sm">
+            <img src="{{ produit.image.url }}" class="card-img-top" alt="{{ produit.nom }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ produit.nom }}</h5>
+                <p class="card-text text-muted">{{ produit.description|truncatechars:60 }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="h5 text-primary">{{ produit.prix }} FCFA</span>
+                    <a href="{% url 'ajouter_au_panier' produit.id %}" class="btn btn-sm btn-accent">
+                        <i class="bi bi-cart-plus"></i> Ajouter
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">Aucun produit disponible dans cette catégorie.</div>
+    </div>
+    {% endfor %}
+</div>
+
+{% include 'frontOfice/partials/pagination.html' %}
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "frontOfice/base.html" %}
+{% load static %}
+
+{% block title %}Confirmation - Canaan Glacier{% endblock %}
+
+{% block content %}
+<section class="py-5 my-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <!-- Icône de confirmation animée -->
+                <div class="icon-confirmation mb-4">
+                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" fill="#00BFFF"/>
+                        <path d="M8 12L11 15L16 9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+
+                <h1 class="display-5 fw-bold text-accent mb-3">Message envoyé avec succès !</h1>
+                
+                <p class="lead mb-4">
+                    Merci pour votre message. Notre équipe vous contactera dans les plus brefs délais.
+                </p>
+                
+                <div class="d-flex flex-wrap justify-content-center gap-3 mt-5">
+                    <a href="{% url 'home' %}" class="btn btn-primary px-4 py-2">
+                        <i class="bi bi-house-door me-2"></i> Retour à l'accueil
+                    </a>
+                    <a href="{% url 'produits' %}" class="btn btn-outline-primary px-4 py-2">
+                        <i class="bi bi-ice-cream me-2"></i> Découvrir nos produits
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Animation de l'icône */
+    .icon-confirmation {
+        animation: bounce 1s ease;
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-20px);}
+        60% {transform: translateY(-10px);}
+    }
+    
+    /* Style des boutons */
+    .btn-outline-primary {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: var(--primary);
+        color: white;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .display-5 {
+            font-size: 2.2rem;
+        }
+    }
+</style>
+{% endblock %}

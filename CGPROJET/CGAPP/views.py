@@ -1,12 +1,59 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
-from .models import Produit, Categorie, Panier, Commande, Contact, AbonnementNewsletter
-from .forms import ContactForm, NewsletterForm, CommandeForm
+from .models import Produit, Categorie, Panier, Commande, Contact, Utilisateur,LignePanier
+from .forms import ContactForm, NewsletterForm, CommandeForm,InscriptionForm, ConnexionForm
+from django.contrib.auth import login, authenticate, logout
+
+#inscription et connexion
+class InscriptionView(CreateView):
+    model = Utilisateur
+    form_class = InscriptionForm
+    template_name = 'frontOfice/compte/inscription.html'
+    success_url = reverse_lazy('home')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)  
+        messages.success(self.request, "Inscription réussie !")
+        return response
+    
+def connexion(request):
+    if request.method == 'POST':
+        form = ConnexionForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                messages.success(request, f"Bienvenue {user.username} !")
+                return redirect('home')
+            else:
+                messages.error(request, "Identifiants incorrects")
+    else:
+        form = ConnexionForm()
+    
+    return render(request, 'frontOfice/compte/connexion.html', {'form': form})
+
+def deconnexion(request):
+    logout(request)
+    messages.success(request, "Vous avez été déconnecté avec succès.")
+    return redirect('home')
 
 # Vue Accueil
+
+def detail_categorie(request, id):
+    categorie = get_object_or_404(Categorie, id=id)
+    return render(request, 'frontOfice/produits/detail.html', {'categorie': categorie})
+
+def categories_context(request):
+    categories = Categorie.objects.all()
+    return {'categories': categories}
+
 def home(request):
     produits_nouveautes = Produit.objects.order_by('-id')[:8]
     produits_populaires = Produit.objects.order_by('?')[:4]
@@ -17,12 +64,15 @@ def home(request):
         'populaires': produits_populaires,
         'categories': categories,
     }
-    return render(request, 'frontOfice/home/index.html', context)
+    return render(request, 'frontOfice/index.html', context)
+
+def apropos(request):
+    return render(request,'frontOfice/apropos.html')
 
 # Liste des Produits
 class ProduitListView(ListView):
     model = Produit
-    template_name = 'produits/liste.html'
+    template_name = 'frontOfice/produits/liste.html'
     context_object_name = 'produits'
     paginate_by = 12
     
@@ -42,7 +92,7 @@ class ProduitListView(ListView):
 # Détail Produit
 class ProduitDetailView(DetailView):
     model = Produit
-    template_name = 'produits/detail.html'
+    template_name = 'fontOfice/produits/detail.html'
     context_object_name = 'produit'
     
     def get_context_data(self, **kwargs):
@@ -53,89 +103,240 @@ class ProduitDetailView(DetailView):
         return context
 
 # Gestion Panier
-class PanierView(LoginRequiredMixin, ListView):
-    template_name = 'panier/panier.html'
-    context_object_name = 'commandes'
+# class PanierView(ListView):
+#     template_name = 'frontOfice/paniers/panier.html'
+
+#     def get(self, request):
+#         if request.user.is_authenticated:
+#             panier, created = Panier.objects.get_or_create(client__utilisateur=request.user)
+#         else:
+#             panier_id = request.session.get('panier_id')
+#             if panier_id:
+#                 panier = Panier.objects.filter(id=panier_id).first()
+#             else:
+#                 panier = Panier.objects.create()
+#                 request.session['panier_id'] = panier.id
+
+#         commandes = panier.commande_set.all()
+#         total = sum(commande.produit.prix * commande.quantite for commande in commandes)
+
+#         return render(request, self.template_name, {
+#             'commandes': commandes,
+#             'total': total,
+#         })
+
+# def ajouter_au_panier(request, produit_id):
+#     produit = get_object_or_404(Produit, id=produit_id)
+
+#     if request.user.is_authenticated:
+#         panier, _ = Panier.objects.get_or_create(client__utilisateur=request.user)
+#     else:
+#         panier_id = request.session.get('panier_id')
+#         if panier_id:
+#             panier = Panier.objects.filter(id=panier_id).first()
+#         else:
+#             panier = Panier.objects.create()
+#             request.session['panier_id'] = panier.id
+
+#     commande, created = Commande.objects.get_or_create(
+#         panier=panier,
+#         produit=produit,
+#         defaults={'quantite': 1}
+#     )
+#     if not created:
+#         commande.quantite += 1
+#         commande.save()
+
+#     messages.success(request, f"{produit.nom} ajouté à votre panier")
+#     return redirect('panier')
+
+
+# def supprimer_du_panier(request, commande_id):
+#     if request.user.is_authenticated:
+#         panier = Panier.objects.filter(client__utilisateur=request.user).first()
+#     else:
+#         panier_id = request.session.get('panier_id')
+#         panier = Panier.objects.filter(id=panier_id).first()
+
+#     commande = get_object_or_404(Commande, id=commande_id, panier=panier)
+#     commande.delete()
+
+#     messages.success(request, "Produit retiré du panier")
+#     return redirect('panier')
+
+# def modifier_quantite(request, commande_id):
+#     commande = get_object_or_404(Commande, id=commande_id, panier__client__utilisateur=request.user)
+#     action = request.GET.get('action')
     
-    def get_queryset(self):
-        panier, created = Panier.objects.get_or_create(client__utilisateur=self.request.user)
-        return panier.commande_set.all()
+#     if action == 'increase':
+#         commande.quantite += 1
+#     elif action == 'decrease' and commande.quantite > 1:
+#         commande.quantite -= 1
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        panier = Panier.objects.get(client__utilisateur=self.request.user)
-        total = sum(commande.produit.prix * commande.quantite for commande in context['commandes'])
-        context['total'] = total
-        return context
+#     commande.save()
+#     return redirect('panier')
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Produit, Panier, LignePanier, Commande
 
 def ajouter_au_panier(request, produit_id):
     produit = get_object_or_404(Produit, id=produit_id)
-    panier, created = Panier.objects.get_or_create(client__utilisateur=request.user)
-    commande, created = Commande.objects.get_or_create(
-        panier=panier,
-        produit=produit,
-        defaults={'quantite': 1}
-    )
+
+    if request.user.is_authenticated:
+        panier, _ = Panier.objects.get_or_create(utilisateur=request.user)
+    else:
+        session_id = request.session.session_key or request.session.save()
+        panier, _ = Panier.objects.get_or_create(session_id=request.session.session_key)
+
+    ligne, created = LignePanier.objects.get_or_create(panier=panier, produit=produit)
     if not created:
-        commande.quantite += 1
-        commande.save()
-    messages.success(request, f"{produit.nom} ajouté à votre panier")
+        ligne.quantite += 1
+        ligne.save()
+
     return redirect('panier')
 
-def supprimer_du_panier(request, commande_id):
-    commande = get_object_or_404(Commande, id=commande_id, panier__client__utilisateur=request.user)
-    commande.delete()
-    messages.success(request, "Produit retiré du panier")
+def voir_panier(request):
+    if request.user.is_authenticated:
+        panier = Panier.objects.filter(utilisateur=request.user).first()
+    else:
+        panier = Panier.objects.filter(session_id=request.session.session_key).first()
+    
+    total = 0
+    if panier:
+        total = sum(l.produit.prix * l.quantite for l in panier.lignes.all())
+    
+    return render(request, 'frontOfice/paniers/panier.html', {
+        'panier': panier,
+        'total': total
+    })
+
+def augmenter_quantite(request, ligne_id):
+    if request.user.is_authenticated:
+        ligne = get_object_or_404(LignePanier, id=ligne_id, panier__utilisateur=request.user)
+    else:
+        ligne = get_object_or_404(LignePanier, id=ligne_id, panier__session_id=request.session.session_key)
+    
+    ligne.quantite += 1
+    ligne.save()
     return redirect('panier')
+
+def diminuer_quantite(request, ligne_id):
+    if request.user.is_authenticated:
+        ligne = get_object_or_404(LignePanier, id=ligne_id, panier__utilisateur=request.user)
+    else:
+        ligne = get_object_or_404(LignePanier, id=ligne_id, panier__session_id=request.session.session_key)
+    
+    if ligne.quantite > 1:
+        ligne.quantite -= 1
+        ligne.save()
+    else:
+        ligne.delete()
+    return redirect('panier')
+
+def supprimer_du_panier(request, ligne_id):
+    if request.user.is_authenticated:
+        ligne = get_object_or_404(LignePanier, id=ligne_id, panier__utilisateur=request.user)
+    else:
+        ligne = get_object_or_404(LignePanier, id=ligne_id, panier__session_id=request.session.session_key)
+    
+    ligne.delete()
+    return redirect('panier')
+
+def vider_panier(request):
+    if request.user.is_authenticated:
+        panier = get_object_or_404(Panier, utilisateur=request.user)
+    else:
+        panier = get_object_or_404(Panier, session_id=request.session.session_key)
+    
+    panier.lignes.all().delete()
+    return redirect('panier')
+
+@login_required
+def valider_panier(request):
+    panier = Panier.objects.filter(utilisateur=request.user).first()
+    if not panier or not panier.lignes.exists():
+        return redirect('produits')
+
+    total = sum(l.produit.prix * l.quantite for l in panier.lignes.all())
+    commande = Commande.objects.create(utilisateur=request.user, total=total)
+
+    # Création des lignes de commande (optionnel)
+    for ligne in panier.lignes.all():
+        commande.lignes.create(
+            produit=ligne.produit,
+            quantite=ligne.quantite,
+            prix_unitaire=ligne.produit.prix
+        )
+
+    panier.delete()
+    return render(request, 'frontOfice/commandes/confirmation.html', {'commande': commande})
 
 # Checkout
-class CheckoutView(LoginRequiredMixin, CreateView):
-    template_name = 'panier/checkout.html'
+class CheckoutView(LoginRequiredMixin, View):
+    template_name = 'frontOfice/panier/checkout.html'
     form_class = CommandeForm
-    success_url = reverse_lazy('commande_confirmation')
-    
-    def form_valid(self, form):
-        panier = Panier.objects.get(client__utilisateur=self.request.user)
-        commandes = panier.commande_set.all()
-        
-        if not commandes.exists():
-            messages.error(self.request, "Votre panier est vide")
+    login_url = reverse_lazy('connexion')  # ou 'connexion'
+
+    def get(self, request):
+        panier = Panier.objects.filter(client__utilisateur=request.user).first()
+        if not panier or not panier.commande_set.exists():
+            messages.error(request, "Votre panier est vide")
             return redirect('panier')
-            
-        # Créer la commande et le paiement
-        # ... logique de traitement ...
-        
-        # Vider le panier
-        panier.commande_set.all().delete()
-        
-        messages.success(self.request, "Votre commande a été passée avec succès!")
-        return super().form_valid(form)
+
+        form = self.form_class()
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = self.form_class(request.POST)
+        panier = Panier.objects.filter(client__utilisateur=request.user).first()
+
+        if not panier or not panier.commande_set.exists():
+            messages.error(request, "Votre panier est vide")
+            return redirect('panier')
+
+        if form.is_valid():
+            # Traitement commande ici...
+            panier.commande_set.all().delete()
+            messages.success(request, "Votre commande a été passée avec succès!")
+            return redirect('commande_confirmation')
+
+        return render(request, self.template_name, {'form': form})
+
 
 # Contact
+
+def contact_success(request):
+    return render(request, 'frontOfice/contactSuccess.html')
+
 class ContactView(CreateView):
     model = Contact
     form_class = ContactForm
-    template_name = 'contact/contact.html'
-    success_url = reverse_lazy('contact_success')
+    template_name = 'frontOfice/contact.html'
+    success_url = reverse_lazy('contact_success')  
     
     def form_valid(self, form):
-        messages.success(self.request, "Votre message a été envoyé avec succès!")
-        return super().form_valid(form)
-
+        response = super().form_valid(form)
+        messages.success(self.request, "Votre message a été envoyé avec succès! Nous vous répondrons dans les plus brefs délais.")
+        return response
+    
+    def form_invalid(self, form):
+        messages.error(self.request, "Veuillez corriger les erreurs dans le formulaire.")
+        return super().form_invalid(form)
 # Newsletter
-class NewsletterView(CreateView):
-    model = AbonnementNewsletter
-    form_class = NewsletterForm
-    template_name = 'newsletter/subscribe.html'
-    success_url = reverse_lazy('newsletter_success')
-    
-    def form_valid(self, form):
-        messages.success(self.request, "Merci pour votre inscription à notre newsletter!")
-        return super().form_valid(form)
+class NewsletterSubscribeView(CreateView):
+    def post(self, request):
+        form = NewsletterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Merci pour votre abonnement !")
+        else:
+            messages.error(request, "Email invalide ou déjà inscrit.")
+        return redirect(request.META.get('HTTP_REFERER', '/')) 
 
 # Compte Utilisateur
 class ProfileView(LoginRequiredMixin, UpdateView):
-    template_name = 'compte/profile.html'
+    template_name = 'frontOfice/compte/profil.html'
     fields = ['first_name', 'last_name', 'email', 'telephone']
     success_url = reverse_lazy('profile')
     
@@ -144,4 +345,4 @@ class ProfileView(LoginRequiredMixin, UpdateView):
 
 
     def commande_confirmation(request):
-        return render(request, 'commande/confirmation.html')  # crée aussi ce template
+        return render(request, 'commande/confirmation.html')  

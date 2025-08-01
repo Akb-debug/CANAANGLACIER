@@ -198,17 +198,24 @@
                     </div>
                 </a>
             </div>
+            {%for categorie in categories%}
             <div class="col-md-6 col-lg-3">
-                <a href="#" class="text-decoration-none">
+                <a href="{% url 'produits_par_categorie' categorie.slug %}" class="text-decoration-none">
                     <div class="card category-card h-100">
-                        <img src="https://images.unsplash.com/photo-1488900128323-21503983a07e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Glaces vegan" style="height: 180px; object-fit: cover;">
+                        {% if categorie.image %}
+                            <img src="{{ categorie.image.url }}" class="card-img-top" alt="{{ categorie.nom }}" style="height: 180px; object-fit: cover;">
+                        {% else %}
+                            <!-- Image par défaut si aucune image n'est définie -->
+                            <img src="https://via.placeholder.com/300x180?text=Canaan+Glacier" class="card-img-top" alt="{{ categorie.nom }}" style="height: 180px; object-fit: cover;">
+                        {% endif %}
                         <div class="card-body text-center">
-                            <h5 class="card-title text-accent">Vegan</h5>
-                            <p class="card-text text-muted small">100% végétal, 100% plaisir</p>
+                            <h5 class="card-title text-accent">{{ categorie.nom }}</h5>
+                            <p class="card-text text-muted small">{{ categorie.description|truncatechars:30 }}</p>
                         </div>
                     </div>
                 </a>
             </div>
+            {%endfor%}
             <div class="col-md-6 col-lg-3">
                 <a href="#" class="text-decoration-none">
                     <div class="card category-card h-100">
@@ -304,14 +311,16 @@
                         <p class="mb-0">Recevez en exclusivité nos nouveautés, offres spéciales et conseils glacés !</p>
                     </div>
                     <div class="col-md-6">
-                        <form class="row g-2">
+                        <form method="POST" action="{% url 'newsletter_subscribe' %}" class="row g-2">
+                            {% csrf_token %}
                             <div class="col-8">
-                                <input type="email" class="form-control" placeholder="Votre email">
+                                <input type="email" name="email" class="form-control" placeholder="Votre email" required>
                             </div>
                             <div class="col-4">
                                 <button type="submit" class="btn btn-light w-100">S'abonner</button>
                             </div>
                         </form>
+
                     </div>
                 </div>
             </div>

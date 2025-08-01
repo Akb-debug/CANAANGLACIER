@@ -1,0 +1,138 @@
+{% extends 'frontOfice/base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Votre Panier</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if panier and panier.lignes.all %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Prix unitaire</th>
+                                    <th>Quantité</th>
+                                    <th>Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ligne in panier.lignes.all %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if ligne.produit.image %}
+                                                <img src="{{ ligne.produit.image.url }}" alt="{{ ligne.produit.nom }}"
+                                                     class="img-fluid rounded" style="width: 70px; height: 70px; object-fit: cover;">
+                                            {% endif %}
+                                            <div class="ms-3">
+                                                <h5 class="mb-0">{{ ligne.produit.nom }}</h5>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ ligne.produit.prix }} €</td>
+                                    <td>
+                                        <div class="input-group" style="width: 120px;">
+                                            <form method="post" action="{% url 'diminuer_quantite' ligne.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-outline-secondary">-</button>
+                                            </form>
+                                            <span class="form-control text-center">{{ ligne.quantite }}</span>
+                                            <form method="post" action="{% url 'augmenter_quantite' ligne.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-outline-secondary">+</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% with total_item=ligne.produit.prix|multiply:ligne.quantite %}
+                                            {{ total_item }} €
+                                        {% endwith %}
+                                    </td>
+                                    <td>
+                                        <form method="post" action="{% url 'supprimer_du_panier' ligne.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mb-4">
+                <a href="{% url 'produits' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left me-2"></i>Continuer mes achats
+                </a>
+                <form method="post" action="{% url 'vider_panier' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="bi bi-trash me-2"></i>Vider le panier
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Récapitulatif</h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Sous-total</span>
+                        <span>{{ total|default:"0.00" }} €</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Livraison</span>
+                        <span>Gratuite</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold mb-4">
+                        <span>Total</span>
+                        <span>{{ total|default:"0.00" }} €</span>
+                    </div>
+
+                    <a href="{% url 'valider_panier' %}" class="btn btn-primary w-100 py-2">
+                        Passer la commande <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+
+                    <div class="mt-3 text-center">
+                        <img src="{% static 'images/paiement-securise.png' %}" alt="Paiement sécurisé" class="img-fluid" style="max-height: 30px;">
+                        <p class="small text-muted mt-2 mb-0">Paiement 100% sécurisé</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <img src="{% static 'images/empty-cart.svg' %}" alt="Panier vide" class="img-fluid mb-4" style="max-height: 200px;">
+        <h3 class="mb-3">Votre panier est vide</h3>
+        <p class="text-muted mb-4">Parcourez notre boutique et découvrez nos produits</p>
+        <a href="{% url 'produits' %}" class="btn btn-primary px-4">
+            <i class="bi bi-cart me-2"></i>Commencer mes achats
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

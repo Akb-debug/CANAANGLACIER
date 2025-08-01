@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from django.templatetags.static import static
 
 # -------------------- UTILISATEUR --------------------
 class Utilisateur(AbstractUser):
@@ -57,7 +57,14 @@ class Categorie(models.Model):
 
     def __str__(self):
         return self.nom
-
+    @property
+    def image_url(self):
+        """
+        Retourne l'URL de l'image si elle existe, sinon un placeholder statique.
+        """
+        if self.image:
+            return self.image.url
+        return static('image/image.jpg')  
 
 # -------------------- PRODUITS --------------------
 class Produit(models.Model):
@@ -74,24 +81,42 @@ class Produit(models.Model):
 
 
 
-# -------------------- PANIER --------------------
+# # -------------------- PANIER --------------------
+# class Panier(models.Model):
+#     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True)
+#     date_creation = models.DateTimeField(auto_now_add=True)
+#     session_id = models.CharField(max_length=100, null=True, blank=True)  # Pour suivre les utilisateurs anonymes
+#     produits = models.ManyToManyField(Produit, through='Commande')
+
+#     def __str__(self):
+#         return f"Panier de {self.client.utilisateur.username}"
+
+
+# # -------------------- COMMANDER --------------------
+# class Commande(models.Model):
+#     panier = models.ForeignKey(Panier, on_delete=models.CASCADE)
+#     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
+#     quantite = models.PositiveIntegerField()
+#     date_commande = models.DateTimeField(auto_now_add=True)
+
+#     def __str__(self):
+#         return f"{self.quantite} x {self.produit.nom}"
+
 class Panier(models.Model):
-    client = models.OneToOneField(Client, on_delete=models.CASCADE)
-    produits = models.ManyToManyField(Produit, through='Commande')
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, null=True, blank=True)
+    session_id = models.CharField(max_length=100, null=True, blank=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Panier de {self.client.utilisateur.username}"
-
-
-# -------------------- COMMANDER --------------------
-class Commande(models.Model):
-    panier = models.ForeignKey(Panier, on_delete=models.CASCADE)
+class LignePanier(models.Model):
+    panier = models.ForeignKey(Panier, on_delete=models.CASCADE, related_name='lignes')
     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
-    quantite = models.PositiveIntegerField()
-    date_commande = models.DateTimeField(auto_now_add=True)
+    quantite = models.PositiveIntegerField(default=1)
 
-    def __str__(self):
-        return f"{self.quantite} x {self.produit.nom}"
+class Commande(models.Model):
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    date_commande = models.DateTimeField(auto_now_add=True)
+    total = models.DecimalField(max_digits=8, decimal_places=2)
+    statut = models.CharField(max_length=20, default='En attente')
 
 
 # -------------------- PAIEMENT --------------------

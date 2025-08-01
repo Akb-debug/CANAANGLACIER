@@ -1,0 +1,95 @@
+{% if messages %}
+<div class="message-container position-fixed top-0 end-0 p-3" style="z-index: 1100; max-width: 400px;">
+    {% for message in messages %}
+    <div class="alert alert-dismissible fade show {% if message.tags %}{{ message.tags }}{% endif %}" role="alert">
+        <div class="d-flex align-items-center">
+            <!-- Icône selon le type de message -->
+            {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                <i class="bi bi-check-circle-fill me-2 fs-4 text-white"></i>
+            {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-4 text-white"></i>
+            {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                <i class="bi bi-exclamation-circle-fill me-2 fs-4 text-white"></i>
+            {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+                <i class="bi bi-info-circle-fill me-2 fs-4 text-white"></i>
+            {% else %}
+                <i class="bi bi-info-circle-fill me-2 fs-4 text-white"></i>
+            {% endif %}
+            
+            <div class="flex-grow-1 text-white">
+                {{ message }}
+            </div>
+            
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    /* Animation d'entrée */
+    .alert {
+        animation: slideIn 0.3s ease-out forwards;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        margin-bottom: 1rem;
+        color: white !important; /* Force le texte en blanc */
+    }
+    
+    /* Couleurs de fond personnalisées */
+    .alert-success {
+        background-color: #28a745; /* Vert */
+    }
+    
+    .alert-error, .alert-danger {
+        background-color: #dc3545; /* Rouge */
+    }
+    
+    .alert-warning {
+        background-color: #fd7e14; /* Orange */
+    }
+    
+    .alert-info {
+        background-color: #00BFFF; /* Bleu glacier */
+    }
+    
+    /* Cas par défaut */
+    .alert {
+        background-color: #002147; /* Bleu nuit */
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    /* Animation de fermeture */
+    .alert.fade {
+        transition: opacity 0.3s, transform 0.3s ease-in;
+    }
+    
+    /* Bouton de fermeture blanc */
+    .btn-close-white {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+</style>
+
+<script>
+    // Fermeture automatique après 5 secondes
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000);
+        });
+    });
+</script>
+{% endif %}

@@ -1,0 +1,132 @@
+{% extends "frontOfice/base.html" %}
+{% load static %}
+
+{% block title %}Connexion - Canaan Glacier{% endblock %}
+
+{% block content %}
+<style>
+    /* Style général des formulaires */
+    .form-control, .form-select {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: none !important;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #00BFFF; /* Bleu glacier */
+        box-shadow: 0 0 0 0.25rem rgba(0, 191, 255, 0.25) !important;
+    }
+
+    /* Labels */
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #002147; /* Bleu nuit */
+    }
+
+    /* Placeholders */
+    .form-control::placeholder {
+        color: #adb5bd;
+        opacity: 1;
+    }
+
+    /* Champs spécifiques */
+    input[type="tel"] {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300BFFF' viewBox='0 0 16 16'%3E%3Cpath d='M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H5z'/%3E%3Cpath d='M8 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        background-size: 20px;
+    }
+
+    /* Messages d'aide */
+    .form-text {
+        font-size: 0.85rem;
+        color: #6c757d !important;
+        margin-top: 5px;
+    }
+
+    /* Messages d'erreur */
+    .invalid-feedback {
+        font-size: 0.85rem;
+        color: #dc3545;
+        margin-top: 5px;
+    }
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+
+    .is-invalid:focus {
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+    }
+
+    /* Boutons */
+    .btn-primary {
+        background-color: #00BFFF; 
+        border-color: #00BFFF;
+        
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #0095d9;
+        border-color: #0095d9;
+        transform: translateY(-2px);
+    }
+
+    /* Icônes dans les boutons */
+    .btn i.bi {
+        margin-right: 8px;
+    }
+</style>
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-lg rounded-3">
+                    <div class="card-body p-5">
+                        <h2 class="text-center mb-4 text-accent">Connexion</h2>
+                        
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                {{ form.username.label_tag }}
+                                {{ form.username }}
+                                <div class="invalid-feedback">
+                                    Veuillez entrer votre nom d'utilisateur ou email.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {{ form.password.label_tag }}
+                                {{ form.password }}
+                                <div class="invalid-feedback">
+                                    Veuillez entrer votre mot de passe.
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i> Se connecter
+                                </button>
+                            </div>
+                            
+                            <div class="text-center">
+                                <a href="{% url 'password_reset' %}" class="text-primary">Mot de passe oublié ?</a>
+                                <hr class="my-4">
+                                <p class="mb-0">Pas encore de compte ? <a href="{% url 'inscription' %}" class="text-primary fw-bold">S'inscrire</a></p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

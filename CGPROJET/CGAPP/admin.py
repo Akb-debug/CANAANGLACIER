@@ -79,21 +79,21 @@ class ProduitAdmin(admin.ModelAdmin):
 # PANIER
 # ----------------------------------------
 
-@admin.register(Panier)
-class PanierAdmin(admin.ModelAdmin):
-    list_display = ('client',)
-    search_fields = ('client__utilisateur__username',)
+# @admin.register(Panier)
+# class PanierAdmin(admin.ModelAdmin):
+#     list_display = ('client',)
+#     search_fields = ('client__utilisateur__username',)
 
 
-# ----------------------------------------
-# COMMANDE
-# ----------------------------------------
+# # ----------------------------------------
+# # COMMANDE
+# # ----------------------------------------
 
-@admin.register(Commande)
-class CommandeAdmin(admin.ModelAdmin):
-    list_display = ('panier', 'produit', 'quantite', 'date_commande')
-    search_fields = ('produit__nom',)
-    list_filter = ('date_commande',)
+# @admin.register(Commande)
+# class CommandeAdmin(admin.ModelAdmin):
+#     list_display = ('panier', 'produit', 'quantite', 'date_commande')
+#     search_fields = ('produit__nom',)
+#     list_filter = ('date_commande',)
 
 
 # ----------------------------------------

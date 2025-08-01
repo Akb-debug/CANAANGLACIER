@@ -1,5 +1,68 @@
 from django import forms
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator,validate_email
+from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import UserCreationForm
+from .models import Utilisateur,Contact,AbonnementNewsletter
+
+
+class InscriptionForm(UserCreationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ajout des classes CSS aux champs
+        self.fields['username'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Nom d\'utilisateur'
+        })
+        self.fields['email'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'email@exemple.com'
+        })
+        self.fields['telephone'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': '90 12 34 56'
+        })
+        self.fields['password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': '••••••••'
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': '••••••••'
+        })
+    
+    telephone = forms.CharField(
+        max_length=15,
+        required=True,
+        help_text='Format: 90 12 34 56',
+        validators=[RegexValidator(
+            regex='^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
+            message='Numéro togolais invalide'
+        )],
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '90 12 34 56'
+        })
+    )
+    
+    class Meta:
+        model = Utilisateur
+        fields = ('username', 'email', 'telephone', 'password1', 'password2')
+
+class ConnexionForm(forms.Form):
+    username = forms.CharField(
+        label="Nom d'utilisateur ou Email",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nom d\'utilisateur ou email'
+        })
+    )
+    password = forms.CharField(
+        label="Mot de passe", 
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': '••••••••'
+        })
+    )
 
 class CommandeForm(forms.Form):
     # Section informations personnelles
@@ -146,9 +209,6 @@ class CommandeForm(forms.Form):
             
         return cleaned_data
     
-from django import forms
-from django.core.validators import RegexValidator
-from .models import Contact
 
 class ContactForm(forms.ModelForm):
     # Champ nom avec validation personnalisée
@@ -213,10 +273,7 @@ class ContactForm(forms.ModelForm):
         if not sujet:
             raise forms.ValidationError("Veuillez sélectionner un sujet.")
         return sujet
-from django import forms
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
-from .models import AbonnementNewsletter
+
 
 class NewsletterForm(forms.ModelForm):
     email = forms.EmailField(

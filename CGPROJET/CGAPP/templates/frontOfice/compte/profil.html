@@ -1,0 +1,170 @@
+{% extends "frontOfice/base.html" %}
+{% load static %}
+
+{% block title %}Mon Profil - Canaan Glacier{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Menu latéral -->
+            <div class="col-lg-3 mb-4">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body text-center">
+                        <div class="avatar bg-primary bg-opacity-10 rounded-circle p-4 mb-3 mx-auto">
+                            <i class="bi bi-person-fill text-primary fs-1"></i>
+                        </div>
+                        <h5 class="mb-1">{{ user.get_full_name }}</h5>
+                        <p class="text-muted small mb-3">{{ user.get_role_display }}</p>
+                        <hr>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="{% url 'compte:profil' %}">
+                                    <i class="bi bi-person me-2"></i> Mon profil
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'compte:commandes' %}">
+                                    <i class="bi bi-bag me-2"></i> Mes commandes
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'deconnexion' %}">
+                                    <i class="bi bi-box-arrow-right me-2"></i> Déconnexion
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-body p-4">
+                        <h2 class="h4 text-accent mb-4">Informations personnelles</h2>
+                        
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.first_name.label_tag }}
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.first_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    {{ form.last_name.label_tag }}
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.last_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    {{ form.email.label_tag }}
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.email.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    {{ form.telephone.label_tag }}
+                                    {{ form.telephone }}
+                                    <small class="text-muted">Format: 90 12 34 56</small>
+                                    {% if form.telephone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.telephone.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-12">
+                                    {{ form.adresse.label_tag }}
+                                    {{ form.adresse }}
+                                    {% if form.adresse.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.adresse.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-12 mt-4">
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="bi bi-save me-2"></i> Enregistrer les modifications
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Section Commandes récentes -->
+                <div class="card border-0 shadow-sm rounded-3 mt-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h2 class="h4 text-accent mb-0">Mes dernières commandes</h2>
+                            <a href="{% url 'compte:commandes' %}" class="btn btn-sm btn-outline-primary">
+                                Voir toutes <i class="bi bi-chevron-right ms-1"></i>
+                            </a>
+                        </div>
+                        
+                        {% if commandes %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>N° Commande</th>
+                                        <th>Date</th>
+                                        <th>Statut</th>
+                                        <th>Total</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commande in commandes %}
+                                    <tr>
+                                        <td>#{{ commande.id }}</td>
+                                        <td>{{ commande.date_commande|date:"d/m/Y" }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ commande.get_status_class }}">
+                                                {{ commande.get_statut_display }}
+                                            </span>
+                                        </td>
+                                        <td>{{ commande.total }} FCFA</td>
+                                        <td class="text-end">
+                                            <a href="{% url 'compte:commande_detail' commande.id %}" class="btn btn-sm btn-outline-secondary">
+                                                Détails
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-cart-x fs-1 text-muted"></i>
+                            <p class="mt-2">Aucune commande passée pour le moment</p>
+                            <a href="{% url 'produits' %}" class="btn btn-primary mt-2">
+                                <i class="bi bi-ice-cream me-2"></i> Découvrir nos produits
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

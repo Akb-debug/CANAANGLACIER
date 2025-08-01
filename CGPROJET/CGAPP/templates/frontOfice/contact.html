@@ -1,0 +1,228 @@
+{% extends "frontOfice/base.html" %}
+{% load static %}
+
+{% block title %}Contact - Canaan Glacier{% endblock %}
+
+{% block content %}
+<!-- Section contact -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center mb-5">
+                <h2 class="display-5 fw-bold text-accent mb-3">Contactez-Nous</h2>
+                <p class="lead text-muted">Une question, une suggestion ou une demande spéciale ? Notre équipe vous répond sous 24h.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="h4 text-primary mb-4">Envoyez-nous un message</h3>
+                        
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row g-3">
+                                <!-- Champ Nom -->
+                                <div class="col-md-6">
+                                    {{ form.nom.label_tag }}
+                                    {{ form.nom }}
+                                    {% if form.nom.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.nom.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Champ Email -->
+                                <div class="col-md-6">
+                                    {{ form.email.label_tag }}
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.email.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                               
+                                
+                                <!-- Champ Sujet -->
+                                <div class="col-12">
+                                    {{ form.sujet.label_tag }}
+                                    {{ form.sujet }}
+                                    {% if form.sujet.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.sujet.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Champ Message -->
+                                <div class="col-12">
+                                    {{ form.message.label_tag }}
+                                    {{ form.message }}
+                                    {% if form.message.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.message.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Bouton de soumission -->
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary w-100 py-3">
+                                        <i class="bi bi-send-fill me-2"></i> Envoyer le message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="h4 text-primary mb-4">Nos Coordonnées</h3>
+
+                        <!-- Adresse -->
+                        <div class="d-flex mb-4">
+                            <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="bi bi-geo-alt-fill text-primary fs-5"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h4 class="h6 text-accent mb-1">Adresse</h4>
+                                <p class="mb-0">123 Avenue des Délices, Lomé, Togo</p>
+                            </div>
+                        </div>
+                       <!-- Téléphone -->
+
+                        <div class="d-flex mb-4">
+                            <a href="tel:+22890000000"style="text-decoration:none">
+                            <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                <i class="bi bi-telephone-fill text-primary fs-5"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h4 class="h6 text-accent mb-1">Téléphone</h4>
+                                <p class="mb-0">
+                                    <a href="tel:+22890000000" class="contact-link" style="text-decoration:none">+228 99667572</a>
+                                </p>
+                                <p class="mb-0">Service client : 24h/24, 7j/7</p>
+                            </div>
+                            </a>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="d-flex mb-4">
+                            <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <a  href="mailto:contact@canaanglacier.tg"  style="text-decoration:none">
+                            <i class="bi bi-envelope-fill text-primary fs-5"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h4 class="h6 text-accent mb-1">Email</h4>
+                                <p class="mb-0">
+                                    <a href="mailto:contact@canaanglacier.com" class="contact-link" style="text-decoration:none">contact@canaanglacier.com</a>
+                                </p>
+                                <p class="mb-0">
+                                    <a href="mailto:support@canaanglacier.com" class="contact-link" style="text-decoration:none">support@canaanglacier.com</a>
+                                </p>
+                            </div>
+                            </a>
+                        </div>
+
+
+                        <hr class="my-4">
+
+                        <!-- Horaires -->
+                        <h4 class="h6 text-accent mb-3">Horaires d'ouverture</h4>
+                        <ul class="list-unstyled">
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>Lundi - Vendredi</span>
+                                <span>08h - 20h</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-2 border-bottom">
+                                <span>Samedi</span>
+                                <span>09h - 22h</span>
+                            </li>
+                            <li class="d-flex justify-content-between py-2">
+                                <span>Dimanche</span>
+                                <span>10h - 18h</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Section FAQ -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center mb-5">
+                <h2 class="display-5 fw-bold text-accent">FAQ</h2>
+                <p class="lead text-muted">Questions fréquemment posées</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="accordion" id="faqAccordion">
+                    <!-- Item 1 -->
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+                        <h3 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed bg-white text-accent" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                Quels sont les modes de paiement acceptés ?
+                            </button>
+                        </h3>
+                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Nous acceptons les paiements par Mobile Money (T-Money, Flooz), cartes bancaires (Visa, Mastercard) et paiement à la livraison pour les retraits en boutique.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Item 2 -->
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+                        <h3 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed bg-white text-accent" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                Quel est le délai de livraison ?
+                            </button>
+                        </h3>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Nous garantissons une livraison en moins de 2 heures dans Lomé pour les commandes passées avant 18h. Pour les autres villes, le délai est de 24 à 48 heures.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Validation du formulaire
+(function () {
+  'use strict'
+  
+  const forms = document.querySelectorAll('.needs-validation')
+  
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      if (!form.checkValidity()) {
+        event.preventDefault()
+        event.stopPropagation()
+      }
+
+      form.classList.add('was-validated')
+    }, false)
+  })
+})()
+</script>
+{% endblock %}

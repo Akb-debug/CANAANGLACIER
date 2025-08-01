@@ -65,6 +65,9 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                
+                # ton context processor
+                'CGAPP.context_processors.categories_context',
             ],
         },
     },
@@ -125,6 +128,8 @@ USE_TZ = True    # Active la gestion des fuseaux horaires
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -132,3 +137,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'CGAPP.Utilisateur'
+LOGIN_REDIRECT_URL = 'compte:profil'
+LOGOUT_REDIRECT_URL = 'home'
