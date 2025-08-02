@@ -39,9 +39,9 @@ class UtilisateurAdmin(UserAdmin):
 class GerantAdmin(admin.ModelAdmin):
     list_display = ('utilisateur',)
 
-@admin.register(Client)
-class ClientAdmin(admin.ModelAdmin):
-    list_display = ('utilisateur',)
+# @admin.register(Client)
+# class ClientAdmin(admin.ModelAdmin):
+#     list_display = ('utilisateur',)
 
 @admin.register(Serveur)
 class ServeurAdmin(admin.ModelAdmin):

@@ -3,9 +3,13 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, V
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
-from .models import Produit, Categorie, Panier, Commande, Contact, Utilisateur,LignePanier
+from .models import Produit, Categorie, Panier, Commande, Contact, Utilisateur,LignePanier, AdresseLivraison, Coupon,Client
 from .forms import ContactForm, NewsletterForm, CommandeForm,InscriptionForm, ConnexionForm
 from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+
+
 
 #inscription et connexion
 class InscriptionView(CreateView):
@@ -359,11 +363,8 @@ class ProfileView(LoginRequiredMixin, UpdateView):
 
 
     from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from .models import Commande, AdresseLivraison, Coupon
 
-@login_required(login_url='connexion') 
+@login_required(login_url='connexion')
 def valider_commande(request):
     # Récupérer le panier de l'utilisateur
     panier = get_object_or_404(Panier, utilisateur=request.user)
@@ -373,7 +374,7 @@ def valider_commande(request):
         adresse_id = request.POST.get('adresse_id')
         methode_paiement = request.POST.get('methode_paiement')
         coupon_code = request.POST.get('coupon_code')
-        
+
         # Création de la commande
         total = panier.total
         commande = Commande.objects.create(
@@ -382,7 +383,11 @@ def valider_commande(request):
             adresse_livraison_id=adresse_id,
             methode_paiement=methode_paiement
         )
-        
+
+        # 🔁 Création automatique du profil Client si inexistant
+        if not hasattr(request.user, 'client'):
+            Client.objects.create(utilisateur=request.user)
+
         # Redirection vers la page de confirmation
         return redirect('suivi_commande', commande_id=commande.id)
     
