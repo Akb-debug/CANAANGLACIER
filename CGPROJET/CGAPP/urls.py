@@ -30,7 +30,7 @@ urlpatterns = [
     #path('panier/valider/', views.valider_panier, name='valider_panier'),
 
     # URLs pour la commande
-    path('commande/valider/', views.valider_commande, name='valider_commande'),
+    path('commande/valider/', views.vali77pder_commande, name='valider_commande'),
     path('commande/suivi/<int:commande_id>/', views.suivi_commande, name='suivi_commande'),
     path('commande/ajouter-adresse/', views.ajouter_adresse, name='ajouter_adresse'),
     path('commande/appliquer-coupon/', views.appliquer_coupon, name='appliquer_coupon'),
