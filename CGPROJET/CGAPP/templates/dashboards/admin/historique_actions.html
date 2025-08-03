@@ -1,0 +1,239 @@
+{% extends 'frontOfice/base.html' %}
+{% load static %}
+
+{% block title %}Historique des Actions - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Historique des Actions
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Bouton retour -->
+                    <div class="mb-3">
+                        <a href="{% url 'dashboard_admin' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Retour au Dashboard
+                        </a>
+                    </div>
+
+                    <!-- Filtres -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-filter me-2"></i>
+                                Filtres
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form method="get" class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="type_action" class="form-label">Type d'action</label>
+                                    <select name="type_action" id="type_action" class="form-select">
+                                        <option value="">Tous les types</option>
+                                        {% for value, label in types_actions %}
+                                            <option value="{{ value }}" {% if value == type_action_filtre %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="utilisateur" class="form-label">Utilisateur</label>
+                                    <select name="utilisateur" id="utilisateur" class="form-select">
+                                        <option value="">Tous les utilisateurs</option>
+                                        {% for user in utilisateurs %}
+                                            <option value="{{ user.id }}" {% if user.id|stringformat:"s" == utilisateur_filtre %}selected{% endif %}>
+                                                {{ user.username }} ({{ user.get_role_display }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary me-2">
+                                        <i class="fas fa-search me-1"></i>
+                                        Filtrer
+                                    </button>
+                                    <a href="{% url 'historique_actions' %}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-times me-1"></i>
+                                        Réinitialiser
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Tableau des actions -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Date/Heure</th>
+                                    <th>Utilisateur</th>
+                                    <th>Type d'action</th>
+                                    <th>Description</th>
+                                    <th>Objet concerné</th>
+                                    <th>IP</th>
+                                    <th>Détails</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for action in page_obj %}
+                                <tr>
+                                    <td>
+                                        <small>{{ action.date_action|date:"d/m/Y H:i:s" }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if action.utilisateur.role == 'admin' %}
+                                                <i class="fas fa-user-shield text-danger me-1"></i>
+                                            {% elif action.utilisateur.role == 'gerant' %}
+                                                <i class="fas fa-user-tie text-primary me-1"></i>
+                                            {% elif action.utilisateur.role == 'serveur' %}
+                                                <i class="fas fa-user-cog text-success me-1"></i>
+                                            {% else %}
+                                                <i class="fas fa-user text-muted me-1"></i>
+                                            {% endif %}
+                                            <span class="fw-bold">{{ action.utilisateur.username }}</span>
+                                        </div>
+                                        <small class="text-muted">{{ action.utilisateur.get_role_display }}</small>
+                                    </td>
+                                    <td>
+                                        {% if action.type_action == 'connexion' %}
+                                            <span class="badge bg-info">{{ action.get_type_action_display }}</span>
+                                        {% elif action.type_action == 'commande_statut' %}
+                                            <span class="badge bg-warning">{{ action.get_type_action_display }}</span>
+                                        {% elif action.type_action == 'utilisateur_creation' %}
+                                            <span class="badge bg-success">{{ action.get_type_action_display }}</span>
+                                        {% elif 'produit' in action.type_action %}
+                                            <span class="badge bg-primary">{{ action.get_type_action_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ action.get_type_action_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ action.description }}</td>
+                                    <td>
+                                        {% if action.objet_concerne %}
+                                            <span class="text-primary">{{ action.objet_concerne }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if action.adresse_ip %}
+                                            <code>{{ action.adresse_ip }}</code>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if action.details_supplementaires %}
+                                            <button class="btn btn-sm btn-outline-info" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#detailsModal{{ action.id }}">
+                                                <i class="fas fa-info-circle"></i>
+                                            </button>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="fas fa-search fa-2x mb-2"></i>
+                                        <br>
+                                        Aucune action trouvée avec ces critères.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                        <nav aria-label="Pagination">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}">
+                                            <i class="fas fa-angle-double-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}">
+                                            <i class="fas fa-angle-left"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+
+                                <li class="page-item active">
+                                    <span class="page-link">
+                                        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                                    </span>
+                                </li>
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}">
+                                            <i class="fas fa-angle-right"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}">
+                                            <i class="fas fa-angle-double-right"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals pour les détails -->
+{% for action in page_obj %}
+    {% if action.details_supplementaires %}
+        <div class="modal fade" id="detailsModal{{ action.id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Détails de l'action
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <dl class="row">
+                            <dt class="col-sm-4">Action :</dt>
+                            <dd class="col-sm-8">{{ action.get_type_action_display }}</dd>
+                            
+                            <dt class="col-sm-4">Description :</dt>
+                            <dd class="col-sm-8">{{ action.description }}</dd>
+                            
+                            <dt class="col-sm-4">Date :</dt>
+                            <dd class="col-sm-8">{{ action.date_action|date:"d/m/Y H:i:s" }}</dd>
+                            
+                            <dt class="col-sm-4">Détails :</dt>
+                            <dd class="col-sm-8">
+                                <pre class="bg-light p-2 rounded"><code>{{ action.details_supplementaires|pprint }}</code></pre>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endfor %}
+{% endblock %}

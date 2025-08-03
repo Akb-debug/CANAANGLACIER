@@ -19,12 +19,12 @@
                         <hr>
                         <ul class="nav flex-column">
                             <li class="nav-item">
-                                <a class="nav-link active" href="{% url 'compte:profil' %}">
+                                <a class="nav-link active" href="{% url 'profile' %}">
                                     <i class="bi bi-person me-2"></i> Mon profil
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'compte:commandes' %}">
+                                <a class="nav-link" href="{% url 'mon_compte' %}">
                                     <i class="bi bi-bag me-2"></i> Mes commandes
                                 </a>
                             </li>
@@ -114,7 +114,7 @@
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h2 class="h4 text-accent mb-0">Mes dernières commandes</h2>
-                            <a href="{% url 'compte:commandes' %}" class="btn btn-sm btn-outline-primary">
+                            <a href="{% url 'mon_compte' %}" class="btn btn-sm btn-outline-primary">
                                 Voir toutes <i class="bi bi-chevron-right ms-1"></i>
                             </a>
                         </div>
@@ -143,7 +143,7 @@
                                         </td>
                                         <td>{{ commande.total }} FCFA</td>
                                         <td class="text-end">
-                                            <a href="{% url 'compte:commande_detail' commande.id %}" class="btn btn-sm btn-outline-secondary">
+                                            <a href="{% url 'suivi_commande' commande.id %}" class="btn btn-sm btn-outline-secondary">
                                                 Détails
                                             </a>
                                         </td>

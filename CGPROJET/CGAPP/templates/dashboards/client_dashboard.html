@@ -1,0 +1,354 @@
+{% extends 'frontOfice/base.html' %}
+{% load static %}
+
+{% block title %}Mon Espace Client{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 text-accent mb-0">
+                        <i class="fas fa-user me-2"></i>Mon Espace Client
+                    </h1>
+                    <p class="text-muted">Bienvenue dans votre espace personnel</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-primary fs-6">Client</span>
+                    <p class="mb-0 text-muted small">{{ user.username }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques principales -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Total Commandes</div>
+                            <div class="h2 mb-0">{{ total_commandes }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shopping-bag fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Total Dépensé</div>
+                            <div class="h2 mb-0">{{ total_depense|floatformat:0 }}€</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-euro-sign fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Commandes en Cours</div>
+                            <div class="h2 mb-0">{{ commandes_en_cours }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Articles Panier</div>
+                            <div class="h2 mb-0">{{ nb_articles_panier }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title text-accent">
+                        <i class="fas fa-bolt me-2"></i>Actions Rapides
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'produits' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-shopping-bag me-2"></i>Continuer mes Achats
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'panier' %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-shopping-cart me-2"></i>Voir mon Panier
+                                {% if nb_articles_panier > 0 %}
+                                    <span class="badge bg-danger ms-1">{{ nb_articles_panier }}</span>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'profile' %}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-user-edit me-2"></i>Mon Profil
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'contact' %}" class="btn btn-outline-warning w-100">
+                                <i class="fas fa-headset me-2"></i>Support
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Mon Panier Actuel -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title text-accent">
+                        <i class="fas fa-shopping-cart me-2"></i>Mon Panier
+                        {% if total_panier > 0 %}
+                            <span class="badge bg-success ms-2">{{ total_panier }}€</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if panier and panier.lignes.all %}
+                        {% for ligne in panier.lignes.all %}
+                        <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
+                            {% if ligne.produit.image %}
+                                <img src="{{ ligne.produit.image.url }}" alt="{{ ligne.produit.nom }}" 
+                                     class="rounded me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-image text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                <div class="fw-bold">{{ ligne.produit.nom }}</div>
+                                <small class="text-muted">{{ ligne.quantite }} x {{ ligne.produit.prix }}€</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-success">{{ ligne.produit.prix|floatformat:2 }}€</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'panier' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>Voir le panier complet
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-2">Votre panier est vide</p>
+                            <a href="{% url 'produits' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-shopping-bag me-1"></i>Découvrir nos produits
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Mes Commandes Récentes -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title text-accent">
+                        <i class="fas fa-history me-2"></i>Mes Commandes Récentes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if mes_commandes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Commande</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commande in mes_commandes %}
+                                    <tr>
+                                        <td class="fw-bold">#{{ commande.id }}</td>
+                                        <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
+                                        <td class="fw-bold text-success">{{ commande.total }}€</td>
+                                        <td>
+                                            {% if commande.statut == 'en_attente' %}
+                                                <span class="badge bg-warning">En attente</span>
+                                            {% elif commande.statut == 'en_cours' %}
+                                                <span class="badge bg-info">En cours</span>
+                                            {% elif commande.statut == 'livree' %}
+                                                <span class="badge bg-success">Livrée</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Annulée</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'suivi_commande' commande.id %}" class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-eye"></i> Suivre
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune commande</h5>
+                            <p class="text-muted">Vous n'avez pas encore passé de commande</p>
+                            <a href="{% url 'produits' %}" class="btn btn-primary">
+                                <i class="fas fa-shopping-bag me-2"></i>Commencer mes achats
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Mes Adresses -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title text-accent">
+                        <i class="fas fa-map-marker-alt me-2"></i>Mes Adresses
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if mes_adresses %}
+                        {% for adresse in mes_adresses %}
+                        <div class="border rounded p-3 mb-2">
+                            <div class="fw-bold">{{ adresse.rue }}</div>
+                            <div class="text-muted">{{ adresse.code_postal }} {{ adresse.ville }}</div>
+                            <div class="text-muted">{{ adresse.pays }}</div>
+                        </div>
+                        {% endfor %}
+                        <div class="text-center mt-3">
+                            <a href="{% url 'ajouter_adresse' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i>Ajouter une adresse
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-map-marker-alt fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-2">Aucune adresse enregistrée</p>
+                            <a href="{% url 'ajouter_adresse' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i>Ajouter une adresse
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Produits Recommandés -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title text-accent">
+                        <i class="fas fa-heart me-2"></i>Recommandés pour vous
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if produits_favoris %}
+                        <div class="row">
+                            {% for produit in produits_favoris %}
+                            <div class="col-6 mb-3">
+                                <div class="card border-0 shadow-sm h-100">
+                                    {% if produit.image %}
+                                        <img src="{{ produit.image.url }}" class="card-img-top" alt="{{ produit.nom }}" 
+                                             style="height: 120px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                             style="height: 120px;">
+                                            <i class="fas fa-image text-muted fa-2x"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title mb-1">{{ produit.nom|truncatechars:20 }}</h6>
+                                        <p class="card-text text-success fw-bold mb-1">{{ produit.prix }}€</p>
+                                        <a href="{% url 'detail_produit' produit.pk %}" class="btn btn-primary btn-sm w-100">
+                                            <i class="fas fa-eye me-1"></i>Voir
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-heart fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">Aucune recommandation disponible</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn-group-sm > .btn, .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #dee2e6 !important;
+}
+</style>
+{% endblock %}

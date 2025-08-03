@@ -143,6 +143,19 @@ class Commande(models.Model):
 
     def __str__(self):
         return f"Commande #{self.id} - {self.utilisateur.username}"
+
+class LigneCommande(models.Model):
+    commande = models.ForeignKey(Commande, on_delete=models.CASCADE, related_name='lignes')
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
+    quantite = models.PositiveIntegerField(default=1)
+    prix_unitaire = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    def __str__(self):
+        return f"{self.produit.nom} x{self.quantite}"
+    
+    @property
+    def sous_total(self):
+        return self.quantite * self.prix_unitaire
 # -------------------- PAIEMENT --------------------
 class Paiement(models.Model):
     commande = models.OneToOneField(Commande, on_delete=models.CASCADE)
@@ -175,3 +188,65 @@ class Contact(models.Model):
 
     def __str__(self):
         return f"{self.nom} - {self.sujet}"
+
+
+# -------------------- HISTORIQUE DES ACTIONS --------------------
+class HistoriqueAction(models.Model):
+    TYPE_ACTION_CHOICES = [
+        ('creation', 'Création'),
+        ('modification', 'Modification'),
+        ('suppression', 'Suppression'),
+        ('connexion', 'Connexion'),
+        ('commande_statut', 'Changement statut commande'),
+        ('produit_ajout', 'Ajout produit'),
+        ('produit_modif', 'Modification produit'),
+        ('produit_suppr', 'Suppression produit'),
+        ('utilisateur_creation', 'Création utilisateur'),
+        ('utilisateur_suspension', 'Suspension utilisateur'),
+        ('configuration', 'Modification configuration'),
+    ]
+    
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='actions')
+    type_action = models.CharField(max_length=25, choices=TYPE_ACTION_CHOICES)
+    description = models.TextField()
+    objet_concerne = models.CharField(max_length=100, blank=True, null=True)  # Ex: "Commande #123", "Produit Glace Vanille"
+    objet_id = models.PositiveIntegerField(blank=True, null=True)  # ID de l'objet concerné
+    details_supplementaires = models.JSONField(blank=True, null=True)  # Données supplémentaires
+    adresse_ip = models.GenericIPAddressField(blank=True, null=True)
+    date_action = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Historique d'action"
+        verbose_name_plural = "Historique des actions"
+        ordering = ['-date_action']
+    
+    def __str__(self):
+        return f"{self.utilisateur.username} - {self.get_type_action_display()} - {self.date_action.strftime('%d/%m/%Y %H:%M')}"
+
+
+# -------------------- NOTIFICATIONS --------------------
+class Notification(models.Model):
+    TYPE_NOTIFICATION_CHOICES = [
+        ('commande_confirmee', 'Commande confirmée'),
+        ('commande_preparation', 'Commande en préparation'),
+        ('commande_livraison', 'Commande en livraison'),
+        ('commande_livree', 'Commande livrée'),
+        ('commande_annulee', 'Commande annulée'),
+        ('produit_stock_bas', 'Stock produit bas'),
+        ('nouveau_message', 'Nouveau message contact'),
+    ]
+    
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='notifications')
+    type_notification = models.CharField(max_length=25, choices=TYPE_NOTIFICATION_CHOICES)
+    titre = models.CharField(max_length=200)
+    message = models.TextField()
+    lue = models.BooleanField(default=False)
+    commande = models.ForeignKey(Commande, on_delete=models.CASCADE, blank=True, null=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Notification"
+        ordering = ['-date_creation']
+    
+    def __str__(self):
+        return f"{self.utilisateur.username} - {self.titre}"

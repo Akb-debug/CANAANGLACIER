@@ -1,0 +1,153 @@
+{% extends 'frontOfice/base.html' %}
+{% load static %}
+
+{% block title %}Mes Notifications{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>
+                        Mes Notifications
+                        {% if notifications_non_lues > 0 %}
+                            <span class="badge bg-warning ms-2">{{ notifications_non_lues }} non lue{{ notifications_non_lues|pluralize }}</span>
+                        {% endif %}
+                    </h4>
+                    {% if notifications_non_lues > 0 %}
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" name="marquer_lues" class="btn btn-light btn-sm">
+                                <i class="fas fa-check-double me-1"></i>
+                                Tout marquer comme lu
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                <div class="card-body p-0">
+                    {% if notifications %}
+                        <div class="list-group list-group-flush">
+                            {% for notification in notifications %}
+                                <div class="list-group-item {% if not notification.lue %}list-group-item-light border-start border-info border-3{% endif %}">
+                                    <div class="d-flex w-100 justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <!-- Icône selon le type -->
+                                                {% if notification.type_notification == 'commande_confirmee' %}
+                                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                                {% elif notification.type_notification == 'commande_preparation' %}
+                                                    <i class="fas fa-clock text-warning me-2"></i>
+                                                {% elif notification.type_notification == 'commande_livraison' %}
+                                                    <i class="fas fa-truck text-info me-2"></i>
+                                                {% elif notification.type_notification == 'commande_livree' %}
+                                                    <i class="fas fa-check-double text-success me-2"></i>
+                                                {% elif notification.type_notification == 'commande_annulee' %}
+                                                    <i class="fas fa-times-circle text-danger me-2"></i>
+                                                {% else %}
+                                                    <i class="fas fa-info-circle text-primary me-2"></i>
+                                                {% endif %}
+                                                
+                                                <h6 class="mb-0 fw-bold">{{ notification.titre }}</h6>
+                                                
+                                                {% if not notification.lue %}
+                                                    <span class="badge bg-primary ms-2">Nouveau</span>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <p class="mb-2 text-muted">{{ notification.message }}</p>
+                                            
+                                            {% if notification.commande %}
+                                                <div class="mt-2">
+                                                    <a href="{% url 'suivi_commande' notification.commande.id %}" class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-eye me-1"></i>
+                                                        Voir la commande
+                                                    </a>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="text-end">
+                                            <small class="text-muted">{{ notification.date_creation|date:"d/m/Y H:i" }}</small>
+                                            {% if not notification.lue %}
+                                                <br>
+                                                <button class="btn btn-sm btn-outline-secondary mt-1" 
+                                                        onclick="marquerCommeLue({{ notification.id }})">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune notification</h5>
+                            <p class="text-muted">Vous n'avez pas encore de notifications.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function marquerCommeLue(notificationId) {
+    fetch(`/notifications/marquer-lue/${notificationId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Erreur:', error);
+    });
+}
+
+// Actualiser le compteur de notifications toutes les 30 secondes
+setInterval(function() {
+    fetch('/api/notifications/count/')
+        .then(response => response.json())
+        .then(data => {
+            // Mettre à jour le badge dans la navigation si il existe
+            const badge = document.querySelector('#notifications-badge');
+            if (badge) {
+                if (data.count > 0) {
+                    badge.textContent = data.count;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+}, 30000); // 30 secondes
+</script>
+
+<style>
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    border-top: 1px solid rgba(0,0,0,.125);
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
+{% endblock %}
