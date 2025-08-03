@@ -37,8 +37,35 @@ urlpatterns = [
     # Page de paiement (checkout)
     path('checkout/', views.CheckoutView.as_view(), name='checkout'),
     # Compte
+    path('mon-compte/', views.mon_compte, name='mon_compte'),
     path('compte/', views.ProfileView.as_view(), name='profile'),
    # path('compte/commandes/', views.HistoriqueCommandesView.as_view(), name='historique_commandes'),
+    
+    # Dashboards
+    path('dashboard/admin/', views.dashboard_admin, name='dashboard_admin'),
+    path('dashboard/serveur/', views.dashboard_serveur, name='dashboard_serveur'),
+    path('dashboard/gerant/', views.dashboard_gerant, name='dashboard_gerant'),
+    path('dashboard/client/', views.dashboard_client, name='dashboard_client'),
+    
+    # Actions pour les dashboards
+    path('commande/changer-statut/<int:commande_id>/', views.changer_statut_commande, name='changer_statut_commande'),
+    
+    # Gestion des utilisateurs par l'admin
+    path('gestion/creer-gerant/', views.creer_gerant, name='creer_gerant'),
+    path('gestion/creer-serveur/', views.creer_serveur, name='creer_serveur'),
+    path('gestion/liste-utilisateurs/', views.liste_utilisateurs, name='liste_utilisateurs'),
+    path('gestion/historique-actions/', views.historique_actions, name='historique_actions'),
+    
+    # Gestion des produits par le gérant
+    path('gerant/ajouter-produit/', views.ajouter_produit, name='ajouter_produit'),
+    path('gerant/modifier-produit/<int:produit_id>/', views.modifier_produit, name='modifier_produit'),
+    path('gerant/supprimer-produit/<int:produit_id>/', views.supprimer_produit, name='supprimer_produit'),
+    path('gerant/rapport-serveur/<int:serveur_id>/', views.rapport_serveur, name='rapport_serveur'),
+    
+    # Notifications
+    path('notifications/', views.mes_notifications, name='mes_notifications'),
+    path('notifications/marquer-lue/<int:notification_id>/', views.marquer_notification_lue, name='marquer_notification_lue'),
+    path('api/notifications/count/', views.notifications_non_lues_count, name='notifications_count'),
     
     # Contact
     path('contact/', views.ContactView.as_view(), name='contact'),
@@ -53,4 +80,11 @@ urlpatterns = [
     path('deconnexion/', views.deconnexion, name='deconnexion'),
     #path('profil/', views.profil, name='profil'),
     path('password-reset/', include('django.contrib.auth.urls')),
+    
+    # Dashboards
+    path('dashboard/admin/', views.dashboard_admin, name='dashboard_admin'),
+    path('dashboard/serveur/', views.dashboard_serveur, name='dashboard_serveur'),
+    path('dashboard/gerant/', views.dashboard_gerant, name='dashboard_gerant'),
+    path('dashboard/client/', views.dashboard_client, name='dashboard_client'),
+    path('commande/<int:commande_id>/changer-statut/', views.changer_statut_commande, name='changer_statut_commande'),
 ]

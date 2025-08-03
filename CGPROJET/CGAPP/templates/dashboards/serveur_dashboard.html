@@ -1,0 +1,332 @@
+{% extends 'frontOfice/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Serveur{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 text-accent mb-0">
+                        <i class="fas fa-user-cog me-2"></i>Dashboard Serveur
+                    </h1>
+                    <p class="text-muted">Gestion des commandes et suivi des livraisons</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-success fs-6">Serveur</span>
+                    <p class="mb-0 text-muted small">{{ user.username }}</p>
+                    {% if notifications_non_lues > 0 %}
+                        <a href="{% url 'mes_notifications' %}" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-bell"></i> {{ notifications_non_lues }}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques détaillées -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white text-center">
+                    <i class="fas fa-calendar-day fa-2x mb-2"></i>
+                    <h3 class="mb-0">{{ stats_serveur.commandes_jour }}</h3>
+                    <small>Commandes Aujourd'hui</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body text-white text-center">
+                    <i class="fas fa-tasks fa-2x mb-2"></i>
+                    <h3 class="mb-0">{{ stats_serveur.commandes_traitees_aujourd_hui }}</h3>
+                    <small>Traitées par Moi</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-body text-white text-center">
+                    <i class="fas fa-calendar-week fa-2x mb-2"></i>
+                    <h3 class="mb-0">{{ stats_serveur.commandes_semaine }}</h3>
+                    <small>Cette Semaine</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="card-body text-white text-center">
+                    <i class="fas fa-calendar-alt fa-2x mb-2"></i>
+                    <h3 class="mb-0">{{ stats_serveur.commandes_mois }}</h3>
+                    <small>Ce Mois</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue d'ensemble des commandes -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title text-accent">
+                        <i class="fas fa-chart-pie me-2"></i>Vue d'Ensemble des Commandes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-clock fa-2x mb-2"></i>
+                                    <h4>{{ commandes_par_statut.en_attente }}</h4>
+                                    <small>En Attente</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-cogs fa-2x mb-2"></i>
+                                    <h4>{{ commandes_par_statut.en_cours }}</h4>
+                                    <small>En Cours</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                    <h4>{{ commandes_par_statut.livree }}</h4>
+                                    <small>Livrées</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-times-circle fa-2x mb-2"></i>
+                                    <h4>{{ commandes_par_statut.annulee }}</h4>
+                                    <small>Annulées</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commandes en attente -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Commandes en Attente - URGENT
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if commandes_en_attente %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Client</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Adresse</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commande in commandes_en_attente %}
+                                    <tr class="table-warning">
+                                        <td><strong>#{{ commande.id }}</strong></td>
+                                        <td>{{ commande.utilisateur.username }}</td>
+                                        <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
+                                        <td><strong>{{ commande.total }}€</strong></td>
+                                        <td>
+                                            {% if commande.adresse_livraison %}
+                                                {{ commande.adresse_livraison.rue }}, {{ commande.adresse_livraison.ville }}
+                                            {% else %}
+                                                <span class="text-muted">Non définie</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form method="post" action="{% url 'changer_statut_commande' commande.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="statut" value="en_cours">
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-play"></i> Prendre en charge
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                            <h5 class="text-success">Aucune commande en attente</h5>
+                            <p class="text-muted">Toutes les commandes sont traitées !</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commandes en cours -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title text-info">
+                        <i class="fas fa-shipping-fast me-2"></i>Commandes en Cours de Livraison
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if commandes_en_cours %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Client</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Adresse</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commande in commandes_en_cours %}
+                                    <tr class="table-info">
+                                        <td><strong>#{{ commande.id }}</strong></td>
+                                        <td>{{ commande.utilisateur.username }}</td>
+                                        <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
+                                        <td><strong>{{ commande.total }}€</strong></td>
+                                        <td>
+                                            {% if commande.adresse_livraison %}
+                                                {{ commande.adresse_livraison.rue }}, {{ commande.adresse_livraison.ville }}
+                                            {% else %}
+                                                <span class="text-muted">Non définie</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form method="post" action="{% url 'changer_statut_commande' commande.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="statut" value="livree">
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-check"></i> Marquer livrée
+                                                </button>
+                                            </form>
+                                            <form method="post" action="{% url 'changer_statut_commande' commande.id %}" class="d-inline ms-1">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="statut" value="annulee">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                                                    <i class="fas fa-times"></i> Annuler
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-truck fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune commande en cours</h5>
+                            <p class="text-muted">Les commandes en cours de livraison apparaîtront ici</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historique des livraisons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="card-title text-success">
+                        <i class="fas fa-history me-2"></i>Dernières Livraisons Effectuées
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if commandes_livrees %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Client</th>
+                                        <th>Date commande</th>
+                                        <th>Total</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commande in commandes_livrees %}
+                                    <tr class="table-success">
+                                        <td><strong>#{{ commande.id }}</strong></td>
+                                        <td>{{ commande.utilisateur.username }}</td>
+                                        <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
+                                        <td><strong>{{ commande.total }}€</strong></td>
+                                        <td>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Livrée
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune livraison récente</h5>
+                            <p class="text-muted">L'historique des livraisons apparaîtra ici</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: all 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+.table-warning {
+    animation: pulse-warning 2s infinite;
+}
+@keyframes pulse-warning {
+    0% { background-color: rgba(255, 193, 7, 0.1); }
+    50% { background-color: rgba(255, 193, 7, 0.2); }
+    100% { background-color: rgba(255, 193, 7, 0.1); }
+}
+.btn {
+    transition: all 0.2s ease;
+}
+.btn:hover {
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}

@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import RegexValidator,validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm
-from .models import Utilisateur,Contact,AbonnementNewsletter
+from .models import Utilisateur,Contact,AbonnementNewsletter,Gerant,Serveur,Produit
 
 
 class InscriptionForm(UserCreationForm):
@@ -35,7 +35,7 @@ class InscriptionForm(UserCreationForm):
         required=True,
         help_text='Format: 90 12 34 56',
         validators=[RegexValidator(
-            regex='^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
+            regex=r'^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
             message='Numéro togolais invalide'
         )],
         widget=forms.TextInput(attrs={
@@ -75,7 +75,7 @@ class CommandeForm(forms.Form):
         }),
         validators=[
             RegexValidator(
-                regex='^[a-zA-ZÀ-ÿ\s\-]{2,100}$',
+                regex=r'^[a-zA-ZÀ-ÿ\s\-]{2,100}$',
                 message='Le nom ne doit contenir que des lettres et espaces (2-100 caractères)'
             )
         ]
@@ -90,7 +90,7 @@ class CommandeForm(forms.Form):
         }),
         validators=[
             RegexValidator(
-                regex='^[a-zA-ZÀ-ÿ\s\-]{2,100}$',
+                regex=r'^[a-zA-ZÀ-ÿ\s\-]{2,100}$',
                 message='Le prénom ne doit contenir que des lettres et espaces (2-100 caractères)'
             )
         ]
@@ -105,7 +105,7 @@ class CommandeForm(forms.Form):
         }),
         validators=[
             RegexValidator(
-                regex='^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
+                regex=r'^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
                 message='Numéro togolais invalide (format: 90 12 34 56)'
             )
         ]
@@ -220,7 +220,7 @@ class ContactForm(forms.ModelForm):
         }),
         validators=[
             RegexValidator(
-                regex='^[a-zA-ZÀ-ÿ\s\-]{2,100}$',
+                regex=r'^[a-zA-ZÀ-ÿ\s\-]{2,100}$',
                 message='Le nom ne doit contenir que des lettres et espaces (2-100 caractères)'
             )
         ]
@@ -307,3 +307,212 @@ class NewsletterForm(forms.ModelForm):
             raise forms.ValidationError("Cet email est déjà inscrit à notre newsletter.")
             
         return email.lower()  # Normalisation en minuscules
+
+
+# ==================== FORMULAIRES ADMIN ====================
+
+class CreerGerantForm(UserCreationForm):
+    """
+    Formulaire pour que l'admin puisse créer un gérant
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ajout des classes CSS aux champs
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'form-control'})
+        
+        self.fields['username'].widget.attrs.update({
+            'placeholder': 'Nom d\'utilisateur du gérant'
+        })
+        self.fields['email'].widget.attrs.update({
+            'placeholder': 'email@exemple.com'
+        })
+        self.fields['first_name'].widget.attrs.update({
+            'placeholder': 'Prénom'
+        })
+        self.fields['last_name'].widget.attrs.update({
+            'placeholder': 'Nom de famille'
+        })
+        self.fields['telephone'].widget.attrs.update({
+            'placeholder': '90 12 34 56'
+        })
+    
+    first_name = forms.CharField(
+        label="Prénom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Prénom'
+        })
+    )
+    
+    last_name = forms.CharField(
+        label="Nom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nom de famille'
+        })
+    )
+    
+    telephone = forms.CharField(
+        label="Téléphone",
+        max_length=15,
+        required=True,
+        help_text='Format: 90 12 34 56',
+        validators=[RegexValidator(
+            regex=r'^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
+            message='Numéro togolais invalide'
+        )],
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '90 12 34 56'
+        })
+    )
+    
+    class Meta:
+        model = Utilisateur
+        fields = ('username', 'first_name', 'last_name', 'email', 'telephone', 'password1', 'password2')
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = 'gerant'  # Définir le rôle comme gérant
+        if commit:
+            user.save()
+            # Créer l'instance Gerant associée
+            Gerant.objects.create(utilisateur=user)
+        return user
+
+
+class CreerServeurForm(UserCreationForm):
+    """
+    Formulaire pour que l'admin puisse créer un serveur
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ajout des classes CSS aux champs
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'form-control'})
+        
+        self.fields['username'].widget.attrs.update({
+            'placeholder': 'Nom d\'utilisateur du serveur'
+        })
+        self.fields['email'].widget.attrs.update({
+            'placeholder': 'email@exemple.com'
+        })
+        self.fields['first_name'].widget.attrs.update({
+            'placeholder': 'Prénom'
+        })
+        self.fields['last_name'].widget.attrs.update({
+            'placeholder': 'Nom de famille'
+        })
+        self.fields['telephone'].widget.attrs.update({
+            'placeholder': '90 12 34 56'
+        })
+    
+    first_name = forms.CharField(
+        label="Prénom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Prénom'
+        })
+    )
+    
+    last_name = forms.CharField(
+        label="Nom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nom de famille'
+        })
+    )
+    
+    telephone = forms.CharField(
+        label="Téléphone",
+        max_length=15,
+        required=True,
+        help_text='Format: 90 12 34 56',
+        validators=[RegexValidator(
+            regex=r'^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
+            message='Numéro togolais invalide'
+        )],
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '90 12 34 56'
+        })
+    )
+    
+    class Meta:
+        model = Utilisateur
+        fields = ('username', 'first_name', 'last_name', 'email', 'telephone', 'password1', 'password2')
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = 'serveur'  # Définir le rôle comme serveur
+        if commit:
+            user.save()
+            # Créer l'instance Serveur associée
+            Serveur.objects.create(utilisateur=user)
+        return user
+
+
+# ==================== FORMULAIRES GÉRANT ====================
+
+class ProduitForm(forms.ModelForm):
+    """
+    Formulaire pour que le gérant puisse ajouter/modifier des produits
+    """
+    class Meta:
+        model = Produit
+        fields = ['nom', 'description', 'prix', 'quantite_disponible', 'categorie', 'image']
+        widgets = {
+            'nom': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nom du produit'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Description du produit'
+            }),
+            'prix': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'quantite_disponible': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0'
+            }),
+            'categorie': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control'
+            })
+        }
+        labels = {
+            'nom': 'Nom du produit',
+            'description': 'Description',
+            'prix': 'Prix (€)',
+            'quantite_disponible': 'Quantité disponible',
+            'categorie': 'Catégorie',
+            'image': 'Image du produit'
+        }
+    
+    def clean_prix(self):
+        prix = self.cleaned_data.get('prix')
+        if prix is not None and prix <= 0:
+            raise forms.ValidationError("Le prix doit être supérieur à 0.")
+        return prix
+    
+    def clean_quantite_disponible(self):
+        quantite = self.cleaned_data.get('quantite_disponible')
+        if quantite is not None and quantite < 0:
+            raise forms.ValidationError("La quantité ne peut pas être négative.")
+        return quantite

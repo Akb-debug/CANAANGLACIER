@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import (
     Utilisateur, Gerant, Client, Serveur, Admin,
-    Categorie, Produit, Panier, Commande,
+    Categorie, Produit, Panier, Commande, LigneCommande,
     Paiement, AbonnementNewsletter, Contact
 )
 
