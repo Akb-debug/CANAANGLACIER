@@ -5,323 +5,1039 @@
 
 {% block extra_css %}
 <style>
-   
+    /* Animation Keyframes */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
     
-    .product-card {
-        transition: all 0.3s ease;
-        border-radius: 12px;
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+        100% { transform: translateY(0px); }
+    }
+    
+    /* Hero Section */
+    .hero-section {
+        height: 100vh;
+        min-height: 700px;
+        position: relative;
         overflow: hidden;
-        border: none;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--pink-swoosh) 100%);
     }
     
-    .product-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 25px rgba(0, 191, 255, 0.15);
+    .hero-content {
+        z-index: 2;
+        position: relative;
     }
     
-    .category-card {
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-bottom: 1.5rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .hero-subtitle {
+        font-size: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+    
+    .hero-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
         height: 100%;
-        transition: transform 0.3s ease;
-        border: 1px solid var(--light);
+        object-fit: cover;
+        opacity: 0.15;
+    }
+    
+    /* Swiper Carousel */
+    .swiper {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .swiper-slide {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .swiper-slide img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .swiper-pagination-bullet-active {
+        background: var(--yellow-canaan) !important;
+    }
+    
+    /* Category Cards */
+    .category-card {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        background: white;
+        height: 100%;
+        position: relative;
     }
     
     .category-card:hover {
-        transform: scale(1.03);
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(253, 203, 5, 0.15);
     }
     
-    .badge-promo {
+    .category-card img {
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .category-card:hover img {
+        transform: scale(1.05);
+    }
+    
+    .category-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        padding: 1.5rem;
+        color: white;
+    }
+    
+    /* Product Cards */
+    .product-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(233, 30, 99, 0.15);
+    }
+    
+    .product-img {
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .product-card:hover .product-img {
+        transform: scale(1.05);
+    }
+    
+    .badge-new {
         position: absolute;
         top: 15px;
         right: 15px;
-        background-color: var(--cta);
+        background: var(--yellow-canaan);
+        color: var(--black-shadow);
+        font-weight: 600;
+        padding: 5px 15px;
+        border-radius: 20px;
         font-size: 0.8rem;
-        padding: 5px 10px;
     }
     
+    /* Section Titles */
     .section-title {
         position: relative;
-        padding-bottom: 15px;
-        margin-bottom: 2rem;
+        display: inline-block;
+        margin-bottom: 3rem;
     }
     
     .section-title:after {
-        content: "";
+        content: '';
         position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 3px;
-        background: var(--primary);
+        bottom: -10px;
+        left: 0;
+        width: 50px;
+        height: 4px;
+        background: var(--teal-glacier);
+        border-radius: 2px;
+    }
+    
+    /* Features */
+    .feature-box {
+        padding: 2rem;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .feature-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 184, 181, 0.15);
     }
     
     .feature-icon {
         font-size: 2.5rem;
-        color: var(--primary);
-        margin-bottom: 1rem;
+        color: var(--teal-glacier);
+        margin-bottom: 1.5rem;
     }
     
-    .newsletter-box {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-        border-radius: 15px;
+    /* Newsletter */
+    .newsletter-section {
+        background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--pink-swoosh) 100%);
+        border-radius: 16px;
         overflow: hidden;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Section Hero -->
-<section class=" position-relative overflow-hidden vh-100">
-    <!-- Dégradé de fond animé -->
-    <div class="gradient-bg position-absolute top-0 start-0 w-100 h-100"></div>
+<!-- Hero Section with Swiper Carousel -->
+<section class="hero-section position-relative">
+    <!-- Background Images Carousel -->
+    <div class="swiper hero-carousel">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide">
+                <div class="hero-slide-overlay"></div>
+                <img src="{% static 'hero-image1.jpg'%}" alt="Glaces artisanales" class="hero-img">
+            </div>
+            <div class="swiper-slide">
+                <div class="hero-slide-overlay"></div>
+                <img src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1600&q=80" alt="Variétés de glaces" class="hero-img">
+            </div>
+            <div class="swiper-slide">
+                <div class="hero-slide-overlay"></div>
+                <img src="https://images.unsplash.com/photo-1560008581-09826d1de69e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1600&q=80" alt="Glaces fraîches" class="hero-img">
+            </div>
+        </div>
+        <div class="swiper-pagination"></div>
+    </div>
     
-    <!-- Bulles décoratives -->
-    <div class="bubble x1"></div>
-    <div class="bubble x2"></div>
-    <div class="bubble x3"></div>
-    <div class="bubble x4"></div>
-    
-    <div class="container h-100 position-relative" style="z-index: 2;">
-        <div class="row h-100 align-items-center justify-content-center g-0">
-            <div class="col-xl-8 col-lg-10 text-center px-3">
-                <!-- Titre principal avec effet de découpe -->
-                <h1 class="display-2 fw-bold mb-4 text-white text-clip">
-                    <span class="d-block">CANAA<span class="text-primary">N GLACIER</span></span>
-                    <span class="d-block fs-1 mt-3">L'EXCELLENCE GLACÉE</span>
-                </h1>
-                
-                <!-- Séparateur décoratif -->
-                <div class="separator mx-auto my-4">
-                    <svg width="150" height="8" viewBox="0 0 150 8" fill="none">
-                        <path d="M0 4H150" stroke="url(#paint0_linear)" stroke-width="2" stroke-linecap="round"/>
-                        <defs>
-                            <linearGradient id="paint0_linear" x1="0" y1="4" x2="150" y2="4">
-                                <stop stop-color="#00BFFF"/>
-                                <stop offset="1" stop-color="#FFA500"/>
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                </div>
-                
-                <!-- Sous-titre -->
-                <p class="lead fs-3 mb-5 text-light">
-                    <span class="d-block">Crèmes glacées <span class="text-primary fw-bold">artisanales</span></span>
-                    <span class="d-block">Livraison express à Lomé en <span class="text-cta fw-bold">120 minutes</span></span>
-                </p>
-                
-                <!-- Boutons CTA -->
-                <div class="d-flex flex-wrap justify-content-center gap-3">
-                    <a href="{% url 'produits' %}" class="btn btn-cta btn-lg px-4 py-3 rounded-pill shadow hover-lift">
-                        <i class="bi bi-ice-cream me-2"></i> Explorer la carte
-                    </a>
-                    <a href="#nouveautes" class="btn btn-outline-light btn-lg px-4 py-3 rounded-pill hover-lift">
-                        <i class="bi bi-stars me-2"></i> Nos nouveautés
-                    </a>
+    <!-- Contenu texte superposé -->
+    <div class="hero-content-container position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10 text-center text-white">
+                    <h1 class="hero-title display-3 fw-bold mb-4 animate__animated animate__fadeInDown">
+                        Découvrez <span class="text-yellow-canaan">Canaan Glacier</span>
+                    </h1>
+                    <p class="hero-subtitle lead mb-5 animate__animated animate__fadeIn animate__delay-1s">
+                        L'art de la glace artisanale avec des saveurs locales exceptionnelles
+                    </p>
+                    <div class="d-flex justify-content-center gap-3 animate__animated animate__fadeIn animate__delay-2s">
+                        <a href="{% url 'produits' %}" class="btn btn-lg btn-teal rounded-pill px-4 py-2">
+                            <i class="fas fa-ice-cream me-2"></i> Nos produits
+                        </a>
+                        <a href="#categories" class="btn btn-lg btn-pink-outline rounded-pill px-4 py-2">
+                            <i class="fas fa-list me-2"></i> Catégories
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <!-- Flèche indicateur -->
-    <a href="#content" class="position-absolute bottom-0 start-50 translate-middle-x mb-4 z-3 text-white scroll-indicator">
-        <i class="bi bi-chevron-down fs-1"></i>
+    <!-- Flèche vers le bas -->
+    <a href="#categories" class="position-absolute bottom-0 start-50 translate-middle-x mb-5 z-3 text-white" style="font-size: 2rem;">
+        <i class="fas fa-chevron-down animate__animated animate__bounce animate__infinite"></i>
     </a>
 </section>
 
 <style>
-    .hero-fullscreen {
-        width: 100vw;
-        margin: 0;
-        padding: 0;
+    .hero-section {
+        height: 100vh;
+        min-height: 600px;
+        overflow: hidden;
     }
     
-    .gradient-bg {
-        background: linear-gradient(135deg, 
-            rgba(0, 33, 71, 0.95) 0%, 
-            rgba(0, 191, 255, 0.85) 50%, 
-            rgba(255, 165, 0, 0.75) 100%);
-        animation: gradientShift 15s ease infinite;
-        background-size: 300% 300%;
+    .hero-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
     
-    @keyframes gradientShift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    .hero-slide-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 1;
     }
     
-    .scroll-indicator {
-        animation: bounce 2s infinite;
-        opacity: 0.8;
-        transition: all 0.3s;
+    .hero-content-container {
+        z-index: 2;
     }
     
-    .scroll-indicator:hover {
-        opacity: 1;
-        transform: scale(1.2);
+    .hero-title {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        font-size: clamp(2rem, 5vw, 3.5rem);
     }
     
-    @keyframes bounce {
-        0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
-        40% { transform: translateY(-20px) translateX(-50%); }
-        60% { transform: translateY(-10px) translateX(-50%); }
+    .hero-subtitle {
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        font-size: clamp(1rem, 2vw, 1.5rem);
     }
     
-    /* Reste du CSS identique à la version précédente */
+    .text-yellow-canaan {
+        color: var(--yellow-canaan);
+    }
+    
+    /* Nouveaux styles de boutons avec les couleurs spécifiées */
+    .btn-teal {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        color: white;
+    }
+    
+    .btn-teal:hover {
+        background-color: #009c99;
+        border-color: #009c99;
+    }
+    
+    .btn-pink-outline {
+        border-color: var(--pink-swoosh);
+        color: white;
+    }
+    
+    .btn-pink-outline:hover {
+        background-color: var(--pink-swoosh);
+        color: white;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            min-height: 500px;
+        }
+        
+        .hero-content-container {
+            padding-top: 80px;
+        }
+        
+        .d-flex {
+            flex-direction: column;
+            gap: 15px !important;
+        }
+        
+        .btn {
+            width: 100%;
+            max-width: 250px;
+        }
+    }
 </style>
 
-<!-- Section Catégories -->
-<section class="mb-5 py-4">
+<!-- Categories Section -->
+<section id="categories" class="py-5 my-5">
     <div class="container">
-        <h2 class="text-center section-title">Nos Univers Gourmands</h2>
+        <div class="text-center mb-5">
+            <h2 class="section-title">Nos Univers de Saveurs</h2>
+            <p class="lead text-muted">Découvrez nos différentes gammes de produits glacés</p>
+        </div>
+        
         <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <a href="#" class="text-decoration-none">
-                    <div class="card category-card h-100">
-                        <img src="https://images.unsplash.com/photo-1570197788417-0e82375c9371?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Glaces classiques" style="height: 180px; object-fit: cover;">
-                        <div class="card-body text-center">
-                            <h5 class="card-title text-accent">Classiques</h5>
-                            <p class="card-text text-muted small">Nos recettes traditionnelles revisitées</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <a href="#" class="text-decoration-none">
-                    <div class="card category-card h-100">
-                        <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Créations exotiques" style="height: 180px; object-fit: cover;">
-                        <div class="card-body text-center">
-                            <h5 class="card-title text-accent">Exotiques</h5>
-                            <p class="card-text text-muted small">Saveurs tropicales et locales</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            {%for categorie in categories%}
+            {% for categorie in categories %}
             <div class="col-md-6 col-lg-3">
                 <a href="{% url 'produits_par_categorie' categorie.slug %}" class="text-decoration-none">
-                    <div class="card category-card h-100">
+                    <div class="category-card">
                         {% if categorie.image %}
-                            <img src="{{ categorie.image.url }}" class="card-img-top" alt="{{ categorie.nom }}" style="height: 180px; object-fit: cover;">
+                        <img src="{{ categorie.image.url }}" class="w-100" alt="{{ categorie.nom }}">
                         {% else %}
-                            <!-- Image par défaut si aucune image n'est définie -->
-                            <img src="https://via.placeholder.com/300x180?text=Canaan+Glacier" class="card-img-top" alt="{{ categorie.nom }}" style="height: 180px; object-fit: cover;">
+                        <img src="https://via.placeholder.com/400x300?text=Canaan+Glacier" class="w-100" alt="{{ categorie.nom }}">
                         {% endif %}
-                        <div class="card-body text-center">
-                            <h5 class="card-title text-accent">{{ categorie.nom }}</h5>
-                            <p class="card-text text-muted small">{{ categorie.description|truncatechars:30 }}</p>
+                        <div class="category-overlay">
+                            <h3 class="h4 mb-0">{{ categorie.nom }}</h3>
+                            <p class="small mb-0">{{ categorie.produit_set.count }} produits</p>
                         </div>
                     </div>
                 </a>
             </div>
-            {%endfor%}
-            <div class="col-md-6 col-lg-3">
-                <a href="#" class="text-decoration-none">
-                    <div class="card category-card h-100">
-                        <img src="https://images.unsplash.com/photo-1501443762994-82bd5dace89a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Desserts glacés" style="height: 180px; object-fit: cover;">
-                        <div class="card-body text-center">
-                            <h5 class="card-title text-accent">Desserts</h5>
-                            <p class="card-text text-muted small">Coupelles et gourmandises</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </section>
 
-<!-- Section Nouveautés -->
-<section id="nouveautes" class="mb-5 py-5 bg-light">
+<!-- Nouveautés Section -->
+<section class="py-5 bg-light">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="section-title">Nos Nouveautés</h2>
-            <a href="{% url 'produits' %}" class="btn btn-outline-primary">Voir tout</a>
+        <div class="section-header mb-5 position-relative text-center">
+            <h2 class="section-title d-inline-block position-relative">
+                Nos Nouveautés
+            
+            </h2>
+            <div class="mt-3">
+                <a href="{% url 'produits' %}" class="btn btn-see-more">
+                    Voir tout <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
         </div>
+
+        <style>
+            .section-header {
+                padding-bottom: 1rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+                font-weight: 700;
+                color: var(--black-shadow);
+                margin-bottom: 1.5rem;
+            }
+            
+            
+            .btn-see-more {
+                background-color: var(--teal-glacier);
+                color: white;
+                border: none;
+                padding: 0.5rem 1.5rem;
+                border-radius: 50px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 10px rgba(0, 184, 181, 0.3);
+            }
+            
+            .btn-see-more:hover {
+                background-color: var(--pink-swoosh);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(233, 30, 99, 0.4);
+                color: white;
+
+            }
+            
+            .btn-see-more i {
+                transition: transform 0.3s ease;
+            }
+            
+            .btn-see-more:hover i {
+                transform: translateX(3px);
+            }
+        </style>
         
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="card product-card h-100">
-                    <span class="badge badge-promo">Nouveau</span>
-                    <img src="https://images.unsplash.com/photo-1560008581-09826d1de69e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" class="card-img-top" alt="Mango Tango" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">Mango Tango</h5>
-                        <p class="card-text text-muted small">Mangue locale et fruit de la passion</p>
-                    </div>
-                    <div class="card-footer bg-white border-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-bold text-primary">4 500 FCFA</span>
-                            <a href="#" class="btn btn-sm btn-cta">
-                                <i class="bi bi-cart-plus"></i> Ajouter
-                            </a>
-                        </div>
+<div class="row g-4">
+    {% for produit in nouveautes %}
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="product-card h-100 position-relative overflow-hidden" 
+             style="border: 1px solid rgba(0, 184, 181, 0.1);">
+            
+            <!-- Badge Nouveau avec animation -->
+            <div class="badge-new position-absolute d-flex align-items-center">
+                <span class="pulse-animation me-1"></span>
+                Nouveau
+            </div>
+            
+            <!-- Image avec effet zoom et overlay -->
+            <div class="product-image-container position-relative overflow-hidden">
+                {% if produit.image %}
+                <img src="{{ produit.image.url }}" class="product-img w-100" alt="{{ produit.nom }}"
+                     style="transition: transform 0.7s cubic-bezier(0.25, 0.45, 0.45, 0.95);">
+                {% else %}
+                <img src="https://via.placeholder.com/400x300?text=Canaan+Glacier" class="product-img w-100" 
+                     alt="{{ produit.nom }}" style="transition: transform 0.7s cubic-bezier(0.25, 0.45, 0.45, 0.95);">
+                {% endif %}
+                
+                <!-- Overlay au hover -->
+                <div class="product-overlay d-flex align-items-center justify-content-center">
+                    <a href="#" 
+                       class="btn btn-outline-light rounded-pill px-4 py-2 view-details-btn">
+                        <i class="fas fa-eye me-2"></i> Voir détails
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Contenu de la carte -->
+            <div class="card-body px-3 py-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0" style="color: var(--black-shadow);">{{ produit.nom }}</h5>
+                    {% if produit.promotion %}
+                    <span class="badge bg-danger rounded-pill ms-2">-{{ produit.promotion }}%</span>
+                    {% endif %}
+                </div>
+                
+                <p class="card-text text-muted small mb-3">{{ produit.description|truncatechars:60 }}</p>
+                
+                <!-- Étoiles de notation -->
+                <div class="product-rating mb-3">
+                    <div class="stars" style="color: var(--yellow-canaan);">
+                        {% for i in "12345" %}
+                        <i class="fas fa-star{% if produit.moyenne_notes < forloop.counter %}-half-alt{% endif %}"></i>
+                        {% endfor %}
+                        <small class="text-muted ms-1">({{ produit.nombre_avis }})</small>
                     </div>
                 </div>
             </div>
             
-            <!-- 3 autres produits similaires -->
+            <!-- Pied de carte avec prix et bouton -->
+            <div class="card-footer bg-transparent border-0 px-3 pb-3 pt-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        {% if produit.promotion %}
+                        <span class="text-decoration-line-through text-muted me-2">{{ produit.prix|add:2000 }} FCFA</span>
+                        {% endif %}
+                        <span class="fw-bold fs-5" style="color: var(--teal-glacier);">
+                            {{ produit.prix }} FCFA
+                        </span>
+                    </div>
+                    
+                    <!-- Bouton Ajouter avec animation -->
+                    <a href="{% url 'ajouter_au_panier' produit.id %}" 
+                       class="btn btn-swoosh rounded-pill px-3 py-2 add-to-cart-btn">
+                        <span class="cart-icon"><i class="fas fa-cart-plus"></i></span>
+                        <span class="cart-text">Ajouter</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Effet de bordure animée -->
+            <div class="product-border-animation"></div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    /* Animation du badge Nouveau */
+    .badge-new {
+        top: 15px;
+        right: 15px;
+        background: var(--yellow-canaan);
+        color: var(--black-shadow);
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        z-index: 2;
+        box-shadow: 0 3px 10px rgba(253, 203, 5, 0.3);
+    }
+    
+    .pulse-animation {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: var(--pink-swoosh);
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(233, 30, 99, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(233, 30, 99, 0); }
+    }
+    
+    /* Conteneur image */
+    .product-image-container {
+        height: 200px;
+        overflow: hidden;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    /* Overlay image */
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 184, 181, 0.85);
+        opacity: 0;
+        transition: all 0.4s ease;
+    }
+    
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+    
+    .view-details-btn {
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.4s ease;
+    }
+    
+    .product-card:hover .view-details-btn {
+        transform: translateY(0);
+        opacity: 1;
+        transition-delay: 0.2s;
+    }
+    
+    /* Effet zoom image */
+    .product-card:hover .product-img {
+        transform: scale(1.1);
+    }
+    
+    /* Animation bouton ajouter */
+    .add-to-cart-btn {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .add-to-cart-btn .cart-icon {
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .add-to-cart-btn .cart-text {
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .add-to-cart-btn:hover {
+        background: var(--pink-swoosh);
+        border-color: var(--pink-swoosh);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+        color : white;
+    }
+    
+    .add-to-cart-btn:hover .cart-icon {
+        transform: rotate(15deg);
+    }
+    
+    /* Effet de bordure animée */
+    .product-border-animation {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 2px solid transparent;
+        border-radius: 16px;
+        z-index: -1;
+        transition: all 0.5s ease;
+    }
+    
+    .product-card:hover .product-border-animation {
+        border-color: var(--yellow-canaan);
+        animation: borderPulse 2s infinite;
+    }
+    
+    @keyframes borderPulse {
+        0% { border-width: 2px; opacity: 1; }
+        50% { border-width: 4px; opacity: 0.7; }
+        100% { border-width: 2px; opacity: 1; }
+    }
+    
+    /* Animation d'entrée */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .product-card {
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+        animation-delay: calc(0.1s * var(--index));
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter un délai d'animation progressif
+    document.querySelectorAll('.product-card').forEach((card, index) => {
+        card.style.setProperty('--index', index);
+    });
+    
+    // Animation au survol du bouton "Ajouter"
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('add-to-cart-btn')) return;
+            
+            const button = e.target;
+            button.innerHTML = '<i class="fas fa-check"></i> Ajouté !';
+            button.style.backgroundColor = '#4CAF50';
+            button.style.borderColor = '#4CAF50';
+            
+            setTimeout(() => {
+                button.innerHTML = '<i class="fas fa-cart-plus"></i> Ajouter';
+                button.style.backgroundColor = '';
+                button.style.borderColor = '';
+            }, 2000);
+        });
+    });
+    });
+</script>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 my-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Pourquoi choisir Canaan Glacier</h2>
+            <p class="lead text-muted">Notre engagement pour une expérience glacée exceptionnelle</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3>Ingrédients Naturels</h3>
+                    <p class="text-muted">Nous utilisons uniquement des fruits frais et des produits naturels pour des saveurs authentiques.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-hands-helping"></i>
+                    </div>
+                    <h3>Fabrication Artisanale</h3>
+                    <p class="text-muted">Chaque glace est préparée à la main avec passion et savoir-faire traditionnel.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box text-center">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Livraison Express</h3>
+                    <p class="text-muted">Recevez vos glaces en moins de 2h dans tout Lomé, bien fraîches et prêtes à déguster.</p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Section Avantages -->
-<section class="mb-5 py-5">
+
+<!-- Section des produits populaires -->
+<section class="py-5 bg-light">
     <div class="container">
-        <h2 class="text-center section-title mb-5">Pourquoi choisir Canaan Glacier</h2>
-        <div class="row g-4 text-center">
-            <div class="col-md-4">
-                <div class="p-4">
-                    <div class="feature-icon">
-                        <i class="bi bi-geo-alt"></i>
-                    </div>
-                    <h3 class="h5 text-accent">Produits locaux</h3>
-                    <p class="text-muted">Nous utilisons des fruits frais provenant directement des producteurs togolais</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="p-4">
-                    <div class="feature-icon">
-                        <i class="bi bi-clock-history"></i>
-                    </div>
-                    <h3 class="h5 text-accent">Fabrication artisanale</h3>
-                    <p class="text-muted">Chaque glace est préparée à la main avec des méthodes traditionnelles</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="p-4">
-                    <div class="feature-icon">
-                        <i class="bi bi-truck"></i>
-                    </div>
-                    <h3 class="h5 text-accent">Livraison express</h3>
-                    <p class="text-muted">Recevez vos glaces en moins de 2h dans tout Lomé</p>
-                </div>
+        <div class="section-header mb-5 position-relative text-center">
+            <h2 class="section-title d-inline-block position-relative">
+                Nos Glaces Populaires
+            </h2>
+            <div class="mt-3">
+                <a href="{% url 'produits' %}" class="btn btn-see-more">
+                    Voir tout <i class="fas fa-arrow-right ms-2"></i>
+                </a>
             </div>
         </div>
+
+        <style>
+            .section-header {
+                padding-bottom: 1rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+                font-weight: 700;
+                color: var(--black-shadow);
+                margin-bottom: 1.5rem;
+            }
+            
+            
+            .btn-see-more {
+                background-color: var(--teal-glacier);
+                color: white;
+                border: none;
+                padding: 0.5rem 1.5rem;
+                border-radius: 50px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 10px rgba(0, 184, 181, 0.3);
+            }
+            
+            .btn-see-more:hover {
+                background-color: var(--pink-swoosh);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(233, 30, 99, 0.4);
+                color: white;
+
+            }
+            
+            .btn-see-more i {
+                transition: transform 0.3s ease;
+            }
+            
+            .btn-see-more:hover i {
+                transform: translateX(3px);
+            }
+        </style>
+        
+        <div class="row g-4">
+    {% for produit in populaires %}
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="product-card h-100 position-relative overflow-hidden" 
+             style="border: 1px solid rgba(0, 184, 181, 0.1);">
+            
+            <!-- Badge Nouveau avec animation -->
+            <div class="badge-new position-absolute d-flex align-items-center">
+                <span class="pulse-animation me-1"></span>
+                populaire
+            </div>
+            
+            <!-- Image avec effet zoom et overlay -->
+            <div class="product-image-container position-relative overflow-hidden">
+                {% if produit.image %}
+                <img src="{{ produit.image.url }}" class="product-img w-100" alt="{{ produit.nom }}"
+                     style="transition: transform 0.7s cubic-bezier(0.25, 0.45, 0.45, 0.95);">
+                {% else %}
+                <img src="https://via.placeholder.com/400x300?text=Canaan+Glacier" class="product-img w-100" 
+                     alt="{{ produit.nom }}" style="transition: transform 0.7s cubic-bezier(0.25, 0.45, 0.45, 0.95);">
+                {% endif %}
+                
+                <!-- Overlay au hover -->
+                <div class="product-overlay d-flex align-items-center justify-content-center">
+                    <a href="#" 
+                       class="btn btn-outline-light rounded-pill px-4 py-2 view-details-btn">
+                        <i class="fas fa-eye me-2"></i> Voir détails
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Contenu de la carte -->
+            <div class="card-body px-3 py-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0" style="color: var(--black-shadow);">{{ produit.nom }}</h5>
+                    {% if produit.promotion %}
+                    <span class="badge bg-danger rounded-pill ms-2">-{{ produit.promotion }}%</span>
+                    {% endif %}
+                </div>
+                
+                <p class="card-text text-muted small mb-3">{{ produit.description|truncatechars:60 }}</p>
+                
+                <!-- Étoiles de notation -->
+                <div class="product-rating mb-3">
+                    <div class="stars" style="color: var(--yellow-canaan);">
+                        {% for i in "12345" %}
+                        <i class="fas fa-star{% if produit.moyenne_notes < forloop.counter %}-half-alt{% endif %}"></i>
+                        {% endfor %}
+                        <small class="text-muted ms-1">({{ produit.nombre_avis }})</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pied de carte avec prix et bouton -->
+            <div class="card-footer bg-transparent border-0 px-3 pb-3 pt-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        {% if produit.promotion %}
+                        <span class="text-decoration-line-through text-muted me-2">{{ produit.prix|add:2000 }} FCFA</span>
+                        {% endif %}
+                        <span class="fw-bold fs-5" style="color: var(--teal-glacier);">
+                            {{ produit.prix }} FCFA
+                        </span>
+                    </div>
+                    
+                    <!-- Bouton Ajouter avec animation -->
+                    <a href="{% url 'ajouter_au_panier' produit.id %}" 
+                       class="btn btn-swoosh rounded-pill px-3 py-2 add-to-cart-btn">
+                        <span class="cart-icon"><i class="fas fa-cart-plus"></i></span>
+                        <span class="cart-text">Ajouter</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Effet de bordure animée -->
+            <div class="product-border-animation"></div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+    /* Animation du badge Nouveau */
+    .badge-new {
+        top: 15px;
+        right: 15px;
+        background: var(--yellow-canaan);
+        color: var(--black-shadow);
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        z-index: 2;
+        box-shadow: 0 3px 10px rgba(253, 203, 5, 0.3);
+    }
+    
+    .pulse-animation {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: var(--pink-swoosh);
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(233, 30, 99, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(233, 30, 99, 0); }
+    }
+    
+    /* Conteneur image */
+    .product-image-container {
+        height: 200px;
+        overflow: hidden;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    /* Overlay image */
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 184, 181, 0.85);
+        opacity: 0;
+        transition: all 0.4s ease;
+    }
+    
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+    
+    .view-details-btn {
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.4s ease;
+    }
+    
+    .product-card:hover .view-details-btn {
+        transform: translateY(0);
+        opacity: 1;
+        transition-delay: 0.2s;
+    }
+    
+    /* Effet zoom image */
+    .product-card:hover .product-img {
+        transform: scale(1.1);
+    }
+    
+    /* Animation bouton ajouter */
+    .add-to-cart-btn {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .add-to-cart-btn .cart-icon {
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .add-to-cart-btn .cart-text {
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .add-to-cart-btn:hover {
+        background: var(--pink-swoosh);
+        border-color: var(--pink-swoosh);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+        color : white;
+    }
+    
+    .add-to-cart-btn:hover .cart-icon {
+        transform: rotate(15deg);
+    }
+    
+    /* Effet de bordure animée */
+    .product-border-animation {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 2px solid transparent;
+        border-radius: 16px;
+        z-index: -1;
+        transition: all 0.5s ease;
+    }
+    
+    .product-card:hover .product-border-animation {
+        border-color: var(--yellow-canaan);
+        animation: borderPulse 2s infinite;
+    }
+    
+    @keyframes borderPulse {
+        0% { border-width: 2px; opacity: 1; }
+        50% { border-width: 4px; opacity: 0.7; }
+        100% { border-width: 2px; opacity: 1; }
+    }
+    
+    /* Animation d'entrée */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .product-card {
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+        animation-delay: calc(0.1s * var(--index));
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter un délai d'animation progressif
+    document.querySelectorAll('.product-card').forEach((card, index) => {
+        card.style.setProperty('--index', index);
+    });
+    
+    // Animation au survol du bouton "Ajouter"
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+    addToCartButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('add-to-cart-btn')) return;
+            
+            const button = e.target;
+            button.innerHTML = '<i class="fas fa-check"></i> Ajouté !';
+            button.style.backgroundColor = '#4CAF50';
+            button.style.borderColor = '#4CAF50';
+            
+            setTimeout(() => {
+                button.innerHTML = '<i class="fas fa-cart-plus"></i> Ajouter';
+                button.style.backgroundColor = '';
+                button.style.borderColor = '';
+            }, 2000);
+        });
+    });
+    });
+</script>
     </div>
 </section>
 
-<!-- Section Newsletter -->
-<section class="mb-5 py-5">
+<!-- Newsletter Section -->
+<section class="py-5 my-5">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-10 newsletter-box p-5 text-white">
-                <div class="row align-items-center">
-                    <div class="col-md-6 mb-4 mb-md-0">
-                        <h2 class="mb-3">Abonnez-vous à notre newsletter</h2>
-                        <p class="mb-0">Recevez en exclusivité nos nouveautés, offres spéciales et conseils glacés !</p>
-                    </div>
-                    <div class="col-md-6">
-                        <form method="POST" action="{% url 'newsletter_subscribe' %}" class="row g-2">
-                            {% csrf_token %}
-                            <div class="col-8">
-                                <input type="email" name="email" class="form-control" placeholder="Votre email" required>
-                            </div>
-                            <div class="col-4">
-                                <button type="submit" class="btn btn-light w-100">S'abonner</button>
-                            </div>
-                        </form>
-
-                    </div>
+        <div class="newsletter-section p-5 text-white">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <h2 class="mb-3">Inscrivez-vous à notre newsletter</h2>
+                    <p class="mb-0">Recevez en avant-première nos nouveautés, offres exclusives et conseils glacés !</p>
+                </div>
+                <div class="col-lg-6">
+                    <form class="row g-2">
+                        <div class="col-md-8">
+                            <input type="email" class="form-control" placeholder="Votre adresse email">
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-light w-100">S'inscrire</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -330,11 +1046,25 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Initialize Swiper -->
 <script>
-// Animation des cartes au scroll
-document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function() {
+    // Hero Carousel
+    var heroSwiper = new Swiper('.hero-carousel', {
+        loop: true,
+        autoplay: {
+            delay: 5000,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+    });
+    
+    // Animation on scroll
     const animateOnScroll = function() {
-        const elements = document.querySelectorAll('.product-card, .category-card');
+        const elements = document.querySelectorAll('.category-card, .product-card, .feature-box');
         
         elements.forEach(element => {
             const elementPosition = element.getBoundingClientRect().top;
@@ -348,15 +1078,15 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     // Initial state
-    const cards = document.querySelectorAll('.product-card, .category-card');
-    cards.forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    const animatedElements = document.querySelectorAll('.category-card, .product-card, .feature-box');
+    animatedElements.forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     });
     
     window.addEventListener('scroll', animateOnScroll);
     animateOnScroll(); // Run once on load
-});
+    });
 </script>
 {% endblock %}

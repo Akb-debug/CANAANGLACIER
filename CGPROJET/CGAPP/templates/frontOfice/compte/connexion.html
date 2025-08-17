@@ -16,29 +16,21 @@
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: #00BFFF; /* Bleu glacier */
-        box-shadow: 0 0 0 0.25rem rgba(0, 191, 255, 0.25) !important;
+        border-color: var(--teal-glacier); /* Utilisation de la variable glacier */
+        box-shadow: 0 0 0 0.25rem rgba(0, 184, 181, 0.25) !important;
     }
 
     /* Labels */
     .form-label {
         font-weight: 500;
         margin-bottom: 8px;
-        color: #002147; /* Bleu nuit */
+        color: var(--black-shadow); /* Utilisation de la variable noire */
     }
 
     /* Placeholders */
     .form-control::placeholder {
         color: #adb5bd;
         opacity: 1;
-    }
-
-    /* Champs spécifiques */
-    input[type="tel"] {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300BFFF' viewBox='0 0 16 16'%3E%3Cpath d='M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H5z'/%3E%3Cpath d='M8 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 15px center;
-        background-size: 20px;
     }
 
     /* Messages d'aide */
@@ -65,25 +57,43 @@
 
     /* Boutons */
     .btn-primary {
-        background-color: #00BFFF; 
-        border-color: #00BFFF;
-        
+        background-color: var(--teal-glacier); 
+        border-color: var(--teal-glacier);
+        color: white;
         font-weight: 500;
         border-radius: 8px;
         transition: all 0.3s ease;
     }
 
     .btn-primary:hover {
-        background-color: #0095d9;
-        border-color: #0095d9;
+        background-color: #009a97; /* Version plus foncée du glacier */
+        border-color: #009a97;
         transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    /* Icônes dans les boutons */
-    .btn i.bi {
-        margin-right: 8px;
+    /* Liens */
+    .text-primary {
+        color: var(--teal-glacier) !important;
+    }
+    .text-primary:hover {
+        color: var(--pink-swoosh) !important;
+    }
+
+    /* Card */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Titre */
+    .text-accent {
+        color: var(--teal-glacier);
+        font-weight: 700;
     }
 </style>
+
 <section class="py-5">
     <div class="container">
         <div class="row justify-content-center">
@@ -94,6 +104,7 @@
                         
                         <form method="post" class="needs-validation" novalidate>
                             {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
                             
                             <div class="mb-3">
                                 {{ form.username.label_tag }}
@@ -113,17 +124,18 @@
                             
                             <div class="d-grid mb-3">
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="bi bi-box-arrow-in-right me-2"></i> Se connecter
+                                    <i class="fas fa-sign-in-alt me-2"></i> Se connecter
                                 </button>
                             </div>
                             
                             <div class="text-center">
                                 <a href="{% url 'password_reset' %}" class="text-primary">Mot de passe oublié ?</a>
                                 <hr class="my-4">
-                                <p class="mb-0">Pas encore de compte ? <a href="{% url 'inscription' %}" class="text-primary fw-bold">S'inscrire</a></p>
+                                <p class="mb-0">
+                                    Pas encore de compte ?
+                                    <a href="{% url 'inscription' %}?next={{ request.GET.next|urlencode }}" class="text-primary fw-bold">S'inscrire</a>
+                                </p>
                             </div>
-                                
-                        <input type="hidden" name="next" value="{{ request.GET.next }}">
                         </form>
                     </div>
                 </div>

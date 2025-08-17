@@ -1,103 +1,149 @@
-{% extends 'frontOfice/base.html' %}
+{% extends 'dashboards/base.html' %}
 {% load static %}
 
 {% block title %}{{ titre }} - Gérant{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-plus me-2"></i>
+            <div class="bg-light rounded-top p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-{{ titre_icon|default:'plus' }} me-2 text-primary"></i>
                         {{ titre }}
-                    </h4>
+                    </h3>
+                    <a href="{% url 'dashboard_gerant' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        Retour
+                    </a>
                 </div>
-                <div class="card-body">
-                    <!-- Bouton retour -->
-                    <div class="mb-3">
-                        <a href="{% url 'dashboard_gerant' %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>
-                            Retour au Dashboard
-                        </a>
-                    </div>
+            </div>
 
-                    <!-- Formulaire -->
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h6 class="mb-0">Informations du produit</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-md-12 mb-3">
-                                                <label for="{{ form.nom.id_for_label }}" class="form-label">{{ form.nom.label }}</label>
+            <div class="bg-light rounded-bottom p-4">
+                <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="row g-4">
+                        <!-- Colonne Informations du produit -->
+                        <div class="col-lg-8">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-info-circle me-2 text-primary"></i>
+                                        Informations du produit
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <!-- Nom du produit -->
+                                        <div class="col-12">
+                                            <div class="form-floating">
                                                 {{ form.nom }}
+                                                <label for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
                                                 {% if form.nom.errors %}
-                                                    <div class="text-danger small">{{ form.nom.errors.0 }}</div>
+                                                    <div class="invalid-feedback d-block">
+                                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                                        {{ form.nom.errors.0 }}
+                                                    </div>
                                                 {% endif %}
                                             </div>
-                                            
-                                            <div class="col-md-12 mb-3">
-                                                <label for="{{ form.description.id_for_label }}" class="form-label">{{ form.description.label }}</label>
+                                        </div>
+                                        
+                                        <!-- Description -->
+                                        <div class="col-12">
+                                            <div class="form-floating">
                                                 {{ form.description }}
+                                                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
                                                 {% if form.description.errors %}
-                                                    <div class="text-danger small">{{ form.description.errors.0 }}</div>
+                                                    <div class="invalid-feedback d-block">
+                                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                                        {{ form.description.errors.0 }}
+                                                    </div>
                                                 {% endif %}
                                             </div>
-                                            
-                                            <div class="col-md-6 mb-3">
-                                                <label for="{{ form.prix.id_for_label }}" class="form-label">{{ form.prix.label }}</label>
-                                                {{ form.prix }}
+                                        </div>
+                                        
+                                        <!-- Prix et Quantité -->
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-white">FCFA</span>
+                                                    {{ form.prix }}
+                                                    <label for="{{ form.prix.id_for_label }}">{{ form.prix.label }}</label>
+                                                </div>
                                                 {% if form.prix.errors %}
-                                                    <div class="text-danger small">{{ form.prix.errors.0 }}</div>
+                                                    <div class="invalid-feedback d-block">
+                                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                                        {{ form.prix.errors.0 }}
+                                                    </div>
                                                 {% endif %}
                                             </div>
-                                            
-                                            <div class="col-md-6 mb-3">
-                                                <label for="{{ form.quantite_disponible.id_for_label }}" class="form-label">{{ form.quantite_disponible.label }}</label>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
                                                 {{ form.quantite_disponible }}
+                                                <label for="{{ form.quantite_disponible.id_for_label }}">{{ form.quantite_disponible.label }}</label>
                                                 {% if form.quantite_disponible.errors %}
-                                                    <div class="text-danger small">{{ form.quantite_disponible.errors.0 }}</div>
+                                                    <div class="invalid-feedback d-block">
+                                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                                        {{ form.quantite_disponible.errors.0 }}
+                                                    </div>
                                                 {% endif %}
                                             </div>
-                                            
-                                            <div class="col-md-12 mb-3">
-                                                <label for="{{ form.categorie.id_for_label }}" class="form-label">{{ form.categorie.label }}</label>
+                                        </div>
+                                        
+                                        <!-- Catégorie -->
+                                        <div class="col-12">
+                                            <div class="form-floating">
                                                 {{ form.categorie }}
+                                                <label for="{{ form.categorie.id_for_label }}">{{ form.categorie.label }}</label>
                                                 {% if form.categorie.errors %}
-                                                    <div class="text-danger small">{{ form.categorie.errors.0 }}</div>
+                                                    <div class="invalid-feedback d-block">
+                                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                                        {{ form.categorie.errors.0 }}
+                                                    </div>
                                                 {% endif %}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="col-md-4">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h6 class="mb-0">Image du produit</h6>
-                                    </div>
-                                    <div class="card-body text-center">
-                                        <div class="mb-3">
-                                            <label for="{{ form.image.id_for_label }}" class="form-label">{{ form.image.label }}</label>
-                                            {{ form.image }}
-                                            {% if form.image.errors %}
-                                                <div class="text-danger small">{{ form.image.errors.0 }}</div>
-                                            {% endif %}
+                        </div>
+                        
+                        <!-- Colonne Image du produit -->
+                        <div class="col-lg-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-image me-2 text-primary"></i>
+                                        Image du produit
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex flex-column h-100">
+                                        <!-- Upload d'image -->
+                                        <div class="mb-4">
+                                            <label for="{{ form.image.id_for_label }}" class="form-label fw-bold mb-3">{{ form.image.label }}</label>
+                                            <div class="input-group">
+                                                <input type="file" class="form-control" id="{{ form.image.id_for_label }}" name="{{ form.image.name }}" accept="image/*">
+                                                {% if form.image.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        <i class="fas fa-exclamation-circle me-1"></i>
+                                                        {{ form.image.errors.0 }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                         
-                                        <div class="preview-container">
-                                            <div id="image-preview" class="border rounded p-3 bg-light" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                                                <div class="text-muted">
-                                                    <i class="fas fa-image fa-3x mb-2"></i>
-                                                    <p>Aperçu de l'image</p>
+                                        <!-- Aperçu de l'image -->
+                                        <div class="flex-grow-1 d-flex flex-column">
+                                            <div id="image-preview" class="border rounded-3 bg-light bg-opacity-50 flex-grow-1 d-flex align-items-center justify-content-center" style="min-height: 250px;">
+                                                <div class="text-center p-4">
+                                                    <i class="fas fa-image fa-4x text-muted mb-3"></i>
+                                                    <p class="text-muted mb-0">Aperçu de l'image du produit</p>
+                                                    <small class="text-muted">(Ratio recommandé : 1:1)</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -105,28 +151,68 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Boutons d'action -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a href="{% url 'dashboard_gerant' %}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-times me-1"></i>
-                                        Annuler
-                                    </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save me-1"></i>
-                                        Ajouter le Produit
-                                    </button>
-                                </div>
+                    </div>
+                    
+                    <!-- Boutons d'action -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-end gap-3">
+                                <a href="{% url 'dashboard_gerant' %}" class="btn btn-outline-secondary px-4 py-2">
+                                    <i class="fas fa-times me-2"></i>
+                                    Annuler
+                                </a>
+                                <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm">
+                                    <i class="fas fa-save me-2"></i>
+                                    {{ submit_text|default:"Ajouter le Produit" }}
+                                </button>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.form-floating label {
+    color: #6c757d;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    border-color: #86b7fe;
+}
+
+#image-preview {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+#image-preview img {
+    object-fit: contain;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.invalid-feedback {
+    font-size: 0.85rem;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+}
+</style>
 
 <script>
 // Prévisualisation de l'image
@@ -137,17 +223,36 @@ document.getElementById('{{ form.image.id_for_label }}').addEventListener('chang
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            preview.innerHTML = `<img src="${e.target.result}" alt="Aperçu" class="img-fluid rounded" style="max-height: 200px;">`;
+            preview.innerHTML = `<img src="${e.target.result}" alt="Aperçu" class="img-fluid">`;
         };
         reader.readAsDataURL(file);
     } else {
         preview.innerHTML = `
-            <div class="text-muted">
-                <i class="fas fa-image fa-3x mb-2"></i>
-                <p>Aperçu de l'image</p>
+            <div class="text-center p-4">
+                <i class="fas fa-image fa-4x text-muted mb-3"></i>
+                <p class="text-muted mb-0">Aperçu de l'image du produit</p>
+                <small class="text-muted">(Ratio recommandé : 1:1)</small>
             </div>
         `;
     }
 });
+
+// Validation du formulaire
+(function () {
+    'use strict'
+    
+    const forms = document.querySelectorAll('.needs-validation')
+    
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            
+            form.classList.add('was-validated')
+        }, false)
+    })
+})();
 </script>
 {% endblock %}

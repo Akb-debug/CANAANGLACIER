@@ -3,42 +3,29 @@
 
 {% block title %}Confirmation - Canaan Glacier{% endblock %}
 
-{% block content %}
-<section class="py-5 my-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 text-center">
-                <!-- Icône de confirmation animée -->
-                <div class="icon-confirmation mb-4">
-                    <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="10" fill="#00BFFF"/>
-                        <path d="M8 12L11 15L16 9" stroke="white" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                </div>
-
-                <h1 class="display-5 fw-bold text-accent mb-3">Message envoyé avec succès !</h1>
-                
-                <p class="lead mb-4">
-                    Merci pour votre message. Notre équipe vous contactera dans les plus brefs délais.
-                </p>
-                
-                <div class="d-flex flex-wrap justify-content-center gap-3 mt-5">
-                    <a href="{% url 'home' %}" class="btn btn-primary px-4 py-2">
-                        <i class="bi bi-house-door me-2"></i> Retour à l'accueil
-                    </a>
-                    <a href="{% url 'produits' %}" class="btn btn-outline-primary px-4 py-2">
-                        <i class="bi bi-ice-cream me-2"></i> Découvrir nos produits
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
+{% block extra_css %}
 <style>
-    /* Animation de l'icône */
-    .icon-confirmation {
+    .confirmation-section {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+    }
+    
+    .confirmation-icon {
+        width: 100px;
+        height: 100px;
+        background-color: var(--teal-glacier);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
         animation: bounce 1s ease;
+    }
+    
+    .confirmation-icon i {
+        font-size: 3rem;
+        color: var(--white-bg);
     }
     
     @keyframes bounce {
@@ -47,22 +34,136 @@
         60% {transform: translateY(-10px);}
     }
     
-    /* Style des boutons */
-    .btn-outline-primary {
-        border-color: var(--primary);
-        color: var(--primary);
+    .confirmation-title {
+        color: var(--teal-glacier);
+        font-weight: 700;
+        margin-bottom: 1.5rem;
     }
     
-    .btn-outline-primary:hover {
-        background-color: var(--primary);
-        color: white;
+    .confirmation-text {
+        color: var(--black-shadow);
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto 2.5rem;
     }
     
-    /* Responsive */
+    .confirmation-btn {
+        border-radius: 50px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
     @media (max-width: 768px) {
-        .display-5 {
-            font-size: 2.2rem;
+        .confirmation-icon {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .confirmation-icon i {
+            font-size: 2.5rem;
+        }
+        
+        .confirmation-title {
+            font-size: 1.8rem;
         }
     }
 </style>
+{% endblock %}
+
+{% block content %}
+<section class="confirmation-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <!-- Icône de confirmation -->
+                <div class="confirmation-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+
+                <h1 class="display-4 fw-bold confirmation-title mb-4">
+                    Message envoyé avec succès !
+                </h1>
+                
+                <p class="lead confirmation-text">
+                    Merci pour votre message. Notre équipe vous contactera dans les plus brefs délais.
+                    <br>
+                    <small class="text-muted">Temps de réponse moyen : 24 heures</small>
+                </p>
+                
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+    <!-- Bouton principal -->
+    <a href="{% url 'home' %}" class="btn btn-glacier confirmation-btn position-relative overflow-hidden"
+       style="background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--pink-swoosh) 100%);
+              border: none;
+        color: white !important;
+              box-shadow: 0 4px 15px rgba(0, 184, 181, 0.3); ">
+        <span class="position-relative z-index-1">
+            <i class="fas fa-home me-2"></i> Retour à l'accueil
+        </span>
+        <span class="position-absolute top-0 left-0 w-100 h-100 bg-white opacity-0 hover-opacity-10 transition-all"
+              style="z-index: 0;"></span>
+    </a>
+    
+    <!-- Bouton secondaire -->
+    <a href="{% url 'produits' %}" class="btn btn-outline-glacier confirmation-btn position-relative overflow-hidden"
+       style="border: 2px solid var(--teal-glacier);
+              color: var(--teal-glacier);
+              background: transparent;
+              transition: all 0.4s ease;">
+        <span class="position-relative z-index-1">
+            <i class="fas fa-ice-cream me-2"></i> Nos glaces
+        </span>
+        <span class="position-absolute top-0 left-0 w-0 h-100 bg-glacier transition-all"
+              style="z-index: 0; opacity: 0.1;"></span>
+    </a>
+</div>
+
+<style>
+    /* Effet hover pour le bouton principal */
+    .btn-glacier:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 25px rgba(0, 184, 181, 0.4);
+        background: linear-gradient(135deg, var(--pink-swoosh) 0%, var(--teal-glacier) 100%) !important;
+        color: white !important;
+
+    }
+    
+    /* Effet hover pour le bouton secondaire */
+    .btn-outline-glacier:hover {
+        color: white !important;
+        border-color: var(--pink-swoosh) !important;
+        background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--pink-swoosh) 100%) !important;
+    }
+    
+    .btn-outline-glacier:hover span:last-child {
+        width: 100% !important;
+        opacity: 0 !important;
+    }
+    
+    /* Animation au survol */
+    .btn-glacier, .btn-outline-glacier {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* Effet "lift" au survol */
+    .btn-glacier:hover, .btn-outline-glacier:hover {
+        transform: translateY(-3px);
+    }
+    
+    /* Animation des icônes */
+    .btn-glacier:hover i, .btn-outline-glacier:hover i {
+        animation: iconBounce 0.6s ease;
+    }
+    
+    @keyframes iconBounce {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-3px); }
+        50% { transform: translateX(3px); }
+    }
+</style>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

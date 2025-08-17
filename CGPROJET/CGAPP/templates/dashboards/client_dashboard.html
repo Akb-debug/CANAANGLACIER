@@ -1,22 +1,22 @@
-{% extends 'frontOfice/base.html' %}
+{% extends 'dashboards/base.html' %}
 {% load static %}
 
 {% block title %}Mon Espace Client{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
+{% block body %}
+<div class="container-fluid pt-4 px-4">
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 text-accent mb-0">
+                    <h1 class="h3 mb-0">
                         <i class="fas fa-user me-2"></i>Mon Espace Client
                     </h1>
-                    <p class="text-muted">Bienvenue dans votre espace personnel</p>
+                    <p class="mb-0">Bienvenue dans votre espace personnel</p>
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-primary fs-6">Client</span>
+                    <span class="badge bg-primary">Client</span>
                     <p class="mb-0 text-muted small">{{ user.username }}</p>
                 </div>
             </div>
@@ -24,11 +24,11 @@
     </div>
 
     <!-- Statistiques principales -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-primary rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Total Commandes</div>
                             <div class="h2 mb-0">{{ total_commandes }}</div>
@@ -41,10 +41,10 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-danger rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Total Dépensé</div>
                             <div class="h2 mb-0">{{ total_depense|floatformat:0 }}€</div>
@@ -57,10 +57,10 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-warning rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Commandes en Cours</div>
                             <div class="h2 mb-0">{{ commandes_en_cours }}</div>
@@ -73,10 +73,10 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-info rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Articles Panier</div>
                             <div class="h2 mb-0">{{ nb_articles_panier }}</div>
@@ -91,37 +91,41 @@
     </div>
 
     <!-- Actions rapides -->
-    <div class="row mb-4">
+    <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-bolt me-2"></i>Actions Rapides
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'produits' %}" class="btn btn-outline-primary w-100">
-                                <i class="fas fa-shopping-bag me-2"></i>Continuer mes Achats
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'produits' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                                <i class="fas fa-shopping-bag fa-2x mb-2"></i>
+                                <span class="fw-bold">Continuer mes Achats</span>
                             </a>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'panier' %}" class="btn btn-outline-success w-100">
-                                <i class="fas fa-shopping-cart me-2"></i>Voir mon Panier
+                        <div class="col-md-3">
+                            <a href="{% url 'panier' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                                <span class="fw-bold">Voir mon Panier</span>
                                 {% if nb_articles_panier > 0 %}
-                                    <span class="badge bg-danger ms-1">{{ nb_articles_panier }}</span>
+                                    <span class="badge bg-danger mt-1">{{ nb_articles_panier }}</span>
                                 {% endif %}
                             </a>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'profile' %}" class="btn btn-outline-info w-100">
-                                <i class="fas fa-user-edit me-2"></i>Mon Profil
+                        <div class="col-md-3">
+                            <a href="{% url 'profile' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                                <i class="fas fa-user-edit fa-2x mb-2"></i>
+                                <span class="fw-bold">Mon Profil</span>
                             </a>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'contact' %}" class="btn btn-outline-warning w-100">
-                                <i class="fas fa-headset me-2"></i>Support
+                        <div class="col-md-3">
+                            <a href="{% url 'contact' %}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                                <i class="fas fa-headset fa-2x mb-2"></i>
+                                <span class="fw-bold">Support</span>
                             </a>
                         </div>
                     </div>
@@ -130,12 +134,12 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-4">
         <!-- Mon Panier Actuel -->
-        <div class="col-lg-4 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-shopping-cart me-2"></i>Mon Panier
                         {% if total_panier > 0 %}
                             <span class="badge bg-success ms-2">{{ total_panier }}€</span>
@@ -183,10 +187,10 @@
         </div>
 
         <!-- Mes Commandes Récentes -->
-        <div class="col-lg-8 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-history me-2"></i>Mes Commandes Récentes
                     </h5>
                 </div>
@@ -245,12 +249,12 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-4 mt-4">
         <!-- Mes Adresses -->
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-map-marker-alt me-2"></i>Mes Adresses
                     </h5>
                 </div>
@@ -282,19 +286,19 @@
         </div>
 
         <!-- Produits Recommandés -->
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-heart me-2"></i>Recommandés pour vous
                     </h5>
                 </div>
                 <div class="card-body">
                     {% if produits_favoris %}
-                        <div class="row">
+                        <div class="row g-3">
                             {% for produit in produits_favoris %}
-                            <div class="col-6 mb-3">
-                                <div class="card border-0 shadow-sm h-100">
+                            <div class="col-sm-6">
+                                <div class="card h-100">
                                     {% if produit.image %}
                                         <img src="{{ produit.image.url }}" class="card-img-top" alt="{{ produit.nom }}" 
                                              style="height: 120px; object-fit: cover;">
@@ -328,27 +332,33 @@
 </div>
 
 <style>
-.card {
-    transition: all 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-2px);
-}
-
-.table th {
-    border-top: none;
-    font-weight: 600;
-    color: #495057;
-}
-
-.btn-group-sm > .btn, .btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-}
-
-.border-bottom {
-    border-bottom: 1px solid #dee2e6 !important;
-}
+    .card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    }
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    }
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+    }
+    .border-bottom {
+        border-bottom: 1px solid #dee2e6 !important;
+    }
 </style>
 {% endblock %}

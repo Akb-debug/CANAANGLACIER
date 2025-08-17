@@ -1,230 +1,225 @@
-{% extends 'frontOfice/base.html' %}
+{% extends 'dashboards/base.html' %}
 {% load static %}
 
 {% block title %}Liste des Utilisateurs - Admin{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h4 class="mb-0">
+            <div class="bg-light rounded h-100 p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0">
                         <i class="fas fa-users me-2"></i>
                         Gestion des Utilisateurs ({{ total_utilisateurs }} total)
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <!-- Bouton retour et actions -->
-                    <div class="mb-3 d-flex justify-content-between align-items-center">
-                        <a href="{% url 'dashboard_admin' %}" class="btn btn-secondary">
+                    </h6>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'dashboard_admin' %}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left me-1"></i>
-                            Retour au Dashboard
+                            Retour
                         </a>
-                        <div class="d-flex gap-2">
-                            <a href="{% url 'creer_gerant' %}" class="btn btn-primary">
-                                <i class="fas fa-user-plus me-1"></i>
-                                Nouveau Gérant
-                            </a>
-                            <a href="{% url 'creer_serveur' %}" class="btn btn-success">
-                                <i class="fas fa-user-plus me-1"></i>
-                                Nouveau Serveur
-                            </a>
-                        </div>
+                        <a href="{% url 'creer_gerant' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-user-plus me-1"></i>
+                            Nouveau Gérant
+                        </a>
+                        <a href="{% url 'creer_serveur' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-user-plus me-1"></i>
+                            Nouveau Serveur
+                        </a>
                     </div>
+                </div>
 
-                    <!-- Statistiques rapides -->
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card bg-danger text-white">
-                                <div class="card-body text-center">
-                                    <h5>{{ utilisateurs.admins.count }}</h5>
-                                    <small>Administrateurs</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body text-center">
-                                    <h5>{{ utilisateurs.gerants.count }}</h5>
-                                    <small>Gérants</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body text-center">
-                                    <h5>{{ utilisateurs.serveurs.count }}</h5>
-                                    <small>Serveurs</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body text-center">
-                                    <h5>{{ utilisateurs.clients.count }}</h5>
-                                    <small>Clients</small>
-                                </div>
+                <!-- Statistiques rapides -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="bg-danger text-white rounded p-3">
+                            <div class="text-center">
+                                <h5 class="mb-0">{{ utilisateurs.admins.count }}</h5>
+                                <small>Administrateurs</small>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Tabs pour les différents rôles -->
-                    <ul class="nav nav-tabs" id="usersTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="admins-tab" data-bs-toggle="tab" data-bs-target="#admins" type="button" role="tab">
-                                <i class="fas fa-user-shield me-1"></i>
-                                Administrateurs ({{ utilisateurs.admins.count }})
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="gerants-tab" data-bs-toggle="tab" data-bs-target="#gerants" type="button" role="tab">
-                                <i class="fas fa-user-tie me-1"></i>
-                                Gérants ({{ utilisateurs.gerants.count }})
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="serveurs-tab" data-bs-toggle="tab" data-bs-target="#serveurs" type="button" role="tab">
-                                <i class="fas fa-user-cog me-1"></i>
-                                Serveurs ({{ utilisateurs.serveurs.count }})
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="clients-tab" data-bs-toggle="tab" data-bs-target="#clients" type="button" role="tab">
-                                <i class="fas fa-user me-1"></i>
-                                Clients ({{ utilisateurs.clients.count }})
-                            </button>
-                        </li>
-                    </ul>
-
-                    <!-- Contenu des tabs -->
-                    <div class="tab-content mt-3" id="usersTabContent">
-                        <!-- Administrateurs -->
-                        <div class="tab-pane fade show active" id="admins" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead class="table-dark">
-                                        <tr>
-                                            <th>Nom d'utilisateur</th>
-                                            <th>Nom complet</th>
-                                            <th>Email</th>
-                                            <th>Téléphone</th>
-                                            <th>Date d'inscription</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for admin in utilisateurs.admins %}
-                                        <tr>
-                                            <td><strong>{{ admin.username }}</strong></td>
-                                            <td>{{ admin.first_name }} {{ admin.last_name }}</td>
-                                            <td>{{ admin.email }}</td>
-                                            <td>{{ admin.telephone|default:"Non renseigné" }}</td>
-                                            <td>{{ admin.date_joined|date:"d/m/Y" }}</td>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted">Aucun administrateur</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                    <div class="col-md-3">
+                        <div class="bg-primary text-white rounded p-3">
+                            <div class="text-center">
+                                <h5 class="mb-0">{{ utilisateurs.gerants.count }}</h5>
+                                <small>Gérants</small>
                             </div>
                         </div>
-
-                        <!-- Gérants -->
-                        <div class="tab-pane fade" id="gerants" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead class="table-primary">
-                                        <tr>
-                                            <th>Nom d'utilisateur</th>
-                                            <th>Nom complet</th>
-                                            <th>Email</th>
-                                            <th>Téléphone</th>
-                                            <th>Date d'inscription</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for gerant in utilisateurs.gerants %}
-                                        <tr>
-                                            <td><strong>{{ gerant.username }}</strong></td>
-                                            <td>{{ gerant.first_name }} {{ gerant.last_name }}</td>
-                                            <td>{{ gerant.email }}</td>
-                                            <td>{{ gerant.telephone|default:"Non renseigné" }}</td>
-                                            <td>{{ gerant.date_joined|date:"d/m/Y" }}</td>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted">Aucun gérant</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-success text-white rounded p-3">
+                            <div class="text-center">
+                                <h5 class="mb-0">{{ utilisateurs.serveurs.count }}</h5>
+                                <small>Serveurs</small>
                             </div>
                         </div>
-
-                        <!-- Serveurs -->
-                        <div class="tab-pane fade" id="serveurs" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead class="table-success">
-                                        <tr>
-                                            <th>Nom d'utilisateur</th>
-                                            <th>Nom complet</th>
-                                            <th>Email</th>
-                                            <th>Téléphone</th>
-                                            <th>Date d'inscription</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for serveur in utilisateurs.serveurs %}
-                                        <tr>
-                                            <td><strong>{{ serveur.username }}</strong></td>
-                                            <td>{{ serveur.first_name }} {{ serveur.last_name }}</td>
-                                            <td>{{ serveur.email }}</td>
-                                            <td>{{ serveur.telephone|default:"Non renseigné" }}</td>
-                                            <td>{{ serveur.date_joined|date:"d/m/Y" }}</td>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted">Aucun serveur</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="bg-warning text-white rounded p-3">
+                            <div class="text-center">
+                                <h5 class="mb-0">{{ utilisateurs.clients.count }}</h5>
+                                <small>Clients</small>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Clients -->
-                        <div class="tab-pane fade" id="clients" role="tabpanel">
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead class="table-warning">
-                                        <tr>
-                                            <th>Nom d'utilisateur</th>
-                                            <th>Nom complet</th>
-                                            <th>Email</th>
-                                            <th>Téléphone</th>
-                                            <th>Date d'inscription</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for client in utilisateurs.clients %}
-                                        <tr>
-                                            <td><strong>{{ client.username }}</strong></td>
-                                            <td>{{ client.first_name }} {{ client.last_name }}</td>
-                                            <td>{{ client.email }}</td>
-                                            <td>{{ client.telephone|default:"Non renseigné" }}</td>
-                                            <td>{{ client.date_joined|date:"d/m/Y" }}</td>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted">Aucun client</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
+                <!-- Tabs pour les différents rôles -->
+                <ul class="nav nav-tabs mb-3" id="usersTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="admins-tab" data-bs-toggle="tab" data-bs-target="#admins" type="button" role="tab">
+                            <i class="fas fa-user-shield me-1"></i>
+                            Administrateurs ({{ utilisateurs.admins.count }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="gerants-tab" data-bs-toggle="tab" data-bs-target="#gerants" type="button" role="tab">
+                            <i class="fas fa-user-tie me-1"></i>
+                            Gérants ({{ utilisateurs.gerants.count }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="serveurs-tab" data-bs-toggle="tab" data-bs-target="#serveurs" type="button" role="tab">
+                            <i class="fas fa-user-cog me-1"></i>
+                            Serveurs ({{ utilisateurs.serveurs.count }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="clients-tab" data-bs-toggle="tab" data-bs-target="#clients" type="button" role="tab">
+                            <i class="fas fa-user me-1"></i>
+                            Clients ({{ utilisateurs.clients.count }})
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Contenu des tabs -->
+                <div class="tab-content" id="usersTabContent">
+                    <!-- Administrateurs -->
+                    <div class="tab-pane fade show active" id="admins" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr class="text-dark">
+                                        <th scope="col">Nom d'utilisateur</th>
+                                        <th scope="col">Nom complet</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Téléphone</th>
+                                        <th scope="col">Date d'inscription</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for admin in utilisateurs.admins %}
+                                    <tr>
+                                        <td><strong>{{ admin.username }}</strong></td>
+                                        <td>{{ admin.first_name }} {{ admin.last_name }}</td>
+                                        <td>{{ admin.email }}</td>
+                                        <td>{{ admin.telephone|default:"Non renseigné" }}</td>
+                                        <td>{{ admin.date_joined|date:"d/m/Y" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">Aucun administrateur</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Gérants -->
+                    <div class="tab-pane fade" id="gerants" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr class="text-primary">
+                                        <th scope="col">Nom d'utilisateur</th>
+                                        <th scope="col">Nom complet</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Téléphone</th>
+                                        <th scope="col">Date d'inscription</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for gerant in utilisateurs.gerants %}
+                                    <tr>
+                                        <td><strong>{{ gerant.username }}</strong></td>
+                                        <td>{{ gerant.first_name }} {{ gerant.last_name }}</td>
+                                        <td>{{ gerant.email }}</td>
+                                        <td>{{ gerant.telephone|default:"Non renseigné" }}</td>
+                                        <td>{{ gerant.date_joined|date:"d/m/Y" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">Aucun gérant</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Serveurs -->
+                    <div class="tab-pane fade" id="serveurs" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr class="text-success">
+                                        <th scope="col">Nom d'utilisateur</th>
+                                        <th scope="col">Nom complet</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Téléphone</th>
+                                        <th scope="col">Date d'inscription</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for serveur in utilisateurs.serveurs %}
+                                    <tr>
+                                        <td><strong>{{ serveur.username }}</strong></td>
+                                        <td>{{ serveur.first_name }} {{ serveur.last_name }}</td>
+                                        <td>{{ serveur.email }}</td>
+                                        <td>{{ serveur.telephone|default:"Non renseigné" }}</td>
+                                        <td>{{ serveur.date_joined|date:"d/m/Y" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">Aucun serveur</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Clients -->
+                    <div class="tab-pane fade" id="clients" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr class="text-warning">
+                                        <th scope="col">Nom d'utilisateur</th>
+                                        <th scope="col">Nom complet</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Téléphone</th>
+                                        <th scope="col">Date d'inscription</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for client in utilisateurs.clients %}
+                                    <tr>
+                                        <td><strong>{{ client.username }}</strong></td>
+                                        <td>{{ client.first_name }} {{ client.last_name }}</td>
+                                        <td>{{ client.email }}</td>
+                                        <td>{{ client.telephone|default:"Non renseigné" }}</td>
+                                        <td>{{ client.date_joined|date:"d/m/Y" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">Aucun client</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -234,22 +229,27 @@
 </div>
 
 <style>
-.card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    border: 1px solid rgba(0, 0, 0, 0.125);
+.nav-tabs .nav-link {
+    font-weight: 500;
+    color: #6c757d;
 }
 
 .nav-tabs .nav-link.active {
-    background-color: #fff;
-    border-color: #dee2e6 #dee2e6 #fff;
+    color: #0d6efd;
+    background-color: transparent;
+    border-bottom: 3px solid #0d6efd;
 }
 
 .table th {
-    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
 }
 
 .table-responsive {
     border-radius: 0.375rem;
+    overflow: hidden;
 }
 </style>
 {% endblock %}

@@ -1,0 +1,859 @@
+{% extends "frontOfice/base.html" %}
+{% block content %}
+
+<style>
+    :root {
+        --primary-color: #3498db;
+        --secondary-color: #2980b9;
+        --accent-color: #e74c3c;
+        --light-color: #f8f9fa;
+        --dark-color: #343a40;
+        --success-color: #2ecc71;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+        line-height: 1.6;
+    }
+    
+    .checkout-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 15px;
+    }
+    
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .checkout-header h1 {
+        color: var(--dark-color);
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .checkout-header h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: var(--primary-color);
+    }
+    
+    .checkout-progress {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .checkout-progress::before {
+        content: '';
+        position: absolute;
+        top: 15px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #ddd;
+        z-index: 1;
+    }
+    
+    .progress-step {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        width: 25%;
+    }
+    
+    .step-number {
+        width: 30px;
+        height: 30px;
+        background: #ddd;
+        color: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        font-weight: bold;
+        transition: var(--transition);
+    }
+    
+    .step-label {
+        font-size: 0.9rem;
+        color: #777;
+        transition: var(--transition);
+    }
+    
+    .progress-step.active .step-number {
+        background: var(--primary-color);
+        transform: scale(1.1);
+    }
+    
+    .progress-step.active .step-label {
+        color: var(--dark-color);
+        font-weight: 500;
+    }
+    
+    .progress-step.completed .step-number {
+        background: var(--success-color);
+    }
+    
+    .etape {
+        display: none;
+        padding: 30px;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin-bottom: 30px;
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .etape.active {
+        display: block;
+    }
+    
+    .etape h2 {
+        color: var(--dark-color);
+        margin-bottom: 1.5rem;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #555;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        outline: none;
+    }
+    
+    .btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        cursor: pointer;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 500;
+        transition: var(--transition);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--primary-color);
+        color: var(--primary-color);
+    }
+    
+    .btn-outline:hover {
+        background: rgba(52, 152, 219, 0.1);
+    }
+    
+    .navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .livraison-options {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .livraison-option {
+        flex: 1;
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        padding: 15px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .livraison-option:hover {
+        border-color: var(--primary-color);
+    }
+    
+    .livraison-option.selected {
+        border: 2px solid var(--primary-color);
+        background: #f0f8ff;
+    }
+    
+    .livraison-option input {
+        display: none;
+    }
+    
+    .paiement-methods {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .paiement-method {
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        padding: 20px;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .paiement-method:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-3px);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .paiement-method.selected {
+        border: 2px solid var(--primary-color);
+        background: #f0f8ff;
+    }
+    
+    .paiement-method input {
+        display: none;
+    }
+    
+    .paiement-method i {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        color: var(--primary-color);
+    }
+    
+    .paiement-details {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: var(--border-radius);
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .recap-section {
+        margin-bottom: 25px;
+    }
+    
+    .recap-section h3 {
+        color: var(--dark-color);
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+    }
+    
+    .recap-item {
+        padding: 15px;
+        background: #f9f9f9;
+        border-radius: var(--border-radius);
+        margin-bottom: 10px;
+        transition: var(--transition);
+    }
+    
+    .recap-item:hover {
+        background: #f0f0f0;
+    }
+    
+    .order-summary {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 20px;
+        margin-top: 30px;
+    }
+    
+    .order-summary h3 {
+        color: var(--dark-color);
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .order-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px dashed #eee;
+    }
+    
+    .order-total {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--dark-color);
+    }
+    
+    .grand-total {
+        font-size: 1.3rem;
+        color: var(--accent-color);
+        margin-top: 10px;
+        padding-top: 15px;
+        border-top: 2px solid #eee;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .livraison-options {
+            flex-direction: column;
+        }
+        
+        .paiement-methods {
+            grid-template-columns: 1fr;
+        }
+        
+        .checkout-header h1 {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+
+<div class="checkout-container">
+    <div class="checkout-header">
+        <h1>Finalisation de votre commande</h1>
+        <p>Remplissez les informations nécessaires pour compléter votre achat</p>
+    </div>
+    
+    <div class="checkout-progress">
+        <div class="progress-step active" id="progress-step1">
+            <div class="step-number">1</div>
+            <div class="step-label">Coordonnées</div>
+        </div>
+        <div class="progress-step" id="progress-step2">
+            <div class="step-number">2</div>
+            <div class="step-label">Livraison</div>
+        </div>
+        <div class="progress-step" id="progress-step3">
+            <div class="step-number">3</div>
+            <div class="step-label">Paiement</div>
+        </div>
+        <div class="progress-step" id="progress-step4">
+            <div class="step-number">4</div>
+            <div class="step-label">Confirmation</div>
+        </div>
+    </div>
+    
+    <form id="commandeForm" method="post">
+        {% csrf_token %}
+        
+        <!-- Étape 1: Coordonnées -->
+        <div id="etape1" class="etape active">
+            <h2>1. Vos coordonnées</h2>
+            
+            <div class="form-group">
+                <label for="nom">Nom*</label>
+                <input type="text" id="nom" name="nom" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="prenom">Prénom*</label>
+                <input type="text" id="prenom" name="prenom" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email*</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="telephone">Téléphone*</label>
+                <input type="tel" id="telephone" name="telephone" class="form-control" required>
+            </div>
+            
+            <div class="navigation">
+                <button type="button" class="btn btn-outline" onclick="nextStep(1, 2)">Suivant</button>
+            </div>
+        </div>
+        
+        <!-- Étape 2: Livraison -->
+        <div id="etape2" class="etape">
+            <h2>2. Mode de livraison</h2>
+            
+            <div class="livraison-options">
+                <div class="livraison-option selected" onclick="selectDeliveryOption('livraison')">
+                    <input type="radio" id="livraison-domicile" name="mode_livraison" value="livraison" checked>
+                    <label for="livraison-domicile">
+                        <i class="fas fa-truck"></i><br>
+                        Livraison à domicile
+                    </label>
+                </div>
+                
+                <div class="livraison-option" onclick="selectDeliveryOption('magasin')">
+                    <input type="radio" id="retrait-magasin" name="mode_livraison" value="magasin">
+                    <label for="retrait-magasin">
+                        <i class="fas fa-store"></i><br>
+                        Retrait en magasin
+                    </label>
+                </div>
+            </div>
+            
+            <div id="adresse-livraison-container">
+                <h3>Adresse de livraison</h3>
+                
+                <div class="form-group">
+                    <label for="rue">Rue*</label>
+                    <input type="text" id="rue" name="rue" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="ville">Ville*</label>
+                    <input type="text" id="ville" name="ville" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="code_postal">Code postal*</label>
+                    <input type="text" id="code_postal" name="code_postal" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="pays">Pays*</label>
+                    <input type="text" id="pays" name="pays" class="form-control" value="Côte d'Ivoire" readonly>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button type="button" class="btn btn-outline" onclick="prevStep(2, 1)">Précédent</button>
+                <button type="button" class="btn" onclick="nextStep(2, 3)">Suivant</button>
+            </div>
+        </div>
+        
+        <!-- Étape 3: Paiement -->
+        <div id="etape3" class="etape">
+            <h2>3. Méthode de paiement</h2>
+            
+            <div class="paiement-methods">
+                <div class="paiement-method selected" onclick="selectPaymentMethod('mobile_money')">
+                    <input type="radio" id="paiement-mobile" name="methode_paiement" value="mobile_money" checked>
+                    <label for="paiement-mobile">
+                        <i class="fas fa-mobile-alt"></i><br>
+                        Mobile Money
+                    </label>
+                    
+                    <div id="mobile-money-details" class="paiement-details">
+                        <div class="form-group">
+                            <label for="mobile_number">Numéro Mobile Money*</label>
+                            <input type="tel" id="mobile_number" name="mobile_number" class="form-control">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mobile_operator">Opérateur*</label>
+                            <select id="mobile_operator" name="mobile_operator" class="form-control">
+                                <option value="mtn">MTN</option>
+                                <option value="orange">Orange</option>
+                                <option value="moov">Moov</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="paiement-method" onclick="selectPaymentMethod('carte')">
+                    <input type="radio" id="paiement-carte" name="methode_paiement" value="carte">
+                    <label for="paiement-carte">
+                        <i class="far fa-credit-card"></i><br>
+                        Carte Bancaire
+                    </label>
+                    
+                    <div id="carte-details" class="paiement-details">
+                        <div class="form-group">
+                            <label for="card_number">Numéro de carte*</label>
+                            <input type="text" id="card_number" name="card_number" class="form-control" placeholder="1234 5678 9012 3456">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="card_expiry">Date d'expiration*</label>
+                            <input type="text" id="card_expiry" name="card_expiry" class="form-control" placeholder="MM/AA">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="card_cvv">CVV*</label>
+                            <input type="text" id="card_cvv" name="card_cvv" class="form-control" placeholder="123">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="paiement-method" onclick="selectPaymentMethod('sur_place')">
+                    <input type="radio" id="paiement-magasin" name="methode_paiement" value="sur_place">
+                    <label for="paiement-magasin">
+                        <i class="fas fa-store"></i><br>
+                        Paiement en magasin
+                    </label>
+                </div>
+                
+                <div id="paiement-livraison-container" class="paiement-method" onclick="selectPaymentMethod('a_la_livraison')">
+                    <input type="radio" id="paiement-livraison" name="methode_paiement" value="a_la_livraison">
+                    <label for="paiement-livraison">
+                        <i class="fas fa-money-bill-wave"></i><br>
+                        Paiement à la livraison
+                    </label>
+                </div>
+            </div>
+            
+            <div class="order-summary">
+                <h3>Résumé de la commande</h3>
+                
+                {% for ligne in panier.lignes.all %}
+                <div class="order-item">
+                    <span>{{ ligne.produit.nom }} x {{ ligne.quantite }}</span>
+                    <span>{{ ligne.produit.prix|floatformat:0 }} FCFA x {{ ligne.quantite }}</span>
+                </div>
+                {% endfor %}
+                
+                <div class="order-total">
+                    <span>Total</span>
+                    <span>{{ panier.total }} FCFA</span>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button type="button" class="btn btn-outline" onclick="prevStep(3, 2)">Précédent</button>
+                <button type="button" class="btn" onclick="nextStep(3, 4)">Suivant</button>
+            </div>
+        </div>
+        
+        <!-- Étape 4: Récapitulatif -->
+        <div id="etape4" class="etape">
+            <h2>4. Récapitulatif de votre commande</h2>
+            
+            <div class="recap-section">
+                <h3>Vos informations</h3>
+                <div class="recap-item" id="recap-coordonnees">
+                    <!-- Rempli par JavaScript -->
+                </div>
+            </div>
+            
+            <div class="recap-section">
+                <h3>Livraison</h3>
+                <div class="recap-item" id="recap-livraison">
+                    <!-- Rempli par JavaScript -->
+                </div>
+            </div>
+            
+            <div class="recap-section">
+                <h3>Paiement</h3>
+                <div class="recap-item" id="recap-paiement">
+                    <!-- Rempli par JavaScript -->
+                </div>
+            </div>
+            
+            <div class="order-summary">
+                <h3>Détails de votre commande</h3>
+                
+                {% for ligne in panier.lignes.all %}
+                <div class="order-item">
+                    <span>{{ ligne.produit.nom }} x {{ ligne.quantite }}</span>
+                    <span>{{ ligne.produit.prix|floatformat:0 }} FCFA x {{ ligne.quantite }}</span>
+                </div>
+                {% endfor %}
+                
+                <div class="order-total">
+                    <span>Sous-total</span>
+                    <span>{{ panier.total }} FCFA</span>
+                </div>
+                
+                <div class="order-item">
+                    <span>Livraison</span>
+                    <span id="recap-frais-livraison">0 FCFA</span>
+                </div>
+                
+                <div class="grand-total">
+                    <span>Total à payer</span>
+                    <span id="recap-total">{{ panier.total }} FCFA</span>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <button type="button" class="btn btn-outline" onclick="prevStep(4, 3)">Précédent</button>
+                <button type="submit" class="btn">Confirmer la commande</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script>
+    // Mise à jour de la barre de progression
+    function updateProgress(currentStep) {
+        // Réinitialiser toutes les étapes
+        document.querySelectorAll('.progress-step').forEach(step => {
+            step.classList.remove('active', 'completed');
+        });
+        
+        // Marquer les étapes précédentes comme complétées
+        for (let i = 1; i < currentStep; i++) {
+            document.getElementById(`progress-step${i}`).classList.add('completed');
+        }
+        
+        // Marquer l'étape actuelle comme active
+        document.getElementById(`progress-step${currentStep}`).classList.add('active');
+    }
+    
+    // Sélection option de livraison
+    function selectDeliveryOption(option) {
+        document.querySelectorAll('.livraison-option').forEach(el => {
+            el.classList.remove('selected');
+        });
+        event.currentTarget.classList.add('selected');
+        
+        const showAddress = option === 'livraison';
+        document.getElementById('adresse-livraison-container').style.display = 
+            showAddress ? 'block' : 'none';
+        
+        document.getElementById('paiement-livraison-container').style.display = 
+            showAddress ? 'block' : 'none';
+    }
+    
+    // Gestion des méthodes de paiement
+    function selectPaymentMethod(method) {
+        // Mettre en surbrillance la méthode sélectionnée
+        document.querySelectorAll('.paiement-method').forEach(el => {
+            el.classList.remove('selected');
+        });
+        event.currentTarget.classList.add('selected');
+        
+        // Masquer tous les détails de paiement
+        document.querySelectorAll('.paiement-details').forEach(el => {
+            el.style.display = 'none';
+        });
+        
+        // Afficher les détails si nécessaire
+        if (method === 'mobile_money') {
+            document.getElementById('mobile-money-details').style.display = 'block';
+        } else if (method === 'carte') {
+            document.getElementById('carte-details').style.display = 'block';
+        }
+    }
+    
+    // Navigation entre les étapes
+    function nextStep(current, next) {
+        // Validation simple
+        let valid = true;
+        if (current === 1) {
+            // Valider les coordonnées
+            const required = ['nom', 'prenom', 'email', 'telephone'];
+            required.forEach(id => {
+                if (!document.getElementById(id).value.trim()) {
+                    valid = false;
+                    document.getElementById(id).style.borderColor = 'var(--accent-color)';
+                    setTimeout(() => {
+                        document.getElementById(id).style.borderColor = '#ddd';
+                    }, 2000);
+                }
+            });
+            
+            if (!valid) {
+                alert('Veuillez remplir tous les champs obligatoires');
+                return;
+            }
+        } else if (current === 2) {
+            const modeLivraison = document.querySelector('input[name="mode_livraison"]:checked').value;
+            if (modeLivraison === 'livraison') {
+                const required = ['rue', 'ville', 'code_postal'];
+                required.forEach(id => {
+                    if (!document.getElementById(id).value.trim()) {
+                        valid = false;
+                        document.getElementById(id).style.borderColor = 'var(--accent-color)';
+                        setTimeout(() => {
+                            document.getElementById(id).style.borderColor = '#ddd';
+                        }, 2000);
+                    }
+                });
+                
+                if (!valid) {
+                    alert('Veuillez remplir tous les champs d\'adresse pour la livraison');
+                    return;
+                }
+            }
+        } else if (current === 3) {
+            const methode = document.querySelector('input[name="methode_paiement"]:checked').value;
+            if (methode === 'mobile_money' && !document.getElementById('mobile_number').value.trim()) {
+                valid = false;
+                document.getElementById('mobile_number').style.borderColor = 'var(--accent-color)';
+                setTimeout(() => {
+                    document.getElementById('mobile_number').style.borderColor = '#ddd';
+                }, 2000);
+                alert('Veuillez entrer votre numéro Mobile Money');
+                return;
+            } else if (methode === 'carte') {
+                const required = ['card_number', 'card_expiry', 'card_cvv'];
+                required.forEach(id => {
+                    if (!document.getElementById(id).value.trim()) {
+                        valid = false;
+                        document.getElementById(id).style.borderColor = 'var(--accent-color)';
+                        setTimeout(() => {
+                            document.getElementById(id).style.borderColor = '#ddd';
+                        }, 2000);
+                    }
+                });
+                
+                if (!valid) {
+                    alert('Veuillez compléter les informations de carte');
+                    return;
+                }
+            }
+        }
+        
+        if (valid) {
+            // Mettre à jour le récapitulatif avant d'afficher l'étape 4
+            if (next === 4) {
+                updateRecap();
+            }
+            
+            document.getElementById(`etape${current}`).classList.remove('active');
+            document.getElementById(`etape${next}`).classList.add('active');
+            updateProgress(next);
+            
+            // Scroll vers le haut de l'étape
+            document.getElementById(`etape${next}`).scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+    
+    function prevStep(current, prev) {
+        document.getElementById(`etape${current}`).classList.remove('active');
+        document.getElementById(`etape${prev}`).classList.add('active');
+        updateProgress(prev);
+        
+        // Scroll vers le haut de l'étape
+        document.getElementById(`etape${prev}`).scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Mise à jour du récapitulatif
+    function updateRecap() {
+        // Coordonnées
+        const coordonnees = `
+            <strong>${document.getElementById('nom').value} ${document.getElementById('prenom').value}</strong><br>
+            <i class="fas fa-envelope"></i> ${document.getElementById('email').value}<br>
+            <i class="fas fa-phone"></i> ${document.getElementById('telephone').value}
+        `;
+        document.getElementById('recap-coordonnees').innerHTML = coordonnees;
+        
+        // Livraison
+        const modeLivraison = document.querySelector('input[name="mode_livraison"]:checked').value;
+        let livraisonText = '';
+        
+        if (modeLivraison === 'livraison') {
+            livraisonText = `
+                <strong><i class="fas fa-truck"></i> Livraison à domicile</strong><br>
+                <i class="fas fa-map-marker-alt"></i> ${document.getElementById('rue').value}<br>
+                ${document.getElementById('code_postal').value} ${document.getElementById('ville').value}<br>
+                ${document.getElementById('pays').value}
+            `;
+            
+            // Simuler des frais de livraison
+            document.getElementById('recap-frais-livraison').textContent = '2000 FCFA';
+            const total = {{ panier.total }} + 2000;
+            document.getElementById('recap-total').textContent = total + ' FCFA';
+        } else {
+            livraisonText = `
+                <strong><i class="fas fa-store"></i> Retrait en magasin</strong><br>
+                Adresse du magasin: [Votre adresse ici]
+            `;
+            document.getElementById('recap-frais-livraison').textContent = '0 FCFA';
+            document.getElementById('recap-total').textContent = '{{ panier.total }} FCFA';
+        }
+        
+        document.getElementById('recap-livraison').innerHTML = livraisonText;
+        
+        // Paiement
+        const methode = document.querySelector('input[name="methode_paiement"]:checked').value;
+        let paiementText = '';
+        
+        switch(methode) {
+            case 'mobile_money':
+                paiementText = `
+                    <strong><i class="fas fa-mobile-alt"></i> Mobile Money</strong><br>
+                    Opérateur: ${document.getElementById('mobile_operator').value}<br>
+                    Numéro: ${document.getElementById('mobile_number').value}
+                `;
+                break;
+            case 'carte':
+                paiementText = `
+                    <strong><i class="far fa-credit-card"></i> Carte bancaire</strong><br>
+                    Numéro: **** **** **** ${document.getElementById('card_number').value.slice(-4)}<br>
+                    Expire: ${document.getElementById('card_expiry').value}
+                `;
+                break;
+            case 'sur_place':
+                paiementText = '<strong><i class="fas fa-store"></i> Paiement en magasin</strong>';
+                break;
+            case 'a_la_livraison':
+                paiementText = '<strong><i class="fas fa-money-bill-wave"></i> Paiement à la livraison</strong>';
+                break;
+        }
+        
+        document.getElementById('recap-paiement').innerHTML = paiementText;
+    }
+    
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        updateProgress(1);
+        selectPaymentMethod('mobile_money');
+        selectDeliveryOption('livraison');
+        
+        // Ajouter des masques pour les champs
+        document.getElementById('telephone').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        
+        document.getElementById('card_number').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '').replace(/(\d{4})(?=\d)/g, '$1 ');
+        });
+        
+        document.getElementById('card_expiry').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '').replace(/(\d{2})(?=\d)/g, '$1/');
+        });
+        
+        document.getElementById('card_cvv').addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+    });
+</script>
+
+{% endblock %}
