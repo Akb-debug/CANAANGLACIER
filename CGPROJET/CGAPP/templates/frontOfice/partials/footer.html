@@ -3,70 +3,249 @@
     <div class="container">
         <div class="row g-4">
             <!-- Colonne 1 - A propos -->
-            <div class="col-md-4">
-                <h5 class="text-uppercase text-primary mb-4">Canaan Glacier</h5>
-                <p class="small">Depuis 2023, nous créons des glaces artisanales avec des ingrédients 100% naturels pour votre plus grand plaisir.</p>
-                <div class="mt-4">
-                    <a href="#" class="text-white me-3"><i class="bi bi-facebook fs-5"></i></a>
-                    <a href="#" class="text-white me-3"><i class="bi bi-instagram fs-5"></i></a>
-                    <a href="#" class="text-white me-3"><i class="bi bi-twitter fs-5"></i></a>
-                    <a href="#" class="text-white"><i class="bi bi-tiktok fs-5"></i></a>
+            <div class="col-lg-4 col-md-6">
+                <div class=" d-flex align-items-center mb-4">
+                    <a href="{% url 'home' %}" class="logo-container">
+                        <img src="{% static 'logo.png' %}" alt="Canaan Glacier" class="brand-logo">
+                    </a>
+                    <h5 class="text-uppercase mb-0" style="color: var(--yellow-canaan)">Canaan Glacier</h5>
+                </div>
+                <p class="small">Depuis 2025, nous créons des glaces artisanales avec des ingrédients 100% naturels pour votre plus grand plaisir.</p>
+                <div class="social-icons mt-4">
+                    <a href="#" class="text-color me-3 hover-pink"><i class="bi bi-facebook fs-5"></i></a>
+                    <a href="#" class="text-color me-3 hover-pink"><i class="bi bi-instagram fs-5"></i></a>
+                    <a href="#" class="text-color me-3 hover-pink"><i class="bi bi-twitter fs-5"></i></a>
+                    <a href="#" class="text-color hover-pink"><i class="bi bi-tiktok fs-5"></i></a>
                 </div>
             </div>
 
             <!-- Colonne 2 - Liens rapides -->
-            <div class="col-md-2">
-                <h5 class="text-uppercase text-primary mb-4">Navigation</h5>
+            <div class="col-lg-2 col-md-6">
+                <h5 class="text-uppercase mb-4" style="color: var(--yellow-canaan)">Navigation</h5>
                 <ul class="list-unstyled small">
-                    <li class="mb-2"><a href="{% url 'home' %}" class="text-white text-decoration-none">Accueil</a></li>
-                    <li class="mb-2"><a href="{% url 'produits' %}" class="text-white text-decoration-none">Nos produits</a></li>
-                    <li class="mb-2"><a href="{% url 'produits' %}?sort=popularite" class="text-white text-decoration-none">Best-sellers</a></li>
-                    <li class="mb-2"><a href="{% url 'produits' %}?nouveautes=1" class="text-white text-decoration-none">Nouveautés</a></li>
-                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Contact</a></li>
+                    <li class="mb-2"><a href="{% url 'home' %}" class="text-white text-decoration-none hover-teal">Accueil</a></li>
+                    <li class="mb-2"><a href="{% url 'produits' %}" class="text-white text-decoration-none hover-pink">Nos produits</a></li>
+                    <li class="mb-2"><a href="{% url 'produits' %}?sort=popularite" class="text-white text-decoration-none hover-teal">Best-sellers</a></li>
+                    <li class="mb-2"><a href="{% url 'produits' %}?nouveautes=1" class="text-white text-decoration-none hover-pink">Nouveautés</a></li>
+                    <li class="mb-2"><a href="{% url 'contact' %}" class="text-white text-decoration-none hover-teal">Contact</a></li>
                 </ul>
             </div>
 
             <!-- Colonne 3 - Informations -->
-            <div class="col-md-3">
-                <h5 class="text-uppercase text-primary mb-4">Informations</h5>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="text-uppercase mb-4" style="color: var(--yellow-canaan)">Informations</h5>
                 <ul class="list-unstyled small">
-                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Conditions générales</a></li>
-                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Politique de confidentialité</a></li>
-                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Livraisons et retours</a></li>
-                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">FAQ</a></li>
-                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Recrutement</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none hover-teal">Conditions générales</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none hover-pink">Politique de confidentialité</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none hover-teal">Livraisons et retours</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none hover-pink">FAQ</a></li>
+                    <li class="mb-2"><a href="#" class="text-white text-decoration-none hover-teal">Recrutement</a></li>
                 </ul>
             </div>
 
             <!-- Colonne 4 - Contact -->
-            <div class="col-md-3">
-                <h5 class="text-uppercase text-primary mb-4">Contactez-nous</h5>
+            <div class="col-lg-3 col-md-6">
+                <h5 class="text-uppercase mb-4" style="color: var(--yellow-canaan)">Contactez-nous</h5>
                 <address class="small">
-                    <p class="mb-2"><i class="bi bi-geo-alt-fill text-primary me-2"></i> 123 Rue des Délices, Lomé</p>
-                    <p class="mb-2"><i class="bi bi-telephone-fill text-primary me-2"></i> +228 99667572</p>
-                    <p class="mb-2"><i class="bi bi-envelope-fill text-primary me-2"></i> contact@canaanglacier.com</p>
+                    <p class="mb-2"><i class="bi bi-geo-alt-fill me-2" style="color: var(--teal-glacier)"></i> Agoè dans le von de koffi Panou à 300 m du goudron en face de la mosquée, Lomé</p>
+                    <p class="mb-2"><i class="bi bi-telephone-fill me-2" style="color: var(--teal-glacier)"></i> +228 92745959</p>
+                    <p class="mb-2"><i class="bi bi-envelope-fill me-2" style="color: var(--teal-glacier)"></i> contact@canaanglacier.com</p>
                 </address>
-                <h6 class="text-uppercase text-primary mt-4 mb-2">Newsletter</h6>
-                <form class="d-flex" method="POST" action="{% url 'newsletter_subscribe' %}" >
-                 {% csrf_token %}
-                    <input type="email" class="form-control form-control-sm" placeholder="Votre email">
-                    <button type="submit" class="btn btn-sm btn-primary ms-2"><i class="bi bi-send"></i></button>
-                </form>
+                
+                <h6 class="text-uppercase mt-4 mb-2" style="color: var(--yellow-canaan)">Newsletter</h6>
+               <form class="newsletter-form" method="POST" action="{% url 'newsletter_subscribe' %}">
+    {% csrf_token %}
+    <div class="input-group">
+        <input 
+            type="email" 
+            name="email"
+            class="newsletter-input"
+            placeholder="Votre email"
+            required
+            aria-label="Votre adresse email"
+        >
+        <button type="submit" class="newsletter-btn">
+            <i class="fas fa-paper-plane"></i>
+            <span class="btn-text">S'abonner</span>
+        </button>
+    </div>
+</form>
+
+<style>
+    .newsletter-form {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .input-group {
+        display: flex;
+        border-radius: 30px;
+        overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .input-group:hover {
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .newsletter-input {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        outline: none;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--black-shadow);
+    }
+    
+    .newsletter-input::placeholder {
+        color: #aaa;
+    }
+    
+    .newsletter-input:focus {
+        background: white;
+    }
+    
+    .newsletter-btn {
+        background: var(--teal-glacier);
+        color: white;
+        border: none;
+        padding: 0 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .newsletter-btn:hover {
+        background: var(--pink-swoosh) !important;
+    }
+    
+    .newsletter-btn i {
+        font-size: 1rem;
+    }
+    
+    .btn-text {
+        display: inline-block;
+    }
+    
+    @media (max-width: 576px) {
+        .btn-text {
+            display: none;
+        }
+        
+        .newsletter-btn {
+            padding: 0 15px;
+        }
+        
+        .newsletter-input {
+            padding: 12px 15px;
+        }
+    }
+</style>
             </div>
         </div>
 
-        <hr class="my-4 bg-light">
+        <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
 
         <!-- Copyright + Paiements -->
-        <div class="row">
-            <div class="col-md-6 text-center text-md-start small">
-                &copy; 2023 Canaan Glacier. Tous droits réservés.
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start small mb-3 mb-md-0">
+                &copy; 2025 Canaan Glacier. Tous droits réservés.
             </div>
             <div class="col-md-6 text-center text-md-end">
-                <img src="{% static 'images/paiements/mobile-money.png' %}" alt="Mobile Money" height="30" class="me-2">
-                <img src="{% static 'images/paiements/visa.png' %}" alt="Visa" height="30" class="me-2">
-                <img src="{% static 'images/paiements/mastercard.png' %}" alt="Mastercard" height="30">
+                <!-- Mobile Money -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Mobile_Money_Logo.svg/1200px-Mobile_Money_Logo.svg.png" 
+                     alt="Mobile Money" 
+                     height="25" 
+                     class="me-2"
+                     style="filter: brightness(0) invert(1); opacity: 0.8">
+                
+                <!-- Visa -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/2560px-Visa_Inc._logo.svg.png" 
+                     alt="Visa" 
+                     height="25" 
+                     class="me-2"
+                     style="filter: brightness(0) invert(1); opacity: 0.8">
+                
+                <!-- Mastercard -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1280px-Mastercard-logo.svg.png" 
+                     alt="Mastercard" 
+                     height="25"
+                     style="filter: brightness(0) invert(1); opacity: 0.8">
             </div>
         </div>
     </div>
 </footer>
+
+<style>
+    /* Styles pour le footer */
+    footer {
+        background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%) !important;
+    }
+    
+    .footer-brand img {
+        transition: transform 0.3s ease;
+        filter: brightness(0) invert(1);
+    }
+    
+    .footer-brand:hover img {
+        transform: rotate(-10deg);
+    }
+    
+    .hover-teal:hover {
+        color: var(--teal-glacier) !important;
+        transform: translateY(-2px);
+    }
+    
+    .hover-pink:hover {
+        color: var(--pink-swoosh) !important;
+        transform: translateY(-2px);
+    }
+    
+    .text-color{
+         color: var(--teal-glacier) !important;
+    }
+    .social-icons a,
+    .list-unstyled a {
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+    
+    .list-unstyled a:hover {
+        padding-left: 5px;
+    }
+    
+    /* Styles pour les logos de paiement */
+    .payment-methods img {
+        transition: opacity 0.3s ease;
+    }
+    
+    .payment-methods img:hover {
+        opacity: 1 !important;
+    }
+    
+    /* Responsive */
+    @media (max-width: 767.98px) {
+        .footer-col {
+            margin-bottom: 2rem;
+        }
+        
+        .footer-brand {
+            justify-content: center;
+        }
+        
+        .social-icons,
+        .list-unstyled {
+            text-align: center;
+        }
+        
+        .payment-methods {
+            justify-content: center;
+            margin-top: 1rem;
+        }
+    }
+</style>

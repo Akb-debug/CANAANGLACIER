@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     #Mes application
     'CGAPP',
+    'django.contrib.humanize',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -136,6 +137,21 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+#Connexion et déconnexion
 AUTH_USER_MODEL = 'CGAPP.Utilisateur'
-LOGIN_REDIRECT_URL = 'compte:profil'
 LOGOUT_REDIRECT_URL = 'home'
+
+
+LOGIN_URL = '/connexion/'
+
+LOGIN_REDIRECT_URL = '/finaliser-commande/'  # redirection par défaut après login
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com' 
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'allodekanybenjamin@gmail.com'
+EMAIL_HOST_PASSWORD = 'tmkz ijkw zsot aksb'
+DEFAULT_FROM_EMAIL = 'contact@canaanglacier.com'
+CONTACT_EMAIL = 'allodekanybenjamin@gmail.com'

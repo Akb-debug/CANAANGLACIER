@@ -1,48 +1,444 @@
 {% extends 'frontOfice/base.html' %}
+{% load static %}
+
 {% block title %}Nos Glaces - Canaan Glacier{% endblock %}
 
-{% block content %}
-<div class="row mb-4">
-    <div class="col-md-6">
-        <h1 class="display-5">Nos Délices Glacés</h1>
-    </div>
-    <div class="col-md-6 text-end">
-        <div class="dropdown">
-            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                Catégories
-            </button>
-            <ul class="dropdown-menu">
-                {% for categorie in categories %}
-                <li><a class="dropdown-item" href="{% url 'produits_par_categorie' categorie.slug %}">{{ categorie.nom }}</a></li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
-</div>
+{% block extra_css %}
+<style>
+    .products-hero {
+        background-color: var(--teal-light);
+        background-image: url('{% static "images/ice-cream-pattern.png" %}');
+        background-size: 400px;
+        background-blend-mode: overlay;
+    }
+    
+    .page-title {
+        color: var(--pink-swoosh);
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        display: inline-block;
+    }
+    
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: var(--yellow-canaan);
+        border-radius: 2px;
+    }
+    
+    .category-dropdown .btn {
+        background-color: var(--teal-glacier);
+        color: white;
+        border-radius: 50px;
+        padding: 0.75rem 1.5rem;
+        transition: all 0.3s ease;
+        border: 2px solid var(--teal-glacier);
+    }
+    
+    .category-dropdown .btn:hover {
+        background-color: var(--pink-swoosh);
+        border-color: var(--pink-swoosh);
+        transform: translateY(-2px);
+    }
+    
+    .dropdown-item.active {
+        background-color: var(--teal-light) !important;
+        color: var(--teal-glacier) !important;
+        font-weight: 600;
+    }
+    
+    .dropdown-item:not(.active):hover {
+        background-color: var(--pink-light) !important;
+        color: var(--pink-swoosh) !important;
+    }
+    
+    .product-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .product-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(233, 30, 99, 0.15);
+    }
+    
+    .product-image-container {
+        overflow: hidden;
+        height: 220px;
+        position: relative;
+    }
+    
+    .product-image {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .product-card:hover .product-image {
+        transform: scale(1.1);
+    }
+    
+    .promo-badge {
+        background-color: var(--pink-swoosh) !important;
+        color: white;
+        font-weight: 600;
+        transform: rotate(15deg);
+        box-shadow: 0 3px 10px rgba(233, 30, 99, 0.3);
+    }
+    
+    .category-badge {
+        background-color: var(--yellow-canaan);
+        color: var(--black-shadow);
+        font-weight: 600;
+    }
+    
+    .price-tag {
+        color: var(--pink-swoosh);
+        font-weight: 700;
+    }
+    
+    .old-price {
+        color: var(--light-text);
+        text-decoration: line-through;
+    }
+    
+    .add-to-cart-btn {
+        background-color: var(--teal-glacier);
+        color: white;
+        border-radius: 50px;
+        padding: 0.5rem 1.25rem;
+        border: none;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .add-to-cart-btn:hover {
+        background-color: var(--pink-swoosh);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(233, 30, 99, 0.2);
+    }
+    
+    .add-to-cart-btn:active {
+        transform: translateY(1px);
+    }
+    
+    .empty-products {
+        background-color: var(--teal-light);
+        border-radius: 15px;
+    }
+    
+    .empty-icon {
+        color: var(--pink-swoosh);
+        font-size: 4rem;
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-20px);}
+        60% {transform: translateY(-10px);}
+    }
+</style>
+{% endblock %}
 
-<div class="row g-4">
-    {% for produit in produits %}
-    <div class="col-md-6 col-lg-4 col-xl-3">
-        <div class="card h-100 shadow-sm">
-            <img src="{{ produit.image.url }}" class="card-img-top" alt="{{ produit.nom }}">
-            <div class="card-body">
-                <h5 class="card-title">{{ produit.nom }}</h5>
-                <p class="card-text text-muted">{{ produit.description|truncatechars:60 }}</p>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="h5 text-primary">{{ produit.prix }} FCFA</span>
-                    <a href="{% url 'ajouter_au_panier' produit.id %}" class="btn btn-sm btn-accent">
-                        <i class="bi bi-cart-plus"></i> Ajouter
-                    </a>
+{% block content %}
+<div class="products-hero py-5">
+    <div class="container">
+        <div class="row mb-5 align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold page-title">Nos Délices Glacés</h1>
+                <p class="lead text-dark mt-3">Savourez l'authenticité de nos glaces artisanales</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="dropdown category-dropdown">
+                    <button class="btn dropdown-toggle shadow-sm" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-filter me-2"></i>Catégories
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg">
+                        <li><a class="dropdown-item active" href="{% url 'produits' %}">
+                            <i class="fas fa-ice-cream me-2"></i>Toutes nos glaces
+                        </a></li>
+                        {% for categorie in categories %}
+                        <li><a class="dropdown-item" href="{% url 'produits_par_categorie' categorie.slug %}">
+                            <i class="fas fa-tag me-2"></i>{{ categorie.nom }}
+                        </a></li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
-    </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="alert alert-info">Aucun produit disponible dans cette catégorie.</div>
+
+     <div class="row g-4">
+    {% for produit in produits %}
+    <div class="col-md-6 col-lg-3 mb-4">
+        <div class="product-card h-100 position-relative overflow-hidden" 
+             style="border: 1px solid rgba(0, 184, 181, 0.1);">
+            
+            <!-- Image avec effet zoom et overlay -->
+            <div class="product-image-container position-relative overflow-hidden">
+                {% if produit.image %}
+                <img src="{{ produit.image.url }}" class="product-img w-100" alt="{{ produit.nom }}"
+                     style="transition: transform 0.7s cubic-bezier(0.25, 0.45, 0.45, 0.95);">
+                {% else %}
+                <img src="https://via.placeholder.com/400x300?text=Canaan+Glacier" class="product-img w-100" 
+                     alt="{{ produit.nom }}" style="transition: transform 0.7s cubic-bezier(0.25, 0.45, 0.45, 0.95);">
+                {% endif %}
+                
+                <!-- Overlay au hover -->
+                <div class="product-overlay d-flex align-items-center justify-content-center">
+                    <a href="#" 
+                       class="btn btn-outline-light rounded-pill px-4 py-2 view-details-btn">
+                        <i class="fas fa-eye me-2"></i> Voir détails
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Contenu de la carte -->
+            <div class="card-body px-3 py-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0" style="color: var(--black-shadow);">{{ produit.nom }}</h5>
+                    {% if produit.promotion %}
+                    <span class="badge bg-danger rounded-pill ms-2">-{{ produit.promotion }}%</span>
+                    {% endif %}
+                </div>
+                
+                <p class="card-text text-muted small mb-3">{{ produit.description|truncatechars:60 }}</p>
+                
+                <!-- Étoiles de notation -->
+                <div class="product-rating mb-3">
+                    <div class="stars" style="color: var(--yellow-canaan);">
+                        {% for i in "12345" %}
+                        <i class="fas fa-star{% if produit.moyenne_notes < forloop.counter %}-half-alt{% endif %}"></i>
+                        {% endfor %}
+                        <small class="text-muted ms-1">({{ produit.nombre_avis }})</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pied de carte avec prix et bouton -->
+            <div class="card-footer bg-transparent border-0 px-3 pb-3 pt-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        {% if produit.promotion %}
+                        <span class="text-decoration-line-through text-muted me-2">{{ produit.prix|add:2000 }} FCFA</span>
+                        {% endif %}
+                        <span class="fw-bold fs-5" style="color: var(--teal-glacier);">
+                            {{ produit.prix }} FCFA
+                        </span>
+                    </div>
+                    
+                    <!-- Bouton Ajouter avec animation -->
+                    <a href="{% url 'ajouter_au_panier' produit.id %}" 
+                       class="btn btn-swoosh rounded-pill px-3 py-2 add-to-cart-btn">
+                        <span class="cart-icon"><i class="fas fa-cart-plus"></i></span>
+                        <span class="cart-text">Ajouter</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Effet de bordure animée -->
+            <div class="product-border-animation"></div>
+        </div>
     </div>
     {% endfor %}
 </div>
 
-{% include 'frontOfice/partials/pagination.html' %}
+<style>
+   
+    
+    .pulse-animation {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: var(--pink-swoosh);
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(233, 30, 99, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(233, 30, 99, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(233, 30, 99, 0); }
+    }
+    
+    /* Conteneur image */
+    .product-image-container {
+        height: 200px;
+        overflow: hidden;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    /* Overlay image */
+    .product-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 184, 181, 0.85);
+        opacity: 0;
+        transition: all 0.4s ease;
+    }
+    
+    .product-card:hover .product-overlay {
+        opacity: 1;
+    }
+    
+    .view-details-btn {
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.4s ease;
+    }
+    
+    .product-card:hover .view-details-btn {
+        transform: translateY(0);
+        opacity: 1;
+        transition-delay: 0.2s;
+    }
+    
+    /* Effet zoom image */
+    .product-card:hover .product-img {
+        transform: scale(1.1);
+    }
+    
+    /* Animation bouton ajouter */
+    .add-to-cart-btn {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .add-to-cart-btn .cart-icon {
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .add-to-cart-btn .cart-text {
+        display: inline-block;
+        transition: all 0.3s ease;
+        background: var(--steal-glacier);
+
+
+    }
+    
+    .add-to-cart-btn:hover {
+        background: var(--pink-swoosh);
+        border-color: var(--pink-swoosh);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+        color : white;
+    }
+    
+    .add-to-cart-btn:hover .cart-icon {
+        transform: rotate(15deg);
+    }
+    
+    /* Effet de bordure animée */
+    .product-border-animation {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 2px solid transparent;
+        border-radius: 16px;
+        z-index: -1;
+        transition: all 0.5s ease;
+    }
+    
+    .product-card:hover .product-border-animation {
+        border-color: var(--yellow-canaan);
+        animation: borderPulse 2s infinite;
+    }
+    
+    @keyframes borderPulse {
+        0% { border-width: 2px; opacity: 1; }
+        50% { border-width: 4px; opacity: 0.7; }
+        100% { border-width: 2px; opacity: 1; }
+    }
+    
+    /* Animation d'entrée */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .product-card {
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+        animation-delay: calc(0.1s * var(--index));
+    }
+</style>
+        {% if produits %}
+        <div class="row mt-5">
+            <div class="col-12">
+                {% include 'frontOfice/partials/pagination.html' %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animation au survol des cartes produits
+    document.querySelectorAll('.product-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.querySelector('.product-image').style.transform = 'scale(1.1)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.querySelector('.product-image').style.transform = 'scale(1)';
+        });
+    });
+    
+    // Effet ripple sur les boutons "Ajouter au panier"
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple-effect');
+            this.appendChild(ripple);
+            
+            // Positionnement
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${e.clientX - rect.left - size/2}px`;
+            ripple.style.top = `${e.clientY - rect.top - size/2}px`;
+            
+            // Suppression après animation
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+</script>
+
+<style>
+    /* Effet ripple */
+    .ripple-effect {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.6);
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+</style>
 {% endblock %}

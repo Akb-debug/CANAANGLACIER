@@ -1,22 +1,22 @@
-{% extends 'frontOfice/base.html' %}
+{% extends 'dashboards/base.html' %}
 {% load static %}
 
 {% block title %}Dashboard Gérant{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
+{% block body %}
+<div class="container-fluid pt-4 px-4">
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 text-accent mb-0">
+                    <h1 class="h3 mb-0">
                         <i class="fas fa-chart-line me-2"></i>Dashboard Gérant
                     </h1>
-                    <p class="text-muted">Gestion de vos produits et analyses business</p>
+                    <p class="mb-0">Gestion de vos produits et analyses business</p>
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-warning fs-6">Gérant</span>
+                    <span class="badge bg-warning">Gérant</span>
                     <p class="mb-0 text-muted small">{{ user.username }}</p>
                 </div>
             </div>
@@ -24,27 +24,28 @@
     </div>
 
     <!-- Statistiques principales -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-primary rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Revenus du Mois</div>
-                            <div class="h2 mb-0">{{ total_revenus_mois|floatformat:0 }}€</div>
+                            <div class="h2 mb-0">{{ total_revenus_mois|floatformat:0 }}fcfa</div>
                         </div>
                         <div class="align-self-center">
-                            <i class="fas fa-euro-sign fa-2x opacity-75"></i>
+                          <i class="fas fa-money-bill-wave fa-2x opacity-75"></i>
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-danger rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Commandes du Mois</div>
                             <div class="h2 mb-0">{{ commandes_mois }}</div>
@@ -57,10 +58,10 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-warning rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Mes Produits</div>
                             <div class="h2 mb-0">{{ nb_mes_produits }}</div>
@@ -73,10 +74,10 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-info rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Stock Faible</div>
                             <div class="h2 mb-0">{{ produits_stock_faible.count }}</div>
@@ -91,34 +92,38 @@
     </div>
 
     <!-- Actions rapides -->
-    <div class="row mb-4">
+    <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-bolt me-2"></i>Actions Rapides
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'ajouter_produit' %}" class="btn btn-outline-primary w-100">
-                                <i class="fas fa-plus me-2"></i>Nouveau Produit
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'ajouter_produit' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                                <i class="fas fa-plus fa-2x mb-2"></i>
+                                <span class="fw-bold">Nouveau Produit</span>
                             </a>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="#gestion-stock" class="btn btn-outline-success w-100" onclick="scrollToSection('mes-produits')">
-                                <i class="fas fa-boxes me-2"></i>Gérer Stock
+                        <div class="col-md-3">
+                            <a href="#mes-produits" class="btn btn-outline-success w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                                <i class="fas fa-boxes fa-2x mb-2"></i>
+                                <span class="fw-bold">Gérer Stock</span>
                             </a>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="#supervision-serveurs" class="btn btn-outline-info w-100" onclick="scrollToSection('supervision-serveurs')">
-                                <i class="fas fa-chart-bar me-2"></i>Rapports
+                        <div class="col-md-3">
+                            <a href="#supervision-serveurs" class="btn btn-outline-info w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                <span class="fw-bold">Rapports</span>
                             </a>
                         </div>
-                        <div class="col-md-3 mb-2">
-                            <a href="{% url 'mes_notifications' %}" class="btn btn-outline-warning w-100">
-                                <i class="fas fa-bell me-2"></i>Notifications
+                        <div class="col-md-3">
+                            <a href="{% url 'mes_notifications' %}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                                <i class="fas fa-bell fa-2x mb-2"></i>
+                                <span class="fw-bold">Notifications</span>
                             </a>
                         </div>
                     </div>
@@ -127,19 +132,17 @@
         </div>
     </div>
 
-    <div class="row" id="mes-produits">
+    <div class="row g-4" id="mes-produits">
         <!-- Mes Produits -->
-        <div class="col-lg-8 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title text-accent mb-0">
-                            <i class="fas fa-box-open me-2"></i>Mes Produits
-                        </h5>
-                        <a href="{% url 'ajouter_produit' %}" class="btn btn-primary btn-sm">
-                            <i class="fas fa-plus me-1"></i>Ajouter Produit
-                        </a>
-                    </div>
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-box-open me-2"></i>Mes Produits
+                    </h5>
+                    <a href="{% url 'ajouter_produit' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-1"></i>Ajouter
+                    </a>
                 </div>
                 <div class="card-body">
                     {% if mes_produits %}
@@ -175,7 +178,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="fw-bold text-success">{{ produit.prix }}€</td>
+                                        <td class="fw-bold text-success">{{ produit.prix }}fcfa</td>
                                         <td>
                                             {% if produit.quantite_disponible < 10 %}
                                                 <span class="badge bg-danger">{{ produit.quantite_disponible }}</span>
@@ -218,8 +221,7 @@
                         <div class="text-center py-4">
                             <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">Aucun produit trouvé</h5>
-                            <p class="text-muted">Commencez par ajouter vos premiers produits</p>
-                            <a href="#" class="btn btn-primary">
+                            <a href="{% url 'ajouter_produit' %}" class="btn btn-primary">
                                 <i class="fas fa-plus me-2"></i>Ajouter un produit
                             </a>
                         </div>
@@ -229,10 +231,10 @@
         </div>
 
         <!-- Alertes Stock -->
-        <div class="col-lg-4 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-warning">
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0 text-warning">
                         <i class="fas fa-exclamation-triangle me-2"></i>Alertes Stock
                     </h5>
                 </div>
@@ -245,6 +247,9 @@
                                 <strong>{{ produit.nom }}</strong><br>
                                 <small>Stock: {{ produit.quantite_disponible }} unités</small>
                             </div>
+                            <a href="{% url 'modifier_produit' produit.id %}" class="btn btn-sm btn-outline-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
                         </div>
                         {% endfor %}
                     {% else %}
@@ -259,19 +264,19 @@
     </div>
 
     <!-- SUPERVISION DES SERVEURS -->
-    <div class="row mb-4" id="supervision-serveurs">
+    <div class="row g-4 mt-4" id="supervision-serveurs">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-users-cog me-2"></i>Supervision des Serveurs
                     </h5>
                 </div>
                 <div class="card-body">
                     <!-- Statistiques serveurs -->
-                    <div class="row mb-4">
+                    <div class="row g-3 mb-4">
                         <div class="col-md-4">
-                            <div class="card bg-info text-white">
+                            <div class="card bg-info text-white h-100">
                                 <div class="card-body text-center">
                                     <i class="fas fa-users fa-2x mb-2"></i>
                                     <h4>{{ stats_serveurs.total_serveurs }}</h4>
@@ -280,7 +285,7 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card bg-success text-white">
+                            <div class="card bg-success text-white h-100">
                                 <div class="card-body text-center">
                                     <i class="fas fa-user-check fa-2x mb-2"></i>
                                     <h4>{{ stats_serveurs.serveurs_actifs_aujourd_hui }}</h4>
@@ -289,7 +294,7 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card bg-warning text-white">
+                            <div class="card bg-warning text-white h-100">
                                 <div class="card-body text-center">
                                     <i class="fas fa-tasks fa-2x mb-2"></i>
                                     <h4>{{ stats_serveurs.commandes_traitees_mois }}</h4>
@@ -302,10 +307,10 @@
                     <!-- Activité des serveurs -->
                     <h6 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Activité des Serveurs</h6>
                     {% if activite_serveurs %}
-                        <div class="row">
+                        <div class="row g-3">
                             {% for activite in activite_serveurs %}
-                            <div class="col-md-6 mb-3">
-                                <div class="card border-left-primary">
+                            <div class="col-md-6">
+                                <div class="card h-100">
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <h6 class="mb-0">
@@ -349,19 +354,19 @@
     </div>
 
     <!-- Statut des Commandes -->
-    <div class="row mb-4">
+    <div class="row g-4 mt-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-clipboard-list me-2"></i>État des Commandes
                     </h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-3">
-                            <div class="card bg-warning text-white text-center">
-                                <div class="card-body">
+                            <div class="card bg-warning text-white h-100">
+                                <div class="card-body text-center">
                                     <i class="fas fa-clock fa-2x mb-2"></i>
                                     <h4>{{ commandes_par_statut.en_attente }}</h4>
                                     <small>En Attente</small>
@@ -369,8 +374,8 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-info text-white text-center">
-                                <div class="card-body">
+                            <div class="card bg-info text-white h-100">
+                                <div class="card-body text-center">
                                     <i class="fas fa-cogs fa-2x mb-2"></i>
                                     <h4>{{ commandes_par_statut.en_cours }}</h4>
                                     <small>En Cours</small>
@@ -378,8 +383,8 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-success text-white text-center">
-                                <div class="card-body">
+                            <div class="card bg-success text-white h-100">
+                                <div class="card-body text-center">
                                     <i class="fas fa-check-circle fa-2x mb-2"></i>
                                     <h4>{{ commandes_par_statut.livree }}</h4>
                                     <small>Livrées</small>
@@ -387,8 +392,8 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-danger text-white text-center">
-                                <div class="card-body">
+                            <div class="card bg-danger text-white h-100">
+                                <div class="card-body text-center">
                                     <i class="fas fa-times-circle fa-2x mb-2"></i>
                                     <h4>{{ commandes_par_statut.annulee }}</h4>
                                     <small>Annulées</small>
@@ -402,11 +407,11 @@
     </div>
 
     <!-- Commandes récentes pour mes produits -->
-    <div class="row">
+    <div class="row g-4 mt-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-shopping-bag me-2"></i>Commandes Récentes (Mes Produits)
                     </h5>
                 </div>
@@ -429,7 +434,7 @@
                                         <td class="fw-bold">#{{ commande.id }}</td>
                                         <td>{{ commande.utilisateur.username }}</td>
                                         <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                        <td class="fw-bold text-success">{{ commande.total }}€</td>
+                                        <td class="fw-bold text-success">{{ commande.total }}fcfa</td>
                                         <td>
                                             {% if commande.statut == 'en_attente' %}
                                                 <span class="badge bg-warning">En attente</span>
@@ -460,24 +465,30 @@
 
 <style>
 .card {
-    transition: all 0.3s ease;
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
 }
-
 .card:hover {
     transform: translateY(-2px);
 }
-
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+.bg-gradient-warning {
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+}
+.bg-gradient-info {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+}
 .table th {
     border-top: none;
     font-weight: 600;
     color: #495057;
 }
-
-.btn-group-sm > .btn, .btn-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-}
-
 .alert {
     border: none;
     border-radius: 0.5rem;
@@ -497,26 +508,19 @@ function scrollToSection(sectionId) {
         // Ajouter un effet de surbrillance temporaire
         element.style.transition = 'all 0.3s ease';
         element.style.backgroundColor = '#f8f9fa';
-        element.style.borderRadius = '10px';
-        element.style.padding = '10px';
         
         setTimeout(() => {
             element.style.backgroundColor = '';
-            element.style.borderRadius = '';
-            element.style.padding = '';
         }, 2000);
     }
 }
 
-// Ajouter des tooltips aux boutons d'action
+// Initialiser les tooltips
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialiser les tooltips Bootstrap si disponible
-    if (typeof bootstrap !== 'undefined') {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    }
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 });
 </script>
 {% endblock %}

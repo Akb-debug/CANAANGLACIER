@@ -3,84 +3,203 @@
 
 {% block title %}À Propos - Canaan Glacier{% endblock %}
 
+{% block extra_css %}
+<style>
+    .hero-section {
+    background: url('{% static "apropos-hero.png" %}');
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+}
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .value-card {
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .value-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<section class="py-5 bg-light">
-    <div class="container">
+<!-- Hero Section -->
+<section class="hero-section d-flex align-items-center text-white">
+    <div class="container py-5">
+        <div class="row">
+       <p class="text-center mb-4" 
+   style="font-size: 1.4rem; 
+          font-weight: 600;
+          color: #333;
+          text-shadow: 1px 1px 3px rgba(255,255,255,0.8), 
+                      -1px -1px 3px rgba(255,255,255,0.8),
+                      0 0 8px rgba(255,255,255,0.8);
+          line-height: 1.5;
+          padding: 15px;
+          background-color: rgba(255,255,255,0.7);
+          border-radius: 10px;
+          max-width: 800px;
+          margin-left: auto;
+          margin-right: auto;">
+   Canaan Glacier, votre spécialiste des glaces artisanales à Lomé,<br> 
+   allie qualité, fraîcheur et passion pour vous offrir le meilleur du plaisir glacé.
+</p>
+            <div class="col-lg-8 mx-auto text-center">
+    <!-- Bouton principal (Notre histoire) -->
+    <a href="#notre-histoire" 
+       class="btn btn-lg px-4 me-2"
+       style="background-color: #00B8B5; 
+              border-color: #00B8B5;
+              color: white;
+              font-weight: 500;
+              border-radius: 30px;
+              transition: all 0.3s ease;">
+        Notre histoire
+    </a>
+    
+    <!-- Bouton secondaire (Nos produits) -->
+    <a href="{% url 'produits' %}" 
+       class="btn btn-lg px-4"
+       style="background-color:  #e20b5eff;
+              border: 2px solid #e20b5eff;
+              color: white;
+              font-weight: 500;
+              border-radius: 30px;
+              transition: all 0.3s ease;">
+        Nos produits
+    </a>
+</div>
+
+<!-- Ajoutez ce style dans votre balise <style> ou fichier CSS -->
+<style>
+    /* Effets au survol */
+    .col-lg-8 a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Effet spécifique pour le bouton principal */
+    .col-lg-8 a:first-child:hover {
+        background-color: #e20b5eff !important;
+        border-color: #e20b5eff !important;
+    }
+    
+    /* Effet spécifique pour le bouton secondaire */
+    .col-lg-8 a:last-child:hover {
+        background-color: #00B8B5 !important;
+        color: white !important;
+    }
+</style>
+        </div>
+    </div>
+</section>
+
+<!-- Notre Histoire -->
+<section id="notre-histoire" class="py-5 bg-white">
+    <div class="container py-5">
         <div class="row align-items-center">
-            <div class="col-lg-6 mb-4 mb-lg-0">
-                <img src="https://images.unsplash.com/photo-1560008581-09826d1de69e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80" 
-                     alt="Équipe Canaan Glacier" 
-                     class="img-fluid rounded-3 shadow"
-                     style="border: 5px solid var(--secondary);">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <img src="{% static 'glace.png'%}" 
+                     alt="Fabrication artisanale de glaces" 
+                     class="img-fluid rounded-3 shadow-lg"
+                     style="border: 5px solid var(--teal-glacier);">
             </div>
             <div class="col-lg-6">
-                <h2 class="display-5 fw-bold text-accent mb-4">Notre Histoire</h2>
-                <p class="lead text-primary">Depuis 2023, Canaan Glacier révolutionne l'expérience glacée au Togo</p>
+                <h2 class="display-5 fw-bold text-glacier mb-4">Notre Histoire Gourmande</h2>
+                <p class="lead text-swoosh mb-4">Des glaces artisanales qui racontent le Togo</p>
                 
                 <div class="mt-4">
-                    <p>Fondée à Lomé par une équipe passionnée, Canaan Glacier allie savoir-faire artisanal et innovation technologique pour vous offrir des produits d'exception.</p>
+                    <p>Née en 2023 à Lomé, Canaan Glacier est bien plus qu'une simple enseigne de glaces. C'est une aventure humaine qui puise son inspiration dans les saveurs locales et l'artisanat togolais.</p>
                     
                     <ul class="list-unstyled mt-4">
                         <li class="mb-3 d-flex">
-                            <i class="bi bi-check-circle-fill text-primary me-2"></i>
-                            <span>Glaces 100% naturelles avec des ingrédients locaux</span>
+                            <i class="fas fa-check-circle text-glacier me-3 fs-5"></i>
+                            <span>Recettes exclusives élaborées par nos maîtres glacier</span>
                         </li>
                         <li class="mb-3 d-flex">
-                            <i class="bi bi-check-circle-fill text-primary me-2"></i>
-                            <span>Fabrication artisanale respectueuse de l'environnement</span>
+                            <i class="fas fa-check-circle text-glacier me-3 fs-5"></i>
+                            <span>Fruits frais issus de l'agriculture locale</span>
                         </li>
                         <li class="mb-3 d-flex">
-                            <i class="bi bi-check-circle-fill text-primary me-2"></i>
-                            <span>Livraison express dans toute la ville de Lomé</span>
+                            <i class="fas fa-check-circle text-glacier me-3 fs-5"></i>
+                            <span>Process de fabrication respectant les normes internationales</span>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
+    </div>
+</section>
 
-        <div class="row mt-5 pt-5">
-            <div class="col-md-4 mb-4">
-                <div class="text-center p-4 bg-white rounded-3 shadow-sm h-100">
-                    <div class="feature-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
-                        <i class="bi bi-trophy fs-2 text-primary"></i>
+<!-- Nos Valeurs -->
+<section class="py-5 bg-light">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-glacier">Nos Engagements</h2>
+            <p class="lead text-muted">Ce qui fait la singularité de Canaan Glacier</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="value-card bg-white p-4 h-100 text-center">
+                    <div class="feature-icon bg-glacier rounded-circle">
+                        <i class="fas fa-award fs-2 text-white"></i>
                     </div>
-                    <h3 class="h5 text-accent">Qualité Premium</h3>
-                    <p class="text-muted">Nos glaces sont préparées quotidiennement avec des ingrédients frais et naturels.</p>
+                    <h3 class="h4 text-glacier mb-3">Qualité Exceptionnelle</h3>
+                    <p>Nous sélectionnons rigoureusement nos ingrédients et contrôlons chaque étape de production pour vous garantir une qualité premium.</p>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="text-center p-4 bg-white rounded-3 shadow-sm h-100">
-                    <div class="feature-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
-                        <i class="bi bi-lightning-charge fs-2 text-primary"></i>
+            
+            <div class="col-md-4">
+                <div class="value-card bg-white p-4 h-100 text-center">
+                    <div class="feature-icon bg-swoosh rounded-circle">
+                        <i class="fas fa-bolt fs-2 text-white"></i>
                     </div>
-                    <h3 class="h5 text-accent">Livraison Express</h3>
-                    <p class="text-muted">Recevez vos commandes en moins de 2 heures grâce à notre réseau de livraison optimisé.</p>
+                    <h3 class="h4 text-swoosh mb-3">Service Rapide</h3>
+                    <p>Notre réseau de livraison express vous permet de profiter de vos glaces préférées en moins de 90 minutes dans Lomé.</p>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
-                <div class="text-center p-4 bg-white rounded-3 shadow-sm h-100">
-                    <div class="feature-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
-                        <i class="bi bi-heart fs-2 text-primary"></i>
+            
+            <div class="col-md-4">
+                <div class="value-card bg-white p-4 h-100 text-center">
+                    <div class="feature-icon bg-canaan rounded-circle">
+                        <i class="fas fa-leaf fs-2 text-dark"></i>
                     </div>
-                    <h3 class="h5 text-accent">Engagement Local</h3>
-                    <p class="text-muted">Nous soutenons les producteurs togolais et l'économie locale.</p>
+                    <h3 class="h4 text-canaan mb-3">Éco-responsabilité</h3>
+                    <p>Emballages biodégradables, circuits courts et soutien aux producteurs locaux : nous agissons pour un impact positif.</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="py-5 bg-accent text-white">
-    <div class="container text-center">
-        <h2 class="display-5 fw-bold mb-4">Notre Engagement Qualité</h2>
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <p class="lead mb-5">Chez Canaan Glacier, chaque glace est une promesse : celle de vous offrir un moment de fraîcheur et de plaisir absolu, tout en respectant les meilleurs standards de qualité et d'hygiène.</p>
-                <a href="{% url 'produits' %}" class="btn btn-cta btn-lg px-4">
-                    Découvrir nos produits
-                </a>
-            </div>
+<!-- CTA Section -->
+<section class="py-5 bg-glacier text-white">
+    <div class="container text-center py-5">
+        <h2 class="display-5 fw-bold mb-4">Prêt à découvrir notre univers glacé ?</h2>
+        <p class="lead mb-5">Plus de 50 parfums uniques vous attendent dans notre boutique</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'produits' %}" class="btn btn-light btn-lg px-4">
+                Voir le catalogue <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+            <a href="{% url 'contact' %}" class="btn btn-outline-light btn-lg px-4">
+                Nous contacter
+            </a>
         </div>
     </div>
 </section>
+
+
 {% endblock %}

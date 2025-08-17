@@ -2,13 +2,117 @@
 {% load static %}
 {% load custom_filters %}
 
+{% block extra_css %}
+<style>
+    .cart-table th {
+        background-color: var(--teal-glacier);
+        color: white;
+    }
+    
+    .cart-item-img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid var(--teal-light);
+    }
+    
+    .quantity-btn {
+        width: 35px;
+        background-color: var(--teal-light);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .quantity-btn:hover {
+        background-color: var(--teal-glacier);
+        color: white;
+    }
+    
+    .quantity-input {
+        text-align: center;
+        border-left: none;
+        border-right: none;
+        background-color: var(--white-bg);
+    }
+    
+    .remove-btn {
+        background-color: var(--pink-light);
+        color: var(--pink-swoosh);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .remove-btn:hover {
+        background-color: var(--pink-swoosh);
+        color: white;
+        transform: rotate(15deg);
+    }
+    
+    .summary-card {
+        border: 2px solid var(--teal-light);
+        border-radius: 15px;
+    }
+    
+    .summary-title {
+        color: var(--teal-glacier);
+        border-bottom: 2px dashed var(--teal-light);
+        padding-bottom: 1rem;
+    }
+    
+    .checkout-btn {
+        background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--pink-swoosh) 100%);
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+    
+    .checkout-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 184, 181, 0.3);
+    }
+    
+    .continue-btn {
+        border: 2px solid var(--teal-glacier);
+        color: var(--teal-glacier);
+        transition: all 0.3s ease;
+    }
+    
+    .continue-btn:hover {
+        background-color: var(--teal-glacier);
+        color: white;
+    }
+    
+    .empty-cart-img {
+        max-height: 200px;
+        opacity: 0.8;
+    }
+    
+    .start-shopping-btn {
+        background-color: var(--teal-glacier);
+        border: none;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .start-shopping-btn:hover {
+        background-color: var(--pink-swoosh);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(233, 30, 99, 0.2);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
-    <h1 class="mb-4">Votre Panier</h1>
+    <h1 class="mb-4 text-glacier"><i class="fas fa-shopping-cart me-2"></i>Votre Panier</h1>
 
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -18,17 +122,17 @@
     {% if panier and panier.lignes.all %}
     <div class="row">
         <div class="col-lg-8">
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
+            <div class="card shadow-sm mb-4 border-0">
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table cart-table mb-0">
                             <thead>
                                 <tr>
                                     <th>Produit</th>
-                                    <th>Prix unitaire</th>
+                                    <th>Prix</th>
                                     <th>Quantité</th>
                                     <th>Total</th>
-                                    <th>Actions</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -38,37 +142,44 @@
                                         <div class="d-flex align-items-center">
                                             {% if ligne.produit.image %}
                                                 <img src="{{ ligne.produit.image.url }}" alt="{{ ligne.produit.nom }}"
-                                                     class="img-fluid rounded" style="width: 70px; height: 70px; object-fit: cover;">
+                                                     class="cart-item-img me-3">
                                             {% endif %}
-                                            <div class="ms-3">
+                                            <div>
                                                 <h5 class="mb-0">{{ ligne.produit.nom }}</h5>
+                                                <small class="text-muted">Ref: {{ ligne.produit.reference }}</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>{{ ligne.produit.prix }} FCFA</td>
                                     <td>
-                                        <div class="input-group" style="width: 120px;">
-                                            <form method="post" action="{% url 'diminuer_quantite' ligne.id %}" class="d-inline">
+                                        <div class="d-flex">
+                                            <form method="post" action="{% url 'diminuer_quantite' ligne.id %}">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-outline-secondary">-</button>
+                                                <button type="submit" class="quantity-btn rounded-start">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
                                             </form>
-                                            <span class="form-control text-center">{{ ligne.quantite }}</span>
-                                            <form method="post" action="{% url 'augmenter_quantite' ligne.id %}" class="d-inline">
+                                            <span class="quantity-input px-3 d-flex align-items-center justify-content-center">
+                                                {{ ligne.quantite }}
+                                            </span>
+                                            <form method="post" action="{% url 'augmenter_quantite' ligne.id %}">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-outline-secondary">+</button>
+                                                <button type="submit" class="quantity-btn rounded-end">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
                                             </form>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="fw-bold">
                                         {% with total_item=ligne.produit.prix|multiply:ligne.quantite %}
-                                            {{ total_item }}FCFA
+                                            {{ total_item }} FCFA
                                         {% endwith %}
                                     </td>
                                     <td>
                                         <form method="post" action="{% url 'supprimer_du_panier' ligne.id %}">
                                             {% csrf_token %}
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="bi bi-trash"></i>
+                                            <button type="submit" class="btn remove-btn rounded-circle p-2">
+                                                <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </form>
                                     </td>
@@ -81,58 +192,169 @@
             </div>
 
             <div class="d-flex justify-content-between mb-4">
-                <a href="{% url 'produits' %}" class="btn btn-outline-primary">
-                    <i class="bi bi-arrow-left me-2"></i>Continuer mes achats
+                <a href="{% url 'produits' %}" class="btn continue-btn">
+                    <i class="fas fa-arrow-left me-2"></i>Continuer mes achats
                 </a>
                 <form method="post" action="{% url 'vider_panier' %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-danger">
-                        <i class="bi bi-trash me-2"></i>Vider le panier
+                        <i class="fas fa-trash-alt me-2"></i>Vider le panier
                     </button>
                 </form>
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="card shadow-sm sticky-top" style="top: 20px;">
+            <div class="card summary-card shadow-sm sticky-top" style="top: 20px;">
                 <div class="card-body">
-                    <h5 class="card-title mb-4">Récapitulatif</h5>
+                    <h5 class="card-title summary-title mb-4">
+                        <i class="fas fa-receipt me-2"></i>Récapitulatif
+                    </h5>
 
                     <div class="d-flex justify-content-between mb-2">
                         <span>Sous-total</span>
-                        <span>{{ total|default:"0.00" }} FCFA</span>
+                        <span>{{ total|default:"0" }} FCFA</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between mb-3">
                         <span>Livraison</span>
-                        <span>Gratuite</span>
+                        <span class="text-success">Gratuite</span>
                     </div>
                     <hr>
-                    <div class="d-flex justify-content-between fw-bold mb-4">
+                    <div class="d-flex justify-content-between fw-bold fs-5 mb-4">
                         <span>Total</span>
-                        <span>{{ total|default:"0.00" }} FCFA</span>
+                        <span class="text-glacier">{{ total|default:"0" }} FCFA</span>
                     </div>
 
-                    <a href="{% url 'valider_commande' %}" class="btn btn-primary w-100 py-2">
-                        Passer la commande <i class="bi bi-arrow-right ms-2"></i>
+                    <a href="{% url 'finaliser_commande' %}" class="btn checkout-btn text-white w-100 py-2 mb-3">
+                        <i class="fas fa-credit-card me-2"></i>Passer la commande
                     </a>
 
                     <div class="mt-3 text-center">
-                        <img src="{% static 'images/paiement-securise.png' %}" alt="Paiement sécurisé" class="img-fluid" style="max-height: 30px;">
-                        <p class="small text-muted mt-2 mb-0">Paiement 100% sécurisé</p>
+                        <div class="d-flex justify-content-center gap-2 mb-2">
+                            <i class="fas fa-lock fa-2x text-glacier"></i>
+                            <i class="fas fa-shield-alt fa-2x text-swoosh"></i>
+                        </div>
+                        <p class="small text-muted mb-0">Paiement 100% sécurisé</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     {% else %}
-    <div class="text-center py-5">
-        <img src="{% static 'images/empty-cart.svg' %}" alt="Panier vide" class="img-fluid mb-4" style="max-height: 200px;">
-        <h3 class="mb-3">Votre panier est vide</h3>
-        <p class="text-muted mb-4">Parcourez notre boutique et découvrez nos produits</p>
-        <a href="{% url 'produits' %}" class="btn btn-primary px-4">
-            <i class="bi bi-cart me-2"></i>Commencer mes achats
-        </a>
+    <div class="text-center py-5 px-3">
+    <!-- Illustration avec effet de vague glacée -->
+    <div class="position-relative mb-4" style="height: 180px;">
+        <img src="{% static 'images/empty-cart.svg' %}" alt="Panier vide" 
+             class="empty-cart-img position-absolute start-50 translate-middle-x"
+             style="max-height: 180px; filter: drop-shadow(0 10px 15px rgba(0, 184, 181, 0.2));">
+        
+        <!-- Effet de vague décorative -->
+        <div class="position-absolute bottom-0 start-0 w-100 overflow-hidden" style="height: 30px;">
+            <svg viewBox="0 0 500 30" preserveAspectRatio="none" style="height: 100%; width: 100%;">
+                <path d="M0,0 C150,30 350,0 500,20 L500,30 L0,30 Z" 
+                      style="stroke: none; fill: var(--teal-light);"></path>
+            </svg>
+        </div>
     </div>
+
+    <!-- Texte avec animation -->
+    <h3 class="mb-3 text-glacier display-6 fw-bold" style="text-shadow: 0 2px 4px rgba(0, 184, 181, 0.1);">
+        <i class="fas fa-shopping-cart me-2"></i>Votre panier est vide
+    </h3>
+    
+    <p class="lead text-muted mb-4" style="max-width: 500px; margin: 0 auto;">
+        Prêt à découvrir nos délices glacés ? Choisissez parmi nos parfums artisanaux !
+    </p>
+
+    <!-- Bouton avec effets avancés -->
+    <a href="{% url 'produits' %}" class="btn btn-lg position-relative overflow-hidden"
+       style="background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--pink-swoosh) 100%);
+              border: none;
+              border-radius: 50px;
+              padding: 12px 30px;
+              color: white;
+              font-weight: 600;
+              letter-spacing: 0.5px;
+              box-shadow: 0 5px 15px rgba(0, 184, 181, 0.3);
+              transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+       
+        <span class="position-relative z-index-1">
+            <i class="fas fa-ice-cream me-2"></i>Commencer mes achats
+        </span>
+        
+        <!-- Effet de brillance au survol -->
+        <span class="position-absolute top-0 left-0 w-full h-full bg-white opacity-0 hover-opacity-10"
+              style="transition: opacity 0.3s ease;"></span>
+        
+        <!-- Animation de particules -->
+        <span class="position-absolute top-0 left-0 w-full h-full overflow-hidden">
+            <span class="particle" style="--size: 5px; --duration: 5s;"></span>
+            <span class="particle" style="--size: 7px; --duration: 7s;"></span>
+            <span class="particle" style="--size: 4px; --duration: 6s;"></span>
+        </span>
+    </a>
+
+    <!-- Petit message incitatif -->
+    <p class="small text-muted mt-3 mb-0">
+        Livraison express offerte dès 10 000 FCFA d'achat
+    </p>
+</div>
+
+<style>
+    /* Animation des particules */
+    .particle {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        animation: float-up var(--duration) linear infinite;
+        opacity: 0;
+    }
+
+    @keyframes float-up {
+        0% {
+            transform: translateY(100%) translateX(var(--x, 20px));
+            opacity: 0;
+        }
+        10% {
+            opacity: 0.6;
+        }
+        90% {
+            opacity: 0.6;
+        }
+        100% {
+            transform: translateY(-50%) translateX(calc(var(--x, 20px) + 30px));
+            opacity: 0;
+        }
+    }
+
+    /* Effets hover */
+    a.btn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 10px 25px rgba(0, 184, 181, 0.4);
+    }
+
+    a.btn:hover i {
+        animation: bounce 0.6s ease;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-5px); }
+        60% { transform: translateY(2px); }
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .empty-cart-img {
+            max-height: 140px !important;
+        }
+        
+        a.btn {
+            padding: 10px 25px !important;
+            font-size: 1rem;
+        }
+    }
+</style>
     {% endif %}
 </div>
 {% endblock %}

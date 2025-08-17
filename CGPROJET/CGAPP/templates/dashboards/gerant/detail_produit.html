@@ -1,0 +1,79 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Détails du Produit - Gérant{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Détails du Produit
+                    </h4>
+                    <a href="{% url 'liste_produits' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Retour
+                    </a>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center">
+                                {% if produit.image %}
+                                <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" 
+                                     class="img-fluid rounded" style="max-height: 300px;">
+                                {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                     style="height: 300px;">
+                                    <i class="fas fa-image fa-4x text-muted"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h3 class="mb-3">{{ produit.nom }}</h3>
+                                
+                                <div class="mb-4">
+                                    <h5 class="text-primary">{{ produit.prix }} FCFA</h5>
+                                    <span class="badge bg-{% if produit.quantite_disponible > 0 %}success{% else %}danger{% endif %}">
+                                        {% if produit.quantite_disponible > 0 %}Disponible{% else %}Épuisé{% endif %}
+                                    </span>
+                                    <span class="badge bg-light text-dark ms-2">
+                                        Stock: {{ produit.quantite_disponible }}
+                                    </span>
+                                    {% if produit.categorie %}
+                                    <span class="badge bg-light text-dark ms-2">
+                                        {{ produit.categorie.nom }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <h5 class="mt-4 mb-3">Description</h5>
+                                <p>{{ produit.description|linebreaks }}</p>
+                                
+                                <div class="d-flex gap-3 mt-5 pt-3 border-top">
+                                    <a href="{% url 'modifier_produit' produit.id %}" 
+                                       class="btn btn-primary px-4">
+                                        <i class="fas fa-edit me-2"></i> Modifier
+                                    </a>
+                                    <a href="{% url 'supprimer_produit' produit.id %}" 
+                                       class="btn btn-outline-danger px-4">
+                                        <i class="fas fa-trash me-2"></i> Supprimer
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

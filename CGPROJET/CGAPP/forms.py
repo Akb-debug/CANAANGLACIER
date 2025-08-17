@@ -2,7 +2,18 @@ from django import forms
 from django.core.validators import RegexValidator,validate_email
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import UserCreationForm
-from .models import Utilisateur,Contact,AbonnementNewsletter,Gerant,Serveur,Produit
+from .models import *
+
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class ProfilForm(forms.ModelForm):
+    telephone = forms.CharField(max_length=20, required=False, label='Téléphone')
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email', 'telephone']
 
 
 class InscriptionForm(UserCreationForm):
@@ -209,70 +220,6 @@ class CommandeForm(forms.Form):
             
         return cleaned_data
     
-
-class ContactForm(forms.ModelForm):
-    # Champ nom avec validation personnalisée
-    nom = forms.CharField(
-        label="Votre nom complet",
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Votre nom complet'
-        }),
-        validators=[
-            RegexValidator(
-                regex=r'^[a-zA-ZÀ-ÿ\s\-]{2,100}$',
-                message='Le nom ne doit contenir que des lettres et espaces (2-100 caractères)'
-            )
-        ]
-    )
-    
-    # Champ email avec validation renforcée
-    email = forms.EmailField(
-        label="Votre email",
-        widget=forms.EmailInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'votre@email.com'
-        })
-    )
-    
-    # Champ sujet avec choix prédéfinis
-    SUJET_CHOICES = [
-        ('', 'Sélectionnez un sujet...'),
-        ('commande', 'Question sur une commande'),
-        ('produit', 'Question sur un produit'),
-        ('livraison', 'Problème de livraison'),
-        ('autre', 'Autre demande')
-    ]
-    
-    sujet = forms.ChoiceField(
-        label="Sujet de votre message",
-        choices=SUJET_CHOICES,
-        widget=forms.Select(attrs={
-            'class': 'form-select'
-        })
-    )
-    
-    # Champ message avec configuration spécifique
-    message = forms.CharField(
-        label="Votre message",
-        widget=forms.Textarea(attrs={
-            'class': 'form-control',
-            'rows': 5,
-            'placeholder': 'Décrivez votre demande en détail...'
-        }),
-        min_length=10,
-        max_length=1000
-    )
-    
-    class Meta:
-        model = Contact
-        fields = ['nom', 'email', 'sujet', 'message']
-    
-    def clean_sujet(self):
-        sujet = self.cleaned_data.get('sujet')
-        if not sujet:
-            raise forms.ValidationError("Veuillez sélectionner un sujet.")
-        return sujet
 
 
 class NewsletterForm(forms.ModelForm):
@@ -516,3 +463,189 @@ class ProduitForm(forms.ModelForm):
         if quantite is not None and quantite < 0:
             raise forms.ValidationError("La quantité ne peut pas être négative.")
         return quantite
+    
+
+class ProduitForm(forms.ModelForm):
+    class Meta:
+        model = Produit
+        fields = ['nom', 'description', 'prix', 'quantite_disponible', 'image', 'categorie']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control'})
+        self.fields['image'].widget.attrs.update({'class': 'form-control-file'})
+
+#==================================Adresse==================================
+
+from django import forms
+from .models import AdresseLivraison, Coupon
+
+class CoordonneesClientForm(forms.Form):
+    nom = forms.CharField(
+        max_length=100,
+        label="Nom",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Votre nom'
+        })
+    )
+    prenom = forms.CharField(
+        max_length=100,
+        label="Prénom",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Votre prénom'
+        })
+    )
+    email = forms.EmailField(
+        label="Email",
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'email@exemple.com'
+        })
+    )
+    telephone = forms.CharField(
+        max_length=20,
+        label="Téléphone",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'XX XXX XXXX'
+        })
+    )
+
+class LivraisonForm(forms.Form):
+    MODE_LIVRAISON_CHOICES = [
+        ('livraison', 'Livraison à domicile'),
+        ('magasin', 'Retrait en magasin'),
+    ]
+    
+    mode_livraison = forms.ChoiceField(
+        choices=MODE_LIVRAISON_CHOICES,
+        widget=forms.RadioSelect(attrs={
+            'class': 'livraison-option'
+        }),
+        initial='livraison'
+    )
+
+class AdresseLivraisonForm(forms.ModelForm):
+    class Meta:
+        model = AdresseLivraison
+        fields = ['rue', 'ville', 'code_postal', 'pays']
+        widgets = {
+            'rue': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nom de la rue, numéro'
+            }),
+            'ville': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ville'
+            }),
+            'code_postal': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Code postal'
+            }),
+            'pays': forms.TextInput(attrs={
+                'class': 'form-control',
+                'value': 'Côte d\'Ivoire',
+                'readonly': 'readonly'
+            })
+        }
+        labels = {
+            'rue': 'Adresse complète',
+            'ville': 'Ville',
+            'code_postal': 'Code postal',
+            'pays': 'Pays'
+        }
+
+class PaiementForm(forms.Form):
+    METHODE_PAIEMENT_CHOICES = [
+        ('mobile_money', 'Mobile Money'),
+        ('carte', 'Carte Bancaire'),
+        ('sur_place', 'Paiement en magasin'),
+        ('a_la_livraison', 'Paiement à la livraison'),
+    ]
+    
+    methode_paiement = forms.ChoiceField(
+        choices=METHODE_PAIEMENT_CHOICES,
+        widget=forms.RadioSelect(attrs={
+            'class': 'paiement-method'
+        }),
+        initial='mobile_money'
+    )
+
+class MobileMoneyForm(forms.Form):
+    OPERATEUR_CHOICES = [
+        ('mtn', 'MTN'),
+        ('orange', 'Orange'),
+        ('moov', 'Moov'),
+    ]
+    
+    numero = forms.CharField(
+        max_length=20,
+        label="Numéro Mobile Money",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'XX XXX XXXX'
+        })
+    )
+    operateur = forms.ChoiceField(
+        choices=OPERATEUR_CHOICES,
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        }),
+        label="Opérateur"
+    )
+
+class CarteBancaireForm(forms.Form):
+    numero_carte = forms.CharField(
+        max_length=16,
+        min_length=16,
+        label="Numéro de carte",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '1234 5678 9012 3456'
+        })
+    )
+    date_expiration = forms.CharField(
+        max_length=5,
+        label="Date d'expiration (MM/AA)",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'MM/AA'
+        })
+    )
+    cvv = forms.CharField(
+        max_length=3,
+        min_length=3,
+        label="Code de sécurité",
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '123'
+        })
+    )
+
+class CouponForm(forms.Form):
+    code = forms.CharField(
+        max_length=20,
+        label="Code promo",
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Entrez votre code promo'
+        })
+    )
+
+    def clean_code(self):
+        code = self.cleaned_data.get('code')
+        if code:
+            try:
+                coupon = Coupon.objects.get(code=code)
+                if not coupon.is_valide():
+                    raise forms.ValidationError("Ce coupon a expiré")
+            except Coupon.DoesNotExist:
+                raise forms.ValidationError("Code promo invalide")
+        return code

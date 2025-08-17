@@ -1,14 +1,14 @@
-{% extends 'frontOfice/base.html' %}
+{% extends 'dashboards/base.html' %}
 {% load static %}
 
 {% block title %}Créer un Serveur - Admin{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
+{% block body %}
+<div class="container-fluid pt-4 px-4">
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-success text-white">
+            <div class="card h-100">
+                <div class="card-header bg-gradient-success text-white">
                     <h4 class="mb-0">
                         <i class="fas fa-user-plus me-2"></i>
                         Créer un nouveau Serveur
@@ -16,7 +16,7 @@
                 </div>
                 <div class="card-body">
                     <!-- Bouton retour -->
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <a href="{% url 'dashboard_admin' %}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left me-1"></i>
                             Retour au Dashboard
@@ -29,84 +29,94 @@
                         
                         <!-- Informations personnelles -->
                         <div class="col-12">
-                            <h5 class="text-success border-bottom pb-2">
+                            <h5 class="text-success border-bottom pb-2 mb-3">
                                 <i class="fas fa-user me-2"></i>
                                 Informations personnelles
                             </h5>
                         </div>
                         
                         <div class="col-md-6">
-                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
-                                {{ form.first_name.label }}
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.first_name }}
-                            {% if form.first_name.errors %}
-                                <div class="text-danger small">
-                                    {{ form.first_name.errors.0 }}
-                                </div>
-                            {% endif %}
+                            <div class="form-group">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                    {{ form.first_name.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.first_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                         
                         <div class="col-md-6">
-                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
-                                {{ form.last_name.label }}
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.last_name }}
-                            {% if form.last_name.errors %}
-                                <div class="text-danger small">
-                                    {{ form.last_name.errors.0 }}
-                                </div>
-                            {% endif %}
+                            <div class="form-group">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                    {{ form.last_name.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.last_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                         
                         <div class="col-md-6">
-                            <label for="{{ form.email.id_for_label }}" class="form-label">
-                                {{ form.email.label }}
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.email }}
-                            {% if form.email.errors %}
-                                <div class="text-danger small">
-                                    {{ form.email.errors.0 }}
-                                </div>
-                            {% endif %}
+                            <div class="form-group">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    {{ form.email.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                         
                         <div class="col-md-6">
-                            <label for="{{ form.telephone.id_for_label }}" class="form-label">
-                                {{ form.telephone.label }}
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.telephone }}
-                            <div class="form-text">{{ form.telephone.help_text }}</div>
-                            {% if form.telephone.errors %}
-                                <div class="text-danger small">
-                                    {{ form.telephone.errors.0 }}
-                                </div>
-                            {% endif %}
+                            <div class="form-group">
+                                <label for="{{ form.telephone.id_for_label }}" class="form-label">
+                                    {{ form.telephone.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.telephone }}
+                                <small class="form-text text-muted">{{ form.telephone.help_text }}</small>
+                                {% if form.telephone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.telephone.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
 
                         <!-- Informations de connexion -->
                         <div class="col-12 mt-4">
-                            <h5 class="text-success border-bottom pb-2">
+                            <h5 class="text-success border-bottom pb-2 mb-3">
                                 <i class="fas fa-key me-2"></i>
                                 Informations de connexion
                             </h5>
                         </div>
                         
                         <div class="col-md-6">
-                            <label for="{{ form.username.id_for_label }}" class="form-label">
-                                {{ form.username.label }}
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.username }}
-                            {% if form.username.errors %}
-                                <div class="text-danger small">
-                                    {{ form.username.errors.0 }}
-                                </div>
-                            {% endif %}
+                            <div class="form-group">
+                                <label for="{{ form.username.id_for_label }}" class="form-label">
+                                    {{ form.username.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.username.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                         
                         <div class="col-md-6">
@@ -114,35 +124,43 @@
                         </div>
                         
                         <div class="col-md-6">
-                            <label for="{{ form.password1.id_for_label }}" class="form-label">
-                                {{ form.password1.label }}
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.password1 }}
-                            {% if form.password1.errors %}
-                                <div class="text-danger small">
-                                    {{ form.password1.errors.0 }}
-                                </div>
-                            {% endif %}
+                            <div class="form-group">
+                                <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                    {{ form.password1.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.password1.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    {{ form.password1.help_text }}
+                                </small>
+                            </div>
                         </div>
                         
                         <div class="col-md-6">
-                            <label for="{{ form.password2.id_for_label }}" class="form-label">
-                                {{ form.password2.label }}
-                                <span class="text-danger">*</span>
-                            </label>
-                            {{ form.password2 }}
-                            {% if form.password2.errors %}
-                                <div class="text-danger small">
-                                    {{ form.password2.errors.0 }}
-                                </div>
-                            {% endif %}
+                            <div class="form-group">
+                                <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                    {{ form.password2.label }}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.password2.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
 
                         <!-- Erreurs générales du formulaire -->
                         {% if form.non_field_errors %}
                             <div class="col-12">
                                 <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
                                     {{ form.non_field_errors }}
                                 </div>
                             </div>
@@ -170,25 +188,48 @@
 
 <style>
 .card {
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    border: 1px solid rgba(0, 0, 0, 0.125);
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
 }
-
-.card-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+.card:hover {
+    transform: translateY(-2px);
 }
-
+.bg-gradient-success {
+    background: linear-gradient(135deg, #198754 0%, #2e856e 100%);
+}
 .form-control:focus {
     border-color: #198754;
     box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
 }
-
-.text-danger {
-    color: #dc3545 !important;
+.invalid-feedback {
+    display: none;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
 }
-
+.invalid-feedback.d-block {
+    display: block;
+}
 .border-bottom {
     border-bottom: 1px solid #dee2e6 !important;
 }
+.btn {
+    transition: all 0.2s ease;
+}
+.btn:hover {
+    transform: translateY(-1px);
+}
 </style>
+
+<script>
+// Initialiser les tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
 {% endblock %}

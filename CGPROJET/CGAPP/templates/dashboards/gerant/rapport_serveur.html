@@ -1,0 +1,262 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Rapport Serveur - {{ serveur.get_full_name }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <!-- En-tête avec infos serveur -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+                    <div class="mb-3 mb-md-0">
+                        <h3 class="mb-1">
+                            <i class="fas fa-chart-line me-2 text-primary"></i>
+                            Rapport d'activité
+                        </h3>
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                {% if serveur.profile_image %}
+                                    <img src="{{ serveur.profile_image.url }}" class="rounded-circle" width="60" height="60" alt="Photo serveur">
+                                {% else %}
+                                    <div class="avatar bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-user text-primary fs-4"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ serveur.get_full_name }}</h5>
+                                <span class="badge bg-primary">{{ serveur.get_role_display }}</span>
+                                <p class="text-muted small mb-0">Membre depuis le {{ serveur.date_joined|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sélecteur de période -->
+                    <form method="get" class="d-flex align-items-center">
+                        <div class="me-2">
+                            <label for="periode" class="form-label mb-0">Période :</label>
+                        </div>
+                        <select name="periode" id="periode" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 120px;">
+                            <option value="7" {% if periode == 7 %}selected{% endif %}>7 jours</option>
+                            <option value="30" {% if periode == 30 %}selected{% endif %}>30 jours</option>
+                            <option value="90" {% if periode == 90 %}selected{% endif %}>3 mois</option>
+                            <option value="180" {% if periode == 180 %}selected{% endif %}>6 mois</option>
+                        </select>
+                    </form>
+                </div>
+
+                <!-- Statistiques principales -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-primary bg-opacity-10 rounded-3 h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-2">Actions totales</h6>
+                                        <h3 class="mb-0">{{ stats.total_actions|intcomma }}</h3>
+                                    </div>
+                                    <div class="bg-primary bg-opacity-25 rounded-circle p-3">
+                                        <i class="fas fa-tasks fa-2x text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <span class="text-muted small">Depuis le {{ date_debut|date:"d/m/Y" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-success bg-opacity-10 rounded-3 h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-2">Commandes traitées</h6>
+                                        <h3 class="mb-0">{{ stats.commandes_traitees|intcomma }}</h3>
+                                    </div>
+                                    <div class="bg-success bg-opacity-25 rounded-circle p-3">
+                                        <i class="fas fa-shopping-basket fa-2x text-success"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <span class="text-muted small">{% widthratio stats.commandes_traitees stats.total_actions 100 %}% des actions</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card border-0 bg-info bg-opacity-10 rounded-3 h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-2">Actions aujourd'hui</h6>
+                                        <h3 class="mb-0">{{ stats.actions_par_jour|intcomma }}</h3>
+                                    </div>
+                                    <div class="bg-info bg-opacity-25 rounded-circle p-3">
+                                        <i class="fas fa-bolt fa-2x text-info"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <span class="text-muted small">{{ timezone.now|date:"d/m/Y" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphique de répartition -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm rounded-3">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-pie me-2 text-primary"></i>
+                                    Répartition des actions par type
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="actionChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dernières actions -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm rounded-3">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-history me-2 text-primary"></i>
+                                    Dernières actions ({{ actions|length }})
+                                </h5>
+                                <small class="text-muted">Période : {{ date_debut|date:"d/m/Y" }} - {{ timezone.now|date:"d/m/Y" }}</small>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Type d'action</th>
+                                                <th>Détails</th>
+                                                <th>Heure</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for action in actions %}
+                                            <tr>
+                                                <td>{{ action.date_action|date:"d/m/Y" }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ action.get_badge_color }}">
+                                                        {{ action.get_type_action_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ action.description|truncatechars:60 }}</td>
+                                                <td>{{ action.date_action|time }}</td>
+                                            </tr>
+                                            {% empty %}
+                                            <tr>
+                                                <td colspan="4" class="text-center py-4">
+                                                    <i class="fas fa-info-circle fa-2x text-muted mb-3"></i>
+                                                    <p class="text-muted">Aucune action enregistrée pour cette période</p>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script pour le graphique -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Données pour le graphique
+    const ctx = document.getElementById('actionChart').getContext('2d');
+    const actionTypes = {{ stats.actions_par_type.keys|safe }};
+    const actionCounts = {{ stats.actions_par_type.values|safe }};
+    
+    // Couleurs dynamiques
+    const backgroundColors = [
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(255, 99, 132, 0.7)',
+        'rgba(75, 192, 192, 0.7)',
+        'rgba(255, 159, 64, 0.7)',
+        'rgba(153, 102, 255, 0.7)',
+        'rgba(201, 203, 207, 0.7)'
+    ];
+    
+    // Création du graphique
+    const actionChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: actionTypes,
+            datasets: [{
+                data: actionCounts,
+                backgroundColor: backgroundColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    font-size: 0.85em;
+}
+
+.avatar {
+    transition: transform 0.3s ease;
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}

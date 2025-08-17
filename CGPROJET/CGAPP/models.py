@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.templatetags.static import static
+from django.utils.text import slugify
+from django.core.validators import MinValueValidator
+from decimal import Decimal, ROUND_HALF_UP
 
 # -------------------- UTILISATEUR --------------------
 class Utilisateur(AbstractUser):
@@ -51,12 +54,28 @@ class Admin(models.Model):
 
 class Categorie(models.Model):
     nom = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to='categories/', blank=True, null=True)
-    slug = models.SlugField(max_length=100, unique=True)
+    ordre_affichage = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Catégorie"
+        verbose_name_plural = "Catégories"
+        ordering = ['ordre_affichage', 'nom']
 
     def __str__(self):
         return self.nom
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.nom)
+        super().save(*args, **kwargs)
+
+    @property
+    def produits_actifs(self):
+        return self.produits.filter(quantite_disponible__gt=0)  
+    
     @property
     def image_url(self):
         """
@@ -64,43 +83,119 @@ class Categorie(models.Model):
         """
         if self.image:
             return self.image.url
-        return static('image/image.jpg')  
+        return static('image/image.jpg')
 
 # -------------------- PRODUITS --------------------
+
+
 class Produit(models.Model):
-    nom = models.CharField(max_length=100)
-    description = models.TextField(blank=True)
-    prix = models.DecimalField(max_digits=10, decimal_places=2)
-    quantite_disponible = models.PositiveIntegerField()
-    image = models.ImageField(upload_to='produits/', blank=True, null=True)
-    gerant = models.ForeignKey(Gerant, on_delete=models.CASCADE, related_name='produits')
-    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, blank=True, related_name='produits')
+    # Informations de base
+    nom = models.CharField(max_length=100, verbose_name="Nom du produit")
+    description = models.CharField(max_length=200, verbose_name="Description courte", blank=True)
+    description_longue = models.TextField(verbose_name="Description détaillée", blank=True)
+    
+    # Prix et disponibilité
+    prix = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        validators=[MinValueValidator(0)],
+        verbose_name="Prix (FCFA)"
+    )
+    promotion = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Pourcentage de réduction",
+        help_text="Pourcentage de réduction (0-100)"
+    )
+    quantite_disponible = models.PositiveIntegerField(
+        default=0,
+        verbose_name="Quantité en stock"
+    )
+    
+    # Images
+    image = models.ImageField(
+        upload_to='produits/',
+        verbose_name="Image principale"
+    )
+    
+    # Relations
+    categorie = models.ForeignKey(
+        'Categorie',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='produits',
+        verbose_name="Catégorie"
+    )
+    gerant = models.ForeignKey(
+        'Gerant',
+        on_delete=models.CASCADE,
+        related_name='produits',
+        verbose_name="Gérant responsable"
+    )
+    
+    # Métadonnées
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
+    est_populaire = models.BooleanField(
+        default=False,
+        verbose_name="Produit populaire",
+        help_text="Cochez pour afficher ce produit comme populaire"
+    )
+    
+    # Caractéristiques
+    ingredients = models.TextField(blank=True, verbose_name="Liste des ingrédients")
+    allergenes = models.CharField(max_length=200, blank=True, verbose_name="Allergènes")
+    poids_net = models.CharField(max_length=20, blank=True, verbose_name="Poids net")
+    conseil_conservation = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name="Conseil de conservation",
+        default="À conserver à -18°C"
+    )
+
+    class Meta:
+        verbose_name = "Produit"
+        verbose_name_plural = "Produits"
+        ordering = ['-date_creation']
+        indexes = [
+            models.Index(fields=['nom']),
+            models.Index(fields=['categorie']),
+            models.Index(fields=['prix']),
+            models.Index(fields=['est_populaire']),
+        ]
 
     def __str__(self):
         return self.nom
 
+    @property
+    def ancien_prix(self):
+        """Retourne le prix avant promotion si applicable"""
+        if self.promotion > 0:
+            # Convertir les valeurs en Decimal
+            promotion_decimal = Decimal(self.promotion) / Decimal('100')
+            ancien = self.prix / (Decimal('1') - promotion_decimal)
+            # Arrondir à 2 décimales comme un prix
+            return ancien.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        return None
 
+    @property
+    def en_stock(self):
+        """Retourne True si le produit est en stock"""
+        return self.quantite_disponible > 0
 
-# # -------------------- PANIER --------------------
-# class Panier(models.Model):
-#     client = models.ForeignKey(Client, on_delete=models.CASCADE, null=True, blank=True)
-#     date_creation = models.DateTimeField(auto_now_add=True)
-#     session_id = models.CharField(max_length=100, null=True, blank=True)  # Pour suivre les utilisateurs anonymes
-#     produits = models.ManyToManyField(Produit, through='Commande')
+    @property
+    def stock_faible(self):
+        """Retourne True si le stock est faible (moins de 5 unités)"""
+        return 0 < self.quantite_disponible < 5
 
-#     def __str__(self):
-#         return f"Panier de {self.client.utilisateur.username}"
+    def get_statut_stock(self):
+        """Retourne le statut du stock sous forme de texte"""
+        if not self.en_stock:
+            return "Rupture de stock"
+        if self.stock_faible:
+            return f"Plus que {self.quantite_disponible} en stock"
+        return "En stock"
 
-
-# # -------------------- COMMANDER --------------------
-# class Commande(models.Model):
-#     panier = models.ForeignKey(Panier, on_delete=models.CASCADE)
-#     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
-#     quantite = models.PositiveIntegerField()
-#     date_commande = models.DateTimeField(auto_now_add=True)
-
-#     def __str__(self):
-#         return f"{self.quantite} x {self.produit.nom}"
 
 class Panier(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, null=True, blank=True)
@@ -179,15 +274,42 @@ class AbonnementNewsletter(models.Model):
 
 
 # -------------------- CONTACT --------------------
-class Contact(models.Model):
-    nom = models.CharField(max_length=100)
-    email = models.EmailField()
-    sujet = models.CharField(max_length=200)
-    message = models.TextField()
-    date_contact = models.DateTimeField(auto_now_add=True)
+from django.db import models
+from django.core.validators import RegexValidator, EmailValidator
+
+class ContactMessage(models.Model):
+    SUJET_CHOICES = [
+        ('commande', 'Problème ou question sur une commande'),
+        ('livraison', 'Problème ou retard de livraison'),
+        ('produit', 'Question sur un produit (goût, disponibilité, allergènes, etc.)'),
+        ('paiement', 'Problème de paiement'),
+        ('partenariat', 'Demande de partenariat ou collaboration'),
+        ('suggestion', 'Suggestion ou amélioration'),
+        ('autre', 'Autre demande'),
+    ]
+
+    nom = models.CharField(max_length=100, verbose_name="Nom")
+    prenom = models.CharField(max_length=100, verbose_name="Prénom", blank=True, null=True)
+    email = models.EmailField(validators=[EmailValidator()], verbose_name="Email")
+    telephone = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        validators=[RegexValidator(regex=r'^\+?[0-9\s\-]+$', message="Numéro de téléphone invalide")]
+    )
+    sujet = models.CharField(max_length=50, choices=SUJET_CHOICES, verbose_name="Sujet")
+    message = models.TextField(verbose_name="Message")
+    date_soumission = models.DateTimeField(auto_now_add=True, verbose_name="Date de soumission")
+    traite = models.BooleanField(default=False, verbose_name="Traité")
+
+    class Meta:
+        verbose_name = "Message de contact"
+        verbose_name_plural = "Messages de contact"
+        ordering = ['-date_soumission']
 
     def __str__(self):
-        return f"{self.nom} - {self.sujet}"
+        return f"{self.nom} - {self.get_sujet_display()} - {self.date_soumission.strftime('%d/%m/%Y')}"
+
 
 
 # -------------------- HISTORIQUE DES ACTIONS --------------------

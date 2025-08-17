@@ -6,35 +6,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #00BFFF;    /* Bleu glacier */
-            --secondary: #FFFFFF;  /* Blanc pur */
-            --accent: #002147;    /* Bleu nuit */
-            --light: #F5F5F5;     /* Gris clair */
-            --cta: #FFA500;       /* Orange CTA */
+            --yellow-canaan: #FDCB05;
+            --teal-glacier: #00B8B5;
+            --pink-swoosh: #E91E63;
+            --black-shadow: #000000;
+            --white-bg: #FFFFFF;
             --font-main: 'Montserrat', sans-serif;
-            --font-alt: 'Roboto', sans-serif;
         }
         
-        body {
-            font-family: var(--font-main);
-        }
-        
+        /* Barre promotionnelle */
         .promo-bar {
-            background-color: var(--accent);
+            background: var(--black-shadow);
             color: white;
-            font-size: 0.9rem;
             padding: 8px 0;
-            white-space: nowrap;
-            overflow: hidden;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
+            font-size: 0.9rem;
         }
         
         .promo-content {
             display: inline-block;
-            animation: scroll 25s linear infinite;
+            white-space: nowrap;
+            animation: scroll 20s linear infinite;
         }
         
         @keyframes scroll {
@@ -42,123 +41,340 @@
             100% { transform: translateX(-100%); }
         }
         
-        .navbar {
-            background-color: var(--secondary) !important;
-            box-shadow: 0 2px 10px rgba(0, 33, 71, 0.1);
+        /* Navbar principale */
+        .main-navbar {
+            background: linear-gradient(135deg, var(--yellow-canaan) 0%, var(--teal-glacier) 100%);
+            padding: 0;
+            position: fixed;
+            top: 35px;
+            width: 100%;
+            z-index: 1029;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .navbar-brand span {
-            font-family: var(--font-main);
-            font-weight: 700;
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            height: 80px;
         }
         
-        .text-primary {
-            color: var(--primary) !important;
+        /* Logo Container */
+    .logo-container {
+        display: inline-block;
+        position: relative;
+        padding: 10px;
+        background: linear-gradient(135deg, var(--yellow-canaan) 0%, var(--teal-glacier) 100%);
+        border-radius: 50%;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    /* Effet de halo */
+    .logo-container::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(135deg, 
+            rgba(253, 203, 5, 0.8) 0%, 
+            rgba(0, 184, 181, 0.8) 50%, 
+            rgba(233, 30, 99, 0.8) 100%);
+        border-radius: 50%;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Logo Image */
+    .brand-logo {
+        height: 60px;
+        width: 60px;
+        object-fit: contain;
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        border-radius: 50%;
+        background-color: white;
+        padding: 5px;
+    }
+
+    /* Hover Effects */
+    .logo-container:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .logo-container:hover::before {
+        opacity: 1;
+    }
+
+    .logo-container:hover .brand-logo {
+        transform: rotate(5deg) scale(1.1);
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+    }
+
+    /* Animation au chargement */
+    @keyframes logoFloat {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+        100% { transform: translateY(0); }
+    }
+
+    .logo-container {
+        animation: logoFloat 4s ease-in-out infinite;
+    }
+
+    /* Version mobile */
+    @media (max-width: 768px) {
+        .logo-container {
+            padding: 8px;
         }
         
-        .btn-primary {
-            background-color: var(--primary);
-            border-color: var(--primary);
+        .brand-logo {
+            height: 50px;
+            width: 50px;
         }
-        
-        .btn-outline-primary {
-            color: var(--primary);
-            border-color: var(--primary);
-        }
-        
-        .btn-outline-primary:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-        
-        .badge-accent {
-            background-color: var(--cta);
-            color: white;
-        }
-        
-        .dropdown-menu {
-            border: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .dropdown-item:focus, .dropdown-item:hover {
-            background-color: var(--light);
-            color: var(--accent);
-        }
+    }
+            /* Menu principal */
+            .main-menu {
+                display: flex;
+                gap: 1.5rem;
+                margin: 0 auto;
+            }
+            
+            .nav-item {
+                position: relative;
+            }
+            
+            .nav-link {
+                color: white !important;
+                font-weight: 500;
+                padding: 0.5rem 0;
+                position: relative;
+            }
+            
+            .nav-link:after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 0;
+                height: 2px;
+                background: white;
+                transition: width 0.3s;
+            }
+            
+            .nav-link:hover:after,
+            .nav-link.active:after {
+                width: 100%;
+            }
+            
+            /* Actions utilisateur */
+            .user-actions {
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            /* Barre de recherche */
+            .search-box {
+                display: flex;
+                width: 220px;
+            }
+            
+            .search-input {
+                border: 1px solid white;
+                border-right: none;
+                border-radius: 20px 0 0 20px;
+                padding: 0.35rem 1rem;
+                outline: none;
+                transition: all 0.3s;
+                width: 100%;
+            }
+            
+            .search-input:focus {
+                border-color: var(--pink-swoosh);
+                box-shadow: 0 0 0 2px rgba(233,30,99,0.2);
+            }
+            
+            .search-btn {
+                background: var(--teal-glacier);
+                color: white;
+                border: 1px solid var(--teal-glacier);
+                border-radius: 0 20px 20px 0;
+                padding: 0 1rem;
+                transition: all 0.3s;
+            }
+            
+            .search-btn:hover {
+                background: var(--pink-swoosh);
+                border-color: var(--pink-swoosh);
+            }
+            
+            /* Panier */
+            .cart-btn {
+                position: relative;
+                color: white;
+                background: transparent;
+                border: 1px solid white;
+                border-radius: 20px;
+                padding: 0.35rem 0.75rem;
+                transition: all 0.3s;
+            }
+            
+            .cart-btn:hover {
+                background: white;
+                color: var(--teal-glacier);
+            }
+            
+            .cart-badge {
+                position: absolute;
+                top: -8px;
+                right: -8px;
+                background: var(--yellow-canaan);
+                color: var(--black-shadow);
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.7rem;
+                font-weight: bold;
+            }
+            
+            /* Boutons auth */
+            .auth-btn {
+                border-radius: 20px;
+                padding: 0.35rem 1rem;
+                font-weight: 500;
+                transition: all 0.3s;
+            }
+            
+            .login-btn {
+                background: transparent;
+                color: white;
+                border: 1px solid white;
+            }
+            
+            .login-btn:hover {
+                background: white;
+                color: var(--teal-glacier);
+            }
+            
+            .signup-btn {
+                background: var(--pink-swoosh);
+                color: white;
+                border: 1px solid var(--pink-swoosh);
+            }
+            
+            .signup-btn:hover {
+                background: #c2185b;
+                border-color: #c2185b;
+                color : white;
+            }
+            
+            /* Version mobile */
+            @media (max-width: 991px) {
+                .main-navbar {
+                    top: 40px;
+                    padding: 10px 0;
+                }
+                
+                .nav-container {
+                    flex-direction: column;
+                    height: auto;
+                    padding: 10px;
+                }
+                
+                .main-menu {
+                    flex-direction: column;
+                    width: 100%;
+                    text-align: center;
+                    margin: 15px 0;
+                }
+                
+                .user-actions {
+                    width: 100%;
+                    justify-content: center;
+                    margin: 15px 0;
+                    flex-wrap: wrap;
+                }
+                
+                .search-box {
+                    width: 100%;
+                    margin-bottom: 10px;
+                }
+            }
     </style>
 </head>
 <body>
-    <!-- Barre promotionnelle animée -->
+    <!-- Barre promotionnelle -->
     <div class="promo-bar">
         <div class="promo-content">
-            <span class="me-4"><i class="bi bi-truck me-2"></i>Livraison express en 2h max dans tout Lomé</span>
-            <span class="me-4"><i class="bi bi-gift me-2"></i>10% de réduction avec le code BIENVENUE</span>
-            <span class="me-4"><i class="bi bi-telephone me-2"></i>Service client : +228 99 66 75 72</span>
-            <span><i class="bi bi-credit-card me-2"></i>Paiement sécurisé par T-Money, Flooz et carte bancaire</span>
+            <span class="me-4"><i class="fas fa-truck me-2"></i>Livraison express en 2h dans tout Lomé</span>
+            <span class="me-4"><i class="fas fa-gift me-2"></i>10% de réduction avec le code BIENVENUE</span>
+            <span><i class="fas fa-phone me-2"></i>Service client :  +228 92 74 59 59</span>
         </div>
     </div>
 
     <!-- Navigation principale -->
-    <header class="sticky-top">
-        <nav class="navbar navbar-expand-lg navbar-light">
-            <div class="container">
-                <!-- Logo + Nom -->
-                <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
-                    <img src="https://via.placeholder.com/40x40/00BFFF/FFFFFF?text=CG" alt="" height="40" class="me-2">
-                    <span class="fw-bold" style="color: var(--primary);">CANAA<span style="color: var(--accent);">N GLACIER</span></span>
+    <nav class="main-navbar">
+        <div class="container">
+            <div class="nav-container">
+                <!-- Logo -->
+                <a href="{% url 'home' %}" class="logo-container">
+                    <img src="{% static 'logo.png' %}" alt="Canaan Glacier" class="brand-logo">
                 </a>
-
-                <!-- Bouton mobile -->
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
                 <!-- Menu principal -->
-                <div class="collapse navbar-collapse" id="navbarContent">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'home' %}">Accueil</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link"  href="{% url 'apropos' %}">A propos</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                Nos Glaces
-                            </a>
-                            <ul class="dropdown-menu">
-                                {% for categorie in categories %}
-                                <li><a class="dropdown-item" href="{% url 'produits_par_categorie' categorie.slug %}">{{ categorie.nom }}</a></li>
-                                {% if forloop.counter == 6 %}<li><hr class="dropdown-divider"></li>{% endif %}
-                                {% endfor %}
-                                <li><a class="dropdown-item text-primary" href="{% url 'produits' %}">Tous nos produits</a></li>
-                                 {% comment %} <li><a class="dropdown-item text-primary" href="{% url 'detail_categorie' categorie.id %}">detail categorie</a></li> {% endcomment %}
-                            </ul>
-                        </li>
-                        
-                        <li class="nav-item">
-                            <a class="nav-link"  href="{% url 'contact' %}">Contact</a>
-                        </li>
-                    </ul>
-
-                    <!-- Actions utilisateur -->
-                    <div class="d-flex align-items-center">
-                        <!-- Barre de recherche -->
-                        <form class="d-none d-lg-block me-3" action="#" method="get">
-                            <div class="input-group" style="width: 200px;">
-                                <input type="text" name="q" class="form-control form-control-sm" placeholder="Rechercher...">
-                                <button class="btn btn-sm btn-outline-primary" type="submit">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </form>
-                        
-                        
-                        <!-- Panier -->
-                      <!-- Panier -->
-                    <a href="{% url 'panier' %}" class="btn btn-sm btn-outline-primary position-relative me-2">
-                        <i class="bi bi-cart3"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill badge-accent">
+                <ul class="main-menu list-unstyled d-none d-lg-flex">
+                    <li class="nav-item">
+                        <a href="{% url 'home' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'apropos' %}" class="nav-link {% if 'apropos' in request.path %}active{% endif %}">À propos</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle {% if 'produits' in request.path %}active{% endif %}" data-bs-toggle="dropdown">
+                            Nos Glaces
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for categorie in categories %}
+                            <li><a class="dropdown-item" href="{% url 'produits_par_categorie' categorie.slug %}">{{ categorie.nom }}</a></li>
+                            {% endfor %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-primary" href="{% url 'produits' %}">Tous les produits</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'contact' %}" class="nav-link {% if 'contact' in request.path %}active{% endif %}">Contact</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{% url 'mon_compte' %}" class="nav-link {% if 'mon_compte' in request.path %}active{% endif %}">Mon compte</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <!-- Actions utilisateur -->
+                <div class="user-actions">
+                    <!-- Recherche -->
+                    <form class="search-box d-none d-lg-flex" action="#" method="get">
+                        <input type="text" name="q" class="search-input" placeholder="Rechercher...">
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                    
+                    <!-- Panier -->
+                    <a href="{% url 'panier' %}" class="cart-btn position-relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-badge">
                             {% if request.user.is_authenticated %}
                                 {% with panier=request.user.panier_set.first %}
                                     {{ panier.lignes.count|default:0 }}
@@ -176,33 +392,84 @@
                             {% endif %}
                         </span>
                     </a>
-
-                        <!-- Compte utilisateur -->
-                        {% if user.is_authenticated %}
-                        <div class="dropdown">
-                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown">
-                                <span class="d-none d-sm-inline me-2">{{ user.first_name|default:user.username }}</span>
-                                <i class="bi bi-person-circle fs-5" style="color: var(--accent);"></i>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{% url 'mon_compte' %}"><i class="bi bi-person me-2"></i>Mon compte</a></li>
-                                <li><a class="dropdown-item" href="{% url 'mon_compte' %}"><i class="bi bi-list-check me-2"></i>Mes commandes</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item"  href="{% url 'deconnexion' %}"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
-                            </ul>
-                        </div>
-                        {% else %}
-                        <div class="d-flex">
-                            <a  href="{% url 'connexion' %}" class="btn btn-sm btn-outline-primary me-2">Connexion</a>
-                            <a  href="{% url 'inscription' %}" class="btn btn-sm btn-primary">Inscription</a>
-                        </div>
-                        {% endif %}
+                    
+                    <!-- Authentification -->
+                    {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                            <span class="d-none d-lg-inline me-2">{{ user.first_name|default:user.username }}</span>
+                            <i class="fas fa-user-circle"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i>Profil</a></li>
+                            <li><a class="dropdown-item" href="{% url 'mon_compte' %}"><i class="fas fa-list-alt me-2"></i>Commandes</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'deconnexion' %}"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
+                        </ul>
                     </div>
+                    {% else %}
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'connexion' %}" class="auth-btn login-btn" style="text-decoration: none">Connexion</a>
+                        <a href="{% url 'inscription' %}" class="auth-btn signup-btn"  style="text-decoration: none">Inscription</a>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Bouton mobile -->
+                    <button class="navbar-toggler d-lg-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                        <i class="fas fa-bars text-white"></i>
+                    </button>
                 </div>
             </div>
-        </nav>
-    </header>
+            
+            <!-- Menu mobile -->
+            <div class="collapse d-lg-none" id="mobileMenu">
+                <ul class="main-menu list-unstyled py-3">
+                    <li class="nav-item py-2">
+                        <a href="{% url 'home' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">Accueil</a>
+                    </li>
+                    <li class="nav-item py-2">
+                        <a href="{% url 'apropos' %}" class="nav-link {% if 'apropos' in request.path %}active{% endif %}">À propos</a>
+                    </li>
+                    <li class="nav-item py-2">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Nos Glaces</a>
+                        <ul class="dropdown-menu">
+                            {% for categorie in categories %}
+                            <li><a class="dropdown-item" href="{% url 'produits_par_categorie' categorie.slug %}">{{ categorie.nom }}</a></li>
+                            {% endfor %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-primary" href="{% url 'produits' %}">Tous les produits</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item py-2">
+                        <a href="{% url 'contact' %}" class="nav-link {% if 'contact' in request.path %}active{% endif %}">Contact</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item py-2">
+                        <a href="{% url 'mon_compte' %}" class="nav-link {% if 'mon_compte' in request.path %}active{% endif %}">Mon compte</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                
+                <form class="search-box px-3 mb-3" action="#" method="get">
+                    <input type="text" name="q" class="search-input" placeholder="Rechercher...">
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animation de la barre promo
+        document.querySelector('.promo-bar').addEventListener('mouseenter', function() {
+            this.querySelector('.promo-content').style.animationPlayState = 'paused';
+        });
+        
+        document.querySelector('.promo-bar').addEventListener('mouseleave', function() {
+            this.querySelector('.promo-content').style.animationPlayState = 'running';
+        });
+    </script>
 </body>
 </html>

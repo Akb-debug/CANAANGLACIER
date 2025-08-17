@@ -5,22 +5,32 @@
         <div class="d-flex align-items-center">
             <!-- Icône selon le type de message -->
             {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                <i class="bi bi-check-circle-fill me-2 fs-4 text-white"></i>
+                <div class="icon-wrapper bg-success bg-opacity-25 rounded-circle p-2 me-3">
+                    <i class="fas fa-check-circle fs-4 text-success"></i>
+                </div>
             {% elif message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                <i class="bi bi-exclamation-triangle-fill me-2 fs-4 text-white"></i>
+                <div class="icon-wrapper bg-danger bg-opacity-25 rounded-circle p-2 me-3">
+                    <i class="fas fa-exclamation-triangle fs-4 text-danger"></i>
+                </div>
             {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
-                <i class="bi bi-exclamation-circle-fill me-2 fs-4 text-white"></i>
+                <div class="icon-wrapper bg-warning bg-opacity-25 rounded-circle p-2 me-3">
+                    <i class="fas fa-exclamation-circle fs-4 text-warning"></i>
+                </div>
             {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
-                <i class="bi bi-info-circle-fill me-2 fs-4 text-white"></i>
+                <div class="icon-wrapper bg-info bg-opacity-25 rounded-circle p-2 me-3">
+                    <i class="fas fa-info-circle fs-4 text-info"></i>
+                </div>
             {% else %}
-                <i class="bi bi-info-circle-fill me-2 fs-4 text-white"></i>
+                <div class="icon-wrapper bg-primary bg-opacity-25 rounded-circle p-2 me-3">
+                    <i class="fas fa-info-circle fs-4 text-primary"></i>
+                </div>
             {% endif %}
             
-            <div class="flex-grow-1 text-white">
-                {{ message }}
+            <div class="flex-grow-1">
+                <p class="mb-0 fw-medium">{{ message }}</p>
             </div>
             
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     </div>
     {% endfor %}
@@ -29,54 +39,77 @@
 <style>
     /* Animation d'entrée */
     .alert {
-        animation: slideIn 0.3s ease-out forwards;
+        animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        border-left: 4px solid;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         margin-bottom: 1rem;
-        color: white !important; /* Force le texte en blanc */
+        border-radius: 8px !important;
+        background-color: white;
     }
     
-    /* Couleurs de fond personnalisées */
+    /* Couleurs de bordure personnalisées */
     .alert-success {
-        background-color: #28a745; /* Vert */
+        border-left-color: var(--teal-glacier);
     }
     
     .alert-error, .alert-danger {
-        background-color: #dc3545; /* Rouge */
+        border-left-color: var(--pink-swoosh);
     }
     
     .alert-warning {
-        background-color: #fd7e14; /* Orange */
+        border-left-color: var(--yellow-canaan);
     }
     
     .alert-info {
-        background-color: #00BFFF; /* Bleu glacier */
+        border-left-color: var(--teal-glacier);
     }
     
-    /* Cas par défaut */
+    /* Couleur par défaut */
     .alert {
-        background-color: #002147; /* Bleu nuit */
+        border-left-color: var(--teal-glacier);
     }
     
+    /* Animation */
     @keyframes slideIn {
         from {
             opacity: 0;
-            transform: translateX(100%);
+            transform: translateX(100%) translateY(-20px);
         }
         to {
             opacity: 1;
-            transform: translateX(0);
+            transform: translateX(0) translateY(0);
         }
     }
     
     /* Animation de fermeture */
     .alert.fade {
-        transition: opacity 0.3s, transform 0.3s ease-in;
+        transition: all 0.4s ease-in;
     }
     
-    /* Bouton de fermeture blanc */
-    .btn-close-white {
-        filter: invert(1) grayscale(100%) brightness(200%);
+    /* Bouton de fermeture */
+    .btn-close {
+        opacity: 0.5;
+        transition: opacity 0.3s ease;
+    }
+    
+    .btn-close:hover {
+        opacity: 1;
+    }
+    
+    /* Icône dans un cercle */
+    .icon-wrapper {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    /* Texte */
+    .alert p {
+        color: var(--black-shadow);
     }
 </style>
 
@@ -89,6 +122,15 @@
                 const bsAlert = new bootstrap.Alert(alert);
                 bsAlert.close();
             }, 5000);
+            
+            // Animation au survol
+            alert.addEventListener('mouseenter', () => {
+                alert.style.transform = 'translateX(-5px)';
+            });
+            
+            alert.addEventListener('mouseleave', () => {
+                alert.style.transform = 'translateX(0)';
+            });
         });
     });
 </script>

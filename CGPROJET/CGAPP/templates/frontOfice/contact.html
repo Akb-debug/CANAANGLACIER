@@ -4,197 +4,343 @@
 {% block title %}Contact - Canaan Glacier{% endblock %}
 
 {% block content %}
-<!-- Section contact -->
-<section class="py-5">
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
+<!-- Hero Section - Background Only -->
+<div class="mi-hero-bg" style="background: url('{% static 'contact-hero.png' %}') no-repeat center center; background-size: cover; height: 75vh;">
+</div>
+
+<!-- Content Section -->
+<div class="mi-contact-container" style="margin-top: -150px;">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 text-center mb-5">
-                <h2 class="display-5 fw-bold text-accent mb-3">Contactez-Nous</h2>
-                <p class="lead text-muted">Une question, une suggestion ou une demande spéciale ? Notre équipe vous répond sous 24h.</p>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-lg-6 mb-5 mb-lg-0">
-                <div class="card border-0 shadow-sm rounded-3 h-100">
-                    <div class="card-body p-4 p-md-5">
-                        <h3 class="h4 text-primary mb-4">Envoyez-nous un message</h3>
-                        
-                        <form method="post" class="needs-validation" novalidate>
-                            {% csrf_token %}
-                            
-                            <div class="row g-3">
-                                <!-- Champ Nom -->
-                                <div class="col-md-6">
-                                    {{ form.nom.label_tag }}
-                                    {{ form.nom }}
-                                    {% if form.nom.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.nom.errors.0 }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- Champ Email -->
-                                <div class="col-md-6">
-                                    {{ form.email.label_tag }}
-                                    {{ form.email }}
-                                    {% if form.email.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.email.errors.0 }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                
-                               
-                                
-                                <!-- Champ Sujet -->
-                                <div class="col-12">
-                                    {{ form.sujet.label_tag }}
-                                    {{ form.sujet }}
-                                    {% if form.sujet.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.sujet.errors.0 }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- Champ Message -->
-                                <div class="col-12">
-                                    {{ form.message.label_tag }}
-                                    {{ form.message }}
-                                    {% if form.message.errors %}
-                                        <div class="invalid-feedback d-block">
-                                            {{ form.message.errors.0 }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                                
-                                <!-- Bouton de soumission -->
-                                <div class="col-12">
-                                    <button type="submit" class="btn btn-primary w-100 py-3">
-                                        <i class="bi bi-send-fill me-2"></i> Envoyer le message
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
+        <div class="row g-4">
+            <!-- Contact Form -->
+            <div class="col-lg-7">
+                <div class="mi-form-card animate__animated animate__fadeInUp">
+                    <div class="mi-form-header">
+                        <h2 class="mi-form-title text-white"><i class="fas fa-paper-plane me-2"></i>Envoyez-nous un message</h2>
                     </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm rounded-3 h-100">
-                    <div class="card-body p-4 p-md-5">
-                        <h3 class="h4 text-primary mb-4">Nos Coordonnées</h3>
-
-                        <!-- Adresse -->
-                        <div class="d-flex mb-4">
-                            <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                <i class="bi bi-geo-alt-fill text-primary fs-5"></i>
+                    <form method="post" class="mi-contact-form">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="mi-input-group">
+                                    <input type="text" id="nom" name="nom" class="mi-form-input" 
+                                        value="{{ submitted_data.nom }}" required>
+                                    <label for="nom" class="mi-input-label">Nom</label>
+                                    <div class="mi-input-bar"></div>
+                                </div>
                             </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h4 class="h6 text-accent mb-1">Adresse</h4>
-                                <p class="mb-0">123 Avenue des Délices, Lomé, Togo</p>
+                            <div class="col-md-6">
+                                <div class="mi-input-group">
+                                    <input type="text" id="prenom" name="prenom" class="mi-form-input"
+                                        value="{{ submitted_data.prenom }}">
+                                    <label for="prenom" class="mi-input-label">Prénom</label>
+                                    <div class="mi-input-bar"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mi-input-group">
+                                    <input type="email" id="email" name="email" class="mi-form-input"
+                                        value="{{ submitted_data.email }}" required>
+                                    <label for="email" class="mi-input-label">Email</label>
+                                    <div class="mi-input-bar"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mi-input-group">
+                                    <input type="tel" id="telephone" name="telephone" class="mi-form-input"
+                                        value="{{ submitted_data.telephone }}">
+                                    <label for="telephone" class="mi-input-label">Téléphone</label>
+                                    <div class="mi-input-bar"></div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mi-input-group">
+                                    <select id="sujet" name="sujet" class="mi-form-select" required>
+                                        <option value="" selected disabled hidden></option>
+                                        <option value="probleme_annonce" {% if submitted_data.sujet == 'probleme_annonce' %}selected{% endif %}>
+                                            Problème avec une annonce
+                                        </option>
+                                        <option value="signalement_utilisateur" {% if submitted_data.sujet == 'signalement_utilisateur' %}selected{% endif %}>
+                                            Signaler un utilisateur
+                                        </option>
+                                        <option value="echange_produit" {% if submitted_data.sujet == 'echange_produit' %}selected{% endif %}>
+                                            Question sur un échange de produit
+                                        </option>
+                                        <option value="probleme_transaction" {% if submitted_data.sujet == 'probleme_transaction' %}selected{% endif %}>
+                                            Problème de transaction
+                                        </option>
+                                        <option value="suggestion_fonctionnalite" {% if submitted_data.sujet == 'suggestion_fonctionnalite' %}selected{% endif %}>
+                                            Suggestion de fonctionnalité
+                                        </option>
+                                        <option value="partenariat" {% if submitted_data.sujet == 'partenariat' %}selected{% endif %}>
+                                            Demande de partenariat
+                                        </option>
+                                        <option value="autre" {% if submitted_data.sujet == 'autre' %}selected{% endif %}>
+                                            Autre demande
+                                        </option>
+                                    </select>
+                                    <label for="sujet" class="mi-select-label">Sujet</label>
+                                    <div class="mi-select-arrow"></div>
+                                </div>
+                            </div>
+
+
+
+
+                            <div class="col-12">
+                                <div class="mi-input-group">
+                                    <textarea id="message" name="message" class="mi-form-textarea" required>{{ submitted_data.message }}</textarea>
+                                    <label for="message" class="mi-textarea-label">Message</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <p class="">
+                                    En soumettant ce formulaire, vous acceptez <u>nos conditions générales ainsi que notre politique de
+                                    confidentialité</u>, qui explique comment nous pouvons collecter, utiliser et divulguer vos informations
+                                    personnelles, y compris à des tiers.                                    
+                                </p>
+                                <button type="submit" class="mi-submit-btn">
+                                    <span>Envoyer</span>
+                                    <i class="fas fa-paper-plane ms-2"></i>
+                                </button>
+                                
+                                <!-- Messages de confirmation placés après le bouton -->
+                                {% if messages %}
+                                <div class="mt-3">
+                                    {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }}">
+                                        {{ message }}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
-                       <!-- Téléphone -->
-
-                        <div class="d-flex mb-4">
-                            <a href="tel:+22890000000"style="text-decoration:none">
-                            <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                <i class="bi bi-telephone-fill text-primary fs-5"></i>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h4 class="h6 text-accent mb-1">Téléphone</h4>
-                                <p class="mb-0">
-                                    <a href="tel:+22890000000" class="contact-link" style="text-decoration:none">+228 99667572</a>
-                                </p>
-                                <p class="mb-0">Service client : 24h/24, 7j/7</p>
-                            </div>
-                            </a>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="d-flex mb-4">
-                            <div class="flex-shrink-0 bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                            <a  href="mailto:contact@canaanglacier.tg"  style="text-decoration:none">
-                            <i class="bi bi-envelope-fill text-primary fs-5"></i>
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h4 class="h6 text-accent mb-1">Email</h4>
-                                <p class="mb-0">
-                                    <a href="mailto:contact@canaanglacier.com" class="contact-link" style="text-decoration:none">contact@canaanglacier.com</a>
-                                </p>
-                                <p class="mb-0">
-                                    <a href="mailto:support@canaanglacier.com" class="contact-link" style="text-decoration:none">support@canaanglacier.com</a>
-                                </p>
-                            </div>
-                            </a>
-                        </div>
-
-
-                        <hr class="my-4">
-
-                        <!-- Horaires -->
-                        <h4 class="h6 text-accent mb-3">Horaires d'ouverture</h4>
-                        <ul class="list-unstyled">
-                            <li class="d-flex justify-content-between py-2 border-bottom">
-                                <span>Lundi - Vendredi</span>
-                                <span>08h - 20h</span>
-                            </li>
-                            <li class="d-flex justify-content-between py-2 border-bottom">
-                                <span>Samedi</span>
-                                <span>09h - 22h</span>
-                            </li>
-                            <li class="d-flex justify-content-between py-2">
-                                <span>Dimanche</span>
-                                <span>10h - 18h</span>
-                            </li>
-                        </ul>
-                    </div>
+                    </form>
                 </div>
             </div>
 
+            <!-- Contact Info -->
+            <div class="col-lg-5">
+                <div class="mi-info-card animate__animated animate__fadeInUp animate__delay-1s">
+                    <div class="mi-info-header">
+                        <h2 class="mi-info-title text-white"><i class="fas fa-info-circle me-2"></i>Nos coordonnées</h2>
+                    </div>
+                    <div class="mi-info-content">
+                        <div class="mi-contact-item">
+                            <div class="mi-contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h3 class="mi-contact-category">Adresse</h3>
+                                <p class="mi-contact-detail">Agoè dans le von de koffi Panou à 300 m du goudron en face de la mosquée, Lomé</p>
+                            </div>
+                        </div>
+                        <div class="mi-contact-item">
+                            <div class="mi-contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div>
+                                <h3 class="mi-contact-category">Email</h3>
+                                <p class="mi-contact-detail">
+                                     <a  href="mailto:contact@canaanglacier.com"  style="text-decoration:none">contact@canaanglacier.com</a>
+                                </p>
+                                <small>
+                                    Contactez-nous pour toute question sur nos produits, vos commandes, la livraison, ou pour toute demande de partenariat et événement spécial.
+                                </small>
+
+                            </div>
+                        </div>
+                        <div class="mi-contact-item">
+                            <div class="mi-contact-icon">
+                                <i class="fas fa-phone-alt"></i>
+                            </div>
+                            <div>
+                                <h3 class="mi-contact-category">Téléphone</h3>
+                                <p class="mi-contact-detail">  <a href="tel:+22892745959" class="contact-link" style="text-decoration:none">+228 92745959</a>
+</p>
+                                <small>24/7 Appelez-nous pour parler à un
+                                    membre de notre equipe. Nous sommes
+                                    toujours ravis de vous aider.
+                                  (+228) 92745959
+                                </small>
+                            </div>
+                        </div>
+                        <div class="mi-contact-item">
+                            <div class="mi-contact-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>
+                                <h3 class="mi-contact-category">Horaires</h3>
+                                <p class="mi-contact-detail"> 24h/24 et 7j/7</p>
+                            </div>
+                        </div>
+                        <div class="mi-social-links">
+                            <a href="#" class="mi-social-link"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="mi-social-link"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="mi-social-link"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="mi-social-link"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="mi-social-link"><i class="fab fa-youtube"></i></a>
+                            <a href="#" class="mi-social-link"><i class="fab fa-tiktok"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</section>
+</div>
 
-<!-- Section FAQ -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 text-center mb-5">
-                <h2 class="display-5 fw-bold text-accent">FAQ</h2>
-                <p class="lead text-muted">Questions fréquemment posées</p>
+<!-- FAQ Section -->
+<section class="faq-section position-relative py-5 bg-light" id="faq">
+    <!-- Parallax Background Image -->
+    <div class="position-absolute top-0 start-0 w-100 h-100 bg-pattern" 
+         style="background-image: url('{% static 'bg-image.jpg' %}');
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed;
+            
+                z-index: -1;">
+    </div> 
+    
+    <!-- Content -->
+    <div class="container py-5 position-relative">
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-8 text-center">
+                <h2 class="display-5 fw-bold text-glacier mb-3">
+                    <i class="fas fa-question-circle me-2 text-swoosh"></i>Questions Fréquentes
+                </h2>
+                <p class="lead text-muted">Trouvez rapidement des réponses à vos questions</p>
             </div>
         </div>
-        
+
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="accordion" id="faqAccordion">
-                    <!-- Item 1 -->
-                    <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+                    <!-- Question 1 - Livraison -->
+                    <div class="accordion-item border-0 rounded-3 overflow-hidden mb-3 shadow-sm">
                         <h3 class="accordion-header" id="headingOne">
-                            <button class="accordion-button collapsed bg-white text-accent" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                                Quels sont les modes de paiement acceptés ?
+                            <button class="accordion-button collapsed rounded-3 py-3 bg-white" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#collapseOne" 
+                                    aria-expanded="false" aria-controls="collapseOne">
+                                <i class="fas fa-truck me-3 text-swoosh"></i>
+                                <span class="fw-bold">Quels sont les délais et options de livraison ?</span>
                             </button>
                         </h3>
-                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
-                            <div class="accordion-body">
-                                Nous acceptons les paiements par Mobile Money (T-Money, Flooz), cartes bancaires (Visa, Mastercard) et paiement à la livraison pour les retraits en boutique.
+                        <div id="collapseOne" class="accordion-collapse collapse" 
+                             aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body bg-white">
+                                <p>Nous proposons :</p>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-clock me-2 text-glacier"></i> <strong>Livraison express :</strong> Sous 2h dans Lomé</li>
+                                    <li class="mb-2"><i class="fas fa-store me-2 text-glacier"></i> <strong>Retrait en boutique :</strong> Préparation en 30 minutes</li>
+                                    <li><i class="fas fa-shipping-fast me-2 text-glacier"></i> <strong>Autres villes :</strong> 24-48h via transport réfrigéré</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Item 2 -->
-                    <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+                    <!-- Question 2 - Paiements -->
+                    <div class="accordion-item border-0 rounded-3 overflow-hidden mb-3 shadow-sm">
                         <h3 class="accordion-header" id="headingTwo">
-                            <button class="accordion-button collapsed bg-white text-accent" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-                                Quel est le délai de livraison ?
+                            <button class="accordion-button collapsed rounded-3 py-3 bg-white" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#collapseTwo" 
+                                    aria-expanded="false" aria-controls="collapseTwo">
+                                <i class="fas fa-money-bill-wave me-3 text-swoosh"></i>
+                                <span class="fw-bold">Quels modes de paiement acceptez-vous ?</span>
                             </button>
                         </h3>
-                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
-                            <div class="accordion-body">
-                                Nous garantissons une livraison en moins de 2 heures dans Lomé pour les commandes passées avant 18h. Pour les autres villes, le délai est de 24 à 48 heures.
+                        <div id="collapseTwo" class="accordion-collapse collapse" 
+                             aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body bg-white">
+                                <p>Nous acceptons plusieurs moyens de paiement :</p>
+                                <div class="d-flex flex-wrap gap-3 mt-3">
+                                    <span class="badge bg-glacier text-white p-2"><i class="fas fa-mobile-alt me-1"></i> Mobile Money</span>
+                                    <span class="badge bg-glacier text-white p-2"><i class="fas fa-credit-card me-1"></i> Cartes bancaires</span>
+                                    <span class="badge bg-glacier text-white p-2"><i class="fas fa-money-bill-alt me-1"></i> Espèces</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Question 3 - Ingrédients -->
+                    <div class="accordion-item border-0 rounded-3 overflow-hidden mb-3 shadow-sm">
+                        <h3 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed rounded-3 py-3 bg-white" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#collapseThree" 
+                                    aria-expanded="false" aria-controls="collapseThree">
+                                <i class="fas fa-seedling me-3 text-swoosh"></i>
+                                <span class="fw-bold">Utilisez-vous des ingrédients locaux ?</span>
+                            </button>
+                        </h3>
+                        <div id="collapseThree" class="accordion-collapse collapse" 
+                             aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body bg-white">
+                                <p>Oui, nous sommes engagés dans une démarche locale :</p>
+                                <ul class="list-check">
+                                    <li class="mb-2">Fruits de saison togolais</li>
+                                    <li class="mb-2">Lait de la région</li>
+                                    <li>Sucre de canne local</li>
+                                </ul>
+                                <p class="mt-3 small text-glacier"><i class="fas fa-leaf me-1"></i> 100% de nos ingrédients proviennent de producteurs locaux.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Question 4 - Conservation -->
+                    <div class="accordion-item border-0 rounded-3 overflow-hidden mb-3 shadow-sm">
+                        <h3 class="accordion-header" id="headingFour">
+                            <button class="accordion-button collapsed rounded-3 py-3 bg-white" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#collapseFour" 
+                                    aria-expanded="false" aria-controls="collapseFour">
+                                <i class="fas fa-snowflake me-3 text-swoosh"></i>
+                                <span class="fw-bold">Comment conserver vos glaces ?</span>
+                            </button>
+                        </h3>
+                        <div id="collapseFour" class="accordion-collapse collapse" 
+                             aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body bg-white">
+                                <div class="alert alert-glacier">
+                                    <i class="fas fa-info-circle me-2"></i> Nos glaces sont livrées dans des emballages isothermes (3h de fraîcheur garantie)
+                                </div>
+                                <ul>
+                                    <li class="mb-2"><strong>Température :</strong> -18°C au congélateur</li>
+                                    <li class="mb-2"><strong>Conservation :</strong> Jusqu'à 2 semaines</li>
+                                    <li><strong>Dégustation :</strong> Sortez 5-10 min avant service</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Question 5 - Événements -->
+                    <div class="accordion-item border-0 rounded-3 overflow-hidden mb-3 shadow-sm">
+                        <h3 class="accordion-header" id="headingFive">
+                            <button class="accordion-button collapsed rounded-3 py-3 bg-white" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#collapseFive" 
+                                    aria-expanded="false" aria-controls="collapseFive">
+                                <i class="fas fa-calendar-alt me-3 text-swoosh"></i>
+                                <span class="fw-bold">Puis-je commander pour un événement ?</span>
+                            </button>
+                        </h3>
+                        <div id="collapseFive" class="accordion-collapse collapse" 
+                             aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body bg-white">
+                                <p>Absolument ! Nous proposons :</p>
+                                <div class="row g-3 mt-3">
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded bg-light">
+                                            <h5 class="text-swoosh"><i class="fas fa-birthday-cake me-2"></i> Événements privés</h5>
+                                            <p class="small mb-0">Mariages, anniversaires...</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded bg-light">
+                                            <h5 class="text-swoosh"><i class="fas fa-briefcase me-2"></i> Événements pros</h5>
+                                            <p class="small mb-0">Séminaires, lancements...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="mt-3"><a href="#contact" class="btn btn-sm btn-glacier">Contactez-nous</a> pour discuter de votre projet !</p>
                             </div>
                         </div>
                     </div>
@@ -203,26 +349,67 @@
         </div>
     </div>
 </section>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-// Validation du formulaire
-(function () {
-  'use strict'
-  
-  const forms = document.querySelectorAll('.needs-validation')
-  
-  Array.from(forms).forEach(form => {
-    form.addEventListener('submit', event => {
-      if (!form.checkValidity()) {
-        event.preventDefault()
-        event.stopPropagation()
-      }
+<style>
+    
+    .accordion-button:not(.collapsed) {
+        color: var(--teal-glacier);
+        background-color: var(--teal-light);
+    }
+    
+    .accordion-button:focus {
+        box-shadow: 0 0 0 0.25rem rgba(0, 184, 181, 0.25);
+        border-color: var(--teal-glacier);
+    }
+    
+    .list-check {
+        list-style: none;
+        padding-left: 0;
+    }
+    
+    .list-check li {
+        position: relative;
+        padding-left: 1.75rem;
+    }
+    
+    .list-check li:before {
+        content: "\f00c";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        position: absolute;
+        left: 0;
+        color: var(--teal-glacier);
+    }
+    
+    @media (max-width: 768px) {
+        .faq-section {
+            padding: 2rem 0;
+        }
+    }
+</style>
+<!-- Map Section -->
+<section class="py-0">
+    <div class="container-fluid px-0">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.521260322283!2d1.215155214768757!3d6.202595295493858!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1023e3838c8a8a6b%3A0x4a1e3a0e5f5b5b5b!2sLom%C3%A9%2C%20Togo!5e0!3m2!1sfr!2sfr!4v1623251234567!5m2!1sfr!2sfr" 
+                width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </div>
+</section>
 
-      form.classList.add('was-validated')
-    }, false)
-  })
-})()
-</script>
+<style>
+    .mi-form-card, .mi-info-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    .mi-form-card:hover, .mi-info-card:hover {
+        transform: translateY(-5px);
+    }
+    .accordion-button:not(.collapsed) {
+        color: #4A90E2;
+        background-color: rgba(74, 144, 226, 0.05);
+    }
+    .accordion-button:focus {
+        box-shadow: 0 0 0 0.25rem rgba(244, 92, 7, 0.25);
+    }
+</style>
 {% endblock %}

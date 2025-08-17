@@ -1,18 +1,24 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, View,DeleteView,DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
-from .models import Produit, Categorie, Panier, Commande, Contact, Utilisateur,LignePanier, AdresseLivraison, Coupon,Client, Gerant, Serveur, HistoriqueAction, Notification
-from .forms import ContactForm, NewsletterForm, CommandeForm,InscriptionForm, ConnexionForm, CreerGerantForm, CreerServeurForm, ProduitForm
-from django.contrib.auth import login, authenticate, logout
+from .models import *
+from .forms import *
+from django.contrib.auth import login, authenticate, logout,get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils import timezone
 from django.db import models
 from datetime import timedelta
-
-
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib.messages.views import SuccessMessageMixin
+User = get_user_model()
+from django.db.models import Q
+from django.db.models import Count
+from decimal import Decimal
+from django.core.mail import send_mail
+from django.conf import settings
 # ==================== UTILITAIRES ====================
 
 def enregistrer_action(utilisateur, type_action, description, objet_concerne=None, objet_id=None, details=None, request=None):
@@ -47,19 +53,62 @@ def creer_notification(utilisateur, type_notification, titre, message, commande=
 
 
 #inscription et connexion
+# class InscriptionView(CreateView):
+#     model = Utilisateur
+#     form_class = InscriptionForm
+#     template_name = 'frontOfice/compte/inscription.html'
+#     success_url = reverse_lazy('home')
+
+#     def form_valid(self, form):
+#         response = super().form_valid(form)
+#         login(self.request, self.object)  
+#         messages.success(self.request, "Inscription réussie !")
+#         return response
+    
+
 class InscriptionView(CreateView):
     model = Utilisateur
     form_class = InscriptionForm
     template_name = 'frontOfice/compte/inscription.html'
-    success_url = reverse_lazy('home')
+
+    def get_success_url(self):
+        next_url = self.request.POST.get('next') or self.request.GET.get('next')
+        return next_url if next_url else reverse_lazy('home')
 
     def form_valid(self, form):
         response = super().form_valid(form)
         login(self.request, self.object)  
         messages.success(self.request, "Inscription réussie !")
-        return response
+        return redirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['next'] = self.request.GET.get('next', '')
+        return context
+
+# def connexion(request):
+#     if request.method == 'POST':
+#         form = ConnexionForm(request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data['username']
+#             password = form.cleaned_data['password']
+#             user = authenticate(request, username=username, password=password)
+            
+#             if user is not None:
+#                 login(request, user)
+#                 messages.success(request, f"Bienvenue {user.username} !")
+#                 return redirect('home')
+#             else:
+#                 messages.error(request, "Identifiants incorrects")
+#     else:
+#         form = ConnexionForm()
     
+#     return render(request, 'frontOfice/compte/connexion.html', {'form': form})
+
+
 def connexion(request):
+    next_url = request.GET.get('next', 'home')
+
     if request.method == 'POST':
         form = ConnexionForm(request.POST)
         if form.is_valid():
@@ -69,14 +118,30 @@ def connexion(request):
             
             if user is not None:
                 login(request, user)
+
+                # Fusionner panier session avec panier utilisateur
+                panier_session = request.session.get('panier', {})
+                if panier_session:
+                    panier_user, created = Panier.objects.get_or_create(utilisateur=user)
+                    for produit_id, quantite in panier_session.items():
+                        produit = Produit.objects.get(id=produit_id)
+                        ligne, created = LignePanier.objects.get_or_create(
+                            panier=panier_user, produit=produit
+                        )
+                        if not created:
+                            ligne.quantite += quantite
+                            ligne.save()
+                    del request.session['panier']
+
                 messages.success(request, f"Bienvenue {user.username} !")
-                return redirect('home')
+                return redirect(next_url)
             else:
                 messages.error(request, "Identifiants incorrects")
     else:
         form = ConnexionForm()
-    
-    return render(request, 'frontOfice/compte/connexion.html', {'form': form})
+
+    return render(request, 'frontOfice/compte/connexion.html', {'form': form, 'next': next_url})
+
 
 def deconnexion(request):
     logout(request)
@@ -94,9 +159,21 @@ def categories_context(request):
     return {'categories': categories}
 
 def home(request):
-    produits_nouveautes = Produit.objects.order_by('-id')[:8]
-    produits_populaires = Produit.objects.order_by('?')[:4]
-    categories = Categorie.objects.all()[:6]
+    # Produits nouveaux (8 derniers produits)
+    produits_nouveautes = Produit.objects.filter(
+        quantite_disponible__gt=0
+    ).order_by('-date_creation')[:8]
+    
+    # Produits populaires (marqués comme tels + en stock)
+    produits_populaires = Produit.objects.filter(
+        est_populaire=True,
+        quantite_disponible__gt=0
+    ).order_by('?')[:4]  # Mélange pour varier l'affichage
+    
+    # Catégories avec des produits disponibles
+    categories = Categorie.objects.filter(
+        produits__quantite_disponible__gt=0
+    ).distinct().order_by('ordre_affichage')[:6]
     
     context = {
         'nouveautes': produits_nouveautes,
@@ -104,6 +181,7 @@ def home(request):
         'categories': categories,
     }
     return render(request, 'frontOfice/index.html', context)
+
 
 def apropos(request):
     return render(request,'frontOfice/apropos.html')
@@ -141,83 +219,6 @@ class ProduitDetailView(DetailView):
         ).exclude(id=self.object.id)[:4]
         return context
 
-# Gestion Panier
-# class PanierView(ListView):
-#     template_name = 'frontOfice/paniers/panier.html'
-
-#     def get(self, request):
-#         if request.user.is_authenticated:
-#             panier, created = Panier.objects.get_or_create(client__utilisateur=request.user)
-#         else:
-#             panier_id = request.session.get('panier_id')
-#             if panier_id:
-#                 panier = Panier.objects.filter(id=panier_id).first()
-#             else:
-#                 panier = Panier.objects.create()
-#                 request.session['panier_id'] = panier.id
-
-#         commandes = panier.commande_set.all()
-#         total = sum(commande.produit.prix * commande.quantite for commande in commandes)
-
-#         return render(request, self.template_name, {
-#             'commandes': commandes,
-#             'total': total,
-#         })
-
-# def ajouter_au_panier(request, produit_id):
-#     produit = get_object_or_404(Produit, id=produit_id)
-
-#     if request.user.is_authenticated:
-#         panier, _ = Panier.objects.get_or_create(client__utilisateur=request.user)
-#     else:
-#         panier_id = request.session.get('panier_id')
-#         if panier_id:
-#             panier = Panier.objects.filter(id=panier_id).first()
-#         else:
-#             panier = Panier.objects.create()
-#             request.session['panier_id'] = panier.id
-
-#     commande, created = Commande.objects.get_or_create(
-#         panier=panier,
-#         produit=produit,
-#         defaults={'quantite': 1}
-#     )
-#     if not created:
-#         commande.quantite += 1
-#         commande.save()
-
-#     messages.success(request, f"{produit.nom} ajouté à votre panier")
-#     return redirect('panier')
-
-
-# def supprimer_du_panier(request, commande_id):
-#     if request.user.is_authenticated:
-#         panier = Panier.objects.filter(client__utilisateur=request.user).first()
-#     else:
-#         panier_id = request.session.get('panier_id')
-#         panier = Panier.objects.filter(id=panier_id).first()
-
-#     commande = get_object_or_404(Commande, id=commande_id, panier=panier)
-#     commande.delete()
-
-#     messages.success(request, "Produit retiré du panier")
-#     return redirect('panier')
-
-# def modifier_quantite(request, commande_id):
-#     commande = get_object_or_404(Commande, id=commande_id, panier__client__utilisateur=request.user)
-#     action = request.GET.get('action')
-    
-#     if action == 'increase':
-#         commande.quantite += 1
-#     elif action == 'decrease' and commande.quantite > 1:
-#         commande.quantite -= 1
-    
-#     commande.save()
-#     return redirect('panier')
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Produit, Panier, LignePanier, Commande
 
 def base_view(request):
     cart_items_count = 0
@@ -325,57 +326,175 @@ def vider_panier(request):
     return redirect('panier')
 
 
-# Checkout
+
 class CheckoutView(LoginRequiredMixin, View):
-    template_name = 'frontOfice/panier/checkout.html'
+    template_name = 'frontOffice/panier/checkout.html'
     form_class = CommandeForm
-    login_url = reverse_lazy('connexion')  # ou 'connexion'
+    login_url = reverse_lazy('connexion')  
 
     def get(self, request):
         panier = Panier.objects.filter(client__utilisateur=request.user).first()
-        if not panier or not panier.commande_set.exists():
+        
+        if not panier or not panier.produits.exists():
             messages.error(request, "Votre panier est vide")
             return redirect('panier')
 
-        form = self.form_class()
-        return render(request, self.template_name, {'form': form})
+        initial_data = {
+            'mode_livraison': 'emporter',
+            'mode_paiement': 'espece',
+        }
+        
+        form = self.form_class(initial=initial_data)
+        return render(request, self.template_name, {
+            'form': form,
+            'panier': panier,
+            'total': panier.get_total()
+        })
 
     def post(self, request):
         form = self.form_class(request.POST)
         panier = Panier.objects.filter(client__utilisateur=request.user).first()
 
-        if not panier or not panier.commande_set.exists():
+        if not panier or not panier.produits.exists():
             messages.error(request, "Votre panier est vide")
             return redirect('panier')
 
         if form.is_valid():
-            # Traitement commande ici...
-            panier.commande_set.all().delete()
+            commande = form.save(commit=False)
+            commande.client = panier.client
+            commande.panier = panier
+            commande.montant_total = panier.get_total()
+            commande.save()
+            
+            # Vider le panier après commande
+            panier.produits.clear()
+            
             messages.success(request, "Votre commande a été passée avec succès!")
-            return redirect('commande_confirmation')
+            return redirect('commande_confirmation', commande_id=commande.id)
 
-        return render(request, self.template_name, {'form': form})
-
-
+        return render(request, self.template_name, {
+            'form': form,
+            'panier': panier,
+            'total': panier.get_total()
+        })
 # Contact
 
 def contact_success(request):
     return render(request, 'frontOfice/contactSuccess.html')
 
-class ContactView(CreateView):
-    model = Contact
-    form_class = ContactForm
-    template_name = 'frontOfice/contact.html'
-    success_url = reverse_lazy('contact_success')  
-    
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        messages.success(self.request, "Votre message a été envoyé avec succès! Nous vous répondrons dans les plus brefs délais.")
-        return response
-    
-    def form_invalid(self, form):
-        messages.error(self.request, "Veuillez corriger les erreurs dans le formulaire.")
-        return super().form_invalid(form)
+def contact_view(request):
+    faq_questions = [
+    {
+        'id': 'question1',
+        'question': "Comment passer une commande ?",
+        'reponse': "Sélectionnez vos glaces préférées, ajoutez-les au panier, puis validez votre commande en suivant les étapes de paiement."
+    },
+    {
+        'id': 'question2',
+        'question': "Quels modes de paiement acceptez-vous ?",
+        'reponse': "Nous acceptons les paiements en espèces à la livraison, ainsi que par TMoney et Flooz."
+    },
+    {
+        'id': 'question3',
+        'question': "Proposez-vous un service de livraison ?",
+        'reponse': "Oui, nous livrons à domicile selon les zones couvertes. Les frais et délais de livraison sont indiqués lors de la commande."
+    },
+    {
+        'id': 'question4',
+        'question': "Puis-je commander en grande quantité pour un événement ?",
+        'reponse': "Oui, il est possible de passer une commande spéciale pour vos fêtes, mariages ou événements. Contactez-nous via la page de contact."
+    },
+    {
+        'id': 'question5',
+        'question': "Vos produits sont-ils faits maison ?",
+        'reponse': "Oui, toutes nos glaces sont préparées avec soin à partir d’ingrédients de qualité et selon nos recettes artisanales."
+    },
+    {
+        'id': 'question6',
+        'question': "Comment savoir si ma commande est confirmée ?",
+        'reponse': "Vous recevrez une confirmation par notification et par email une fois votre commande validée."
+    },
+    {
+        'id': 'question7',
+        'question': "Quels parfums de glaces proposez-vous ?",
+        'reponse': "Nous proposons plusieurs parfums : vanille, chocolat, fraise, mangue, citron, et bien d’autres selon la saison."
+    },
+    {
+        'id': 'question8',
+        'question': "Puis-je annuler ma commande après validation ?",
+        'reponse': "Oui, vous pouvez annuler votre commande avant qu’elle ne soit expédiée en contactant notre service client."
+    },
+]
+
+
+    if request.method == 'POST':
+        # Récupération des données
+        nom = request.POST.get('nom')
+        prenom = request.POST.get('prenom')
+        email = request.POST.get('email')
+        telephone = request.POST.get('telephone')
+        sujet = request.POST.get('sujet')
+        message = request.POST.get('message')
+
+        # Validation
+        if not nom or not email or not sujet or not message:
+            messages.error(request, "Veuillez remplir tous les champs obligatoires.")
+            return render(request, 'frontOfice/contact.html', {
+                'submitted_data': request.POST,
+                'faq_questions': faq_questions
+            })
+
+        try:
+            # Enregistrement en base
+            contact = ContactMessage.objects.create(
+                nom=nom,
+                prenom=prenom if prenom else None,
+                email=email,
+                telephone=telephone if telephone else None,
+                sujet=sujet,
+                message=message
+            )
+
+            # Envoi d'email
+            sujet_email = f"[Canaan glacier Contact] {contact.get_sujet_display()}"
+            message_email = f"""
+            Nouveau message de contact:
+            
+            Nom: {contact.nom}
+            Prénom: {contact.prenom if contact.prenom else 'Non fourni'}
+            Email: {contact.email}
+            Téléphone: {contact.telephone if contact.telephone else 'Non fourni'}
+            Sujet: {contact.get_sujet_display()}
+            
+            Message:
+            {contact.message}
+            
+            Date: {contact.date_soumission.strftime('%d/%m/%Y %H:%M')}
+            """
+
+            send_mail(
+                sujet_email,
+                message_email,
+                settings.DEFAULT_FROM_EMAIL,
+                ['allodekanybenjamin@gmail.com'],  
+                fail_silently=False,
+            )
+
+            messages.success(request, "Votre message a bien été envoyé ! Nous vous contacterons bientôt.")
+            return redirect('contact_success')
+
+        except Exception as e:
+            messages.error(request, f"Une erreur est survenue : {str(e)}")
+            return render(request, 'frontOfice/contact.html', {
+                'submitted_data': request.POST,
+                'faq_questions': faq_questions
+            })
+
+    return render(request, 'frontOfice/contact.html', {
+        'faq_questions': faq_questions
+    })
+
+
 # Newsletter
 class NewsletterSubscribeView(CreateView):
     def post(self, request):
@@ -388,16 +507,27 @@ class NewsletterSubscribeView(CreateView):
         return redirect(request.META.get('HTTP_REFERER', '/')) 
 
 # Compte Utilisateur
+
 class ProfileView(LoginRequiredMixin, UpdateView):
     template_name = 'frontOfice/compte/profil.html'
-    fields = ['first_name', 'last_name', 'email', 'telephone']
-    success_url = reverse_lazy('profile')
-    
+    form_class = ProfilForm
+    success_url = reverse_lazy('profile')  # ou 'profil' selon ton urls.py
+
     def get_object(self):
         return self.request.user
 
+class CustomPasswordChangeView(SuccessMessageMixin, PasswordChangeView):
+    template_name = 'frontOfice/compte/'
+    success_url = reverse_lazy('profile')  
+    success_message = "Votre mot de passe a été modifié avec succès."
 
-    from django.shortcuts import render, redirect, get_object_or_404
+class DeleteAccountView(LoginRequiredMixin, DeleteView):
+    model = User
+    template_name = 'frontOfice/compte/supprimer_compte.html'
+    success_url = reverse_lazy('connexion')
+
+    def get_object(self, queryset=None):
+        return self.request.user
 
 @login_required(login_url='connexion')
 def valider_commande(request):
@@ -496,7 +626,7 @@ def dashboard_admin(request):
     produits_populaires = Produit.objects.order_by('-quantite_disponible')[:5]
     
     # Messages de contact non lus
-    messages_contact = Contact.objects.order_by('-date_contact')[:5]
+    messages_contact = ContactMessage.objects.order_by('-date_soumission')[:5]
     
     # Utilisateurs par rôle
     stats_roles = {
@@ -1026,129 +1156,142 @@ def historique_actions(request):
 
 # ==================== GESTION DES PRODUITS (GÉRANT) ====================
 
-@login_required
-def ajouter_produit(request):
-    """
-    Vue pour que le gérant puisse ajouter un nouveau produit
-    """
-    if request.user.role != 'gerant':
-        messages.error(request, "Accès non autorisé")
-        return redirect('home')
+class ListeProduitsView(ListView):
+    model = Produit
+    template_name = 'dashboards/gerant/liste_produit.html'
+    context_object_name = 'produits'
+    paginate_by = 10
     
-    if request.method == 'POST':
-        form = ProduitForm(request.POST, request.FILES)
-        if form.is_valid():
-            produit = form.save(commit=False)
-            # Associer le produit au gérant si nécessaire
-            try:
-                gerant = Gerant.objects.get(utilisateur=request.user)
-                produit.gerant = gerant
-            except Gerant.DoesNotExist:
-                pass
-            
-            produit.save()
-            
-            # Enregistrer l'action
-            enregistrer_action(
-                request.user, 
-                'produit_ajout', 
-                f"Ajout du produit '{produit.nom}'",
-                objet_concerne='Produit',
-                objet_id=produit.id,
-                details={'nom': produit.nom, 'prix': float(produit.prix)},
-                request=request
-            )
-            
-            messages.success(request, f"Le produit '{produit.nom}' a été ajouté avec succès.")
-            return redirect('dashboard_gerant')
-    else:
-        form = ProduitForm()
-    
-    context = {
-        'form': form,
-        'titre': 'Ajouter un Produit'
-    }
-    return render(request, 'dashboards/gerant/ajouter_produit.html', context)
-
-
-@login_required
-def modifier_produit(request, produit_id):
-    """
-    Vue pour que le gérant puisse modifier un produit existant
-    """
-    if request.user.role != 'gerant':
-        messages.error(request, "Accès non autorisé")
-        return redirect('home')
-    
-    produit = get_object_or_404(Produit, id=produit_id)
-    
-    if request.method == 'POST':
-        form = ProduitForm(request.POST, request.FILES, instance=produit)
-        if form.is_valid():
-            ancien_nom = produit.nom
-            produit = form.save()
-            
-            # Enregistrer l'action
-            enregistrer_action(
-                request.user, 
-                'produit_modif', 
-                f"Modification du produit '{ancien_nom}' -> '{produit.nom}'",
-                objet_concerne='Produit',
-                objet_id=produit.id,
-                details={'ancien_nom': ancien_nom, 'nouveau_nom': produit.nom, 'prix': float(produit.prix)},
-                request=request
-            )
-            
-            messages.success(request, f"Le produit '{produit.nom}' a été modifié avec succès.")
-            return redirect('dashboard_gerant')
-    else:
-        form = ProduitForm(instance=produit)
-    
-    context = {
-        'form': form,
-        'produit': produit,
-        'titre': f'Modifier {produit.nom}'
-    }
-    return render(request, 'dashboards/gerant/modifier_produit.html', context)
-
-
-@login_required
-def supprimer_produit(request, produit_id):
-    """
-    Vue pour que le gérant puisse supprimer un produit
-    """
-    if request.user.role != 'gerant':
-        messages.error(request, "Accès non autorisé")
-        return redirect('home')
-    
-    produit = get_object_or_404(Produit, id=produit_id)
-    
-    if request.method == 'POST':
-        nom_produit = produit.nom
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(gerant=self.request.user.gerant)
         
-        # Enregistrer l'action avant la suppression
-        enregistrer_action(
-            request.user, 
-            'produit_suppr', 
-            f"Suppression du produit '{nom_produit}'",
-            objet_concerne='Produit',
-            objet_id=produit.id,
-            details={'nom': nom_produit, 'prix': float(produit.prix)},
-            request=request
-        )
-        
-        produit.delete()
-        messages.success(request, f"Le produit '{nom_produit}' a été supprimé avec succès.")
-        return redirect('dashboard_gerant')
+        # Filtrage par catégorie
+        categorie_id = self.request.GET.get('categorie')
+        if categorie_id:
+            queryset = queryset.filter(categorie__id=categorie_id)
+            
+        # Filtrage par statut de stock
+        stock_status = self.request.GET.get('stock_status')
+        if stock_status == 'disponible':
+            queryset = queryset.filter(quantite_disponible__gt=0)
+        elif stock_status == 'epuise':
+            queryset = queryset.filter(quantite_disponible=0)
+            
+        return queryset
     
-    context = {
-        'produit': produit
-    }
-    return render(request, 'dashboards/gerant/confirmer_suppression.html', context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Categorie.objects.all()
+        return context
 
+class AjouterProduitView(CreateView):
+    model = Produit
+    form_class = ProduitForm
+    template_name = 'dashboards/gerant/ajouter_produit.html'
+    success_url = reverse_lazy('liste_produits')
+    
+    def form_valid(self, form):
+        form.instance.gerant = self.request.user.gerant
+        messages.success(self.request, "Le produit a été ajouté avec succès.")
+        return super().form_valid(form)
+
+class ModifierProduitView(UpdateView):
+    model = Produit
+    form_class = ProduitForm
+    template_name = 'dashboards/gerant/modifier_produit.html'
+    success_url = reverse_lazy('liste_produits')
+    
+    def form_valid(self, form):
+        messages.success(self.request, "Le produit a été modifié avec succès.")
+        return super().form_valid(form)
+
+class SupprimerProduitView(DeleteView):
+    model = Produit
+    template_name = 'dashboards/gerant/supprimer_produit.html'
+    success_url = reverse_lazy('liste_produits')
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, "Le produit a été supprimé avec succès.")
+        return super().delete(request, *args, **kwargs)
+
+class DetailProduitView(DetailView):
+    model = Produit
+    template_name = 'dashboards/gerant/detail_produit.html'
+    context_object_name = 'produit'
+
+def recherche_produits(request):
+    query = request.GET.get('q', '')
+    
+    produits = Produit.objects.filter(
+        Q(nom__icontains=query) | 
+        Q(description__icontains=query),
+        gerant=request.user.gerant
+    ).order_by('nom')
+    
+    return render(request, 'dashboards/gerant/recherche_produits.html', {
+        'produits': produits,
+        'query': query
+    })
+
+class ProduitAPIView(ListView):
+    model = Produit
+    http_method_names = ['get']
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(gerant=self.request.user.gerant)
+        return queryset
+    
+    def render_to_response(self, context, **response_kwargs):
+        produits = list(context['object_list'].values(
+            'id', 'nom', 'prix', 'quantite_disponible', 'image'
+        ))
+        return JsonResponse({'produits': produits})
+    
+
+# ==================== GESTION DES SERVEURS (GÉRANT) ====================
+
+
+class ListeServeursView(ListView):
+    model = Utilisateur
+    template_name = 'dashboards/gerant/liste_serveurs.html'
+    context_object_name = 'serveurs'
+    
+    def get_queryset(self):
+        # Utilisation du bon related_name 'actions'
+        return Utilisateur.objects.filter(
+            role='serveur'
+        ).annotate(
+            total_actions=Count('actions')
+        ).order_by('-total_actions')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Ajoute les statistiques globales
+        context['total_serveurs'] = self.get_queryset().count()
+        context['actions_7j'] = HistoriqueAction.objects.filter(
+            date_action__gte=timezone.now() - timedelta(days=7),
+            utilisateur__role='serveur'
+        ).count()
+        
+        # Statistiques supplémentaires
+        context['total_actions'] = HistoriqueAction.objects.count()
+        context['total_commandes'] = HistoriqueAction.objects.filter(
+            type_action='commande_statut'
+        ).count()
+        context['actions_auj'] = HistoriqueAction.objects.filter(
+            date_action__date=timezone.now().date()
+        ).count()
+        context['serveurs_actifs'] = Utilisateur.objects.filter(
+            role='serveur',
+            actions__isnull=False
+        ).distinct().count()
+        
+        return context
 
 @login_required
-def rapport_serveur(request, serveur_id):
+def rapport_serveur(request, pk):
     """
     Génère un rapport d'activité individuel pour un serveur spécifique
     """
@@ -1156,7 +1299,7 @@ def rapport_serveur(request, serveur_id):
         messages.error(request, "Accès non autorisé")
         return redirect('home')
     
-    serveur = get_object_or_404(Utilisateur, id=serveur_id, role='serveur')
+    serveur = get_object_or_404(Utilisateur, id=pk, role='serveur')
     
     # Période (par défaut: 30 derniers jours)
     periode = request.GET.get('periode', '30')
@@ -1186,10 +1329,7 @@ def rapport_serveur(request, serveur_id):
     # Répartition par type d'action
     for action in actions:
         type_action = action.get_type_action_display()
-        if type_action in stats['actions_par_type']:
-            stats['actions_par_type'][type_action] += 1
-        else:
-            stats['actions_par_type'][type_action] = 1
+        stats['actions_par_type'][type_action] = stats['actions_par_type'].get(type_action, 0) + 1
     
     context = {
         'serveur': serveur,
@@ -1200,3 +1340,116 @@ def rapport_serveur(request, serveur_id):
     }
     
     return render(request, 'dashboards/gerant/rapport_serveur.html', context)
+
+
+@login_required
+def finalisation_commande(request):
+    # Récupération du panier de l'utilisateur connecté
+    try:
+        panier = Panier.objects.get(utilisateur=request.user)
+        if not panier.lignes.exists():
+            messages.warning(request, "Votre panier est vide")
+            return redirect('produits')
+    except Panier.DoesNotExist:
+        messages.warning(request, "Votre panier est vide")
+        return redirect('produits')
+
+    total_panier = sum(l.produit.prix * l.quantite for l in panier.lignes.all())
+    coupon_form = CouponForm(request.POST or None)
+    coupon_message = None
+    coupon = None
+
+    # Application du coupon
+    if request.method == 'POST' and 'appliquer_coupon' in request.POST:
+        if coupon_form.is_valid():
+            code = coupon_form.cleaned_data['code']
+            try:
+                coupon = Coupon.objects.get(code=code, actif=True)
+                if hasattr(coupon, 'is_valide') and coupon.is_valide():
+                    request.session['coupon_id'] = coupon.id
+                    coupon_message = f"Coupon appliqué : {coupon.reduction}% de réduction"
+                else:
+                    coupon_message = "Ce coupon a expiré"
+            except Coupon.DoesNotExist:
+                coupon_message = "Coupon invalide"
+
+    # Finalisation commande
+    if request.method == 'POST' and 'finaliser_commande' in request.POST:
+        nom = request.POST.get('nom')
+        prenom = request.POST.get('prenom')
+        email = request.POST.get('email')
+        telephone = request.POST.get('telephone')
+
+        mode_livraison = request.POST.get('mode_livraison')
+        methode_paiement = request.POST.get('methode_paiement')
+
+        adresse_livraison = None
+        if mode_livraison == 'livraison':
+            adresse_livraison = AdresseLivraison.objects.create(
+                utilisateur=request.user,
+                rue=request.POST.get('rue'),
+                ville=request.POST.get('ville'),
+                code_postal=request.POST.get('code_postal'),
+                pays=request.POST.get('pays')
+            )
+
+        total = total_panier
+        coupon_id = request.session.get('coupon_id')
+        if coupon_id:
+            coupon = Coupon.objects.get(id=coupon_id)
+            if hasattr(coupon, 'is_valide') and coupon.is_valide():
+                total = total * (Decimal(1) - (coupon.reduction / Decimal(100)))
+
+        commande = Commande.objects.create(
+            utilisateur=request.user,
+            total=total,
+            adresse_livraison=adresse_livraison,
+            methode_paiement=methode_paiement,
+            statut='en_attente',
+            coupon=coupon if coupon_id else None
+        )
+
+        for ligne in panier.lignes.all():
+            LigneCommande.objects.create(
+                commande=commande,
+                produit=ligne.produit,
+                quantite=ligne.quantite,
+                prix_unitaire=ligne.produit.prix
+            )
+
+        if methode_paiement in ['mobile_money', 'carte']:
+            Paiement.objects.create(
+                commande=commande,
+                montant=total,
+                statut='en_attente'
+            )
+
+        panier.lignes.all().delete()
+        if 'coupon_id' in request.session:
+            del request.session['coupon_id']
+
+        return redirect('confirmation_commande', commande_id=commande.id)
+
+    context = {
+        'panier': panier,
+        'total_panier': total_panier,
+        'coupon_form': coupon_form,
+        'coupon_message': coupon_message
+    }
+    return render(request, 'frontOfice/commandes/finalisation.html', context)
+
+@login_required
+def confirmation_commande(request, commande_id):
+    commande = get_object_or_404(Commande, id=commande_id, utilisateur=request.user)
+    
+    # Envoyer notification WhatsApp (exemple simplifié)
+    if commande.utilisateur.telephone:
+        message = (
+            f"Merci pour votre commande #{commande.id} chez Canaan Glacier!\n"
+            f"Montant: {commande.total} FCFA\n"
+            f"Statut: En préparation"
+        )
+        # Ici vous intégrerez l'API WhatsApp réelle
+        # envoyer_whatsapp(commande.utilisateur.telephone, message)
+    
+    return render(request, 'commandes/confirmation.html', {'commande': commande})

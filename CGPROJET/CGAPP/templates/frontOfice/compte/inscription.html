@@ -9,21 +9,22 @@
     .form-control, .form-select {
         border: 1px solid #dee2e6;
         border-radius: 8px;
+        padding: 12px 15px;
         font-size: 1rem;
         transition: all 0.3s ease;
         box-shadow: none !important;
     }
 
     .form-control:focus, .form-select:focus {
-        border-color: #00BFFF; /* Bleu glacier */
-        box-shadow: 0 0 0 0.25rem rgba(0, 191, 255, 0.25) !important;
+        border-color: var(--teal-glacier);
+        box-shadow: 0 0 0 0.25rem rgba(0, 184, 181, 0.25) !important;
     }
 
     /* Labels */
     .form-label {
         font-weight: 500;
         margin-bottom: 8px;
-        color: #002147; /* Bleu nuit */
+        color: var(--black-shadow);
     }
 
     /* Placeholders */
@@ -34,7 +35,7 @@
 
     /* Champs spécifiques */
     input[type="tel"] {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300BFFF' viewBox='0 0 16 16'%3E%3Cpath d='M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H5z'/%3E%3Cpath d='M8 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300B8B5' viewBox='0 0 16 16'%3E%3Cpath d='M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H5z'/%3E%3Cpath d='M8 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 15px center;
         background-size: 20px;
@@ -63,23 +64,47 @@
     }
 
     /* Boutons */
-    .btn-primary {
-        background-color: #00BFFF; /* Bleu glacier */
-        border-color: #00BFFF;
+    .btn-pri {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        color: white;
         font-weight: 500;
         border-radius: 8px;
         transition: all 0.3s ease;
     }
 
-    .btn-primary:hover {
-        background-color: #0095d9;
-        border-color: #0095d9;
+    .btn-pri:hover {
+        background-color: #009a97;
+        border-color: #009a97;
         transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
-    /* Icônes dans les boutons */
-    .btn i.bi {
-        margin-right: 8px;
+    /* Liens */
+    .text-primary {
+        color: var(--teal-glacier) !important;
+    }
+    .text-primary:hover {
+        color: var(--pink-swoosh) !important;
+    }
+
+    /* Card */
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Titre */
+    .text-accent {
+        color: var(--teal-glacier);
+        font-weight: 700;
+    }
+
+    /* Checkbox */
+    .form-check-input:checked {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
     }
 </style>
 
@@ -93,47 +118,38 @@
                         
                         <form method="post" class="needs-validation" novalidate>
                             {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
                             
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     {{ form.username.label_tag }}
                                     {{ form.username }}
-                                    <div class="invalid-feedback">
-                                        {{ form.username.errors }}
-                                    </div>
+                                    <div class="invalid-feedback">{{ form.username.errors }}</div>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     {{ form.email.label_tag }}
                                     {{ form.email }}
-                                    <div class="invalid-feedback">
-                                        {{ form.email.errors }}
-                                    </div>
+                                    <div class="invalid-feedback">{{ form.email.errors }}</div>
                                 </div>
                                 
                                 <div class="col-12">
                                     {{ form.telephone.label_tag }}
                                     {{ form.telephone }}
-                                    <small class="text-muted">Format: 90 12 34 56</small>
-                                    <div class="invalid-feedback">
-                                        {{ form.telephone.errors }}
-                                    </div>
+                                    <small class="form-text text-muted">Format: 90 12 34 56</small>
+                                    <div class="invalid-feedback">{{ form.telephone.errors }}</div>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     {{ form.password1.label_tag }}
                                     {{ form.password1 }}
-                                    <div class="invalid-feedback">
-                                        {{ form.password1.errors }}
-                                    </div>
+                                    <div class="invalid-feedback">{{ form.password1.errors }}</div>
                                 </div>
                                 
                                 <div class="col-md-6">
                                     {{ form.password2.label_tag }}
                                     {{ form.password2 }}
-                                    <div class="invalid-feedback">
-                                        {{ form.password2.errors }}
-                                    </div>
+                                    <div class="invalid-feedback">{{ form.password2.errors }}</div>
                                 </div>
                                 
                                 <div class="col-12 mt-4">
@@ -141,19 +157,24 @@
                                         <input class="form-check-input" type="checkbox" id="conditions" required>
                                         <label class="form-check-label" for="conditions">
                                             J'accepte les <a href="#" class="text-primary">conditions générales</a>
-                                            <div class="invalid-feedback"> </div>
                                         </label>
+                                        <div class="invalid-feedback">Vous devez accepter les conditions</div>
                                     </div>
                                 </div>
                                 
                                 <div class="col-12 mt-3">
-                                    <button type="submit" class="btn btn-primary btn-lg w-100">
-                                        <i class="bi bi-person-plus me-2"></i> S'inscrire
+                                    <button type="submit" class="btn btn-pri btn-lg w-100">
+                                        <i class="fas fa-user-plus me-2"></i> S'inscrire
                                     </button>
                                 </div>
                                 
                                 <div class="col-12 text-center mt-3">
-                                    <p class="mb-0">Déjà un compte ? <a href="{% url 'connexion' %}" class="text-primary fw-bold">Se connecter</a></p>
+                                    <p class="mb-0">
+                                        Déjà un compte ?
+                                        <a href="{% url 'connexion' %}?next={{ request.GET.next|urlencode }}" class="text-primary fw-bold">
+                                            Se connecter
+                                        </a>
+                                    </p>
                                 </div>
                             </div>
                         </form>

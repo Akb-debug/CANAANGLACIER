@@ -1,22 +1,22 @@
-{% extends 'frontOfice/base.html' %}
+{% extends 'dashboards/base.html' %}
 {% load static %}
 
 {% block title %}Dashboard Admin{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
+{% block body %}
+<div class="container-fluid pt-4 px-4">
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 text-accent mb-0">
+                    <h1 class="h3 mb-0">
                         <i class="fas fa-tachometer-alt me-2"></i>Dashboard Administrateur
                     </h1>
-                    <p class="text-muted">Vue d'ensemble de votre plateforme</p>
+                    <p class="mb-0">Vue d'ensemble de votre plateforme</p>
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-success fs-6">Admin</span>
+                    <span class="badge bg-success">Admin</span>
                     <p class="mb-0 text-muted small">{{ user.username }}</p>
                 </div>
             </div>
@@ -24,11 +24,11 @@
     </div>
 
     <!-- Statistiques principales -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-primary rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Total Utilisateurs</div>
                             <div class="h2 mb-0">{{ total_utilisateurs }}</div>
@@ -41,10 +41,10 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-danger rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Total Produits</div>
                             <div class="h2 mb-0">{{ total_produits }}</div>
@@ -57,10 +57,10 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-info rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Total Commandes</div>
                             <div class="h2 mb-0">{{ total_commandes }}</div>
@@ -73,10 +73,10 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                <div class="card-body text-white">
-                    <div class="d-flex justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+                <div class="card-body bg-gradient-success rounded">
+                    <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Revenus Total</div>
                             <div class="h2 mb-0">{{ total_revenus|floatformat:0 }}€</div>
@@ -91,11 +91,11 @@
     </div>
 
     <!-- Section Gestion des Utilisateurs -->
-    <div class="row mb-4">
+    <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-users-cog me-2"></i>Gestion des Utilisateurs
                     </h5>
                 </div>
@@ -130,7 +130,7 @@
                         
                         <!-- Statistiques rapides -->
                         <div class="col-md-3">
-                            <div class="card bg-light h-100">
+                            <div class="card h-100">
                                 <div class="card-body d-flex flex-column justify-content-center">
                                     <div class="text-center">
                                         <h6 class="text-muted mb-3">Répartition</h6>
@@ -159,20 +159,19 @@
             </div>
         </div>
     </div>
-
-    <div class="row">
-        <!-- Commandes récentes -->
-        <div class="col-lg-8 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+ <!-- Commandes récentes -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-clock me-2"></i>Commandes Récentes
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
-                            <thead class="table-light">
+                            <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Client</th>
@@ -213,10 +212,10 @@
         </div>
 
         <!-- Statistiques utilisateurs -->
-        <div class="col-lg-4 mb-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-chart-pie me-2"></i>Répartition Utilisateurs
                     </h5>
                 </div>
@@ -266,18 +265,18 @@
     </div>
 
     <!-- Messages de contact -->
-    <div class="row">
+    <div class="row g-4 mt-4">
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title text-accent">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
                         <i class="fas fa-envelope me-2"></i>Messages de Contact Récents
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
-                            <thead class="table-light">
+                            <thead>
                                 <tr>
                                     <th>Nom</th>
                                     <th>Email</th>
@@ -311,45 +310,59 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modals pour les messages -->
-{% for message in messages_contact %}
-<div class="modal fade" id="messageModal{{ message.id }}" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Message de {{ message.nom }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p><strong>Email:</strong> {{ message.email }}</p>
-                <p><strong>Sujet:</strong> {{ message.sujet }}</p>
-                <p><strong>Message:</strong></p>
-                <p>{{ message.message|linebreaks }}</p>
-                <p class="text-muted"><small>Reçu le {{ message.date_contact|date:"d/m/Y à H:i" }}</small></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <a href="mailto:{{ message.email }}" class="btn btn-primary">Répondre</a>
+
+    <!-- Modals pour les messages -->
+    {% for message in messages_contact %}
+    <div class="modal fade" id="messageModal{{ message.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Message de {{ message.nom }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Email:</strong> {{ message.email }}</p>
+                    <p><strong>Sujet:</strong> {{ message.sujet }}</p>
+                    <p><strong>Message:</strong></p>
+                    <p>{{ message.message|linebreaks }}</p>
+                    <p class="text-muted"><small>Reçu le {{ message.date_contact|date:"d/m/Y à H:i" }}</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <a href="mailto:{{ message.email }}" class="btn btn-primary">Répondre</a>
+                </div>
             </div>
         </div>
     </div>
 </div>
 {% endfor %}
-
 <style>
-.card {
-    transition: transform 0.2s;
-}
-.card:hover {
-    transform: translateY(-2px);
-}
-.progress {
-    border-radius: 10px;
-}
-.progress-bar {
-    border-radius: 10px;
-}
+    .card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    }
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    .progress {
+        border-radius: 10px;
+    }
+    .progress-bar {
+        border-radius: 10px;
+    }
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .bg-gradient-danger {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    .bg-gradient-info {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
 </style>
 {% endblock %}
