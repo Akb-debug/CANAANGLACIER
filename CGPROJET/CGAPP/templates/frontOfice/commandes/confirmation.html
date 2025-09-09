@@ -1,95 +1,65 @@
-{% extends 'frontOfice/base.html' %}
-{% load static %}
-
+{% extends "frontOfice/base.html" %}
 {% block content %}
-<div class="container py-5">
-    <h2 class="mb-4">Finaliser votre commande</h2>
+
+<div class="confirmation-container">
+    <div class="confirmation-icon">
+        <i class="fas fa-check-circle"></i>
+    </div>
     
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h4>Informations de livraison</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post" id="checkout-form">
-                        {% csrf_token %}
-                        
-                        <div class="form-group mb-3">
-                            <label for="{{ form.mode_livraison.id_for_label }}">Mode de livraison</label>
-                            {{ form.mode_livraison }}
-                        </div>
-                        
-                        <div id="livraison-adresse" style="display: none;">
-                            <div class="form-group mb-3">
-                                <label for="{{ form.adresse_livraison.id_for_label }}">Adresse de livraison</label>
-                                {{ form.adresse_livraison }}
-                                <small class="text-muted">Précisez l'adresse complète pour la livraison</small>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group mb-3">
-                            <label for="{{ form.mode_paiement.id_for_label }}">Mode de paiement</label>
-                            {{ form.mode_paiement }}
-                        </div>
-                        
-                        <div class="form-group mb-3">
-                            <label for="{{ form.notes.id_for_label }}">Notes supplémentaires</label>
-                            {{ form.notes }}
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                            Confirmer la commande
-                        </button>
-                    </form>
-                </div>
-            </div>
+    <h1 class="confirmation-title">Commande Confirmée!</h1>
+    
+    <p class="confirmation-message">
+        Merci pour votre commande! Votre numéro de commande est <strong>#{{ commande.id }}</strong>.
+        Un email de confirmation a été envoyé à votre adresse email.
+    </p>
+    
+    <div class="order-details">
+        <h3>Détails de la commande</h3>
+        
+        <div class="detail-item">
+            <span>Numéro de commande:</span>
+            <strong>#{{ commande.id }}</strong>
         </div>
         
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h4>Récapitulatif</h4>
-                </div>
-                <div class="card-body">
-                    <h5>Votre commande</h5>
-                    <ul class="list-group mb-3">
-                        {% for produit in panier.produits.all %}
-                        <li class="list-group-item d-flex justify-content-between">
-                            <span>{{ produit.nom }}</span>
-                            <span>{{ produit.prix }} FCFA</span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    <hr>
-                    <div class="d-flex justify-content-between fw-bold">
-                        <span>Total:</span>
-                        <span>{{ total }} FCFA</span>
-                    </div>
-                </div>
-            </div>
+        <div class="detail-item">
+            <span>Date:</span>
+            <strong>{{ commande.date_creation|date:"d/m/Y H:i" }}</strong>
         </div>
+        
+        <div class="detail-item">
+            <span>Total:</span>
+            <strong>{{ commande.total }} FCFA</strong>
+        </div>
+        
+        <div class="detail-item">
+            <span>Méthode de paiement:</span>
+            <strong>
+                {% if commande.methode_paiement == 'mobile_money' %}Mobile Money
+                {% elif commande.methode_paiement == 'carte' %}Carte Bancaire
+                {% elif commande.methode_paiement == 'sur_place' %}Paiement en Magasin
+                {% elif commande.methode_paiement == 'a_la_livraison' %}Paiement à la Livraison
+                {% endif %}
+            </strong>
+        </div>
+        
+        <div class="detail-item">
+            <span>Statut:</span>
+            <strong>
+                {% if commande.statut == 'en_attente' %}En attente
+                {% elif commande.statut == 'confirmee' %}Confirmée
+                {% elif commande.statut == 'preparation' %}En préparation
+                {% elif commande.statut == 'livraison' %}En livraison
+                {% elif commande.statut == 'livree' %}Livrée
+                {% elif commande.statut == 'annulee' %}Annulée
+                {% endif %}
+            </strong>
+        </div>
+    </div>
+    
+    <div class="actions">
+        <a href="{% url 'accueil' %}" class="btn">Continuer mes achats</a>
+        <a href="{% url 'mes_commandes' %}" class="btn btn-outline">Voir mes commandes</a>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modeLivraison = document.getElementById('{{ form.mode_livraison.id_for_label }}');
-    const adresseSection = document.getElementById('livraison-adresse');
-    
-    function toggleAdresseField() {
-        if (modeLivraison.value === 'livraison') {
-            adresseSection.style.display = 'block';
-        } else {
-            adresseSection.style.display = 'none';
-        }
-    }
-    
-    // Initial check
-    toggleAdresseField();
-    
-    // Event listener
-    modeLivraison.addEventListener('change', toggleAdresseField);
-});
-</script>
 {% endblock %}

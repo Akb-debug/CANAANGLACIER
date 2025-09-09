@@ -1,24 +1,30 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, View,DeleteView,DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
 from .models import *
 from .forms import *
 from django.contrib.auth import login, authenticate, logout,get_user_model
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.utils import timezone
-from django.db import models
+from django.db import models,transaction
 from datetime import timedelta
 from django.contrib.auth.views import PasswordChangeView
 from django.contrib.messages.views import SuccessMessageMixin
 User = get_user_model()
-from django.db.models import Q
-from django.db.models import Count
+from django.db.models import Q,Sum,Avg,Count
 from decimal import Decimal
 from django.core.mail import send_mail
 from django.conf import settings
+import logging
+logger = logging.getLogger(__name__)
+import random
+import time
+import json
+from django.core.paginator import Paginator
+
 # ==================== UTILITAIRES ====================
 
 def enregistrer_action(utilisateur, type_action, description, objet_concerne=None, objet_id=None, details=None, request=None):
@@ -51,21 +57,6 @@ def creer_notification(utilisateur, type_notification, titre, message, commande=
         commande=commande
     )
 
-
-#inscription et connexion
-# class InscriptionView(CreateView):
-#     model = Utilisateur
-#     form_class = InscriptionForm
-#     template_name = 'frontOfice/compte/inscription.html'
-#     success_url = reverse_lazy('home')
-
-#     def form_valid(self, form):
-#         response = super().form_valid(form)
-#         login(self.request, self.object)  
-#         messages.success(self.request, "Inscription réussie !")
-#         return response
-    
-
 class InscriptionView(CreateView):
     model = Utilisateur
     form_class = InscriptionForm
@@ -85,25 +76,6 @@ class InscriptionView(CreateView):
         context = super().get_context_data(**kwargs)
         context['next'] = self.request.GET.get('next', '')
         return context
-
-# def connexion(request):
-#     if request.method == 'POST':
-#         form = ConnexionForm(request.POST)
-#         if form.is_valid():
-#             username = form.cleaned_data['username']
-#             password = form.cleaned_data['password']
-#             user = authenticate(request, username=username, password=password)
-            
-#             if user is not None:
-#                 login(request, user)
-#                 messages.success(request, f"Bienvenue {user.username} !")
-#                 return redirect('home')
-#             else:
-#                 messages.error(request, "Identifiants incorrects")
-#     else:
-#         form = ConnexionForm()
-    
-#     return render(request, 'frontOfice/compte/connexion.html', {'form': form})
 
 
 def connexion(request):
@@ -237,6 +209,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Produit, Panier, LignePanier, Commande
 
+@login_required
 def ajouter_au_panier(request, produit_id):
     produit = get_object_or_404(Produit, id=produit_id)
 
@@ -832,7 +805,7 @@ def dashboard_gerant(request):
 
 # Action pour changer le statut d'une commande (pour serveurs)
 @login_required
-def changer_statut_commande(request, commande_id):
+def changer_statut(request, commande_id):
     if request.user.role != 'serveur':
         messages.error(request, "Accès non autorisé")
         return redirect('home')
@@ -842,7 +815,7 @@ def changer_statut_commande(request, commande_id):
         ancien_statut = commande.statut
         nouveau_statut = request.POST.get('statut')
         
-        if nouveau_statut in ['en_attente', 'en_cours', 'livree', 'annulee']:
+        if nouveau_statut in ['en_attente', 'en_traitement', 'livree', 'annulee']:
             commande.statut = nouveau_statut
             commande.save()
             
@@ -862,7 +835,7 @@ def changer_statut_commande(request, commande_id):
             message_notification = ""
             type_notification = ""
             
-            if nouveau_statut == 'en_cours':
+            if nouveau_statut == 'en_traitement':
                 titre_notification = "Commande en préparation"
                 message_notification = f"Votre commande #{commande.id} est maintenant en préparation."
                 type_notification = 'commande_preparation'
@@ -1341,73 +1314,57 @@ def rapport_serveur(request, pk):
     
     return render(request, 'dashboards/gerant/rapport_serveur.html', context)
 
-
+#===============================Client============================
 @login_required
-def finalisation_commande(request):
-    # Récupération du panier de l'utilisateur connecté
-    try:
-        panier = Panier.objects.get(utilisateur=request.user)
-        if not panier.lignes.exists():
-            messages.warning(request, "Votre panier est vide")
-            return redirect('produits')
-    except Panier.DoesNotExist:
-        messages.warning(request, "Votre panier est vide")
-        return redirect('produits')
+@transaction.atomic
+def finaliser_commande(request):
+    utilisateur = request.user if request.user.is_authenticated else None
+    panier = Panier.objects.filter(utilisateur=utilisateur).first() if utilisateur else Panier.objects.filter(session_id=request.session.session_key).first()
 
-    total_panier = sum(l.produit.prix * l.quantite for l in panier.lignes.all())
-    coupon_form = CouponForm(request.POST or None)
-    coupon_message = None
-    coupon = None
+    if not panier or not panier.lignes.exists():
+        messages.error(request, "Votre panier est vide.")
+        return redirect("produits")
 
-    # Application du coupon
-    if request.method == 'POST' and 'appliquer_coupon' in request.POST:
-        if coupon_form.is_valid():
-            code = coupon_form.cleaned_data['code']
-            try:
-                coupon = Coupon.objects.get(code=code, actif=True)
-                if hasattr(coupon, 'is_valide') and coupon.is_valide():
-                    request.session['coupon_id'] = coupon.id
-                    coupon_message = f"Coupon appliqué : {coupon.reduction}% de réduction"
-                else:
-                    coupon_message = "Ce coupon a expiré"
-            except Coupon.DoesNotExist:
-                coupon_message = "Coupon invalide"
+    if request.method == "POST":
+        methode_paiement = request.POST.get("methode_paiement")
+        retrait_magasin = request.POST.get("retrait_magasin") == "on"
 
-    # Finalisation commande
-    if request.method == 'POST' and 'finaliser_commande' in request.POST:
-        nom = request.POST.get('nom')
-        prenom = request.POST.get('prenom')
-        email = request.POST.get('email')
-        telephone = request.POST.get('telephone')
-
-        mode_livraison = request.POST.get('mode_livraison')
-        methode_paiement = request.POST.get('methode_paiement')
-
-        adresse_livraison = None
-        if mode_livraison == 'livraison':
-            adresse_livraison = AdresseLivraison.objects.create(
-                utilisateur=request.user,
-                rue=request.POST.get('rue'),
-                ville=request.POST.get('ville'),
-                code_postal=request.POST.get('code_postal'),
-                pays=request.POST.get('pays')
+        adresse = None
+        if not retrait_magasin:
+            # Ne créer que si tous les champs existent
+            adresse = AdresseLivraison.objects.create(
+                utilisateur=utilisateur,
+                rue=request.POST.get("rue"),
+                ville=request.POST.get("ville"),
+                code_postal=request.POST.get("code_postal"),
+                pays=request.POST.get("pays"),
             )
 
-        total = total_panier
-        coupon_id = request.session.get('coupon_id')
-        if coupon_id:
-            coupon = Coupon.objects.get(id=coupon_id)
-            if hasattr(coupon, 'is_valide') and coupon.is_valide():
-                total = total * (Decimal(1) - (coupon.reduction / Decimal(100)))
+        # Coupon
+        coupon, total = None, panier.total
+        coupon_code = request.POST.get("coupon")
+        if coupon_code:
+            try:
+                coupon = Coupon.objects.get(code=coupon_code, actif=True)
+                if coupon.date_expiration < timezone.now().date():
+                    messages.warning(request, "Le coupon est expiré.")
+                    coupon = None
+            except Coupon.DoesNotExist:
+                messages.warning(request, "Coupon invalide.")
+        if coupon:
+            total -= total * (coupon.reduction / Decimal('100'))
 
+        # Commande
         commande = Commande.objects.create(
-            utilisateur=request.user,
+            utilisateur=utilisateur,
             total=total,
-            adresse_livraison=adresse_livraison,
             methode_paiement=methode_paiement,
-            statut='en_attente',
-            coupon=coupon if coupon_id else None
+            statut="en_attente",
+            coupon=coupon
         )
+        if adresse:
+            commande.adresse_livraison = adresse
+            commande.save()
 
         for ligne in panier.lignes.all():
             LigneCommande.objects.create(
@@ -1416,40 +1373,981 @@ def finalisation_commande(request):
                 quantite=ligne.quantite,
                 prix_unitaire=ligne.produit.prix
             )
+            ligne.produit.quantite_disponible -= ligne.quantite
+            ligne.produit.save()
 
-        if methode_paiement in ['mobile_money', 'carte']:
-            Paiement.objects.create(
-                commande=commande,
-                montant=total,
-                statut='en_attente'
-            )
+        paiement_statut = "en attente"
+        if methode_paiement in ["carte_bancaire", "flooz", "tmoney"]:
+            paiement_statut = "en cours"
+
+        Paiement.objects.create(commande=commande, montant=total, statut=paiement_statut)
 
         panier.lignes.all().delete()
-        if 'coupon_id' in request.session:
-            del request.session['coupon_id']
+        panier.delete()
 
-        return redirect('confirmation_commande', commande_id=commande.id)
+        messages.success(request, f"Votre commande #{commande.id} a été créée avec succès !")
+        return redirect("commande_detail", commande.id)
 
-    context = {
-        'panier': panier,
-        'total_panier': total_panier,
-        'coupon_form': coupon_form,
-        'coupon_message': coupon_message
-    }
-    return render(request, 'frontOfice/commandes/finalisation.html', context)
+    return render(request, "frontOfice/commandes/finalisation.html", {"panier": panier})
+
+
+def commande_detail(request, pk):
+    commande = get_object_or_404(Commande, pk=pk, utilisateur=request.user)
+    return render(request, "frontOfice/commandes/detail.html", {"commande": commande})
 
 @login_required
-def confirmation_commande(request, commande_id):
+def processus_paiement(request, commande_id):
+    """Vue pour gérer le processus de paiement selon la méthode choisie"""
     commande = get_object_or_404(Commande, id=commande_id, utilisateur=request.user)
     
-    # Envoyer notification WhatsApp (exemple simplifié)
-    if commande.utilisateur.telephone:
-        message = (
-            f"Merci pour votre commande #{commande.id} chez Canaan Glacier!\n"
-            f"Montant: {commande.total} FCFA\n"
-            f"Statut: En préparation"
-        )
-        # Ici vous intégrerez l'API WhatsApp réelle
-        # envoyer_whatsapp(commande.utilisateur.telephone, message)
+    # Vérifier si la commande est déjà payée
+    if hasattr(commande, 'paiement') and commande.paiement.statut == 'payé':
+        messages.info(request, "Cette commande a déjà été payée.")
+        return redirect('commande_detail', pk=commande_id)
     
-    return render(request, 'commandes/confirmation.html', {'commande': commande})
+    # Déterminer le template en fonction de la méthode de paiement
+    templates = {
+        'carte_bancaire': 'frontOfice/paiement/carte_bancaire.html',
+        'flooz': 'frontOfice/paiement/mobile_money.html',
+        'tmoney': 'frontOfice/paiement/mobile_money.html',
+        'paiement_livraison': 'frontOfice/paiement/paiement_livraison.html',
+        'retrait_magasin': 'frontOfice/paiement/retrait_magasin.html',
+    }
+    
+    template = templates.get(commande.methode_paiement, 'frontOfice/paiement/default.html')
+    
+    context = {
+        'commande': commande,
+        'methode_paiement': commande.methode_paiement,
+    }
+    
+    return render(request, template, context)
+
+@login_required
+def traiter_paiement(request, commande_id):
+    """Vue pour traiter le paiement (simulation)"""
+    if request.method == 'POST':
+        commande = get_object_or_404(Commande, id=commande_id, utilisateur=request.user)
+        methode = commande.methode_paiement
+        
+        # Simulation de traitement selon la méthode
+        if methode in ['carte_bancaire', 'flooz', 'tmoney']:
+            # Simuler un délai de traitement
+            time.sleep(2)
+            
+            # Générer un numéro de transaction aléatoire
+            numero_transaction = ''.join([str(random.randint(0, 9)) for _ in range(12)])
+            
+            # Mettre à jour le statut du paiement
+            paiement, created = Paiement.objects.get_or_create(commande=commande)
+            paiement.montant = commande.total
+            paiement.statut = 'payé'
+            paiement.save()
+            
+            # Mettre à jour le statut de la commande
+            commande.statut = 'payée'
+            commande.save()
+            
+            messages.success(request, f"Paiement effectué avec succès! Numéro de transaction: {numero_transaction}")
+            return redirect('commande_detail', pk=commande_id)
+        
+        elif methode == 'paiement_livraison':
+            messages.info(request, "Vous paierez à la livraison de votre commande.")
+            return redirect('commande_detail', pk=commande_id)
+        
+        elif methode == 'retrait_magasin':
+            messages.info(request, "Vous paierez lors du retrait en magasin.")
+            return redirect('commande_detail', pk=commande_id)
+    
+    return redirect('commande_detail', pk=commande_id)
+
+@login_required
+def annuler_paiement(request, commande_id):
+    """Vue pour annuler un paiement"""
+    commande = get_object_or_404(Commande, id=commande_id, utilisateur=request.user)
+    
+    # Réactiver le stock des produits (si nécessaire)
+    for ligne in commande.lignes.all():
+        ligne.produit.quantite_disponible += ligne.quantite
+        ligne.produit.save()
+    
+    # Marquer la commande comme annulée
+    commande.statut = 'annulee'
+    commande.save()
+    
+    messages.info(request, "Paiement annulé. Votre commande a été annulée.")
+    return redirect('commande_detail', pk=commande_id)
+
+
+#Gestion serveur
+
+def is_serveur(user):
+    return user.is_authenticated and (user.is_staff or user.groups.filter(name='Serveurs').exists())
+
+def nouvelle_commande_serveur(request):
+    if request.method == 'POST':
+        form = ClientForm(request.POST)
+        if form.is_valid():
+            nom_complet = form.cleaned_data['nom_complet']
+            telephone = form.cleaned_data['telephone']
+            email = form.cleaned_data.get('email', f"{telephone}@client.com")
+            
+            client, created = Utilisateur.objects.get_or_create(
+                telephone=telephone,
+                defaults={
+                    'username': telephone,
+                    'email': email,
+                    'first_name': nom_complet.split(' ')[0] if ' ' in nom_complet else nom_complet,
+                    'last_name': ' '.join(nom_complet.split(' ')[1:]) if ' ' in nom_complet else '',
+                }
+            )
+            
+            panier, created = Panier.objects.get_or_create(
+                utilisateur=client,
+                defaults={'session_id': f"serveur_{timezone.now().timestamp()}"}
+            )
+            
+            request.session['panier_serveur_id'] = panier.id
+            request.session['client_id'] = client.id
+            
+            messages.success(request, f"Commande créée pour {nom_complet}")
+            return redirect('ajouter_produit_commande', commande_id=panier.id)
+    else:
+        form = ClientForm()
+    
+    return render(request, 'dashboards/serveur/nouvelle_commande.html', {'form': form, 'title': 'Nouvelle Commande - Client'})
+
+def ajouter_produit_commande(request, commande_id):
+    panier = get_object_or_404(Panier, id=commande_id)
+    client = panier.utilisateur
+    
+    # Préparer les données pour le template
+    lignes_avec_max = []
+    for ligne in panier.lignes.all():
+        quantite_max = ligne.produit.quantite_disponible + ligne.quantite
+        lignes_avec_max.append({
+            'ligne': ligne,
+            'quantite_max': quantite_max
+        })
+    
+    if request.method == 'POST':
+        form = ProduitPanierForm(request.POST)
+        if form.is_valid():
+            produit = form.cleaned_data['produit']
+            quantite = form.cleaned_data['quantite']
+            
+            if produit.quantite_disponible < quantite:
+                messages.error(request, f"Stock insuffisant pour {produit.nom}. Disponible: {produit.quantite_disponible}")
+                return redirect('ajouter_produit_commande', commande_id=panier.id)
+            
+            ligne_existante = panier.lignes.filter(produit=produit).first()
+            
+            if ligne_existante:
+                nouvelle_quantite = ligne_existante.quantite + quantite
+                if nouvelle_quantite > produit.quantite_disponible + ligne_existante.quantite:
+                    messages.error(request, f"Stock insuffisant pour {produit.nom}. Disponible: {produit.quantite_disponible}")
+                    return redirect('ajouter_produit_commande', commande_id=panier.id)
+                ligne_existante.quantite = nouvelle_quantite
+                ligne_existante.save()
+                messages.success(request, f"Quantité mise à jour pour {produit.nom}")
+            else:
+                panier.lignes.create(produit=produit, quantite=quantite)
+                messages.success(request, f"{produit.nom} ajouté au panier")
+            
+            return redirect('ajouter_produit_commande', commande_id=panier.id)
+    else:
+        form = ProduitPanierForm()
+    
+    produits_disponibles = Produit.objects.filter(quantite_disponible__gt=0).order_by('-est_populaire', 'nom')[:10]
+    
+    return render(request, 'dashboards/serveur/ajouter_produits.html', {
+        'form': form,
+        'panier': panier,
+        'client': client,
+        'produits_disponibles': produits_disponibles,
+        'lignes_avec_max': lignes_avec_max,  # Nouvelle donnée
+        'title': f'Ajouter Produits - {client.get_full_name()}'
+    })
+def modifier_quantite(request, commande_id, ligne_id):
+    panier = get_object_or_404(Panier, id=commande_id)
+    ligne = get_object_or_404(LignePanier, id=ligne_id, panier=panier)
+    
+    if request.method == 'POST':
+        nouvelle_quantite = int(request.POST.get('quantite', 1))
+        
+        if nouvelle_quantite > ligne.produit.quantite_disponible + ligne.quantite:
+            messages.error(request, f"Stock insuffisant. Disponible: {ligne.produit.quantite_disponible}")
+            return redirect('ajouter_produit_commande', commande_id=panier.id)
+        
+        if nouvelle_quantite > 0:
+            ligne.quantite = nouvelle_quantite
+            ligne.save()
+            messages.success(request, f"Quantité de {ligne.produit.nom} mise à jour")
+        else:
+            ligne.delete()
+            messages.success(request, f"{ligne.produit.nom} retiré du panier")
+    
+    return redirect('ajouter_produit_commande', commande_id=panier.id)
+
+
+def supprimer_produit(request, commande_id, ligne_id):
+    panier = get_object_or_404(Panier, id=commande_id)
+    ligne = get_object_or_404(LignePanier, id=ligne_id, panier=panier)
+    
+    produit_nom = ligne.produit.nom
+    ligne.delete()
+    messages.success(request, f"{produit_nom} retiré du panier")
+    
+    return redirect('ajouter_produit_commande', commande_id=panier.id)
+
+
+@transaction.atomic
+def finaliser_commande_serveur(request, commande_id):
+    panier = get_object_or_404(Panier, id=commande_id)
+    client = panier.utilisateur
+    
+    if not panier.lignes.exists():
+        messages.error(request, "Le panier est vide.")
+        return redirect('ajouter_produit_commande', commande_id=panier.id)
+    
+    for ligne in panier.lignes.all():
+        if ligne.quantite > ligne.produit.quantite_disponible:
+            messages.error(request, f"Stock insuffisant pour {ligne.produit.nom}. Disponible: {ligne.produit.quantite_disponible}")
+            return redirect('ajouter_produit_commande', commande_id=panier.id)
+    
+    try:
+        commande = Commande.objects.create(
+            utilisateur=client,
+            total=panier.total,
+            methode_paiement='a_definir',
+            statut="en_attente",
+        )
+        
+        for ligne_panier in panier.lignes.all():
+            LigneCommande.objects.create(
+                commande=commande,
+                produit=ligne_panier.produit,
+                quantite=ligne_panier.quantite,
+                prix_unitaire=ligne_panier.produit.prix
+            )
+            
+            ligne_panier.produit.quantite_disponible -= ligne_panier.quantite
+            ligne_panier.produit.save()
+        
+        panier.lignes.all().delete()
+        
+        if 'panier_serveur_id' in request.session:
+            del request.session['panier_serveur_id']
+        
+        messages.success(request, f"Commande #{commande.id} créée avec succès")
+        return redirect('paiement_commande_serveur', commande_id=commande.id)
+        
+    except Exception as e:
+        messages.error(request, f"Erreur: {str(e)}")
+        return redirect('ajouter_produit_commande', commande_id=panier.id)
+
+
+def paiement_commande_serveur(request, commande_id):
+    commande = get_object_or_404(Commande, id=commande_id)
+    
+    if request.method == 'POST':
+        form = PaiementServeurForm(request.POST)
+        if form.is_valid():
+            methode_paiement = form.cleaned_data['methode_paiement']
+            montant_paye = form.cleaned_data['montant_paye']
+            
+            commande.methode_paiement = methode_paiement
+            commande.statut = "en_cours"
+            commande.save()
+            
+            Paiement.objects.create(
+                commande=commande,
+                montant=montant_paye,
+                statut="payé",
+                reference=f"BOUTIQUE_{timezone.now().strftime('%Y%m%d_%H%M%S')}"
+            )
+            
+            messages.success(request, f"Paiement de {montant_paye} FCFA enregistré")
+            return redirect('generer_recu_serveur', commande_id=commande.id)
+    else:
+        form = PaiementServeurForm(initial={'montant_paye': commande.total})
+    
+    return render(request, 'dashboards/serveur/paiement.html', {
+        'form': form,
+        'commande': commande,
+        'client': commande.utilisateur,
+        'title': f'Paiement - Commande #{commande.id}'
+    })
+
+
+def generer_recu(request, commande_id):
+    commande = get_object_or_404(Commande, id=commande_id)
+    paiement = get_object_or_404(Paiement, commande=commande)
+    
+    return render(request, 'dashboards/serveur/recu.html', {
+        'commande': commande,
+        'paiement': paiement,
+        'client': commande.utilisateur,
+        'title': f'Reçu - Commande #{commande.id}'
+    })
+
+
+
+def commandes_en_attente(request):
+    """Afficher les commandes en attente de traitement"""
+    commandes_en_attente = Commande.objects.filter(statut='en_attente').order_by('date_creation')
+    commandes_en_cours = Commande.objects.filter(statut='en_traitement').order_by('date_creation')
+    
+    # Définir les choix de statut pour le template
+    statut_choices = {
+        'en_attente': 'En attente',
+        'en_traitement': 'En traitement',
+        'expediee': 'Expédiée', 
+        'livree': 'Livrée',
+        'annulee': 'Annulée'
+    }
+    
+    return render(request, 'dashboards/serveur/commande_liste.html', {
+        'commandes_en_attente': commandes_en_attente,
+        'commandes_en_cours': commandes_en_cours,
+        'statut_choices': statut_choices,
+        'title': 'Commandes en Attente'
+    })
+
+def prendre_en_charge_commande(request, commande_id):
+    commande = get_object_or_404(Commande, id=commande_id)
+    
+    if commande.statut != Commande.STATUT_EN_ATTENTE:
+        messages.warning(request, f"La commande #{commande.id} n'est plus en attente.")
+        return redirect('commandes_en_attente')
+    
+    commande.statut = Commande.STATUT_TRAITEMENT
+    commande.save()
+    
+    messages.success(request, f"Commande #{commande.id} prise en charge!")
+    return redirect('commandes_en_attente')
+
+
+def changer_statut_commande(request, commande_id):
+    """Changer le statut d'une commande"""
+    commande = get_object_or_404(Commande, id=commande_id)
+    
+    if request.method == 'POST':
+        nouveau_statut = request.POST.get('statut')
+        
+        # Définir les statuts valides directement dans la vue
+        statuts_valides = {
+            'en_attente': 'En attente',
+            'en_traitement': 'En traitement', 
+            'expediee': 'Expédiée',
+            'livree': 'Livrée',
+            'annulee': 'Annulée'
+        }
+        
+        if nouveau_statut in statuts_valides:
+            commande.statut = nouveau_statut
+            commande.save()
+            messages.success(request, f"Statut de la commande #{commande.id} changé en {statuts_valides[nouveau_statut]}")
+        else:
+            messages.error(request, "Statut invalide")
+    
+    return redirect('commandes_en_attente')
+
+
+def annuler_commande_serveur(request, commande_id):
+    commande = get_object_or_404(Commande, id=commande_id)
+    
+    if commande.statut not in [Commande.STATUT_EN_ATTENTE, Commande.STATUT_TRAITEMENT]:
+        messages.error(request, "Seules les commandes en attente ou en traitement peuvent être annulées")
+        return redirect('commandes_en_attente')
+    
+    try:
+        for ligne in commande.lignes.all():
+            ligne.produit.quantite_disponible += ligne.quantite
+            ligne.produit.save()
+        
+        commande.statut = Commande.STATUT_ANNULEE
+        commande.save()
+        
+        messages.success(request, f"Commande #{commande.id} annulée et produits restockés")
+    
+    except Exception as e:
+        messages.error(request, f"Erreur lors de l'annulation: {str(e)}")
+    
+    return redirect('commandes_en_attente')
+
+
+
+
+@login_required
+def detail_commande(request, commande_id):
+    """Afficher le détail d'une commande spécifique"""
+    commande = get_object_or_404(Commande, id=commande_id)
+    return render(request, 'dashboards/serveur/commande_detail.html', {'commande': commande})
+
+@login_required
+def commandes_en_cours(request):
+    """Afficher les commandes en cours de traitement"""
+    commandes = Commande.objects.filter(
+        statut__in=[Commande.STATUT_EN_ATTENTE, Commande.STATUT_TRAITEMENT]
+    ).order_by('date_creation')
+    
+    return render(request, 'dashboards/serveur/commandes_en_cours.html', {
+        'commandes': commandes,
+        'title': 'Commandes en Cours'
+    })
+
+class ListeProduitsServeurView(ListView):
+    model = Produit
+    template_name = 'dashboards/serveur/liste_produits.html'
+    context_object_name = 'produits'
+    paginate_by = 12  # 12 produits par page
+    
+    def get_queryset(self):
+        # Récupérer tous les produits avec leurs catégories
+        return Produit.objects.select_related('categorie').all()
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Ajouter des statistiques ou autres données au contexte si nécessaire
+        context['total_produits'] = Produit.objects.count()
+        return context
+
+class CommandesLivreesServeurView(LoginRequiredMixin, ListView):
+    model = Commande
+    template_name = 'dashboards/serveur/commandes_livrees_serveur.html'
+    context_object_name = 'commandes'
+    paginate_by = 15
+    
+    def get_queryset(self):
+        # Filtrer les commandes livrées (sans restriction de groupe)
+        queryset = Commande.objects.filter(
+            statut=Commande.STATUT_LIVREE
+        ).select_related(
+            'utilisateur', 
+            'adresse_livraison', 
+            'coupon'
+        ).prefetch_related(
+            'lignes__produit'
+        ).order_by('-date_creation')
+        
+        return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Statistiques
+        context['total_commandes'] = self.get_queryset().count()
+        
+        # Chiffre d'affaires des commandes livrées
+        chiffre_affaires = self.get_queryset().aggregate(
+            total=Sum('total')
+        )['total'] or 0
+        
+        context['chiffre_affaires'] = chiffre_affaires
+        context['serveur_connecte'] = self.request.user
+        return context
+    
+    # Méthode pour vérifier l'accès (plus permissive)
+    def dispatch(self, request, *args, **kwargs):
+        # Vérifier simplement que l'utilisateur est connecté
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
+    
+#==================================Gestion client=======================================
+
+
+def detail_produit_client(request, produit_id):
+    """Afficher le détail d'un produit pour le client"""
+    produit = get_object_or_404(
+        Produit.objects.select_related('categorie', 'gerant'),
+        id=produit_id,
+        quantite_disponible__gt=0  # Seulement les produits en stock
+    )
+    
+    # Produits similaires (même catégorie ou produits populaires)
+    produits_similaires = Produit.objects.filter(
+        Q(categorie=produit.categorie) | Q(est_populaire=True),
+        quantite_disponible__gt=0
+    ).exclude(id=produit.id).select_related('categorie')[:4]
+    
+    context = {
+        'produit': produit,
+        'produits_similaires': produits_similaires,
+    }
+    
+    return render(request, 'dashboards/client/detail_produit.html', context)
+
+
+@login_required
+def historique_client(request):
+    """Afficher l'historique des activités du client connecté"""
+    user = request.user
+    
+    # Commandes du client
+    commandes = Commande.objects.filter(
+        utilisateur=user
+    ).select_related(
+        'adresse_livraison', 
+        'coupon'
+    ).prefetch_related(
+        'lignes__produit'
+    ).order_by('-date_creation')
+    
+    # Statistiques des commandes
+    total_commandes = commandes.count()
+    total_depense = commandes.aggregate(total=Sum('total'))['total'] or 0
+    commandes_livrees = commandes.filter(statut=Commande.STATUT_LIVREE).count()
+    
+    # Panier actuel - Vérification correcte
+    panier_actuel = Panier.objects.filter(
+        utilisateur=user
+    ).prefetch_related('lignes').order_by('-date_creation').first()
+    
+    # Vérifier si le panier a des articles
+    if panier_actuel and panier_actuel.lignes.count() == 0:
+        panier_actuel = None
+    
+    # Historique des actions du client
+    historique_actions = HistoriqueAction.objects.filter(
+        utilisateur=user
+    ).order_by('-date_action')[:10]
+    
+    # Notifications du client
+    notifications = Notification.objects.filter(
+        utilisateur=user
+    ).order_by('-date_creation')[:5]
+    
+    # Calcul des statistiques mensuelles (exemple simplifié)
+    commandes_mois = commandes.filter(
+        date_creation__month=timezone.now().month,
+        date_creation__year=timezone.now().year
+    )
+    depense_mensuelle = commandes_mois.aggregate(total=Sum('total'))['total'] or 0
+    
+    context = {
+        'commandes': commandes,
+        'total_commandes': total_commandes,
+        'total_depense': total_depense,
+        'commandes_livrees': commandes_livrees,
+        'panier_actuel': panier_actuel,
+        'historique_actions': historique_actions,
+        'notifications': notifications,
+        'commandes_mois_count': commandes_mois.count(),
+        'depense_mensuelle': depense_mensuelle,
+        'user': user,
+    }
+    
+    return render(request, 'dashboards/client/historique.html', context)
+
+#--------------------------------Avis clients-----------------------------------
+
+
+@login_required
+def tableau_de_bord_avis(request):
+    """Tableau de bord principal pour les avis et préférences"""
+    user = request.user
+    
+    # Préférences alimentaires de l'utilisateur
+    preferences = PreferenceAlimentaire.objects.filter(
+        utilisateur=user, 
+        est_actif=True
+    ).order_by('-date_creation')
+    
+    # Avis de l'utilisateur
+    avis_utilisateur = AvisProduit.objects.filter(
+        utilisateur=user
+    ).select_related('produit').order_by('-date_creation')
+    
+    # Commandes éligibles pour avis (livrées et sans avis)
+    commandes_sans_avis = Commande.objects.filter(
+        utilisateur=user,
+        statut=Commande.STATUT_LIVREE
+    ).prefetch_related('lignes__produit').exclude(
+        Q(avis__isnull=False) | Q(lignes__produit__avis__utilisateur=user)
+    ).distinct()
+    
+    context = {
+        'preferences': preferences,
+        'avis_utilisateur': avis_utilisateur,
+        'commandes_sans_avis': commandes_sans_avis,
+        'total_avis': avis_utilisateur.count(),
+        'moyenne_notes': avis_utilisateur.aggregate(avg=Avg('note'))['avg'] or 0,
+    }
+    
+    return render(request, 'dashboards/client/tableau_avis.html', context)
+
+@login_required
+def gerer_preferences(request):
+    """Gérer les préférences et allergies alimentaires"""
+    user = request.user
+    
+    if request.method == 'POST':
+        form = PreferenceAlimentaireForm(request.POST)
+        if form.is_valid():
+            preference = form.save(commit=False)
+            preference.utilisateur = user
+            preference.save()
+            messages.success(request, 'Votre préférence a été enregistrée avec succès.')
+            return redirect('gerer_preferences')
+    else:
+        form = PreferenceAlimentaireForm()
+    
+    preferences = PreferenceAlimentaire.objects.filter(utilisateur=user).order_by('-date_creation')
+    
+    context = {
+        'form': form,
+        'preferences': preferences,
+    }
+    
+    return render(request, 'dashboards/client/gerer_preferences.html', context)
+
+@login_required
+def modifier_preference(request, preference_id):
+    """Modifier une préférence existante"""
+    preference = get_object_or_404(PreferenceAlimentaire, id=preference_id, utilisateur=request.user)
+    
+    if request.method == 'POST':
+        form = PreferenceAlimentaireForm(request.POST, instance=preference)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Votre préférence a été modifiée avec succès.')
+            return redirect('gerer_preferences')
+    else:
+        form = PreferenceAlimentaireForm(instance=preference)
+    
+    context = {
+        'form': form,
+        'preference': preference,
+    }
+    
+    return render(request, 'dashboards/client/modifier_preference.html', context)
+
+@login_required
+def supprimer_preference(request, preference_id):
+    """Supprimer une préférence"""
+    preference = get_object_or_404(PreferenceAlimentaire, id=preference_id, utilisateur=request.user)
+    
+    if request.method == 'POST':
+        preference.delete()
+        messages.success(request, 'Votre préférence a été supprimée avec succès.')
+        return redirect('gerer_preferences')
+    
+    context = {
+        'preference': preference,
+    }
+    
+    return render(request, 'dashboards/client/supprimer_preference.html', context)
+from django import forms
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.core.paginator import Paginator
+
+# Widget personnalisé pour gérer plusieurs fichiers
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        return result
+
+@login_required
+def laisser_avis(request, commande_id=None, produit_id=None):
+    """Laisser un avis sur un produit"""
+    user = request.user
+    
+    if commande_id:
+        commande = get_object_or_404(Commande, id=commande_id, utilisateur=user)
+        produits = commande.lignes.values_list('produit', flat=True)
+    else:
+        commande = None
+        produits = None
+    
+    if produit_id:
+        produit = get_object_or_404(Produit, id=produit_id)
+        # Vérifier que l'utilisateur a bien commandé ce produit
+        if not Commande.objects.filter(
+            utilisateur=user, 
+            lignes__produit=produit,
+            statut=Commande.STATUT_LIVREE
+        ).exists():
+            messages.error(request, "Vous devez avoir commandé ce produit pour pouvoir laisser un avis.")
+            return redirect('tableau_avis')
+    else:
+        produit = None
+    
+    # Vérifier si un avis existe déjà pour cette combinaison
+    avis_existant = None
+    if produit and commande:
+        avis_existant = AvisProduit.objects.filter(
+            utilisateur=user, 
+            produit=produit, 
+            commande=commande
+        ).first()
+    
+    # Définition du formulaire simple basé sur votre modèle
+    class SimpleAvisForm(forms.Form):
+        NOTE_CHOICES = [
+            (1, '★☆☆☆☆ - Très mauvais'),
+            (2, '★★☆☆☆ - Mauvais'),
+            (3, '★★★☆☆ - Moyen'),
+            (4, '★★★★☆ - Bon'),
+            (5, '★★★★★ - Excellent'),
+        ]
+        
+        note = forms.ChoiceField(
+            choices=NOTE_CHOICES,
+            widget=forms.RadioSelect(attrs={'class': 'form-check-input'}),
+            label="Note globale ★"
+        )
+        titre = forms.CharField(
+            max_length=100,
+            widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Titre de votre avis'}),
+            label="Titre de votre avis"
+        )
+        commentaire = forms.CharField(
+            widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Décrivez votre expérience avec ce produit...'}),
+            label="Votre commentaire"
+        )
+        remarques = forms.CharField(
+            required=False,
+            widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Suggestions, points d\'amélioration...'}),
+            label="Remarques supplémentaires"
+        )
+        images = MultipleFileField(
+            required=False,
+            label="Photos du produit"
+        )
+    
+    if request.method == 'POST':
+        form = SimpleAvisForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Créer ou mettre à jour l'avis
+            if avis_existant:
+                avis = avis_existant
+            else:
+                avis = AvisProduit()
+                
+            avis.utilisateur = user
+            avis.note = int(form.cleaned_data['note'])
+            avis.titre = form.cleaned_data['titre']
+            avis.commentaire = form.cleaned_data['commentaire']
+            avis.remarques = form.cleaned_data['remarques']
+            
+            if produit:
+                avis.produit = produit
+            if commande:
+                avis.commande = commande
+                
+            avis.save()
+            
+            # Gérer les images
+            images = request.FILES.getlist('images')
+            for image in images:
+                MediaAvis.objects.create(avis=avis, image=image)
+            
+            messages.success(request, 'Votre avis a été enregistré avec succès. Merci !')
+            return redirect('tableau_avis')
+    else:
+        # Pré-remplir le formulaire si un avis existe déjà
+        initial_data = {}
+        if avis_existant:
+            initial_data = {
+                'note': str(avis_existant.note),
+                'titre': avis_existant.titre,
+                'commentaire': avis_existant.commentaire,
+                'remarques': avis_existant.remarques,
+            }
+        form = SimpleAvisForm(initial=initial_data)
+    
+    context = {
+        'form': form,
+        'commande': commande,
+        'produit': produit,
+        'avis_existant': avis_existant,
+    }
+    
+    return render(request, 'dashboards/client/laisser_avis.html', context)
+@login_required
+def mes_avis(request):
+    """Afficher tous les avis de l'utilisateur"""
+    avis_list = AvisProduit.objects.filter(
+        utilisateur=request.user
+    ).select_related('produit', 'commande').prefetch_related('medias', 'reponses').order_by('-date_creation')
+    
+    paginator = Paginator(avis_list, 10)
+    page_number = request.GET.get('page')
+    avis = paginator.get_page(page_number)
+    
+    context = {
+        'avis': avis,
+    }
+    
+    return render(request, 'dashboards/client/mes_avis.html', context)
+
+@login_required
+def modifier_avis(request, avis_id):
+    """Modifier un avis existant"""
+    avis = get_object_or_404(AvisProduit, id=avis_id, utilisateur=request.user)
+    
+    if request.method == 'POST':
+        form = AvisProduitForm(request.POST, request.FILES, instance=avis)
+        if form.is_valid():
+            form.save()
+            
+            # Gérer les nouvelles images
+            images = request.FILES.getlist('images')
+            for image in images:
+                MediaAvis.objects.create(avis=avis, image=image)
+            
+            messages.success(request, 'Votre avis a été modifié avec succès.')
+            return redirect('mes_avis')
+    else:
+        form = AvisProduitForm(instance=avis)
+    
+    context = {
+        'form': form,
+        'avis': avis,
+    }
+    
+    return render(request, 'dashboards/client/modifier_avis.html', context)
+
+@login_required
+def supprimer_avis(request, avis_id):
+    """Supprimer un avis"""
+    avis = get_object_or_404(AvisProduit, id=avis_id, utilisateur=request.user)
+    
+    if request.method == 'POST':
+        avis.delete()
+        messages.success(request, 'Votre avis a été supprimé avec succès.')
+        return redirect('mes_avis')
+    
+    context = {
+        'avis': avis,
+    }
+    
+    return render(request, 'dashboards/client/supprimer_avis.html', context)
+
+@login_required
+def noter_commande_complete(request, commande_id):
+    """Noter une commande complète"""
+    commande = get_object_or_404(Commande, id=commande_id, utilisateur=request.user)
+    
+    # Vérifier si la commande est livrée
+    if commande.statut != Commande.STATUT_LIVREE:
+        messages.error(request, "Vous ne pouvez noter que les commandes livrées.")
+        return redirect('tableau_avis')
+    
+    # Vérifier si une notation existe déjà
+    notation_existante = NotationCommande.objects.filter(
+        utilisateur=request.user, 
+        commande=commande
+    ).first()
+    
+    if request.method == 'POST':
+        form = NotationCommandeForm(request.POST, request.FILES, instance=notation_existante)
+        if form.is_valid():
+            notation = form.save(commit=False)
+            notation.utilisateur = request.user
+            notation.commande = commande
+            notation.save()
+            
+            # Gérer les images
+            images = request.FILES.getlist('images')
+            for image in images:
+                MediaNotationCommande.objects.create(notation=notation, image=image)
+            
+            messages.success(request, 'Merci d\'avoir noté votre commande !')
+            return redirect('detail_notation_commande', notation_id=notation.id)
+    else:
+        form = NotationCommandeForm(instance=notation_existante)
+    
+    # Préparer les produits de la commande pour le template
+    produits_commande = commande.lignes.select_related('produit').all()
+    
+    context = {
+        'form': form,
+        'commande': commande,
+        'produits_commande': produits_commande,
+        'notation_existante': notation_existante,
+    }
+    
+    return render(request, 'dashboards/client/noter_commande.html', context)
+
+@login_required
+def detail_notation_commande(request, notation_id):
+    """Voir le détail d'une notation de commande"""
+    notation = get_object_or_404(NotationCommande, id=notation_id, utilisateur=request.user)
+    
+    context = {
+        'notation': notation,
+    }
+    
+    return render(request, 'client/detail_notation_commande.html', context)
+
+@login_required
+def signaler_probleme(request, commande_id):
+    """Signaler un problème sur une commande"""
+    commande = get_object_or_404(Commande, id=commande_id, utilisateur=request.user)
+    
+    # Préparer les produits de la commande pour le choix
+    produits_commande = commande.lignes.select_related('produit').all()
+    
+    if request.method == 'POST':
+        form = ProblemeCommandeForm(request.POST, request.FILES)
+        if form.is_valid():
+            probleme = form.save(commit=False)
+            probleme.utilisateur = request.user
+            probleme.commande = commande
+            probleme.save()
+            
+            # Gérer les images
+            images = request.FILES.getlist('images')
+            for image in images:
+                media = MediaNotationCommande.objects.create(image=image)
+                probleme.photos.add(media)
+            
+            # Envoyer une notification au support
+            messages.success(request, 'Votre problème a été signalé. Nous allons le traiter rapidement.')
+            return redirect('detail_commande_client', commande_id=commande.id)
+    else:
+        form = ProblemeCommandeForm()
+        form.fields['produit_concerne'].queryset = Produit.objects.filter(
+            id__in=produits_commande.values_list('produit_id', flat=True)
+        )
+    
+    context = {
+        'form': form,
+        'commande': commande,
+        'produits_commande': produits_commande,
+    }
+    
+    return render(request, 'client/signaler_probleme.html', context)
+
+@login_required
+def mes_notations_commandes(request):
+    """Afficher toutes les notations de commandes de l'utilisateur"""
+    notations = NotationCommande.objects.filter(
+        utilisateur=request.user
+    ).select_related('commande').prefetch_related('medias').order_by('-date_creation')
+    
+    paginator = Paginator(notations, 10)
+    page_number = request.GET.get('page')
+    notations_page = paginator.get_page(page_number)
+    
+    context = {
+        'notations': notations_page,
+    }
+    
+    return render(request, 'client/mes_notations_commandes.html', context)

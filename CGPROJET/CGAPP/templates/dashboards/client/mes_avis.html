@@ -1,0 +1,181 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'mon_compte' %}">Mon compte</a></li>
+                    <li class="breadcrumb-item active">Mes avis produits</li>
+                </ol>
+            </nav>
+
+            <div class="bg-light rounded h-100 p-4">
+                <!-- En-tête -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">Mes avis produits</h4>
+                    <span class="badge bg-primary p-2">
+                        {{ avis.paginator.count }} avis au total
+                    </span>
+                </div>
+
+                {% if avis %}
+                <!-- Liste des avis -->
+                <div class="row">
+                    {% for avi in avis %}
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">{{ avi.produit.nom }}</h6>
+                                    <small class="text-muted">Commande #{{ avi.commande.id }}</small>
+                                </div>
+                                <div class="text-warning">
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= avi.note %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <h6 class="card-title">{{ avi.titre }}</h6>
+                                <p class="card-text">{{ avi.commentaire }}</p>
+                                
+                                {% if avi.remarques %}
+                                <div class="alert alert-info mt-3">
+                                    <strong>Remarques :</strong> {{ avi.remarques }}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Photos -->
+                                {% if avi.medias.all %}
+                                <div class="mt-3">
+                                    <h6>Photos :</h6>
+                                    <div class="row">
+                                        {% for media in avi.medias.all|slice:":3" %}
+                                        <div class="col-4">
+                                            <img src="{{ media.image.url }}" 
+                                                 alt="Photo avis" 
+                                                 class="img-fluid rounded"
+                                                 style="height: 100px; object-fit: cover;">
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Réponses -->
+                                {% if avi.reponses.all %}
+                                <div class="mt-3">
+                                    <h6>Réponse du vendeur :</h6>
+                                    {% for reponse in avi.reponses.all %}
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <p class="card-text mb-0">{{ reponse.message }}</p>
+                                            <small class="text-muted">
+                                                Par {{ reponse.auteur.username }}, 
+                                                le {{ reponse.date_creation|date:"d/m/Y" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        Posté le {{ avi.date_creation|date:"d/m/Y à H:i" }}
+                                    </small>
+                                    <div class="btn-group">
+                                        <a href="{% url 'modifier_avis' avi.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'supprimer_avis' avi.id %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if avis.has_other_pages %}
+                <nav class="d-flex justify-content-center mt-4">
+                    <ul class="pagination">
+                        {% if avis.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ avis.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in avis.paginator.page_range %}
+                        <li class="page-item {% if avis.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endfor %}
+                        
+                        {% if avis.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ avis.next_page_number }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+                {% else %}
+                <!-- Aucun avis -->
+                <div class="text-center py-5">
+                    <i class="fas fa-star fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">Vous n'avez pas encore d'avis</h5>
+                    <p class="text-muted">Donnez votre avis sur les produits que vous avez commandés.</p>
+                    <a href="{% url 'tableau_avis' %}" class="btn btn-primary">
+                        <i class="fas fa-shopping-bag me-2"></i>Voir mes commandes à noter
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-group .btn {
+    padding: 0.25rem 0.5rem;
+}
+</style>
+{% endblock %}

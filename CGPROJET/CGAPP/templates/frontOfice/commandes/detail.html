@@ -1,0 +1,757 @@
+{% extends "frontOfice/base.html" %}
+{% load static %}
+{% load math_operations %}  
+
+{% block content %}
+<div class="order-detail-container">
+    <!-- En-tête avec numéro de commande -->
+    <div class="order-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="order-title">Détails de la commande</h1>
+                    <p class="order-number">Référence #{{ commande.id }}</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="order-actions">
+                        <button class="btn btn-outline-glacier" aria-label="Imprimer">
+                            <i class="fas fa-print"></i> Imprimer
+                        </button>
+                        <button class="btn btn-outline-swoosh ms-2" aria-label="Recevoir par email">
+                            <i class="fas fa-envelope"></i> Recevoir par email
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Colonne principale -->
+            <div class="col-lg-8">
+                <!-- Carte de statut de commande -->
+                <div class="order-card">
+                    <div class="order-progress">
+                        <div class="progress-steps">
+                            {% with statut=commande.statut %}
+                            <div class="step {% if statut != 'annulee' %}completed{% endif %}">
+                                <div class="step-icon">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div class="step-label">Commandé</div>
+                                <div class="step-date">{{ commande.date_creation|date:"d M Y" }}</div>
+                            </div>
+                            
+                            <div class="step {% if statut == 'payee' or statut == 'expediee' or statut == 'livree' %}completed{% endif %}">
+                                <div class="step-icon">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="step-label">Payé</div>
+                                <div class="step-date">
+                                    {% if statut != 'en_attente' %}{{ commande.date_creation|date:"d M Y" }}{% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="step {% if statut == 'expediee' or statut == 'livree' %}completed{% endif %}">
+                                <div class="step-icon">
+                                    <i class="fas fa-shipping-fast"></i>
+                                </div>
+                                <div class="step-label">Expédié</div>
+                            </div>
+                            
+                            <div class="step {% if statut == 'livree' %}completed{% endif %}">
+                                <div class="step-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="step-label">Livré</div>
+                            </div>
+                            {% endwith %}
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 
+                                {% if commande.statut == 'en_attente' %}25%
+                                {% elif commande.statut == 'payee' %}50%
+                                {% elif commande.statut == 'expediee' %}75%
+                                {% elif commande.statut == 'livree' %}100%
+                                {% else %}0%{% endif %}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-status-badge status-{{ commande.statut }}">
+                        <i class="fas 
+                            {% if commande.statut == 'en_attente' %}fa-clock
+                            {% elif commande.statut == 'payee' %}fa-check
+                            {% elif commande.statut == 'expediee' %}fa-shipping-fast
+                            {% elif commande.statut == 'livree' %}fa-box-open
+                            {% else %}fa-times{% endif %}">
+                        </i>
+                        {{ commande.get_statut_display }}
+                    </div>
+                </div>
+
+                <!-- Produits commandés -->
+                <div class="order-card">
+                    <h3 class="card-title">Produits commandés</h3>
+                    <div class="ordered-products">
+                        {% for ligne in commande.lignes.all %}
+                        <div class="ordered-item">
+                            <div class="product-image">
+                                <img src="{% if ligne.produit.image %}{{ ligne.produit.image.url }}{% else %}{% static 'images/placeholder-product.jpg' %}{% endif %}" alt="{{ ligne.produit.nom }}">
+                            </div>
+                            <div class="product-details">
+                                <h4 class="product-name">{{ ligne.produit.nom }}</h4>
+                                <p class="product-sku">Réf: {{ ligne.produit.id }}</p>
+                                <div class="product-quantity">Quantité: {{ ligne.quantite }}</div>
+                            </div>
+                            <div class="product-price">
+                                <div class="unit-price">{{ ligne.produit.prix }} FCFA</div>
+                                <div class="total-price">{{ ligne.sous_total }} FCFA</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Informations de livraison -->
+                <div class="order-card">
+                    <h3 class="card-title">Informations de livraison</h3>
+                    <div class="delivery-info">
+                        {% if commande.adresse_livraison %}
+                        <div class="info-row">
+                            <div class="info-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <div class="info-content">
+                                <h5>Adresse de livraison</h5>
+                                <p>{{ commande.adresse_livraison }}</p>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="info-content">
+                                <h5>Délai de livraison estimé</h5>
+                                <p>Dans 120 minutes</p>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="info-row">
+                            <div class="info-icon">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div class="info-content">
+                                <h5>Retrait en magasin</h5>
+                                <p>Votre commande sera disponible au retrait en magasin</p>
+                                <p class="store-address">123 Avenue du Commerce, Lomé, Togo</p>
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="info-content">
+                                <h5>Délai de livraison estimé</h5>
+                                <p>Dans quelques minute</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        
+                    </div>
+                </div>
+                  <!-- Payement -->
+                <div class="order-card">
+                    <h3 class="card-title">Paiement</h3>
+                    
+                    {% if commande.statut == 'en_attente' %}
+                        <div class="payment-pending">
+                            <div class="alert alert-glacier">
+                                <i class="fas fa-clock me-2"></i>
+                                <strong>En attente de paiement</strong>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'processus_paiement' commande.id %}" class="btn btn-glacier">
+                                    <i class="fas fa-credit-card me-2"></i>
+                                    Procéder au paiement
+                                </a>
+                                
+                                <a href="{% url 'annuler_paiement' commande.id %}" class="btn btn-outline-swoosh" 
+                                onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande?');">
+                                    <i class="fas fa-times me-2"></i>
+                                    Annuler la commande
+                                </a>
+                            </div>
+                        </div>
+                    {% elif commande.statut == 'payee' and commande.paiement %}
+                        <div class="payment-success">
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Paiement confirmé</strong>
+                            </div>
+                            
+                            <div class="payment-details">
+                                <p><strong>Méthode:</strong> 
+                                    {% if commande.methode_paiement == 'carte_bancaire' %}Carte bancaire
+                                    {% elif commande.methode_paiement == 'flooz' %}Flooz
+                                    {% elif commande.methode_paiement == 'tmoney' %}TMoney
+                                    {% elif commande.methode_paiement == 'paiement_livraison' %}Paiement à la livraison
+                                    {% elif commande.methode_paiement == 'retrait_magasin' %}Paiement en magasin
+                                    {% else %}{{ commande.methode_paiement }}{% endif %}
+                                </p>
+                                <p><strong>Montant:</strong> {{ commande.paiement.montant }} FCFA</p>
+                                <p><strong>Date:</strong> {{ commande.paiement.date_paiement|date:"d M Y à H:i" }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Colonne latérale -->
+            <div class="col-lg-4">
+                <!-- Récapitulatif de commande -->
+                <div class="order-card summary-card">
+                    <h3 class="card-title">Récapitulatif</h3>
+                    <div class="summary-details">
+                        <div class="summary-row">
+                            <span>Date de commande</span>
+                            <span>{{ commande.date_creation|date:"d M Y à H:i" }}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Statut</span>
+                            <span class="status-badge status-{{ commande.statut }}">
+                                {{ commande.get_statut_display }}
+                            </span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Méthode de paiement</span>
+                            <span>
+                                {% if commande.methode_paiement == 'retrait_magasin' %}Paiement en magasin
+                                {% elif commande.methode_paiement == 'paiement_livraison' %}Paiement à la livraison
+                                {% elif commande.methode_paiement == 'flooz' %}Flooz
+                                {% elif commande.methode_paiement == 'tmoney' %}TMoney
+                                {% elif commande.methode_paiement == 'carte_bancaire' %}Carte bancaire
+                                {% else %}{{ commande.methode_paiement }}{% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="summary-totals">
+                        <div class="total-row">
+                            <span>Sous-total</span>
+                            <span>{{ commande.total }} FCFA</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Livraison</span>
+                            <span>
+                                {% if commande.adresse_livraison %}2 000 FCFA{% else %}Gratuit{% endif %}
+                            </span>
+                        </div>
+                        {% if commande.remise and commande.remise > 0 %}
+                        <div class="total-row discount">
+                            <span>Remise</span>
+                            <span>-{{ commande.remise }} FCFA</span>
+                        </div>
+                        {% endif %}
+                        <div class="total-row grand-total">
+                            <span>Total</span>
+                            <span>
+                                {% if commande.adresse_livraison %}
+                                    {% if commande.remise %}
+                                        {{ commande.total|add:2000|sub:commande.remise }} FCFA
+                                    {% else %}
+                                        {{ commande.total|add:2000 }} FCFA
+                                    {% endif %}
+                                {% else %}
+                                    {% if commande.remise %}
+                                        {{ commande.total|sub:commande.remise }} FCFA
+                                    {% else %}
+                                        {{ commande.total }} FCFA
+                                    {% endif %}
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="support-section">
+                        <h5>Besoin d'aide ?</h5>
+                        <p>Notre équipe client est là pour vous aider</p>
+                        <div class="support-contacts">
+                            <a href="tel:+22890123456" class="support-link">
+                                <i class="fas fa-phone"></i> +228 92 74 59 59
+                            </a>
+                            <a href="mailto:support@canaanglacier.com" class="support-link">
+                                <i class="fas fa-envelope"></i>  contact@canaanglacier.com
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+              
+
+                <!-- Actions de suivi -->
+                <div class="order-card">
+                    <h3 class="card-title">Suivi de commande</h3>
+                    <div class="tracking-actions">
+                        <button class="btn btn-glacier btn-block">
+                            <i class="fas fa-map-marker-alt"></i> Suivre mon colis
+                        </button>
+                        <button class="btn btn-outline-glacier btn-block mt-2">
+                            <i class="fas fa-file-invoice"></i> Voir la facture
+                        </button>
+                        {% if commande.statut == 'livree' %}
+                        <button class="btn btn-swoosh btn-block mt-2">
+                            <i class="fas fa-star"></i> Évaluer les produits
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.order-detail-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding-bottom: 50px;
+}
+
+.order-header {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--yellow-canaan) 100%);
+    color: white;
+    padding: 30px 0;
+    margin-bottom: 30px;
+}
+
+.order-title {
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.order-number {
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.order-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.card-title {
+    color: var(--teal-glacier);
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--teal-light);
+}
+
+/* Barre de progression */
+.order-progress {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    color: #e0e0e0;
+}
+
+.step.completed .step-icon {
+    background: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.step-label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.step-date {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.progress-bar {
+    position: absolute;
+    top: 25px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #e0e0e0;
+    z-index: 1;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--teal-glacier);
+    transition: width 0.5s ease;
+    border-radius: 2px;
+}
+
+.order-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.order-status-badge i {
+    margin-right: 8px;
+}
+
+.status-en_attente {
+    background-color: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+}
+
+.status-payee {
+    background-color: rgba(0, 184, 181, 0.2);
+    color: var(--teal-glacier);
+}
+
+.status-expediee {
+    background-color: rgba(33, 150, 243, 0.2);
+    color: #2196f3;
+}
+
+.status-livree {
+    background-color: rgba(76, 175, 80, 0.2);
+    color: #4caf50;
+}
+
+.status-annulee {
+    background-color: rgba(244, 67, 54, 0.2);
+    color: #f44336;
+}
+
+/* Produits commandés */
+.ordered-products {
+    margin-top: 20px;
+}
+
+.ordered-item {
+    display: flex;
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.ordered-item:last-child {
+    border-bottom: none;
+}
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-right: 15px;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-details {
+    flex: 1;
+}
+
+.product-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.product-sku {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.product-quantity {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.product-price {
+    text-align: right;
+}
+
+.unit-price {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.total-price {
+    font-weight: 700;
+    color: var(--teal-glacier);
+}
+
+/* Informations de livraison */
+.delivery-info {
+    margin-top: 15px;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--teal-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: var(--teal-glacier);
+}
+
+.info-content h5 {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.store-address {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Récapitulatif */
+.summary-card {
+    position: sticky;
+    top: 100px;
+}
+
+.summary-details {
+    margin-bottom: 20px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.summary-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.summary-totals {
+    border-top: 2px dashed var(--teal-glacier);
+    padding-top: 15px;
+    margin: 20px 0;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.total-row.discount {
+    color: var(--pink-swoosh);
+}
+
+.total-row.grand-total {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--teal-glacier);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(0, 184, 181, 0.3);
+}
+
+/* Support */
+.support-section {
+    background: var(--teal-light);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.support-section h5 {
+    color: var(--teal-glacier);
+    margin-bottom: 5px;
+}
+
+.support-section p {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.support-contacts {
+    display: flex;
+    flex-direction: column;
+}
+
+.support-link {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    color: var(--teal-glacier);
+    text-decoration: none;
+}
+
+.support-link i {
+    margin-right: 10px;
+}
+
+.support-link:hover {
+    color: var(--pink-swoosh);
+}
+
+/* Actions de suivi */
+.tracking-actions .btn {
+    padding: 12px;
+    font-weight: 500;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .summary-card {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .order-header {
+        text-align: center;
+        padding: 20px 0;
+    }
+    
+    .order-actions {
+        margin-top: 15px;
+        justify-content: center;
+    }
+    
+    .progress-steps {
+        flex-wrap: wrap;
+    }
+    
+    .step {
+        flex: 0 0 50%;
+        margin-bottom: 20px;
+    }
+    
+    .progress-bar {
+        display: none;
+    }
+    
+    .ordered-item {
+        flex-direction: column;
+    }
+    
+    .product-image {
+        margin-bottom: 15px;
+    }
+    
+    .product-price {
+        text-align: left;
+        margin-top: 10px;
+    }
+    
+    .info-row {
+        flex-direction: column;
+    }
+    
+    .info-icon {
+        margin-bottom: 10px;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.order-card {
+    animation: fadeIn 0.5s ease;
+}
+
+.ordered-item {
+    transition: transform 0.3s ease;
+}
+
+.ordered-item:hover {
+    transform: translateX(5px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation pour la barre de progression
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressFill) {
+        setTimeout(() => {
+            progressFill.style.transition = 'width 1.5s ease';
+        }, 500);
+    }
+    
+    // Simulation d'impression
+    document.querySelector('[aria-label="Imprimer"]').addEventListener('click', function() {
+        window.print();
+    });
+});
+</script>
+{% endblock %}

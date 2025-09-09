@@ -1,0 +1,58 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded h-100 p-4">
+                <h4 class="mb-4">🛒 Nouvelle Commande - Client</h4>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.nom_complet.id_for_label }}" class="form-label">Nom complet du client</label>
+                                    {{ form.nom_complet }}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.telephone.id_for_label }}" class="form-label">Numéro de téléphone</label>
+                                    {{ form.telephone }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label">Email (optionnel)</label>
+                                    {{ form.email }}
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-arrow-right me-2"></i>Commencer la commande
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+</style>
+{% endblock %}

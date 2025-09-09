@@ -1,0 +1,84 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>📋 Commandes en Cours</h4>
+                    <a href="{% url 'nouvelle_commande_serveur' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Nouvelle Commande
+                    </a>
+                </div>
+
+                <!-- Filtres -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <select class="form-select" onchange="location = this.value;">
+                            <option value="{% url 'commandes_en_cours_serveur' %}">Tous les statuts</option>
+                            {% for value, label in commande.STATUT_CHOICES %}
+                            <option value="{% url 'commandes_en_cours_serveur' %}?statut={{ value }}" 
+                                    {% if request.GET.statut == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tableau des commandes -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>N° Commande</th>
+                                <th>Client</th>
+                                <th>Téléphone</th>
+                                <th>Total</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commande in commandes %}
+                            <tr>
+                                <td><strong>#{{ commande.id }}</strong></td>
+                                <td>{{ commande.utilisateur.get_full_name }}</td>
+                                <td>{{ commande.utilisateur.telephone }}</td>
+                                <td>{{ commande.total }} FCFA</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if commande.statut == 'en_attente' %}bg-warning
+                                        {% elif commande.statut == 'en_traitement' %}bg-info
+                                        {% elif commande.statut == 'expediee' %}bg-primary
+                                        {% elif commande.statut == 'livree' %}bg-success
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ commande.get_statut_display }}
+                                    </span>
+                                </td>
+                                <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'detail_commande' commande_id=commande.id %}" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                                    <p>Aucune commande en cours</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

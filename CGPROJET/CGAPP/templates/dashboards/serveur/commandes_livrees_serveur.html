@@ -1,0 +1,96 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded h-100 p-4">
+                <!-- En-tête simplifié -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h4 class="mb-0">Commandes Livrées</h4>
+                        <small class="text-muted">Liste des commandes marquées comme livrées</small>
+                    </div>
+                    <div class="d-flex">
+                        <span class="badge bg-primary me-2 p-2">
+                            <i class="fas fa-list me-1"></i>
+                            {{ total_commandes }} commande(s)
+                        </span>
+                    </div>
+                </div>
+                
+                {% if commandes %}
+                <!-- Liste des commandes simplifiée -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th># Commande</th>
+                                <th>Client</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commande in commandes %}
+                            <tr>
+                                <td>
+                                    <strong>#{{ commande.id }}</strong>
+                                </td>
+                                <td>
+                                    {{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}
+                                </td>
+                                <td>
+                                    {{ commande.date_creation|date:"d/m/Y H:i" }}
+                                </td>
+                                <td>
+                                    <strong>{{ commande.total }} FCFA</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Livrée
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination simplifiée -->
+                {% if is_paginated %}
+                <nav class="d-flex justify-content-center mt-4">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                        </li>
+                        {% endif %}
+                        
+                        <li class="page-item active">
+                            <span class="page-link">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">Aucune commande livrée</h5>
+                    <p class="text-muted">Aucune commande n'est actuellement marquée comme livrée.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

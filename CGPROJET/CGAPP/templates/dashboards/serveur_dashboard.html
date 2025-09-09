@@ -174,7 +174,7 @@
                                         <td><strong>#{{ commande.id }}</strong></td>
                                         <td>{{ commande.utilisateur.username }}</td>
                                         <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                        <td><strong>{{ commande.total }}€</strong></td>
+                                        <td><strong>{{ commande.total }}fcfa</strong></td>
                                         <td>
                                             {% if commande.adresse_livraison %}
                                                 {{ commande.adresse_livraison.rue }}, {{ commande.adresse_livraison.ville }}
@@ -183,7 +183,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <form method="post" action="{% url 'changer_statut_commande' commande.id %}" class="d-inline">
+                                            <form method="post" action="{% url 'changer_statut' commande.id %}" class="d-inline">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="statut" value="en_cours">
                                                 <button type="submit" class="btn btn-sm btn-success">
@@ -237,7 +237,7 @@
                                         <td><strong>#{{ commande.id }}</strong></td>
                                         <td>{{ commande.utilisateur.username }}</td>
                                         <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                        <td><strong>{{ commande.total }}€</strong></td>
+                                        <td><strong>{{ commande.total }}fcfa</strong></td>
                                         <td>
                                             {% if commande.adresse_livraison %}
                                                 {{ commande.adresse_livraison.rue }}, {{ commande.adresse_livraison.ville }}
@@ -246,14 +246,14 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <form method="post" action="{% url 'changer_statut_commande' commande.id %}" class="d-inline">
+                                            <form method="post" action="{% url 'changer_statut' commande.id %}" class="d-inline">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="statut" value="livree">
                                                 <button type="submit" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-check"></i> Marquer livrée
                                                 </button>
                                             </form>
-                                            <form method="post" action="{% url 'changer_statut_commande' commande.id %}" class="d-inline ms-1">
+                                            <form method="post" action="{% url 'changer_statut' commande.id %}" class="d-inline ms-1">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="statut" value="annulee">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
@@ -306,7 +306,7 @@
                                         <td><strong>#{{ commande.id }}</strong></td>
                                         <td>{{ commande.utilisateur.username }}</td>
                                         <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                        <td><strong>{{ commande.total }}€</strong></td>
+                                        <td><strong>{{ commande.total }}fcfa</strong></td>
                                         <td>
                                             <span class="badge bg-success">
                                                 <i class="fas fa-check me-1"></i>Livrée

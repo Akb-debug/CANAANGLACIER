@@ -1,0 +1,148 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'mon_compte' %}">Mon compte</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'tableau_avis' %}">Mes avis</a></li>
+                    <li class="breadcrumb-item active">Gérer mes préférences</li>
+                </ol>
+            </nav>
+
+            <div class="bg-light rounded h-100 p-4">
+                <div class="row">
+                    <!-- Formulaire d'ajout -->
+                    <div class="col-md-5">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-plus-circle me-2"></i>
+                                    Ajouter une préférence
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Type</label>
+                                        {{ form.type }}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Sévérité</label>
+                                        {{ form.severite }}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Description</label>
+                                        {{ form.description }}
+                                        <div class="form-text">
+                                            Décrivez précisément votre allergie, intolérance ou préférence.
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-check mb-3">
+                                        {{ form.est_actif }}
+                                        <label class="form-check-label">Cette préférence est active</label>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-save me-2"></i>Enregistrer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste des préférences -->
+                    <div class="col-md-7">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-list me-2"></i>
+                                    Mes préférences ({{ preferences.count }})
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if preferences %}
+                                <div class="list-group">
+                                    {% for preference in preferences %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="badge bg-{% if preference.severite == 'critique' %}danger{% elif preference.severite == 'severe' %}warning{% else %}info{% endif %} me-2">
+                                                        {{ preference.get_severite_display }}
+                                                    </span>
+                                                    <span class="badge bg-secondary">{{ preference.get_type_display }}</span>
+                                                </div>
+                                                <p class="mb-1">{{ preference.description }}</p>
+                                                <small class="text-muted">
+                                                    Ajouté le {{ preference.date_creation|date:"d/m/Y" }}
+                                                    {% if not preference.est_actif %}
+                                                    • <span class="text-danger">Inactive</span>
+                                                    {% endif %}
+                                                </small>
+                                            </div>
+                                            <div class="btn-group ms-3">
+                                                <a href="{% url 'modifier_preference' preference.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'supprimer_preference' preference.id %}" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-info-circle fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Aucune préférence enregistrée</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Information importante -->
+                        <div class="alert alert-info mt-4">
+                            <h6><i class="fas fa-info-circle me-2"></i>Information importante</h6>
+                            <p class="mb-0">
+                                Vos préférences alimentaires nous aident à mieux vous servir et à éviter tout risque 
+                                d'allergie. Ces informations sont traitées avec la plus grande confidentialité.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.list-group-item {
+    border: 1px solid #e9ecef;
+    margin-bottom: 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.form-select {
+    border-radius: 0.375rem;
+}
+
+.textarea {
+    min-height: 100px;
+}
+</style>
+{% endblock %}

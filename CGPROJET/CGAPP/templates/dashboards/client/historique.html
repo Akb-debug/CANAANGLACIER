@@ -1,0 +1,391 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'mon_compte' %}">Mon compte</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Mon historique</li>
+                </ol>
+            </nav>
+
+            <div class="bg-light rounded h-100 p-4">
+                <!-- En-tête avec statistiques -->
+                <div class="row mb-5">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white text-center">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ total_commandes }}</h3>
+                                <p class="card-text">Commandes passées</p>
+                                <i class="fas fa-shopping-bag fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white text-center">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ total_depense|floatformat:0 }} FCFA</h3>
+                                <p class="card-text">Total dépensé</p>
+                                <i class="fas fa-money-bill-wave fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white text-center">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ commandes_livrees }}</h3>
+                                <p class="card-text">Commandes livrées</p>
+                                <i class="fas fa-truck fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white text-center">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ commandes_mois_count }}</h3>
+                                <p class="card-text">Ce mois-ci</p>
+                                <i class="fas fa-calendar fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation dans l'historique -->
+                <ul class="nav nav-tabs mb-4" id="historyTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="commandes-tab" data-bs-toggle="tab" data-bs-target="#commandes" type="button" role="tab">
+                            <i class="fas fa-shopping-bag me-2"></i>Mes commandes
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="activite-tab" data-bs-toggle="tab" data-bs-target="#activite" type="button" role="tab">
+                            <i class="fas fa-history me-2"></i>Activité récente
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
+                            <i class="fas fa-bell me-2"></i>Notifications
+                            {% if notifications.count > 0 %}
+                            <span class="badge bg-danger ms-1">{{ notifications.count }}</span>
+                            {% endif %}
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="historyTabsContent">
+                    <!-- Onglet Commandes -->
+                    <div class="tab-pane fade show active" id="commandes" role="tabpanel">
+                        {% if commandes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Commande</th>
+                                        <th>Date</th>
+                                        <th>Articles</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commande in commandes %}
+                                    <tr>
+                                        <td>
+                                            <strong>#{{ commande.id }}</strong>
+                                        </td>
+                                        <td>
+                                            {{ commande.date_creation|date:"d/m/Y" }}
+                                            <br>
+                                            <small class="text-muted">{{ commande.date_creation|date:"H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <small>{{ commande.lignes.count }} article(s)</small>
+                                        </td>
+                                        <td>
+                                            <strong class="text-success">{{ commande.total }} FCFA</strong>
+                                            {% if commande.coupon %}
+                                            <br>
+                                            <small class="text-danger">-{{ commande.coupon.reduction }} FCFA</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if commande.statut == 'livree' %}success{% elif commande.statut == 'annulee' %}danger{% elif commande.statut == 'en_traitement' %}info{% else %}warning{% endif %}">
+                                                {{ commande.get_statut_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'detail_commande' commande.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> Détails
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune commande passée</h5>
+                            <p class="text-muted">Vous n'avez pas encore passé de commande.</p>
+                            <a href="{% url 'boutique' %}" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart me-2"></i>Découvrir la boutique
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Onglet Activité récente -->
+                    <div class="tab-pane fade" id="activite" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="mb-4">Votre activité récente</h5>
+                                
+                                <!-- Timeline des activités -->
+                                <div class="timeline">
+                                    {% for action in historique_actions %}
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-{% if action.type_action == 'connexion' %}success{% elif 'commande' in action.type_action %}primary{% else %}info{% endif %}"></div>
+                                        <div class="timeline-content">
+                                            <div class="d-flex justify-content-between">
+                                                <h6 class="mb-1">{{ action.get_type_action_display }}</h6>
+                                                <small class="text-muted">{{ action.date_action|timesince }}</small>
+                                            </div>
+                                            <p class="text-muted mb-1">{{ action.description }}</p>
+                                            {% if action.objet_concerne %}
+                                            <small class="text-muted">Objet: {{ action.objet_concerne }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% empty %}
+                                    <div class="text-center py-4">
+                                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">Aucune activité récente</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <!-- Statistiques mensuelles -->
+                                <div class="card">
+                                    <div class="card-header bg-dark text-white">
+                                        <h6 class="mb-0">Statistiques du mois</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <small class="text-muted">Commandes ce mois</small>
+                                            <h4 class="text-primary">{{ commandes_mois_count }}</h4>
+                                        </div>
+                                        <div class="mb-3">
+                                            <small class="text-muted">Dépense mensuelle</small>
+                                            <h4 class="text-success">{{ depense_mensuelle|floatformat:0 }} FCFA</h4>
+                                        </div>
+                                        <div class="mb-3">
+                                            <small class="text-muted">Activités ce mois</small>
+                                            <h4 class="text-info">{{ historique_actions.count }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Panier actuel -->
+                                {% if panier_actuel %}
+                                <div class="card mt-4">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="mb-0">Panier en cours</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="mb-2">{{ panier_actuel.lignes.count }} article(s)</p>
+                                        <p class="mb-3">Total: {{ panier_actuel.total }} FCFA</p>
+                                        <a href="{% url 'panier' %}" class="btn btn-primary btn-sm w-100">
+                                            Continuer mes achats
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Onglet Notifications -->
+                    <div class="tab-pane fade" id="notifications" role="tabpanel">
+                        {% if notifications %}
+                        <div class="notification-list">
+                            {% for notification in notifications %}
+                            <div class="card mb-3 {% if not notification.lue %}border-primary{% endif %}">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="card-title {% if not notification.lue %}text-primary{% endif %}">
+                                                {{ notification.titre }}
+                                                {% if not notification.lue %}
+                                                <span class="badge bg-primary ms-2">Nouveau</span>
+                                                {% endif %}
+                                            </h6>
+                                            <p class="card-text">{{ notification.message }}</p>
+                                            <small class="text-muted">
+                                                {{ notification.date_creation|date:"d/m/Y à H:i" }}
+                                                {% if notification.commande %}
+                                                • Commande #{{ notification.commande.id }}
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-bell-slash fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune notification</h5>
+                            <p class="text-muted">Vous n'avez pas de notifications pour le moment.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styles personnalisés -->
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 25px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.timeline-content {
+    padding-left: 20px;
+    border-left: 2px solid #dee2e6;
+    margin-left: 10px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: -21px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.nav-tabs .nav-link {
+    font-weight: 600;
+    color: #6c757d;
+    border: none;
+    padding: 1rem 1.5rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom: 3px solid #0d6efd;
+    background: transparent;
+}
+
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+.notification-list .card {
+    transition: transform 0.2s ease;
+}
+
+.notification-list .card:hover {
+    transform: translateX(5px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-tabs .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .timeline {
+        padding-left: 20px;
+    }
+    
+    .timeline-marker {
+        left: -20px;
+        width: 16px;
+        height: 16px;
+    }
+    
+    .row.mb-5 > .col-md-3 {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+<!-- Scripts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sauvegarder l'onglet actif
+    const historyTabs = document.getElementById('historyTabs');
+    const activeTab = localStorage.getItem('activeHistoryTab');
+    
+    if (activeTab) {
+        const tabTrigger = new bootstrap.Tab(document.querySelector(activeTab));
+        tabTrigger.show();
+    }
+    
+    historyTabs.addEventListener('click', function(e) {
+        if (e.target.classList.contains('nav-link')) {
+            localStorage.setItem('activeHistoryTab', e.target.getAttribute('data-bs-target'));
+        }
+    });
+    
+    // Animation pour les timelines
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    timelineItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+            item.style.transition = 'all 0.5s ease';
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

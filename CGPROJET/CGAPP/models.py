@@ -4,6 +4,8 @@ from django.templatetags.static import static
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator
 from decimal import Decimal, ROUND_HALF_UP
+from django.db import models
+from django.core.validators import RegexValidator, EmailValidator
 
 # -------------------- UTILISATEUR --------------------
 class Utilisateur(AbstractUser):
@@ -12,6 +14,7 @@ class Utilisateur(AbstractUser):
         ('admin', 'Admin'),
         ('serveur', 'Serveur'),
         ('gerant', 'Gérant'),
+        ('livreur', 'Livreur'),
     )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES)
     telephone = models.CharField(max_length=15, blank=True, null=True)
@@ -36,6 +39,12 @@ class Client(models.Model):
 
 
 class Serveur(models.Model):
+    utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.utilisateur.username
+    
+class Livreur(models.Model):
     utilisateur = models.OneToOneField(Utilisateur, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -202,10 +211,24 @@ class Panier(models.Model):
     session_id = models.CharField(max_length=100, null=True, blank=True)
     date_creation = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def total(self):
+        """Somme totale du panier"""
+        total = Decimal('0')
+        for ligne in self.lignes.all():
+            total += ligne.total  # ✅ utilise la propriété total de LignePanier
+        return total
+
+
 class LignePanier(models.Model):
     panier = models.ForeignKey(Panier, on_delete=models.CASCADE, related_name='lignes')
     produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
     quantite = models.PositiveIntegerField(default=1)
+
+    @property
+    def total(self):
+        """Sous-total pour cette ligne du panier"""
+        return self.produit.prix * self.quantite  # ✅ simple et direct
 
 class AdresseLivraison(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
@@ -228,13 +251,30 @@ class Coupon(models.Model):
         return self.code
 
 class Commande(models.Model):
+
+     # Constantes de statut
+    STATUT_EN_ATTENTE = 'en_attente'
+    STATUT_TRAITEMENT = 'en_traitement'
+    STATUT_EXPEDIEE = 'expediee'
+    STATUT_LIVREE = 'livree'
+    STATUT_ANNULEE = 'annulee'
+
+      
+    STATUT_CHOICES = [
+        (STATUT_EN_ATTENTE, 'En attente'),
+        (STATUT_TRAITEMENT, 'En traitement'),
+        (STATUT_EXPEDIEE, 'Expédiée'),
+        (STATUT_LIVREE, 'Livrée'),
+        (STATUT_ANNULEE, 'Annulée'),
+    ]
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
     date_creation = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
-    adresse_livraison = models.ForeignKey(AdresseLivraison, on_delete=models.SET_NULL, null=True)
+    adresse_livraison = models.ForeignKey(AdresseLivraison, on_delete=models.SET_NULL, null=True,  blank=True)
     methode_paiement = models.CharField(max_length=50)
-    statut = models.CharField(max_length=20, default='en_attente')
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default=STATUT_EN_ATTENTE)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
+    
 
     def __str__(self):
         return f"Commande #{self.id} - {self.utilisateur.username}"
@@ -251,16 +291,24 @@ class LigneCommande(models.Model):
     @property
     def sous_total(self):
         return self.quantite * self.prix_unitaire
-# -------------------- PAIEMENT --------------------
+
+
 class Paiement(models.Model):
+    STATUT_CHOICES = [
+        ('en_attente', 'En attente'),
+        ('payé', 'Payé'),
+        ('échoué', 'Échoué'),
+        ('annulé', 'Annulé'),
+    ]
+    
     commande = models.OneToOneField(Commande, on_delete=models.CASCADE)
     montant = models.DecimalField(max_digits=10, decimal_places=2)
     date_paiement = models.DateTimeField(auto_now_add=True)
-    statut = models.CharField(max_length=20, default='en attente')
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
+    reference = models.CharField(max_length=100, blank=True, null=True)
 
     def __str__(self):
         return f"Paiement de {self.montant} FCFA"
-
 
 # -------------------- ABONNEMENT --------------------
 class AbonnementNewsletter(models.Model):
@@ -271,11 +319,7 @@ class AbonnementNewsletter(models.Model):
     def __str__(self):
         return self.email
 
-
-
 # -------------------- CONTACT --------------------
-from django.db import models
-from django.core.validators import RegexValidator, EmailValidator
 
 class ContactMessage(models.Model):
     SUJET_CHOICES = [
@@ -372,3 +416,166 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"{self.utilisateur.username} - {self.titre}"
+
+
+#------------------------------Gestion client --------------------------------
+
+class PreferenceAlimentaire(models.Model):
+    """Modèle pour stocker les préférences et allergies des clients"""
+    TYPE_CHOICES = [
+        ('allergie', 'Allergie'),
+        ('intolerance', 'Intolérance'),
+        ('preference', 'Préférence alimentaire'),
+        ('regime', 'Régime spécial'),
+        ('autre', 'Autre'),
+    ]
+    
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='preferences_alimentaires')
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    description = models.TextField(verbose_name="Description de la préférence/allergie")
+    severite = models.CharField(max_length=20, choices=[
+        ('leger', 'Léger'),
+        ('modere', 'Modéré'),
+        ('severe', 'Sévère'),
+        ('critique', 'Critique')
+    ], default='modere')
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
+    est_actif = models.BooleanField(default=True, verbose_name="Actif")
+
+    class Meta:
+        verbose_name = "Préférence alimentaire"
+        verbose_name_plural = "Préférences alimentaires"
+        ordering = ['-date_creation']
+
+    def __str__(self):
+        return f"{self.utilisateur.username} - {self.get_type_display()}"
+
+class AvisProduit(models.Model):
+    """Modèle pour les avis et remarques sur les produits"""
+    NOTE_CHOICES = [
+        (1, '★☆☆☆☆ - Très mauvais'),
+        (2, '★★☆☆☆ - Mauvais'),
+        (3, '★★★☆☆ - Moyen'),
+        (4, '★★★★☆ - Bon'),
+        (5, '★★★★★ - Excellent'),
+    ]
+    
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='avis_produits')
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE, related_name='avis')
+    commande = models.ForeignKey(Commande, on_delete=models.CASCADE, related_name='avis', null=True, blank=True)
+    note = models.PositiveSmallIntegerField(choices=NOTE_CHOICES, verbose_name="Note")
+    titre = models.CharField(max_length=100, verbose_name="Titre de l'avis")
+    commentaire = models.TextField(verbose_name="Votre commentaire")
+    remarques = models.TextField(blank=True, verbose_name="Remarques supplémentaires")
+    est_approuve = models.BooleanField(default=False, verbose_name="Avis approuvé")
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Avis produit"
+        verbose_name_plural = "Avis produits"
+        ordering = ['-date_creation']
+        unique_together = ['utilisateur', 'produit', 'commande']
+
+    def __str__(self):
+        return f"Avis de {self.utilisateur.username} sur {self.produit.nom}"
+
+class MediaAvis(models.Model):
+    """Modèle pour les médias associés aux avis (photos)"""
+    avis = models.ForeignKey(AvisProduit, on_delete=models.CASCADE, related_name='medias')
+    image = models.ImageField(upload_to='avis/', verbose_name="Image")
+    legende = models.CharField(max_length=200, blank=True, verbose_name="Légende")
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Média d'avis"
+        verbose_name_plural = "Médias d'avis"
+
+    def __str__(self):
+        return f"Media pour {self.avis}"
+
+class ReponseAvis(models.Model):
+    """Modèle pour les réponses aux avis (par le gérant ou l'admin)"""
+    avis = models.ForeignKey(AvisProduit, on_delete=models.CASCADE, related_name='reponses')
+    auteur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, verbose_name="Auteur de la réponse")
+    message = models.TextField(verbose_name="Réponse")
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Réponse à l'avis"
+        verbose_name_plural = "Réponses aux avis"
+        ordering = ['date_creation']
+
+    def __str__(self):
+        return f"Réponse à l'avis #{self.avis.id}"
+    
+
+class NotationCommande(models.Model):
+    """Modèle pour noter une commande complète"""
+    NOTE_CHOICES = [
+        (1, '★☆☆☆☆ - Très mauvais'),
+        (2, '★★☆☆☆ - Mauvais'),
+        (3, '★★★☆☆ - Moyen'),
+        (4, '★★★★☆ - Bon'),
+        (5, '★★★★★ - Excellent'),
+    ]
+    
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='notations_commandes')
+    commande = models.ForeignKey(Commande, on_delete=models.CASCADE, related_name='notations')
+    note_globale = models.PositiveSmallIntegerField(choices=NOTE_CHOICES, verbose_name="Note globale")
+    note_livraison = models.PositiveSmallIntegerField(choices=NOTE_CHOICES, verbose_name="Note livraison")
+    note_emballage = models.PositiveSmallIntegerField(choices=NOTE_CHOICES, verbose_name="Note emballage")
+    commentaire = models.TextField(verbose_name="Commentaire sur la commande")
+    remarques = models.TextField(blank=True, verbose_name="Remarques supplémentaires")
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Notation de commande"
+        verbose_name_plural = "Notations de commandes"
+        unique_together = ['utilisateur', 'commande']
+
+    def __str__(self):
+        return f"Notation de {self.utilisateur.username} pour commande #{self.commande.id}"
+
+class MediaNotationCommande(models.Model):
+    """Médias pour les notations de commande"""
+    notation = models.ForeignKey(NotationCommande, on_delete=models.CASCADE, related_name='medias')
+    image = models.ImageField(upload_to='notations-commandes/', verbose_name="Image")
+    legende = models.CharField(max_length=200, blank=True, verbose_name="Légende")
+    date_creation = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Média de notation"
+        verbose_name_plural = "Médias de notations"
+
+class ProblemeCommande(models.Model):
+    """Modèle pour signaler des problèmes sur une commande"""
+    TYPE_PROBLEME_CHOICES = [
+        ('produit_manquant', 'Produit manquant'),
+        ('produit_abime', 'Produit abîmé'),
+        ('produit_erreur', 'Mauvais produit reçu'),
+        ('emballage', 'Problème d\'emballage'),
+        ('livraison', 'Problème de livraison'),
+        ('qualite', 'Problème de qualité'),
+        ('autre', 'Autre problème'),
+    ]
+    
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='problemes_commandes')
+    commande = models.ForeignKey(Commande, on_delete=models.CASCADE, related_name='problemes')
+    type_probleme = models.CharField(max_length=20, choices=TYPE_PROBLEME_CHOICES, verbose_name="Type de problème")
+    description = models.TextField(verbose_name="Description du problème")
+    produit_concerne = models.ForeignKey(Produit, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Produit concerné")
+    photos = models.ManyToManyField(MediaNotationCommande, blank=True, verbose_name="Photos")
+    resolu = models.BooleanField(default=False, verbose_name="Problème résolu")
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_resolution = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Problème de commande"
+        verbose_name_plural = "Problèmes de commandes"
+
+    def __str__(self):
+        return f"Problème {self.get_type_probleme_display()} - Commande #{self.commande.id}"

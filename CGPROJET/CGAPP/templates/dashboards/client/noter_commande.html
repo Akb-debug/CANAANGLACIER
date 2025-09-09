@@ -1,0 +1,231 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accueil' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'mon_compte' %}">Mon compte</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'tableau_avis' %}">Mes avis</a></li>
+                    <li class="breadcrumb-item active">Noter la commande #{{ commande.id }}</li>
+                </ol>
+            </nav>
+
+            <div class="bg-light rounded h-100 p-4">
+                <div class="row">
+                    <!-- Résumé de la commande -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">Commande #{{ commande.id }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Date:</strong> {{ commande.date_creation|date:"d/m/Y à H:i" }}</p>
+                                <p><strong>Total:</strong> {{ commande.total }} FCFA</p>
+                                <p><strong>Statut:</strong> 
+                                    <span class="badge bg-success">{{ commande.get_statut_display }}</span>
+                                </p>
+                                
+                                <h6 class="mt-4">Produits commandés:</h6>
+                                <ul class="list-group list-group-flush">
+                                    {% for ligne in produits_commande %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ ligne.produit.nom }}
+                                        <span class="badge bg-primary rounded-pill">{{ ligne.quantite }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire de notation -->
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-star me-2"></i>
+                                    Noter votre commande
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if notation_existante %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Vous avez déjà noté cette commande. Vous pouvez modifier votre notation.
+                                </div>
+                                {% endif %}
+
+                                <form method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    
+                                    <!-- Note globale -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">Note globale ★</label>
+                                        <div class="form-check-group">
+                                            {% for choice in form.note_globale %}
+                                            <div class="form-check form-check-inline">
+                                                {{ choice.tag }}
+                                                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                    {{ choice.choice_label }}
+                                                </label>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Note livraison -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">Livraison 🚚</label>
+                                        <div class="form-check-group">
+                                            {% for choice in form.note_livraison %}
+                                            <div class="form-check form-check-inline">
+                                                {{ choice.tag }}
+                                                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                    {{ choice.choice_label }}
+                                                </label>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Note emballage -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">Emballage 📦</label>
+                                        <div class="form-check-group">
+                                            {% for choice in form.note_emballage %}
+                                            <div class="form-check form-check-inline">
+                                                {{ choice.tag }}
+                                                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                    {{ choice.choice_label }}
+                                                </label>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Commentaire -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">Votre commentaire</label>
+                                        {{ form.commentaire }}
+                                        <div class="form-text">
+                                            Partagez votre expérience globale avec cette commande.
+                                        </div>
+                                    </div>
+
+                                    <!-- Remarques -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">Remarques supplémentaires</label>
+                                        {{ form.remarques }}
+                                        <div class="form-text">
+                                            Suggestions, points d'amélioration...
+                                        </div>
+                                    </div>
+
+                                    <!-- Photos -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">Photos de la commande</label>
+                                        {{ form.images }}
+                                        <div class="form-text">
+                                            Ajoutez des photos de l'emballage, des produits reçus...
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-paper-plane me-2"></i>
+                                            {% if notation_existante %}Modifier ma notation{% else %}Envoyer ma notation{% endif %}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Lien pour signaler un problème -->
+                        <div class="card mt-4">
+                            <div class="card-body text-center">
+                                <h6>Un problème avec votre commande ?</h6>
+                                <p class="text-muted">Signalez-le nous pour que nous puissions le résoudre</p>
+                                <a href="{% url 'signaler_probleme' commande.id %}" class="btn btn-outline-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>Signaler un problème
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-check-group {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+}
+
+.form-check-inline {
+    margin-right: 1.5rem;
+}
+
+.form-check-input {
+    margin-right: 0.5rem;
+}
+
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+}
+
+.list-group-item {
+    border: 1px solid #e9ecef;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Ajouter des étoiles visuelles pour les notes
+    const noteFields = ['note_globale', 'note_livraison', 'note_emballage'];
+    
+    noteFields.forEach(field => {
+        const inputs = document.querySelectorAll(`input[name="${field}"]`);
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // Mettre à jour l'affichage visuel
+                updateStarDisplay(field, this.value);
+            });
+        });
+    });
+
+    function updateStarDisplay(fieldName, value) {
+        const container = document.querySelector(`input[name="${fieldName}"]:checked`)
+                            ?.closest('.form-check-group');
+        if (container) {
+            // Retirer les anciennes étoiles
+            const oldStars = container.querySelector('.visual-stars');
+            if (oldStars) oldStars.remove();
+            
+            // Ajouter les nouvelles étoiles
+            const stars = document.createElement('div');
+            stars.className = 'visual-stars mt-2';
+            stars.innerHTML = '★'.repeat(value) + '☆'.repeat(5 - value);
+            stars.style.fontSize = '1.5rem';
+            stars.style.color = '#ffc107';
+            container.appendChild(stars);
+        }
+    }
+
+    // Initialiser l'affichage des étoiles pour les valeurs sélectionnées
+    noteFields.forEach(field => {
+        const selectedInput = document.querySelector(`input[name="${field}"]:checked`);
+        if (selectedInput) {
+            updateStarDisplay(field, selectedInput.value);
+        }
+    });
+});
+</script>
+{% endblock %}

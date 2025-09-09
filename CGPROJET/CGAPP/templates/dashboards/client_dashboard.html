@@ -47,10 +47,12 @@
                     <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Total Dépensé</div>
-                            <div class="h2 mb-0">{{ total_depense|floatformat:0 }}€</div>
+                            <div class="h2 mb-0">{{ total_depense|floatformat:0 }}fcfa</div>
                         </div>
                         <div class="align-self-center">
-                            <i class="fas fa-euro-sign fa-2x opacity-75"></i>
+                        <i class="fas fa-money-bill fa-2x opacity-75"></i>
+
+
                         </div>
                     </div>
                 </div>
@@ -142,7 +144,7 @@
                     <h5 class="mb-0">
                         <i class="fas fa-shopping-cart me-2"></i>Mon Panier
                         {% if total_panier > 0 %}
-                            <span class="badge bg-success ms-2">{{ total_panier }}€</span>
+                            <span class="badge bg-success ms-2">{{ total_panier }}fcfa</span>
                         {% endif %}
                     </h5>
                 </div>
@@ -161,10 +163,10 @@
                             {% endif %}
                             <div class="flex-grow-1">
                                 <div class="fw-bold">{{ ligne.produit.nom }}</div>
-                                <small class="text-muted">{{ ligne.quantite }} x {{ ligne.produit.prix }}€</small>
+                                <small class="text-muted">{{ ligne.quantite }} x {{ ligne.produit.prix }}fcfa</small>
                             </div>
                             <div class="text-end">
-                                <div class="fw-bold text-success">{{ ligne.produit.prix|floatformat:2 }}€</div>
+                                <div class="fw-bold text-success">{{ ligne.produit.prix|floatformat:2 }}fcfa</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -200,19 +202,20 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Commande</th>
+                                        
                                         <th>Date</th>
                                         <th>Total</th>
                                         <th>Statut</th>
-                                        <th>Actions</th>
+                                        <th>moyen de payement</th>
+                                        
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for commande in mes_commandes %}
                                     <tr>
-                                        <td class="fw-bold">#{{ commande.id }}</td>
+                                        
                                         <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                        <td class="fw-bold text-success">{{ commande.total }}€</td>
+                                        <td class="fw-bold text-success">{{ commande.total }}fcfa</td>
                                         <td>
                                             {% if commande.statut == 'en_attente' %}
                                                 <span class="badge bg-warning">En attente</span>
@@ -225,9 +228,7 @@
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <a href="{% url 'suivi_commande' commande.id %}" class="btn btn-outline-primary btn-sm">
-                                                <i class="fas fa-eye"></i> Suivre
-                                            </a>
+                                            {{commande.methode_paiement}}
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -276,9 +277,6 @@
                         <div class="text-center py-3">
                             <i class="fas fa-map-marker-alt fa-2x text-muted mb-2"></i>
                             <p class="text-muted mb-2">Aucune adresse enregistrée</p>
-                            <a href="{% url 'ajouter_adresse' %}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-plus me-1"></i>Ajouter une adresse
-                            </a>
                         </div>
                     {% endif %}
                 </div>
@@ -310,8 +308,8 @@
                                     {% endif %}
                                     <div class="card-body p-2">
                                         <h6 class="card-title mb-1">{{ produit.nom|truncatechars:20 }}</h6>
-                                        <p class="card-text text-success fw-bold mb-1">{{ produit.prix }}€</p>
-                                        <a href="{% url 'detail_produit' produit.pk %}" class="btn btn-primary btn-sm w-100">
+                                        <p class="card-text text-success fw-bold mb-1">{{ produit.prix }}fcfa</p>
+                                        <a href="{% url 'detail_produit_client' produit.id %}" class="btn btn-primary btn-sm w-100">
                                             <i class="fas fa-eye me-1"></i>Voir
                                         </a>
                                     </div>

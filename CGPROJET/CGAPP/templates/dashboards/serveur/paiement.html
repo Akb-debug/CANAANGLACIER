@@ -1,0 +1,84 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="bg-light rounded h-100 p-4">
+                <div class="text-center mb-4">
+                    <h4>💳 Paiement - Commande #{{ commande.id }}</h4>
+                    <p class="text-muted">Client: {{ client.get_full_name }} | Tél: {{ client.telephone }}</p>
+                </div>
+
+                <div class="row">
+                    <!-- Détails de la commande -->
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">Détails de la commande</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            {% for ligne in commande.lignes.all %}
+                                            <tr>
+                                                <td>{{ ligne.produit.nom }} x{{ ligne.quantite }}</td>
+                                                <td class="text-end">{{ ligne.sous_total }} FCFA</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="table-primary">
+                                                <th>Total</th>
+                                                <th class="text-end">{{ commande.total }} FCFA</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire de paiement -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0">Informations de paiement</h6>
+                            </div>
+                            <div class="card-body">
+                                <form method="post">
+                                    {% csrf_token %}
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Méthode de paiement</label>
+                                        {{ form.methode_paiement }}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Montant payé</label>
+                                        {{ form.montant_paye }}
+                                        <div class="form-text">
+                                            Total à payer: <strong>{{ commande.total }} FCFA</strong>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid gap-2">
+                                        <button type="submit" class="btn btn-success btn-lg">
+                                            <i class="fas fa-cash-register me-2"></i>Enregistrer le paiement
+                                        </button>
+                                        <a href="{% url 'ajouter_produit_commande' commande_id=commande.id %}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-arrow-left me-2"></i>Retour
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

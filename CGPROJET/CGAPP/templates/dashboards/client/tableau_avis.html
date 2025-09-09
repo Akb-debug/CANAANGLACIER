@@ -1,0 +1,303 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'mon_compte' %}">Mon compte</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Mes avis et préférences</li>
+                </ol>
+            </nav>
+
+            <div class="bg-light rounded h-100 p-4">
+                <!-- En-tête -->
+                <div class="row mb-5">
+                    <div class="col-md-4">
+                        <div class="card bg-primary text-white text-center">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ total_avis }}</h3>
+                                <p class="card-text">Avis laissés</p>
+                                <i class="fas fa-star fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-success text-white text-center">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ moyenne_notes|floatformat:1 }}/5</h3>
+                                <p class="card-text">Note moyenne</p>
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-info text-white text-center">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ preferences.count }}</h3>
+                                <p class="card-text">Préférences enregistrées</p>
+                                <i class="fas fa-heart fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <ul class="nav nav-tabs mb-4" id="avisTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="commandes-tab" data-bs-toggle="tab" data-bs-target="#commandes" type="button" role="tab">
+                            <i class="fas fa-shopping-bag me-2"></i>Commandes à évaluer
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="preferences-tab" data-bs-toggle="tab" data-bs-target="#preferences" type="button" role="tab">
+                            <i class="fas fa-heart me-2"></i>Mes préférences
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="historique-tab" data-bs-toggle="tab" data-bs-target="#historique" type="button" role="tab">
+                            <i class="fas fa-history me-2"></i>Mes avis
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="avisTabsContent">
+                    <!-- Onglet Commandes à évaluer -->
+                    <div class="tab-pane fade show active" id="commandes" role="tabpanel">
+                        {% if commandes_sans_avis %}
+                        <div class="row">
+                            {% for commande in commandes_sans_avis %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h6 class="card-title mb-0">
+                                            Commande #{{ commande.id }} - {{ commande.date_creation|date:"d/m/Y" }}
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6>Produits à évaluer :</h6>
+                                        <ul class="list-group list-group-flush mb-3">
+                                            {% for ligne in commande.lignes.all|slice:":3" %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ ligne.produit.nom }}
+                                                <a href="{% url 'laisser_avis_produit' ligne.produit.id %}" class="btn btn-sm btn-outline-primary">
+                                                    Noter
+                                                </a>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% if commande.lignes.count > 3 %}
+                                        <small class="text-muted">+ {{ commande.lignes.count|add:"-3" }} autres produits</small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-footer">
+                                        <a href="{% url 'laisser_avis_commande' commande.id %}" class="btn btn-primary w-100">
+                                            <i class="fas fa-star me-2"></i>Évaluer toute la commande
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                            <h5 class="text-success">Toutes vos commandes ont été évaluées !</h5>
+                            <p class="text-muted">Vous avez donné votre avis sur tous vos produits commandés.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Onglet Préférences -->
+                    <div class="tab-pane fade" id="preferences" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5>Mes préférences alimentaires</h5>
+                            <a href="{% url 'gerer_preferences' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Ajouter une préférence
+                            </a>
+                        </div>
+
+                        {% if preferences %}
+                        <div class="row">
+                            {% for preference in preferences %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-{% if preference.severite == 'critique' %}danger{% elif preference.severite == 'severe' %}warning{% else %}info{% endif %}">
+                                            {{ preference.get_severite_display }}
+                                        </span>
+                                        <span class="badge bg-secondary">{{ preference.get_type_display }}</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text">{{ preference.description }}</p>
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-muted">
+                                                Ajouté le {{ preference.date_creation|date:"d/m/Y" }}
+                                            </small>
+                                            <div>
+                                                <a href="{% url 'modifier_preference' preference.id %}" class="btn btn-sm btn-outline-primary me-2">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'supprimer_preference' preference.id %}" class="btn btn-sm btn-outline-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-info-circle fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune préférence enregistrée</h5>
+                            <p class="text-muted">Ajoutez vos allergies, intolérances ou préférences alimentaires.</p>
+                            <a href="{% url 'gerer_preferences' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Ajouter ma première préférence
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Onglet Historique des avis -->
+                    <div class="tab-pane fade" id="historique" role="tabpanel">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5>Mes avis produits</h5>
+                            <a href="{% url 'mes_avis' %}" class="btn btn-outline-primary">
+                                Voir tous mes avis
+                            </a>
+                        </div>
+
+                        {% if avis_utilisateur %}
+                        <div class="row">
+                            {% for avis in avis_utilisateur|slice:":6" %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">{{ avis.produit.nom }}</h6>
+                                        <div class="text-warning">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= avis.note %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ avis.titre }}</h6>
+                                        <p class="card-text">{{ avis.commentaire|truncatewords:20 }}</p>
+                                        {% if avis.remarques %}
+                                        <div class="alert alert-info mt-3 p-2">
+                                            <small><strong>Remarque :</strong> {{ avis.remarques|truncatewords:10 }}</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-footer bg-transparent">
+    <div class="d-flex justify-content-between align-items-center">
+        <small class="text-muted">
+            {{ avis.date_creation|date:"d/m/Y" }}
+        </small>
+        <div class="d-flex gap-2">
+            <a href="{% url 'modifier_avis' avis.id %}" class="btn btn-sm btn-outline-secondary" title="Modifier">
+                <i class="fas fa-edit"></i>
+            </a>
+            <a href="{% url 'supprimer_avis' avis.id %}" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                <i class="fas fa-trash"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-star fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucun avis pour le moment</h5>
+                            <p class="text-muted">Donnez votre avis sur les produits que vous avez commandés.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styles personnalisés -->
+<style>
+.nav-tabs .nav-link {
+    font-weight: 600;
+    color: #6c757d;
+    border: none;
+    padding: 1rem 1.5rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom: 3px solid #0d6efd;
+    background: transparent;
+}
+
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    border: none;
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
+
+.list-group-item {
+    border: 1px solid #e9ecef;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-tabs .nav-link {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .row.mb-5 > .col-md-4 {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+<!-- Scripts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sauvegarder l'onglet actif
+    const avisTabs = document.getElementById('avisTabs');
+    const activeTab = localStorage.getItem('activeAvisTab');
+    
+    if (activeTab) {
+        const tabTrigger = new bootstrap.Tab(document.querySelector(activeTab));
+        tabTrigger.show();
+    }
+    
+    avisTabs.addEventListener('click', function(e) {
+        if (e.target.classList.contains('nav-link')) {
+            localStorage.setItem('activeAvisTab', e.target.getAttribute('data-bs-target'));
+        }
+    });
+});
+</script>
+{% endblock %}

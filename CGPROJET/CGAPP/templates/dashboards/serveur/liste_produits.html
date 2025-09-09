@@ -1,0 +1,149 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">Liste des Produits ({{ total_produits }})</h4>
+                </div>
+                
+                {% if produits %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                    {% for produit in produits %}
+                    <div class="col">
+                        <div class="card h-100 product-card">
+                            <div class="position-relative">
+                                {% if produit.image %}
+                                <img src="{{ produit.image.url }}" class="card-img-top product-image" alt="{{ produit.nom }}">
+                                {% else %}
+                                <div class="card-img-top product-image bg-secondary d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-image fa-3x text-light"></i>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Badges pour statut promotion et stock -->
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    {% if produit.promotion > 0 %}
+                                    <span class="badge bg-danger">-{{ produit.promotion }}%</span>
+                                    {% endif %}
+                                </div>
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    {% if not produit.en_stock %}
+                                    <span class="badge bg-dark">Rupture</span>
+                                    {% elif produit.stock_faible %}
+                                    <span class="badge bg-warning text-dark">Faible</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Stock</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <h6 class="card-title">{{ produit.nom }}</h6>
+                                <p class="card-text text-muted small mb-2">
+                                    {{ produit.description|truncatewords:10 }}
+                                </p>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        {% if produit.promotion > 0 %}
+                                        <div>
+                                            <span class="text-danger fw-bold">{{ produit.prix }} FCFA</span>
+                                            <small class="text-muted text-decoration-line-through ms-1">
+                                                {{ produit.ancien_prix }} FCFA
+                                            </small>
+                                        </div>
+                                        {% else %}
+                                        <span class="fw-bold">{{ produit.prix }} FCFA</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="text-end">
+                                        <small class="text-muted d-block">Qté: {{ produit.quantite_disponible }}</small>
+                                    </div>
+                                </div>
+                                
+                                {% if produit.categorie %}
+                                <div class="mt-2">
+                                    <span class="badge bg-info text-dark">{{ produit.categorie }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        Ajouté le {{ produit.date_creation|date:"d/m/Y" }}
+                                    </small>
+                                    {% if produit.est_populaire %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-star me-1"></i>Populaire
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <nav class="d-flex justify-content-center mt-4">
+                    <ul class="pagination">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+                
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">Aucun produit disponible</h5>
+                    <p class="text-muted">Aucun produit n'a été ajouté pour le moment.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.product-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+.product-image {
+    height: 200px;
+    object-fit: cover;
+}
+</style>
+{% endblock %}

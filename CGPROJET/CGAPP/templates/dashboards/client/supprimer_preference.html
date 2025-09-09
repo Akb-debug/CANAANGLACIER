@@ -1,0 +1,118 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'mon_compte' %}">Mon compte</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'gerer_preferences' %}">Mes préférences</a></li>
+                    <li class="breadcrumb-item active">Supprimer préférence</li>
+                </ol>
+            </nav>
+
+            <div class="bg-light rounded h-100 p-4">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="card border-danger">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    Confirmer la suppression
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning">
+                                    <h6 class="alert-heading">Attention !</h6>
+                                    <p class="mb-0">Vous êtes sur le point de supprimer définitivement cette préférence alimentaire.</p>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <h6>Détails de la préférence :</h6>
+                                        <p class="mb-1"><strong>Type:</strong> 
+                                            <span class="badge bg-secondary">{{ preference.get_type_display }}</span>
+                                        </p>
+                                        <p class="mb-1"><strong>Sévérité:</strong> 
+                                            <span class="badge bg-{% if preference.severite == 'critique' %}danger{% elif preference.severite == 'severe' %}warning{% else %}info{% endif %}">
+                                                {{ preference.get_severite_display }}
+                                            </span>
+                                        </p>
+                                        <p class="mb-0"><strong>Description:</strong> {{ preference.description }}</p>
+                                    </div>
+                                </div>
+
+                                <form method="post">
+                                    {% csrf_token %}
+                                    
+                                    <div class="mb-3">
+                                        <label for="confirmation" class="form-label fw-bold">
+                                            Pour confirmer la suppression, tapez "SUPPRIMER" ci-dessous :
+                                        </label>
+                                        <input type="text" class="form-control" id="confirmation" name="confirmation" 
+                                               required pattern="SUPPRIMER" 
+                                               placeholder="Tapez SUPPRIMER pour confirmer">
+                                        <div class="form-text">Cette action est irréversible.</div>
+                                    </div>
+
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <a href="{% url 'gerer_preferences' %}" class="btn btn-secondary me-md-2">
+                                            <i class="fas fa-times me-1"></i>Annuler
+                                        </a>
+                                        <button type="submit" class="btn btn-danger" id="submitBtn" disabled>
+                                            <i class="fas fa-trash me-1"></i>Supprimer définitivement
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmationInput = document.getElementById('confirmation');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    confirmationInput.addEventListener('input', function() {
+        submitBtn.disabled = this.value !== 'SUPPRIMER';
+    });
+    
+    // Empêcher la soumission avec la touche Entrée
+    confirmationInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+
+<style>
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+}
+
+.border-danger {
+    border: 2px solid #dc3545;
+}
+
+.btn:disabled {
+    cursor: not-allowed;
+}
+
+.form-control:invalid {
+    border-color: #dc3545;
+}
+
+.form-control:valid {
+    border-color: #198754;
+}
+</style>
+{% endblock %}

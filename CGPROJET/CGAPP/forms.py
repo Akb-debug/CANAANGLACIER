@@ -481,9 +481,6 @@ class ProduitForm(forms.ModelForm):
 
 #==================================Adresse==================================
 
-from django import forms
-from .models import AdresseLivraison, Coupon
-
 class CoordonneesClientForm(forms.Form):
     nom = forms.CharField(
         max_length=100,
@@ -649,3 +646,139 @@ class CouponForm(forms.Form):
             except Coupon.DoesNotExist:
                 raise forms.ValidationError("Code promo invalide")
         return code
+    
+
+
+
+#Serveur
+
+class ClientForm(forms.Form):
+    nom_complet = forms.CharField(max_length=100, label="Nom complet", widget=forms.TextInput(attrs={'placeholder': 'Prénom Nom', 'class': 'form-control'}))
+    telephone = forms.CharField(max_length=15, label="Téléphone", widget=forms.TextInput(attrs={'placeholder': '+225 XX XX XX XX', 'class': 'form-control'}))
+    email = forms.EmailField(required=False, label="Email", widget=forms.EmailInput(attrs={'placeholder': 'email@exemple.com', 'class': 'form-control'}))
+
+class ProduitPanierForm(forms.Form):
+    produit = forms.ModelChoiceField(
+        queryset=Produit.objects.filter(quantite_disponible__gt=0),
+        label="Produit",
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Sélectionnez un produit"
+    )
+    quantite = forms.IntegerField(
+        min_value=1,
+        initial=1,
+        label="Quantité",
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'min': 1})
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ajouter le stock dans le label des options
+        self.fields['produit'].label_from_instance = lambda obj: f"{obj.nom} - {obj.prix} FCFA (Stock: {obj.quantite_disponible})"
+
+class PaiementServeurForm(forms.Form):
+    METHODES_PAIEMENT = [
+        ('espèces', 'Espèces'),
+        ('carte_bancaire', 'Carte Bancaire'),
+        ('mobile_money', 'Mobile Money'),
+    ]
+    
+    methode_paiement = forms.ChoiceField(
+        choices=METHODES_PAIEMENT,
+        label="Méthode de paiement",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    montant_paye = forms.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        label="Montant payé",
+        widget=forms.NumberInput(attrs={'class': 'form-control'})
+    )
+
+    #---------------------Avis des clients------------------------------
+  
+
+
+class PreferenceAlimentaireForm(forms.ModelForm):
+    class Meta:
+        model = PreferenceAlimentaire
+        fields = ['type', 'description', 'severite', 'est_actif']
+        widgets = {
+            'description': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Décrivez votre allergie, intolérance ou préférence alimentaire...'
+            }),
+            'type': forms.Select(attrs={'class': 'form-select'}),
+            'severite': forms.Select(attrs={'class': 'form-select'}),
+        }
+        labels = {
+            'est_actif': 'Cette préférence est active',
+        }
+class AvisProduitForm(forms.ModelForm):
+    image = forms.ImageField(
+        required=False,
+        widget=forms.ClearableFileInput, 
+        label='Ajouter une photo'
+    )
+    
+    class Meta:
+        model = AvisProduit
+        fields = ['note', 'titre', 'commentaire', 'remarques', 'image']
+        widgets = {
+            'commentaire': forms.Textarea(attrs={
+                'rows': 4,
+                'placeholder': 'Partagez votre expérience avec ce produit...'
+            }),
+            'remarques': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Remarques supplémentaires, suggestions...'
+            }),
+            'note': forms.RadioSelect(choices=AvisProduit.NOTE_CHOICES),
+        }
+class NotationCommandeForm(forms.ModelForm):
+    image = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(),  # simple FileInput pour une seule image
+        label='Ajouter une photo de la commande'
+    )
+    
+    class Meta:
+        model = NotationCommande
+        fields = ['note_globale', 'note_livraison', 'note_emballage', 'commentaire', 'remarques', 'image']
+        widgets = {
+            'commentaire': forms.Textarea(attrs={
+                'rows': 4,
+                'placeholder': 'Comment était votre expérience globale avec cette commande ?'
+            }),
+            'remarques': forms.Textarea(attrs={
+                'rows': 3,
+                'placeholder': 'Remarques supplémentaires, suggestions...'
+            }),
+            'note_globale': forms.RadioSelect(),
+            'note_livraison': forms.RadioSelect(),
+            'note_emballage': forms.RadioSelect(),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['note_globale'].widget.attrs.update({'class': 'form-check-input'})
+        self.fields['note_livraison'].widget.attrs.update({'class': 'form-check-input'})
+        self.fields['note_emballage'].widget.attrs.update({'class': 'form-check-input'})
+class ProblemeCommandeForm(forms.ModelForm):
+    image = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(),  # simple FileInput pour une seule image
+        label='Ajouter une photo du problème'
+    )
+    
+    class Meta:
+        model = ProblemeCommande
+        fields = ['type_probleme', 'produit_concerne', 'description', 'image']  # ajout de 'image'
+        widgets = {
+            'description': forms.Textarea(attrs={
+                'rows': 4,
+                'placeholder': 'Décrivez précisément le problème rencontré...'
+            }),
+            'type_probleme': forms.Select(attrs={'class': 'form-select'}),
+            'produit_concerne': forms.Select(attrs={'class': 'form-select'}),
+        }
