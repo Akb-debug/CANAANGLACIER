@@ -1,0 +1,106 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- Reçu imprimable -->
+            <div class="card" id="receipt">
+                <div class="card-body">
+                    <!-- En-tête du reçu -->
+                    <div class="text-center mb-4">
+                        <h3 class="text-primary">VOTRE BOUTIQUE</h3>
+                        <p class="text-muted mb-0">Votre adresse ici</p>
+                        <p class="text-muted">Tél: +225 XX XX XX XX</p>
+                        <hr>
+                        <h5>📋 REÇU DE PAIEMENT</h5>
+                    </div>
+
+                    <!-- Informations de la commande -->
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <strong>N° Commande:</strong> #{{ commande.id }}
+                        </div>
+                        <div class="col-6 text-end">
+                            <strong>Date:</strong> {{ commande.date_creation|date:"d/m/Y H:i" }}
+                        </div>
+                    </div>
+
+                    <!-- Informations client -->
+                    <div class="mb-3">
+                        <strong>Client:</strong> {{ client.get_full_name }}<br>
+                        <strong>Téléphone:</strong> {{ client.telephone }}
+                    </div>
+
+                    <!-- Détails des articles -->
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Qty</th>
+                                    <th>Prix</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ligne in commande.lignes.all %}
+                                <tr>
+                                    <td>{{ ligne.produit.nom }}</td>
+                                    <td>{{ ligne.quantite }}</td>
+                                    <td>{{ ligne.prix_unitaire }} FCFA</td>
+                                    <td>{{ ligne.sous_total }} FCFA</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Total et paiement -->
+                    <div class="border-top pt-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <strong>Méthode:</strong> {{ commande.methode_paiement|title }}
+                            </div>
+                            <div class="col-6 text-end">
+                                <h5>Total: {{ commande.total }} FCFA</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Référence paiement -->
+                    <div class="text-center mt-4">
+                        <small class="text-muted">
+                            Référence: {{ paiement.reference }}<br>
+                            Merci pour votre visite !
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="text-center mt-4">
+                <button onclick="window.print()" class="btn btn-primary me-2">
+                    <i class="fas fa-print me-2"></i>Imprimer le reçu
+                </button>
+                <a href="{% url 'nouvelle_commande_serveur' %}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Nouvelle Commande
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .navbar, .sidebar, .footer, .btn {
+        display: none !important;
+    }
+    #receipt {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
+</style>
+{% endblock %}

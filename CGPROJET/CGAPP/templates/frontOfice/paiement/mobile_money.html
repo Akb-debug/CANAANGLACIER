@@ -1,0 +1,76 @@
+{% extends "frontOfice/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-glacier text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-mobile-alt me-2"></i>
+                        Paiement par Mobile Money
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="{% static 'images/' %}{% if methode_paiement == 'flooz' %}flooz{% else %}tmoney{% endif %}-logo.png" 
+                             alt="{% if methode_paiement == 'flooz' %}Flooz{% else %}TMoney{% endif %}" 
+                             height="80">
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Vous serez redirigé vers le service {% if methode_paiement == 'flooz' %}Flooz{% else %}TMoney{% endif %} pour finaliser votre paiement.
+                    </div>
+                    
+                    <div class="payment-summary mb-4">
+                        <h5>Récapitulatif de paiement</h5>
+                        <div class="d-flex justify-content-between">
+                            <span>Montant à payer:</span>
+                            <strong>{{ commande.total }} FCFA</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Numéro de commande:</span>
+                            <strong>#{{ commande.id }}</strong>
+                        </div>
+                    </div>
+                    
+                    <form method="post" action="{% url 'traiter_paiement' commande.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Numéro de téléphone</label>
+                            <div class="input-group">
+                                <span class="input-group-text">+228</span>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       placeholder="90 12 34 56" required pattern="[0-9]{8}">
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-glacier btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Payer avec {% if methode_paiement == 'flooz' %}Flooz{% else %}TMoney{% endif %}
+                            </button>
+                            
+                            <a href="{% url 'commande_detail' commande.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Retour aux détails de la commande
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-summary {
+    background-color: var(--teal-light);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid var(--teal-glacier);
+}
+</style>
+{% endblock %}

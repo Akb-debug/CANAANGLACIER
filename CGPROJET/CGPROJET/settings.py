@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+# middleware.py
+from django.utils.deprecation import MiddlewareMixin
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-ou#cokzttaikw-7-+!sbuevarx_$jsez6+urpb^otnzdb)^qp2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True 
 
 ALLOWED_HOSTS = ['*']
 
@@ -155,3 +158,16 @@ EMAIL_HOST_USER = 'allodekanybenjamin@gmail.com'
 EMAIL_HOST_PASSWORD = 'tmkz ijkw zsot aksb'
 DEFAULT_FROM_EMAIL = 'contact@canaanglacier.com'
 CONTACT_EMAIL = 'allodekanybenjamin@gmail.com'
+
+
+class PrintPostMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.method == 'POST':
+            print("POST DATA:", request.POST)
+        response = self.get_response(request)
+        return response
+    
+

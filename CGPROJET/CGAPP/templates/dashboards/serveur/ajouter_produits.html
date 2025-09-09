@@ -1,0 +1,217 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <!-- Panier du client -->
+        <div class="col-md-8">
+            <div class="bg-light rounded h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>📦 Panier de {{ client.get_full_name|default:client.username }}</h4>
+                    <span class="badge bg-primary">Tél: {{ client.telephone }}</span>
+                </div>
+
+                {% if panier.lignes.all %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th>Prix unitaire</th>
+                                <th>Quantité</th>
+                                <th>Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in lignes_avec_max %}
+                            {% with ligne=item.ligne %}
+                            <tr>
+                                <td>
+                                    <strong>{{ ligne.produit.nom }}</strong>
+                                    {% if ligne.produit.description %}
+                                    <br><small class="text-muted">{{ ligne.produit.description|truncatewords:10 }}</small>
+                                    {% endif %}
+                                    <br>
+                                    <small class="text-info">
+                                        Stock disponible: {{ ligne.produit.quantite_disponible }}
+                                    </small>
+                                </td>
+                                <td>{{ ligne.produit.prix }} FCFA</td>
+                                <td>
+                                    <form method="post" action="{% url 'modifier_quantite_serveur' commande_id=panier.id ligne_id=ligne.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <div class="input-group input-group-sm" style="width: 120px;">
+                                            <input type="number" name="quantite" value="{{ ligne.quantite }}" 
+                                                   min="1" max="{{ item.quantite_max }}"
+                                                   class="form-control">
+                                            <button type="submit" class="btn btn-outline-primary">✓</button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td><strong>{{ ligne.total }} FCFA</strong></td>
+                                <td>
+                                    <form method="post" action="{% url 'supprimer_produit_serveur' commande_id=panier.id ligne_id=ligne.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endwith %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">Total Panier</h5>
+                                <h3 class="card-text">{{ panier.total }} FCFA</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="{% url 'finaliser_commande_serveur' commande_id=panier.id %}" class="btn btn-success btn-lg">
+                            <i class="fas fa-check-circle me-2"></i>Finaliser la Commande
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                    <h5>Panier vide</h5>
+                    <p class="text-muted">Ajoutez des produits pour commencer</p>
+                </div>
+                {% endif %}
+
+                <!-- Messages d'alerte -->
+                {% if messages %}
+                <div class="mt-3">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ajouter des produits -->
+        <div class="col-md-4">
+            <div class="bg-light rounded h-100 p-4">
+                <h5 class="mb-4">➕ Ajouter un produit</h5>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Produit</label>
+                        {{ form.produit }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantité</label>
+                        {{ form.quantite }}
+                        <div class="form-text">
+                            Maximum disponible: <span id="max-stock">Sélectionnez un produit</span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-plus me-2"></i>Ajouter au panier
+                    </button>
+                </form>
+
+                <hr>
+
+                <h6 class="mb-3">🛒 Produits Disponibles</h6>
+                <div class="list-group">
+                    {% for produit in produits_disponibles %}
+                    <form method="post" class="mb-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="produit" value="{{ produit.id }}">
+                        <input type="hidden" name="quantite" value="1">
+                        <button type="submit" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ produit.nom }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ produit.prix }} FCFA • Stock: {{ produit.quantite_disponible }}
+                                        {% if produit.est_populaire %}
+                                        <span class="badge bg-warning ms-2">Populaire</span>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">+</span>
+                            </div>
+                        </button>
+                    </form>
+                    {% empty %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Aucun produit disponible pour le moment.
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const produitSelect = document.getElementById('id_produit');
+    const maxStockSpan = document.getElementById('max-stock');
+    
+    function updateMaxStock() {
+        const selectedOption = produitSelect.options[produitSelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            // Extraire le stock du texte de l'option
+            const optionText = selectedOption.text;
+            const stockMatch = optionText.match(/Stock: (\d+)/);
+            if (stockMatch) {
+                maxStockSpan.textContent = stockMatch[1] + ' unités';
+            } else {
+                maxStockSpan.textContent = 'Information non disponible';
+            }
+        } else {
+            maxStockSpan.textContent = 'Sélectionnez un produit';
+        }
+    }
+    
+    updateMaxStock();
+    produitSelect.addEventListener('change', updateMaxStock);
+});
+</script>
+
+<style>
+.list-group-item {
+    border-radius: 8px;
+    margin-bottom: 5px;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+    border-color: #0d6efd;
+}
+
+.input-group-sm {
+    width: 120px;
+}
+
+.badge {
+    font-size: 0.85em;
+}
+
+.alert {
+    border-radius: 8px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded h-100 p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4>📋 Commandes en Cours</h4>
+                    <a href="{% url 'nouvelle_commande_serveur' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Nouvelle Commande
+                    </a>
+                </div>
+
+                <!-- Commandes en attente -->
+                <div class="card mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Commandes en Attente - URGENT
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if commandes_en_attente %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Client</th>
+                                            <th>Date</th>
+                                            <th>Total</th>
+                                            <th>Méthode Paiement</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for commande in commandes_en_attente %}
+                                        <tr class="table-warning">
+                                            <td><strong>#{{ commande.id }}</strong></td>
+                                            <td>
+                                                {{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}
+                                                {% if commande.utilisateur.telephone %}
+                                                    <br><small class="text-muted">{{ commande.utilisateur.telephone }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
+                                            <td><strong>{{ commande.total }} FCFA</strong></td>
+                                            <td>
+                                                <span class="badge bg-info">
+                                                    {{ commande.methode_paiement|title }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <form method="post" action="{% url 'prendre_en_charge_commande' commande.id %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-play me-1"></i> Prendre en charge
+                                                    </button>
+                                                </form>
+                                                <a href="{% url 'detail_commande' commande_id=commande.id %}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                                <h5 class="text-success">Aucune commande en attente</h5>
+                                <p class="text-muted">Toutes les commandes sont traitées !</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Commandes en cours de traitement -->
+                {% if commandes_en_cours %}
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>Commandes en Cours de Traitement
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Client</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commande in commandes_en_cours %}
+                                    <tr class="table-info">
+                                        <td><strong>#{{ commande.id }}</strong></td>
+                                        <td>
+                                            {{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}
+                                            {% if commande.utilisateur.telephone %}
+                                                <br><small class="text-muted">{{ commande.utilisateur.telephone }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
+                                        <td><strong>{{ commande.total }} FCFA</strong></td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {{ statut_choices.commande.statut|default:"En traitement" }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'detail_commande' commande_id=commande.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit me-1"></i> Gérer
+                                            </a>
+                                            <form method="post" action="{% url 'changer_statut_commande' commande.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="statut" value="expediee">
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-truck me-1"></i> Expédier
+                                                </button>
+                                            </form>
+                                            <form method="post" action="{% url 'changer_statut_commande' commande.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="statut" value="annulee">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-times me-1"></i> Annuler
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.table-warning {
+    background-color: #fff3cd;
+}
+.table-info {
+    background-color: #d1ecf1;
+}
+.badge {
+    font-size: 0.85em;
+}
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'mon_compte' %}">Mon compte</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'tableau_avis' %}">Mes avis</a></li>
+                    <li class="breadcrumb-item active">Laisser un avis</li>
+                </ol>
+            </nav>
+
+            <div class="bg-light rounded h-100 p-4">
+                <div class="row">
+                    <!-- Informations sur le produit/commande -->
+                    <div class="col-md-5 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">
+                                    {% if produit %}
+                                    Avis pour {{ produit.nom }}
+                                    {% else %}
+                                    Avis pour la commande
+                                    {% endif %}
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if produit %}
+                                <!-- Avis pour un produit spécifique -->
+                                <div class="text-center mb-4">
+                                    {% if produit.image %}
+                                    <img src="{{ produit.image.url }}" 
+                                         alt="{{ produit.nom }}" 
+                                         class="img-fluid rounded"
+                                         style="max-height: 200px;">
+                                    {% else %}
+                                    <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
+                                         style="height: 150px;">
+                                        <i class="fas fa-image fa-3x text-light"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <h6>{{ produit.nom }}</h6>
+                                <p class="text-muted">{{ produit.description|truncatewords:20 }}</p>
+                                <p class="fw-bold text-success">{{ produit.prix }} FCFA</p>
+                                {% endif %}
+
+                                {% if commande %}
+                                <hr>
+                                <h6>Informations commande</h6>
+                                <p class="mb-1"><strong>Commande #{{ commande.id }}</strong></p>
+                                <p class="mb-1">Date: {{ commande.date_creation|date:"d/m/Y" }}</p>
+                                <p class="mb-0">Total: {{ commande.total }} FCFA</p>
+                                {% endif %}
+
+                                {% if avis_existant %}
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Vous avez déjà laissé un avis pour ce produit. Vous pouvez le modifier.
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Guide d'évaluation -->
+                        <div class="card mt-4">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="card-title mb-0">Conseils pour votre avis</h6>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-lightbulb text-warning me-2"></i>Soyez honnête et précis</li>
+                                    <li class="mb-2"><i class="fas fa-lightbulb text-warning me-2"></i>Parlez du goût et de la qualité</li>
+                                    <li class="mb-2"><i class="fas fa-lightbulb text-warning me-2"></i>Mentionnez la fraîcheur</li>
+                                    <li class="mb-2"><i class="fas fa-lightbulb text-warning me-2"></i>Ajoutez des photos si possible</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire d'avis -->
+                    <div class="col-md-7">
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-star me-2"></i>
+                Donner votre avis
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Note -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Note globale ★</label>
+                    <div class="rating-group">
+                        {% for choice in form.note %}
+                        <div class="form-check form-check-inline">
+                            {{ choice.tag }}
+                            <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                {{ choice.choice_label }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if form.note.errors %}
+                    <div class="text-danger">{{ form.note.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Titre -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Titre de votre avis</label>
+                    {{ form.titre }}
+                    <div class="form-text">Donnez un titre accrocheur à votre avis.</div>
+                    {% if form.titre.errors %}
+                    <div class="text-danger">{{ form.titre.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Commentaire -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Votre commentaire</label>
+                    {{ form.commentaire }}
+                    <div class="form-text">Décrivez votre expérience avec ce produit.</div>
+                    {% if form.commentaire.errors %}
+                    <div class="text-danger">{{ form.commentaire.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Remarques -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Remarques supplémentaires</label>
+                    {{ form.remarques }}
+                    <div class="form-text">Suggestions, points d'amélioration...</div>
+                    {% if form.remarques.errors %}
+                    <div class="text-danger">{{ form.remarques.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Photos -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Photos du produit</label>
+                    <input type="file" name="images" class="form-control" multiple>
+                    <div class="form-text">Ajoutez jusqu'à 3 photos de bonne qualité.</div>
+                    {% if form.images.errors %}
+                    <div class="text-danger">{{ form.images.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        {% if avis_existant %}Modifier mon avis{% else %}Publier mon avis{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-group {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+}
+
+.form-check-inline {
+    margin-right: 2rem;
+}
+
+.form-check-input {
+    margin-right: 0.5rem;
+}
+
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+}
+
+.form-control {
+    border-radius: 0.375rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mise en évidence visuelle des notes
+    const noteInputs = document.querySelectorAll('input[name="note"]');
+    
+    noteInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            updateStarDisplay(this.value);
+        });
+    });
+
+    function updateStarDisplay(note) {
+        const container = document.querySelector('.rating-group');
+        
+        // Retirer l'affichage existant
+        const existingDisplay = container.querySelector('.visual-rating');
+        if (existingDisplay) existingDisplay.remove();
+        
+        // Créer l'affichage visuel
+        const display = document.createElement('div');
+        display.className = 'visual-rating mt-3 p-3 bg-white rounded';
+        display.innerHTML = `
+            <h6 class="text-center">Votre note: ${note}/5</h6>
+            <div class="text-center" style="font-size: 2rem; color: #ffc107;">
+                ${'★'.repeat(note)}${'☆'.repeat(5 - note)}
+            </div>
+        `;
+        
+        container.appendChild(display);
+    }
+
+    // Initialiser l'affichage si une note est déjà sélectionnée
+    const selectedNote = document.querySelector('input[name="note"]:checked');
+    if (selectedNote) {
+        updateStarDisplay(selectedNote.value);
+    }
+});
+</script>
+{% endblock %}

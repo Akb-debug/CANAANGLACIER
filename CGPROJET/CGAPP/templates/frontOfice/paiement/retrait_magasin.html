@@ -1,0 +1,71 @@
+{% extends "frontOfice/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-glacier text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-{% if methode_paiement == 'paiement_livraison' %}truck{% else %}store{% endif %} me-2"></i>
+                        {% if methode_paiement == 'paiement_livraison' %}Paiement à la Livraison{% else %}Retrait en Magasin{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-{% if methode_paiement == 'paiement_livraison' %}money-bill-wave{% else %}shopping-bag{% endif %} fa-4x text-glacier"></i>
+                    </div>
+                    
+                    <h5 class="mb-3">Votre commande a été enregistrée!</h5>
+                    
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {% if methode_paiement == 'paiement_livraison' %}
+                        Vous paierez {{ commande.total }} FCFA à la livraison de votre commande.
+                        {% else %}
+                        Vous paierez {{ commande.total }} FCFA lors du retrait en magasin.
+                        {% endif %}
+                    </div>
+                    
+                    <div class="payment-summary mb-4 mx-auto" style="max-width: 300px;">
+                        <div class="d-flex justify-content-between">
+                            <span>Numéro de commande:</span>
+                            <strong>#{{ commande.id }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Total:</span>
+                            <strong>{{ commande.total }} FCFA</strong>
+                        </div>
+                    </div>
+                    
+                    {% if methode_paiement == 'retrait_magasin' %}
+                    <div class="store-info mb-4 p-3 bg-light rounded">
+                        <h6><i class="fas fa-store me-2"></i>Notre magasin</h6>
+                        <p class="mb-1">123 Avenue du Commerce</p>
+                        <p class="mb-1">Lomé, Togo</p>
+                        <p class="mb-0"><i class="fas fa-clock me-2"></i>Lun-Sam: 8h-20h</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'commande_detail' commande.id %}" class="btn btn-glacier">
+                            <i class="fas fa-check me-2"></i>
+                            Compris, merci!
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-summary {
+    background-color: var(--teal-light);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid var(--teal-glacier);
+}
+</style>
+{% endblock %}

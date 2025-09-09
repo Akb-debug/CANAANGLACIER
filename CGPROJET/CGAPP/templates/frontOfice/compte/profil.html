@@ -5,244 +5,188 @@
 {% block title %}Mon Profil - Canaan Glacier{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-5 bg-light">
+<div class="container-fluid py-5" style="background-color: var(--teal-light);">
     <div class="container">
         <div class="row g-4">
             <!-- Menu latéral -->
             <div class="col-lg-3">
-                <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+                <div class="card shadow-sm">
                     <div class="card-body p-4 text-center">
                         <div class="position-relative d-inline-block mb-3">
                             {% if user.profile_image %}
                                 <img src="{{ user.profile_image.url }}" class="rounded-circle shadow" width="120" height="120" alt="Photo de profil">
                             {% else %}
-                                <div class="avatar bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
-                                    <i class="fas fa-user text-primary fs-3"></i>
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 120px; height: 120px; background-color: var(--teal-light);">
+                                    <i class="fas fa-user fs-3" style="color: var(--teal-glacier);"></i>
                                 </div>
                             {% endif %}
-                            <button class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-pill" data-bs-toggle="modal" data-bs-target="#avatarModal">
+                            <button class="btn btn-sm position-absolute bottom-0 end-0 rounded-pill" 
+                                    style="background-color: var(--teal-glacier); color: white;"
+                                    data-bs-toggle="modal" data-bs-target="#avatarModal">
                                 <i class="fas fa-camera"></i>
                             </button>
                         </div>
                         <h5 class="mb-1 fw-bold">{{ user.get_full_name|default:user.username }}</h5>
-                        <span class="badge bg-soft-{{ user.get_role_color }} text-{{ user.get_role_color }} rounded-pill">{{ user.get_role_display }}</span>
+                        <span class="badge rounded-pill" 
+                              style="background-color: var(--teal-light); color: var(--teal-glacier);">
+                            {{ user.get_role_display }}
+                        </span>
                         
                         <hr class="my-4">
                         
-                        <ul class="nav flex-column gap-2">
-                            <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2 active" href="{% url 'profile' %}">
-                                    <i class="fas fa-user-circle fa-fw"></i>
-                                    <span>Mon profil</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'mon_compte' %}">
-                                    <i class="fas fa-shopping-bag fa-fw"></i>
-                                    <span>Mes commandes</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" href="#">
-                                    <i class="fas fa-heart fa-fw"></i>
-                                    <span>Ma liste de souhaits</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" href="{% url 'deconnexion' %}">
-                                    <i class="fas fa-sign-out-alt fa-fw"></i>
-                                    <span>Déconnexion</span>
-                                </a>
-                            </li>
-                        </ul>
+                        <div class="d-flex flex-column gap-2">
+                            <a href="{% url 'profile' %}" 
+                               class="d-flex align-items-center gap-2 p-2 rounded"
+                               style="background-color: var(--teal-light); color: var(--teal-glacier);">
+                                <i class="fas fa-user-circle fa-fw"></i>
+                                <span>Mon profil</span>
+                            </a>
+                            <a href="{% url 'mon_compte' %}" 
+                               class="d-flex align-items-center gap-2 p-2 rounded"
+                               style="color: var(--black-shadow);">
+                                <i class="fas fa-shopping-bag fa-fw"></i>
+                                <span>Mes commandes</span>
+                            </a>
+                            <a href="#" 
+                               class="d-flex align-items-center gap-2 p-2 rounded"
+                               style="color: var(--black-shadow);">
+                                <i class="fas fa-heart fa-fw"></i>
+                                <span>Ma liste de souhaits</span>
+                            </a>
+                            <a href="{% url 'deconnexion' %}" 
+                               class="d-flex align-items-center gap-2 p-2 rounded"
+                               style="color: var(--black-shadow);">
+                                <i class="fas fa-sign-out-alt fa-fw"></i>
+                                <span>Déconnexion</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Contenu principal -->
-        <div class="col-lg-9">
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                <!-- En-tête avec effet de dégradé -->
-                <div class="card-header bg-gradient-primary py-4 border-0">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-circle bg-white text-primary me-3">
-                            <i class="fas fa-user-edit fs-5"></i>
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-sm">
+                    <!-- En-tête -->
+                    <div class="card-header py-4 border-0" style="background-color: var(--teal-glacier);">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-white me-3 d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-user-edit fs-5" style="color: var(--teal-glacier);"></i>
+                            </div>
+                            <h2 class="h4 mb-0 text-white fw-bold">
+                                Informations personnelles
+                            </h2>
                         </div>
-                        <h2 class="h4 mb-0 text-white fw-bold">
-                            Informations personnelles
-                        </h2>
                     </div>
-                </div>
-                
-                <!-- Corps de la carte avec espacement amélioré -->
-                <div class="card-body p-5">
-                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        
-                        <div class="row g-4">
+                    
+                    <!-- Corps de la carte -->
+                    <div class="card-body p-5">
+                        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row g-4">
+                                <!-- Prénom -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="id_first_name">
+                                        <i class="fas fa-user me-2" style="color: var(--teal-glacier);"></i> Prénom
+                                    </label>
+                                    {{ form.first_name|add_class:"form-control form-control-lg" }}
+                                    {% if form.first_name.errors %}
+                                        <div class="text-danger small mt-1">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            {{ form.first_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
 
-                            <!-- Prénom -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold" for="id_first_name">
-                                    <i class="fas fa-user text-primary me-2"></i> Prénom
-                                </label>
-                                {{ form.first_name|add_class:"form-control form-control-lg" }}
-                                {% if form.first_name.errors %}
-                                    <div class="text-danger small mt-1">
-                                        <i class="fas fa-exclamation-circle me-1"></i>
-                                        {{ form.first_name.errors.0 }}
-                                    </div>
-                                {% endif %}
-                            </div>
+                                <!-- Nom -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="id_last_name">
+                                        <i class="fas fa-user me-2" style="color: var(--teal-glacier);"></i> Nom
+                                    </label>
+                                    {{ form.last_name|add_class:"form-control form-control-lg" }}
+                                    {% if form.last_name.errors %}
+                                        <div class="text-danger small mt-1">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            {{ form.last_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
 
-                            <!-- Nom -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold" for="id_last_name">
-                                    <i class="fas fa-user text-primary me-2"></i> Nom
-                                </label>
-                                {{ form.last_name|add_class:"form-control form-control-lg" }}
-                                {% if form.last_name.errors %}
-                                    <div class="text-danger small mt-1">
-                                        <i class="fas fa-exclamation-circle me-1"></i>
-                                        {{ form.last_name.errors.0 }}
-                                    </div>
-                                {% endif %}
-                            </div>
+                                <!-- Email -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="id_email">
+                                        <i class="fas fa-envelope me-2" style="color: var(--teal-glacier);"></i> Email
+                                    </label>
+                                    {{ form.email|add_class:"form-control form-control-lg" }}
+                                    {% if form.email.errors %}
+                                        <div class="text-danger small mt-1">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            {{ form.email.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
 
-                            <!-- Email -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold" for="id_email">
-                                    <i class="fas fa-envelope text-primary me-2"></i> Email
-                                </label>
-                                {{ form.email|add_class:"form-control form-control-lg" }}
-                                {% if form.email.errors %}
-                                    <div class="text-danger small mt-1">
-                                        <i class="fas fa-exclamation-circle me-1"></i>
-                                        {{ form.email.errors.0 }}
-                                    </div>
-                                {% endif %}
-                            </div>
+                                <!-- Téléphone -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold" for="id_telephone">
+                                        <i class="fas fa-phone me-2" style="color: var(--teal-glacier);"></i> Téléphone
+                                    </label>
+                                    {{ form.telephone|add_class:"form-control form-control-lg" }}
+                                    <small class="text-muted ms-1 mt-1 d-block">Format: +228 99667572</small>
+                                    {% if form.telephone.errors %}
+                                        <div class="text-danger small mt-1">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            {{ form.telephone.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
 
-                            <!-- Téléphone -->
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold" for="id_telephone">
-                                    <i class="fas fa-phone text-primary me-2"></i> Téléphone
-                                </label>
-                                {{ form.telephone|add_class:"form-control form-control-lg" }}
-                                <small class="text-muted ms-1 mt-1 d-block">Format: +228 99667572</small>
-                                {% if form.telephone.errors %}
-                                    <div class="text-danger small mt-1">
-                                        <i class="fas fa-exclamation-circle me-1"></i>
-                                        {{ form.telephone.errors.0 }}
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                            <!-- Boutons -->
-                            <div class="col-12 mt-4 pt-3 border-top">
-                                <div class="d-flex gap-3 justify-content-between align-items-center flex-wrap">
-                                    
-                                        <button type="submit" class="btn btn-primary btn-lg px-5 py-3 fw-bold shadow-sm">
+                                <!-- Boutons -->
+                                <div class="col-12 mt-4 pt-3 border-top">
+                                    <div class="d-flex gap-3 justify-content-between align-items-center flex-wrap">
+                                        <button type="submit" 
+                                                class="btn btn-lg px-5 py-3 fw-bold shadow-sm"
+                                                style="background-color: var(--teal-glacier); color: white;">
                                             <i class="fas fa-save me-2"></i> Enregistrer les modifications
                                         </button>
-                                
 
-
-                                    <div class="d-flex gap-3">
-                                        <a href="{% url 'password_change' %}" class="btn btn-outline-success btn-lg px-4 py-3">
-                                            <i class="fas fa-lock me-2"></i> Changer le mot de passe
-                                        </a>
-                                        <a href="{% url 'delete_account' %}" class="btn btn-outline-danger btn-lg px-4 py-3">
-                                            <i class="fas fa-trash-alt me-2"></i> Supprimer le compte
-                                        </a>
-                                         <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-primary btn-lg px-4 py-3">
-                                            <i class="fas fa-arrow-left me-1"></i> Retour
-                                        </a>
+                                        <div class="d-flex gap-3">
+                                            <a href="{% url 'password_change' %}" 
+                                               class="btn btn-lg px-4 py-3"
+                                               style="border: 1px solid var(--teal-glacier); color: var(--teal-glacier);">
+                                                <i class="fas fa-lock me-2"></i> Changer le mot de passe
+                                            </a>
+                                            <a href="{% url 'delete_account' %}" 
+                                               class="btn btn-lg px-4 py-3"
+                                               style="border: 1px solid var(--pink-swoosh); color: var(--pink-swoosh);">
+                                                <i class="fas fa-trash-alt me-2"></i> Supprimer le compte
+                                            </a>
+                                            <a href="{% url 'dashboard_admin' %}" 
+                                               class="btn btn-lg px-4 py-3"
+                                               style="border: 1px solid var(--teal-glacier); color: var(--teal-glacier);">
+                                                <i class="fas fa-arrow-left me-1"></i> Retour
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </form>
-
+                        </form>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <style>
-            .card {
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-            }
-
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
-            }
-
-            .bg-gradient-primary {
-                background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
-            }
-
-            .icon-circle {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .form-floating .form-control {
-                border-left: 0;
-                padding-left: 0.5rem;
-                background-color: rgba(255, 255, 255, 0.9);
-            }
-
-            .form-floating .form-control:focus {
-                box-shadow: none;
-                border-color: #86b7fe;
-            }
-
-            .input-group-text {
-                transition: all 0.3s ease;
-            }
-
-            .form-floating>.form-control:focus~label,
-            .form-floating>.form-control:not(:placeholder-shown)~label {
-                transform: scale(0.85) translateY(-1.5rem) translateX(0.15rem);
-                color: #3a7bd5;
-            }
-
-            .btn-lg {
-                border-radius: 0.75rem;
-                transition: all 0.3s ease;
-            }
-
-            .btn-outline-secondary:hover {
-                background-color: #f8f9fa;
-                color: #212529;
-            }
-
-            @media (max-width: 768px) {
-                .card-body {
-                    padding: 1.5rem !important;
-                }
-                
-                .btn-lg {
-                    padding: 0.75rem 1.5rem;
-                    font-size: 1rem;
-                }
-            }
-        </style>
 
                 <!-- Section Commandes récentes -->
-                <div class="card shadow-sm border-0 rounded-3 mt-4 overflow-hidden">
-                    <div class="card-header bg-white py-3 border-bottom">
+                <div class="card shadow-sm border-0 mt-4">
+                    <div class="card-header py-3 border-bottom bg-white">
                         <div class="d-flex justify-content-between align-items-center">
                             <h2 class="h5 mb-0 fw-bold">
-                                <i class="fas fa-history me-2 text-primary"></i>
+                                <i class="fas fa-history me-2" style="color: var(--teal-glacier);"></i>
                                 Mes dernières commandes
                             </h2>
-                            <a href="{% url 'mon_compte' %}" class="btn btn-sm btn-outline-primary">
+                            <a href="{% url 'mon_compte' %}" 
+                               class="btn btn-sm"
+                               style="border: 1px solid var(--teal-glacier); color: var(--teal-glacier);">
                                 Voir toutes <i class="fas fa-chevron-right ms-1"></i>
                             </a>
                         </div>
@@ -252,7 +196,7 @@
                         {% if commandes %}
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
-                                <thead class="table-light">
+                                <thead style="background-color: var(--teal-light);">
                                     <tr>
                                         <th class="ps-4">N° Commande</th>
                                         <th>Date</th>
@@ -267,7 +211,8 @@
                                         <td class="ps-4 fw-bold">#{{ commande.reference }}</td>
                                         <td>{{ commande.date_commande|date:"d/m/Y" }}</td>
                                         <td>
-                                            <span class="badge bg-soft-{{ commande.get_status_color }} text-{{ commande.get_status_color }} rounded-pill py-1 px-3">
+                                            <span class="badge rounded-pill py-1 px-3"
+                                                  style="background-color: var(--teal-light); color: var(--teal-glacier);">
                                                 <i class="fas fa-{{ commande.get_status_icon }} me-1"></i>
                                                 {{ commande.get_statut_display }}
                                             </span>
@@ -275,11 +220,15 @@
                                         <td>{{ commande.total|floatformat:0 }} FCFA</td>
                                         <td class="text-end pe-4">
                                             <div class="d-flex gap-2 justify-content-end">
-                                                <a href="{% url 'suivi_commande' commande.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                <a href="{% url 'suivi_commande' commande.id %}" 
+                                                   class="btn btn-sm rounded-pill px-3"
+                                                   style="border: 1px solid var(--teal-glacier); color: var(--teal-glacier);">
                                                     <i class="fas fa-eye me-1"></i> Détails
                                                 </a>
                                                 {% if commande.can_reorder %}
-                                                <a href="{% url 'reorder' commande.id %}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                                <a href="{% url 'reorder' commande.id %}" 
+                                                   class="btn btn-sm rounded-pill px-3"
+                                                   style="border: 1px solid var(--teal-glacier); color: var(--teal-glacier);">
                                                     <i class="fas fa-redo me-1"></i> Commander à nouveau
                                                 </a>
                                                 {% endif %}
@@ -293,11 +242,13 @@
                         {% else %}
                         <div class="text-center py-5">
                             <div class="mb-4">
-                                <i class="fas fa-shopping-cart fa-3x text-muted opacity-25"></i>
+                                <i class="fas fa-shopping-cart fa-3x" style="color: var(--teal-light);"></i>
                             </div>
                             <h5 class="fw-bold mb-3">Aucune commande passée pour le moment</h5>
                             <p class="text-muted mb-4">Découvrez nos délicieuses glaces et passez votre première commande !</p>
-                            <a href="{% url 'produits' %}" class="btn btn-primary px-4 py-2 fw-bold">
+                            <a href="{% url 'produits' %}" 
+                               class="btn px-4 py-2 fw-bold"
+                               style="background-color: var(--teal-glacier); color: white;">
                                 <i class="fas fa-ice-cream me-2"></i> Découvrir nos produits
                             </a>
                         </div>
@@ -313,9 +264,9 @@
 <div class="modal fade" id="avatarModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header" style="background-color: var(--teal-glacier); color: white;">
                 <h5 class="modal-title">Changer la photo de profil</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form method="post" enctype="multipart/form-data" action="#">
                 {% csrf_token %}
@@ -326,14 +277,17 @@
                                 {% if user.profile_image %}
                                     <img id="imagePreview" src="{{ user.profile_image.url }}" alt="Photo de profil actuelle">
                                 {% else %}
-                                    <div id="imagePreview" class="default-avatar rounded-circle d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-user text-white"></i>
+                                    <div id="imagePreview" class="rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 150px; height: 150px; background-color: var(--teal-glacier);">
+                                        <i class="fas fa-user text-white fa-3x"></i>
                                     </div>
                                 {% endif %}
                             </div>
                             <div class="avatar-edit">
                                 <input type="file" id="imageUpload" name="profile_image" accept=".png, .jpg, .jpeg" class="d-none">
-                                <label for="imageUpload" class="btn btn-primary rounded-pill px-4">
+                                <label for="imageUpload" 
+                                       class="btn rounded-pill px-4"
+                                       style="background-color: var(--teal-glacier); color: white;">
                                     <i class="fas fa-upload me-2"></i> Choisir une image
                                 </label>
                             </div>
@@ -342,8 +296,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    <button type="button" 
+                            class="btn"
+                            style="border: 1px solid var(--teal-glacier); color: var(--teal-glacier);"
+                            data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" 
+                            class="btn"
+                            style="background-color: var(--teal-glacier); color: white;">Enregistrer</button>
                 </div>
             </form>
         </div>
@@ -351,60 +310,57 @@
 </div>
 
 <style>
-    .avatar-upload {
-        position: relative;
-        max-width: 200px;
+    /* Styles pour les interactions */
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .avatar-preview {
-        width: 150px;
-        height: 150px;
-        background-color: #f8f9fa;
-        border: 2px dashed #dee2e6;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
     }
 
-    .avatar-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    /* Styles pour les boutons et liens */
+    .btn:hover:not(.btn-close) {
+        opacity: 0.9;
     }
 
-    .default-avatar {
-        background-color: var(--bs-primary);
-        width: 100%;
-        height: 100%;
-        font-size: 3rem;
+    [style*="var(--teal-glacier)"]:not(.card-header):hover {
+        background-color: var(--teal-glacier) !important;
+        color: white !important;
     }
 
-    .nav-link {
-        padding: 0.75rem 1rem;
-        border-radius: 0.5rem;
-        transition: all 0.3s;
+    [style*="var(--pink-swoosh)"]:hover {
+        background-color: var(--pink-swoosh) !important;
+        color: white !important;
     }
 
-    .nav-link:hover, .nav-link.active {
-        background-color: rgba(var(--bs-primary-rgb), 0.1);
-        color: var(--bs-primary) !important;
+    /* Styles pour la navigation latérale */
+    .d-flex.flex-column.gap-2 a:hover {
+        background-color: var(--teal-light) !important;
+        color: var(--teal-glacier) !important;
+        text-decoration: none;
     }
 
-    .nav-link.active {
-        font-weight: 500;
+    .d-flex.flex-column.gap-2 a {
+        transition: all 0.3s ease;
     }
 
-    .table-hover tbody tr {
-        transition: all 0.2s;
-    }
-
+    /* Styles pour le tableau */
     .table-hover tbody tr:hover {
-        background-color: rgba(var(--bs-primary-rgb), 0.03);
+        background-color: var(--teal-light) !important;
     }
 
-    .badge {
-        font-weight: 500;
+    /* Responsive */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
     }
 </style>
 

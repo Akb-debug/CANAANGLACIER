@@ -1,0 +1,267 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header pb-0 bg-gradient-primary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-white mb-0">Modifier votre avis</h6>
+                        <a href="{% url 'mes_avis' %}" class="btn btn-sm btn-light">
+                            <i class="fas fa-arrow-left me-1"></i> Retour aux avis
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Formulaire de modification -->
+                        <div class="col-md-8">
+                            <div class="card shadow-sm border-0 mb-4">
+                                <div class="card-header bg-warning text-white py-3">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-edit me-2"></i>
+                                        Modifier votre évaluation
+                                    </h5>
+                                </div>
+                                <div class="card-body p-4">
+                                    <form method="post" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        
+                                        <!-- Note -->
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold text-dark">Note globale ★</label>
+                                            <div class="rating-group bg-light p-3 rounded">
+                                                {% for choice in form.note %}
+                                                <div class="form-check form-check-inline mb-2">
+                                                    {{ choice.tag }}
+                                                    <label class="form-check-label text-dark fw-medium" for="{{ choice.id_for_label }}">
+                                                        {{ choice.choice_label }}
+                                                    </label>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% if form.note.errors %}
+                                            <div class="alert alert-danger mt-2 py-2">
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                {{ form.note.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Titre -->
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold text-dark">Titre de votre avis</label>
+                                            {{ form.titre }}
+                                            <div class="form-text text-muted">Donnez un titre accrocheur qui résume votre expérience.</div>
+                                            {% if form.titre.errors %}
+                                            <div class="alert alert-danger mt-2 py-2">
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                {{ form.titre.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Commentaire -->
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold text-dark">Votre commentaire</label>
+                                            {{ form.commentaire }}
+                                            <div class="form-text text-muted">Partagez votre expérience détaillée avec ce produit.</div>
+                                            {% if form.commentaire.errors %}
+                                            <div class="alert alert-danger mt-2 py-2">
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                {{ form.commentaire.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Remarques -->
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold text-dark">Remarques supplémentaires</label>
+                                            {{ form.remarques }}
+                                            <div class="form-text text-muted">Suggestions, points d'amélioration ou conseils d'utilisation.</div>
+                                            {% if form.remarques.errors %}
+                                            <div class="alert alert-danger mt-2 py-2">
+                                                <i class="fas fa-exclamation-circle me-1"></i>
+                                                {{ form.remarques.errors }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Photos existantes -->
+                                        {% if avis.medias.all %}
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold text-dark">Photos actuelles</label>
+                                            <div class="row g-3">
+                                                {% for media in avis.medias.all %}
+                                                <div class="col-4">
+                                                    <div class="card border-0 shadow-sm">
+                                                        <div class="position-relative">
+                                                            <img src="{{ media.image.url }}" class="card-img-top" alt="Photo avis" style="height: 120px; object-fit: cover;">
+                                                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1" data-bs-toggle="modal" data-bs-target="#deleteImageModal{{ media.id }}">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+
+                                        <!-- Nouvelles photos -->
+                                        <div class="mb-4">
+                                            <label class="form-label fw-bold text-dark">Ajouter de nouvelles photos</label>
+                                            <div class="file-upload-area border-dashed rounded p-4 text-center bg-light">
+                                                <i class="fas fa-cloud-upload-alt text-primary mb-2" style="font-size: 2rem;"></i>
+                                                <p class="text-muted mb-2">Glissez-déposez vos images ici ou</p>
+                                                <input type="file" name="images" class="form-control d-inline-block w-auto" multiple>
+                                                <div class="form-text text-muted mt-2">Formats acceptés: JPG, PNG. Max 3 images.</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-3">
+                                            <a href="{% url 'mes_avis' %}" class="btn btn-outline-secondary me-md-2 px-4">
+                                                <i class="fas fa-times me-1"></i> Annuler
+                                            </a>
+                                            <button type="submit" class="btn btn-primary px-4">
+                                                <i class="fas fa-save me-1"></i>
+                                                Enregistrer les modifications
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Informations produit -->
+                        <div class="col-md-4">
+                            <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
+                                <div class="card-header bg-info text-white py-3">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Détails du produit
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        {% if avis.produit.image %}
+                                        <img src="{{ avis.produit.image.url }}" alt="{{ avis.produit.nom }}" 
+                                             class="rounded me-3 shadow" style="width: 80px; height: 80px; object-fit: cover;">
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-1 text-dark">{{ avis.produit.nom }}</h6>
+                                            <p class="text-muted mb-0 small">Réf: {{ avis.produit.reference }}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="product-meta bg-light rounded p-3 mt-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="text-muted small">
+                                                <i class="fas fa-star text-warning me-1"></i>
+                                                Note actuelle:
+                                            </span>
+                                            <span class="badge bg-warning text-dark">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= avis.note %}
+                                                        <i class="fas fa-star"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="border-top pt-3">
+                                            <div class="timeline-item">
+                                                <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                                <span class="text-muted small">Créé le: {{ avis.date_creation|date:"d/m/Y" }}</span>
+                                            </div>
+                                            <div class="timeline-item mt-1">
+                                                <i class="fas fa-sync-alt text-success me-2"></i>
+                                                <span class="text-muted small">Modifié le: {{ avis.date_modification|date:"d/m/Y" }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals pour la suppression d'images -->
+{% for media in avis.medias.all %}
+<div class="modal fade" id="deleteImageModal{{ media.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cette image ?</p>
+                <div class="text-center">
+                    <img src="{{ media.image.url }}" class="img-thumbnail" style="max-height: 200px;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <a href="#" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i> Supprimer
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<style>
+    .border-dashed {
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+    }
+    .file-upload-area:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+    }
+    .rating-group {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 8px;
+    }
+    .form-check-input:checked {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+    .product-meta {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    .timeline-item {
+        display: flex;
+        align-items: center;
+    }
+    .card {
+        border: none;
+        border-radius: 12px;
+    }
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+    }
+    textarea.form-control {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+    }
+    textarea.form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+    input.form-control {
+        border-radius: 8px;
+    }
+</style>
+{% endblock %}
