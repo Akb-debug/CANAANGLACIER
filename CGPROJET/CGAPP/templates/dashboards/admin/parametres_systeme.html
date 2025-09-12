@@ -1,0 +1,262 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Paramètres Système{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-cogs me-2"></i>Paramètres Système
+                    </h1>
+                    <p class="mb-0">Configuration générale de l'application</p>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajouterParametreModal">
+                        <i class="fas fa-plus me-2"></i>Nouveau Paramètre
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paramètres par catégorie -->
+    <div class="row g-4">
+        <!-- Livraison -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-truck me-2"></i>Paramètres de Livraison
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for param in parametres_livraison %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                        <div>
+                            <div class="fw-bold">{{ param.nom }}</div>
+                            <small class="text-muted">{{ param.description }}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary">{{ param.valeur }}</span>
+                            <button class="btn btn-sm btn-outline-primary" onclick="modifierParametre('{{ param.id }}', '{{ param.nom|escapejs }}', '{{ param.valeur|escapejs }}', '{{ param.description|escapejs }}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-truck fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">Aucun paramètre de livraison configuré</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Paiement -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-credit-card me-2"></i>Paramètres de Paiement
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for param in parametres_paiement %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                        <div>
+                            <div class="fw-bold">{{ param.nom }}</div>
+                            <small class="text-muted">{{ param.description }}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success">{{ param.valeur }}</span>
+                            <button class="btn btn-sm btn-outline-primary" onclick="modifierParametre('{{ param.id }}', '{{ param.nom|escapejs }}', '{{ param.valeur|escapejs }}', '{{ param.description|escapejs }}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-credit-card fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">Aucun paramètre de paiement configuré</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Application -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-mobile-alt me-2"></i>Paramètres Application
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for param in parametres_app %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                        <div>
+                            <div class="fw-bold">{{ param.nom }}</div>
+                            <small class="text-muted">{{ param.description }}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-info">{{ param.valeur }}</span>
+                            <button class="btn btn-sm btn-outline-primary" onclick="modifierParametre('{{ param.id }}', '{{ param.nom|escapejs }}', '{{ param.valeur|escapejs }}', '{{ param.description|escapejs }}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-mobile-alt fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">Aucun paramètre d'application configuré</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>Paramètres Notifications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for param in parametres_notifications %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                        <div>
+                            <div class="fw-bold">{{ param.nom }}</div>
+                            <small class="text-muted">{{ param.description }}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-warning">{{ param.valeur }}</span>
+                            <button class="btn btn-sm btn-outline-primary" onclick="modifierParametre('{{ param.id }}', '{{ param.nom|escapejs }}', '{{ param.valeur|escapejs }}', '{{ param.description|escapejs }}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-bell fa-2x text-muted mb-2"></i>
+                        <p class="text-muted">Aucun paramètre de notification configuré</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajouter Paramètre -->
+<div class="modal fade" id="ajouterParametreModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Ajouter un Paramètre
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'ajouter_parametre' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Nom du paramètre <span class="text-danger">*</span></label>
+                        <input type="text" name="nom" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Catégorie <span class="text-danger">*</span></label>
+                        <select name="categorie" class="form-select" required>
+                            <option value="">Sélectionner une catégorie</option>
+                            <option value="livraison">Livraison</option>
+                            <option value="paiement">Paiement</option>
+                            <option value="application">Application</option>
+                            <option value="notifications">Notifications</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valeur <span class="text-danger">*</span></label>
+                        <input type="text" name="valeur" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Modifier Paramètre -->
+<div class="modal fade" id="modifierParametreModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Modifier le Paramètre
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" id="modifierForm">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="parametre_id" id="modifier_parametre_id">
+                    <div class="mb-3">
+                        <label class="form-label">Nom du paramètre</label>
+                        <input type="text" name="nom" id="modifier_nom" class="form-control" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valeur <span class="text-danger">*</span></label>
+                        <input type="text" name="valeur" id="modifier_valeur" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" id="modifier_description" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Sauvegarder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+</style>
+
+<script>
+function modifierParametre(id, nom, valeur, description) {
+    // Mettre à jour le formulaire avec les valeurs du paramètre
+    document.getElementById('modifier_parametre_id').value = id;
+    document.getElementById('modifier_nom').value = nom;
+    document.getElementById('modifier_valeur').value = valeur;
+    document.getElementById('modifier_description').value = description;
+    
+    // Mettre à jour l'action du formulaire avec l'URL correcte
+    document.getElementById('modifierForm').action = `/gestion/parametres/modifier/${id}/`;
+    
+    const modal = new bootstrap.Modal(document.getElementById('modifierParametreModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Statistiques - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiques Détaillées
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Statistiques générales -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ stats.total_utilisateurs }}</h3>
+                                    <p class="mb-0">Utilisateurs</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ stats.total_produits }}</h3>
+                                    <p class="mb-0">Produits</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ stats.total_commandes }}</h3>
+                                    <p class="mb-0">Commandes</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ stats.ca_mensuel|floatformat:0 }}</h3>
+                                    <p class="mb-0">CA Mensuel (FCFA)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Graphiques -->
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Évolution des Ventes</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="ventesChart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Produits Populaires</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="produitsChart" height="300"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tableaux de données -->
+                    <div class="row mt-4">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Top Produits</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Produit</th>
+                                                    <th>Ventes</th>
+                                                    <th>CA</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Glace Vanille</td>
+                                                    <td>150</td>
+                                                    <td>75,000 FCFA</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Glace Chocolat</td>
+                                                    <td>120</td>
+                                                    <td>60,000 FCFA</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Sorbet Fraise</td>
+                                                    <td>100</td>
+                                                    <td>45,000 FCFA</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Performances Mensuelles</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>Mois</th>
+                                                    <th>Commandes</th>
+                                                    <th>CA</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Janvier</td>
+                                                    <td>45</td>
+                                                    <td>180,000 FCFA</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Février</td>
+                                                    <td>52</td>
+                                                    <td>220,000 FCFA</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Mars</td>
+                                                    <td>48</td>
+                                                    <td>195,000 FCFA</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Graphique des ventes
+    const ventesCtx = document.getElementById('ventesChart').getContext('2d');
+    new Chart(ventesCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'Ventes (FCFA)',
+                data: {{ ventes_mensuelles|safe }},
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString() + ' FCFA';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Graphique des produits populaires
+    const produitsCtx = document.getElementById('produitsChart').getContext('2d');
+    new Chart(produitsCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Glace Vanille', 'Glace Chocolat', 'Sorbet Fraise', 'Glace Pistache', 'Autres'],
+            datasets: [{
+                data: [30, 25, 20, 15, 10],
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

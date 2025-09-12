@@ -1,0 +1,140 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Ajouter une Catégorie{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-plus me-2"></i>Ajouter une Catégorie
+                    </h1>
+                    <p class="mb-0">Créer une nouvelle catégorie de produits</p>
+                </div>
+                <div>
+                    <a href="{% url 'gestion_categories' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations de la Catégorie
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.nom.id_for_label }}" class="form-label">
+                                        <i class="fas fa-tag me-1"></i>Nom de la catégorie *
+                                    </label>
+                                    {{ form.nom }}
+                                    {% if form.nom.errors %}
+                                        <div class="text-danger small">{{ form.nom.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.ordre_affichage.id_for_label }}" class="form-label">
+                                        <i class="fas fa-sort-numeric-up me-1"></i>Ordre d'affichage
+                                    </label>
+                                    {{ form.ordre_affichage }}
+                                    {% if form.ordre_affichage.errors %}
+                                        <div class="text-danger small">{{ form.ordre_affichage.errors.0 }}</div>
+                                    {% endif %}
+                                    <div class="form-text">Plus le nombre est petit, plus la catégorie apparaîtra en premier</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Description
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small">{{ form.description.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">
+                                <i class="fas fa-image me-1"></i>Image de la catégorie
+                            </label>
+                            {{ form.image }}
+                            {% if form.image.errors %}
+                                <div class="text-danger small">{{ form.image.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-text">Formats acceptés: JPG, PNG, GIF (max 5MB)</div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'gestion_categories' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aide -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Aide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-tag me-1"></i>Nom</h6>
+                        <p class="small text-muted">Le nom de la catégorie tel qu'il apparaîtra sur le site.</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6><i class="fas fa-sort-numeric-up me-1"></i>Ordre d'affichage</h6>
+                        <p class="small text-muted">Détermine l'ordre d'apparition des catégories. 0 = premier, 1 = deuxième, etc.</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6><i class="fas fa-image me-1"></i>Image</h6>
+                        <p class="small text-muted">Image représentative de la catégorie. Recommandé: 300x300px.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+</style>
+{% endblock %}

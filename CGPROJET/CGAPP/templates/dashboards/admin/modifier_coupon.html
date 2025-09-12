@@ -1,0 +1,202 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Modifier le Coupon{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-edit me-2"></i>Modifier le Coupon
+                    </h1>
+                    <p class="mb-0">Code: <strong>{{ coupon.code }}</strong></p>
+                </div>
+                <div>
+                    <a href="{% url 'gestion_coupons' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques du coupon -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Utilisations</div>
+                            <div class="h4 mb-0">{{ coupon.usage_actuel }}/{{ coupon.usage_max }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-bar fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card {% if coupon.est_valide %}bg-success{% else %}bg-danger{% endif %} text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Statut</div>
+                            <div class="h5 mb-0">{% if coupon.est_valide %}Valide{% else %}Expiré{% endif %}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas {% if coupon.est_valide %}fa-check-circle{% else %}fa-times-circle{% endif %} fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-ticket-alt me-2"></i>Informations du Coupon
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.code.id_for_label }}" class="form-label">
+                                        Code du coupon <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.code }}
+                                    {% if form.code.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.code.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.type_reduction.id_for_label }}" class="form-label">
+                                        Type de réduction <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.type_reduction }}
+                                    {% if form.type_reduction.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.type_reduction.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.valeur.id_for_label }}" class="form-label">
+                                        Valeur <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.valeur }}
+                                    {% if form.valeur.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.valeur.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.usage_max.id_for_label }}" class="form-label">
+                                        Usage maximum <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.usage_max }}
+                                    {% if form.usage_max.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.usage_max.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.date_debut.id_for_label }}" class="form-label">
+                                        Date de début <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.date_debut }}
+                                    {% if form.date_debut.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.date_debut.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.date_fin.id_for_label }}" class="form-label">
+                                        Date de fin <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.date_fin }}
+                                    {% if form.date_fin.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ form.date_fin.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.actif }}
+                                <label class="form-check-label" for="{{ form.actif.id_for_label }}">
+                                    Coupon actif
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'gestion_coupons' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Sauvegarder
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.form-control, .form-select {
+    border: 1px solid #d1d3e2;
+    border-radius: 0.35rem;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #5a5c69;
+    box-shadow: 0 0 0 0.2rem rgba(90, 92, 105, 0.25);
+}
+</style>
+{% endblock %}

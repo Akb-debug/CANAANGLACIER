@@ -1,0 +1,454 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Gestion Avancée des Stocks{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-boxes me-2"></i>Gestion Avancée des Stocks
+                    </h1>
+                    <p class="mb-0">Suivi détaillé et prévisions de stock</p>
+                </div>
+                <div>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#ajustementStockModal">
+                        <i class="fas fa-plus me-2"></i>Ajustement Stock
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertes et KPIs -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-danger text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Stock Critique</div>
+                            <div class="h3 mb-0">{{ stats.stock_critique }}</div>
+                            <div class="small">Produits en rupture</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Stock Faible</div>
+                            <div class="h3 mb-0">{{ stats.stock_faible }}</div>
+                            <div class="small">Réapprovisionnement requis</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-battery-quarter fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Valeur Stock</div>
+                            <div class="h3 mb-0">{{ stats.valeur_stock|floatformat:0 }} FCFA</div>
+                            <div class="small">Inventaire total</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-coins fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Rotation Stock</div>
+                            <div class="h3 mb-0">{{ stats.rotation_stock|floatformat:1 }}</div>
+                            <div class="small">Fois par mois</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-sync-alt fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Catégorie</label>
+                            <select name="categorie" class="form-select">
+                                <option value="">Toutes les catégories</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if cat.id|stringformat:"s" == categorie_filtre %}selected{% endif %}>
+                                    {{ cat.nom }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Statut Stock</label>
+                            <select name="statut" class="form-select">
+                                <option value="">Tous les statuts</option>
+                                <option value="critique" {% if statut_filtre == 'critique' %}selected{% endif %}>Stock critique</option>
+                                <option value="faible" {% if statut_filtre == 'faible' %}selected{% endif %}>Stock faible</option>
+                                <option value="normal" {% if statut_filtre == 'normal' %}selected{% endif %}>Stock normal</option>
+                                <option value="exces" {% if statut_filtre == 'exces' %}selected{% endif %}>Stock excédentaire</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tri par</label>
+                            <select name="tri" class="form-select">
+                                <option value="nom" {% if tri == 'nom' %}selected{% endif %}>Nom</option>
+                                <option value="stock" {% if tri == 'stock' %}selected{% endif %}>Quantité stock</option>
+                                <option value="rotation" {% if tri == 'rotation' %}selected{% endif %}>Rotation</option>
+                                <option value="valeur" {% if tri == 'valeur' %}selected{% endif %}>Valeur</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block w-100">
+                                <i class="fas fa-filter me-2"></i>Filtrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des stocks -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>État des Stocks
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th>Stock Actuel</th>
+                                    <th>Stock Min</th>
+                                    <th>Stock Max</th>
+                                    <th>Rotation</th>
+                                    <th>Valeur</th>
+                                    <th>Prévision</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for produit in produits %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if produit.image %}
+                                                <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" 
+                                                     class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" 
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-image text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <div class="fw-bold">{{ produit.nom }}</div>
+                                                <small class="text-muted">{{ produit.categorie.nom|default:"Non catégorisé" }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-{% if produit.quantite_disponible <= produit.stock_min %}danger{% elif produit.quantite_disponible <= produit.stock_min|add:10 %}warning{% else %}success{% endif %} me-2">
+                                                {{ produit.quantite_disponible }}
+                                            </span>
+                                            <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
+                                                <div class="progress-bar bg-{% if produit.quantite_disponible <= produit.stock_min %}danger{% elif produit.quantite_disponible <= produit.stock_min|add:10 %}warning{% else %}success{% endif %}" 
+                                                     style="width: {{ produit.pourcentage_stock }}%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ produit.stock_min|default:"-" }}</td>
+                                    <td>{{ produit.stock_max|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if produit.rotation > 4 %}success{% elif produit.rotation > 2 %}warning{% else %}danger{% endif %}">
+                                            {{ produit.rotation|floatformat:1 }}x
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold">{{ produit.valeur_stock|floatformat:0 }} FCFA</td>
+                                    <td>
+                                        {% if produit.jours_rupture %}
+                                            <small class="text-{% if produit.jours_rupture <= 7 %}danger{% elif produit.jours_rupture <= 14 %}warning{% else %}success{% endif %}">
+                                                Rupture dans {{ produit.jours_rupture }} jours
+                                            </small>
+                                        {% else %}
+                                            <small class="text-muted">Stock stable</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="ajusterStock({{ produit.id }}, '{{ produit.nom }}', {{ produit.quantite_disponible }})"
+                                                    title="Ajuster stock">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info" 
+                                                    onclick="voirHistorique({{ produit.id }})"
+                                                    title="Historique">
+                                                <i class="fas fa-history"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success" 
+                                                    onclick="commanderStock({{ produit.id }})"
+                                                    title="Commander">
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center py-4">
+                                        <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">Aucun produit trouvé</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques et analyses -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Évolution des Stocks
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="stockChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Alertes Stock
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if alertes_stock %}
+                        {% for alerte in alertes_stock %}
+                        <div class="alert alert-{{ alerte.niveau }} d-flex align-items-center mb-2" role="alert">
+                            <i class="fas fa-{{ alerte.icone }} me-2"></i>
+                            <div class="flex-grow-1">
+                                <strong>{{ alerte.produit }}</strong><br>
+                                <small>{{ alerte.message }}</small>
+                            </div>
+                            <button class="btn btn-sm btn-outline-{{ alerte.niveau }}" 
+                                    onclick="ajusterStock({{ alerte.produit_id }}, '{{ alerte.produit }}', {{ alerte.stock_actuel }})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <p class="text-success mb-0">Tous les stocks sont OK</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajustement Stock -->
+<div class="modal fade" id="ajustementStockModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Ajustement de Stock
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="ajustementForm" method="post" action="{% url 'ajuster_stock' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="produit_id" id="ajust_produit_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Produit</label>
+                        <input type="text" id="ajust_produit_nom" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Stock actuel</label>
+                        <input type="number" id="ajust_stock_actuel" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Type d'ajustement</label>
+                        <select name="type_ajustement" class="form-select" required>
+                            <option value="">Sélectionner le type</option>
+                            <option value="entree">Entrée de stock</option>
+                            <option value="sortie">Sortie de stock</option>
+                            <option value="correction">Correction d'inventaire</option>
+                            <option value="perte">Perte/Casse</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Quantité</label>
+                        <input type="number" name="quantite" class="form-control" min="1" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Motif</label>
+                        <textarea name="motif" class="form-control" rows="3" placeholder="Raison de l'ajustement..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Confirmer l'ajustement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+.progress {
+    background-color: #e9ecef;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Graphique évolution des stocks
+const stockCtx = document.getElementById('stockChart').getContext('2d');
+new Chart(stockCtx, {
+    type: 'line',
+    data: {
+        labels: {{ stock_labels|safe }},
+        datasets: [{
+            label: 'Valeur Stock Total',
+            data: {{ stock_data|safe }},
+            borderColor: '#4e73df',
+            backgroundColor: 'rgba(78, 115, 223, 0.1)',
+            tension: 0.3,
+            fill: true
+        }, {
+            label: 'Nombre de Produits',
+            data: {{ produits_data|safe }},
+            borderColor: '#1cc88a',
+            backgroundColor: 'rgba(28, 200, 138, 0.1)',
+            tension: 0.3,
+            yAxisID: 'y1'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+                ticks: {
+                    callback: function(value) {
+                        return value.toLocaleString() + ' FCFA';
+                    }
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                grid: {
+                    drawOnChartArea: false,
+                }
+            }
+        }
+    }
+});
+
+function ajusterStock(produitId, produitNom, stockActuel) {
+    document.getElementById('ajust_produit_id').value = produitId;
+    document.getElementById('ajust_produit_nom').value = produitNom;
+    document.getElementById('ajust_stock_actuel').value = stockActuel;
+    
+    const modal = new bootstrap.Modal(document.getElementById('ajustementStockModal'));
+    modal.show();
+}
+
+function voirHistorique(produitId) {
+    window.location.href = `/gerant/historique-stock/${produitId}/`;
+}
+
+function commanderStock(produitId) {
+    if (confirm('Créer une commande de réapprovisionnement pour ce produit ?')) {
+        fetch(`/gerant/commander-stock/${produitId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Commande de réapprovisionnement créée');
+            } else {
+                alert('Erreur lors de la création de la commande');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

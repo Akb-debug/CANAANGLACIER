@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Utilisateurs - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Gestion des Utilisateurs
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Statistiques -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ total_utilisateurs }}</h3>
+                                    <p class="mb-0">Total Utilisateurs</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ utilisateurs_actifs }}</h3>
+                                    <p class="mb-0">Utilisateurs Actifs</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ nouveaux_utilisateurs }}</h3>
+                                    <p class="mb-0">Nouveaux (30j)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ utilisateurs.count }}</h3>
+                                    <p class="mb-0">Total Comptes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste des utilisateurs -->
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Email</th>
+                                    <th>Rôle</th>
+                                    <th>Statut</th>
+                                    <th>Date d'inscription</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for utilisateur in utilisateurs %}
+                                <tr>
+                                    <td>{{ utilisateur.get_full_name|default:utilisateur.username }}</td>
+                                    <td>{{ utilisateur.email }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if utilisateur.role == 'admin' %}danger{% elif utilisateur.role == 'gerant' %}warning{% else %}primary{% endif %}">
+                                            {{ utilisateur.get_role_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if utilisateur.is_active %}success{% else %}secondary{% endif %}">
+                                            {% if utilisateur.is_active %}Actif{% else %}Inactif{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ utilisateur.date_joined|date:"d/m/Y" }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#userModal{{ utilisateur.id }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">Aucun utilisateur trouvé</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals pour les détails utilisateurs -->
+{% for utilisateur in utilisateurs %}
+<div class="modal fade" id="userModal{{ utilisateur.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Détails - {{ utilisateur.get_full_name|default:utilisateur.username }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Email:</strong> {{ utilisateur.email }}</p>
+                <p><strong>Rôle:</strong> {{ utilisateur.get_role_display }}</p>
+                <p><strong>Statut:</strong> {% if utilisateur.is_active %}Actif{% else %}Inactif{% endif %}</p>
+                <p><strong>Date d'inscription:</strong> {{ utilisateur.date_joined|date:"d/m/Y à H:i" }}</p>
+                <p><strong>Dernière connexion:</strong> {{ utilisateur.last_login|date:"d/m/Y à H:i"|default:"Jamais" }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

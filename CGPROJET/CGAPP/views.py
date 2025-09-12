@@ -3,7 +3,9 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, V
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.contrib import messages
 from django.urls import reverse_lazy
-from .models import *
+from django.db import models
+from django.utils import timezone
+from django.http import JsonResponse
 from .forms import *
 from django.contrib.auth import login, authenticate, logout,get_user_model
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -207,7 +209,7 @@ def base_view(request):
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Produit, Panier, LignePanier, Commande
+from .models import Produit, Panier, LignePanier, Commande, LigneCommande, Notification, Gerant
 
 @login_required
 def ajouter_au_panier(request, produit_id):
@@ -733,48 +735,9 @@ def dashboard_gerant(request):
         produits_stock_faible = Produit.objects.none()
     
     # Commandes récentes pour les produits du gérant
-    commandes_mes_produits = Commande.objects.all().order_by('-date_creation')[:10]
+    commandes_recentes = Commande.objects.all().order_by('-date_creation')[:10]
     
-    # SUPERVISION DES SERVEURS
-    # Liste des serveurs actifs
-    serveurs = Utilisateur.objects.filter(role='serveur')
-    
-    # Activité des serveurs (actions récentes)
-    activite_serveurs = []
-    for serveur in serveurs:
-        actions_serveur = HistoriqueAction.objects.filter(
-            utilisateur=serveur,
-            type_action='commande_statut'
-        ).order_by('-date_action')[:5]
-        
-        commandes_traitees_aujourd_hui = HistoriqueAction.objects.filter(
-            utilisateur=serveur,
-            type_action='commande_statut',
-            date_action__date=timezone.now().date()
-        ).count()
-        
-        activite_serveurs.append({
-            'serveur': serveur,
-            'actions_recentes': actions_serveur,
-            'commandes_aujourd_hui': commandes_traitees_aujourd_hui,
-        })
-    
-    # Statistiques globales des serveurs
-    stats_serveurs = {
-        'total_serveurs': serveurs.count(),
-        'commandes_traitees_mois': HistoriqueAction.objects.filter(
-            utilisateur__role='serveur',
-            type_action='commande_statut',
-            date_action__month=timezone.now().month,
-            date_action__year=timezone.now().year
-        ).count(),
-        'serveurs_actifs_aujourd_hui': HistoriqueAction.objects.filter(
-            utilisateur__role='serveur',
-            date_action__date=timezone.now().date()
-        ).values('utilisateur').distinct().count(),
-    }
-    
-    # Commandes par statut pour supervision
+    # Statistiques des commandes
     commandes_par_statut = {
         'en_attente': Commande.objects.filter(statut='en_attente').count(),
         'en_cours': Commande.objects.filter(statut='en_cours').count(),
@@ -782,22 +745,53 @@ def dashboard_gerant(request):
         'annulee': Commande.objects.filter(statut='annulee').count(),
     }
     
+    # Préparer les données pour le graphique des ventes
+    aujourd_hui = timezone.now().date()
+    debut_semaine = aujourd_hui - timezone.timedelta(days=7)
+    
+    # Ventes des 7 derniers jours
+    ventes_7_jours = []
+    for i in range(7):
+        date = debut_semaine + timezone.timedelta(days=i)
+        total_ventes = Commande.objects.filter(
+            date_creation__date=date
+        ).aggregate(total=models.Sum('total'))['total'] or 0
+        ventes_7_jours.append({
+            'date': date,
+            'total': float(total_ventes)
+        })
+    
+    # Produits les plus vendus
+    produits_vendus = LigneCommande.objects.values('produit__nom').annotate(
+        total_vendu=models.Sum('quantite')
+    ).order_by('-total_vendu')[:5]
+    
     # Notifications non lues pour le gérant
     notifications_non_lues = Notification.objects.filter(utilisateur=request.user, lue=False).count()
+    
+    # Préparer les données pour le graphique des ventes (format JSON pour JavaScript)
+    ventes_7_jours_json = json.dumps([{
+        'date': vente['date'].strftime('%Y-%m-%d') if hasattr(vente['date'], 'strftime') else vente['date'],
+        'total': vente['total']
+    } for vente in ventes_7_jours])
     
     context = {
         'total_revenus_mois': total_revenus_mois,
         'commandes_mois': commandes_mois,
-        'mes_produits': mes_produits,
+        'mes_produits': mes_produits[:5],  # Limiter à 5 produits pour l'affichage
         'produits_stock_faible': produits_stock_faible,
-        'commandes_mes_produits': commandes_mes_produits,
+        'commandes_recentes': commandes_recentes,
         'nb_mes_produits': mes_produits.count(),
-        # Supervision des serveurs
-        'serveurs': serveurs,
-        'activite_serveurs': activite_serveurs,
-        'stats_serveurs': stats_serveurs,
-        'commandes_par_statut': commandes_par_statut,
+        'nb_commandes_attente': commandes_par_statut['en_attente'],
+        'nb_commandes_en_cours': commandes_par_statut['en_cours'],
+        'nb_commandes_livrees': commandes_par_statut['livree'],
+        'nb_commandes_annulees': commandes_par_statut['annulee'],
+        'ventes_7_jours': ventes_7_jours,
+        'ventes_7_jours_json': ventes_7_jours_json,  # Pour le graphique JavaScript
+        'produits_vendus': produits_vendus,
         'notifications_non_lues': notifications_non_lues,
+        'aujourd_hui': timezone.now().date(),
+        'mois_courant': timezone.now().strftime('%B %Y'),
     }
     
     return render(request, 'dashboards/gerant_dashboard.html', context)
@@ -977,6 +971,45 @@ def creer_gerant(request):
 
 
 @login_required
+def creer_serveur_gerant(request):
+    """
+    Vue pour que le gérant puisse créer un serveur
+    """
+    # Vérifier si l'utilisateur est gérant
+    if request.user.role != 'gerant':
+        messages.error(request, "Accès non autorisé")
+        return redirect('dashboard_gerant')
+    
+    if request.method == 'POST':
+        form = CreerServeurForm(request.POST)
+        if form.is_valid():
+            try:
+                serveur_user = form.save(commit=False)
+                serveur_user.role = 'serveur'  # S'assurer que le rôle est bien 'serveur'
+                serveur_user.save()
+                
+                # Enregistrer l'action dans l'historique
+                enregistrer_action(
+                    utilisateur=request.user,
+                    type_action='utilisateur_creation',
+                    description=f"Création d'un compte serveur pour {serveur_user.first_name} {serveur_user.last_name}",
+                    objet_concerne=f"Utilisateur {serveur_user.username}",
+                    objet_id=serveur_user.id,
+                    details={'role': 'serveur', 'email': serveur_user.email},
+                    request=request
+                )
+                
+                messages.success(request, f"Serveur '{serveur_user.username}' créé avec succès !")
+                return redirect('gestion_serveurs_avancee')
+            except Exception as e:
+                messages.error(request, f"Erreur lors de la création du serveur: {str(e)}")
+    else:
+        form = CreerServeurForm()
+    
+    return render(request, 'dashboards/gerant/creer_serveur.html', {'form': form})
+
+
+@login_required
 def creer_serveur(request):
     """
     Vue pour que l'admin puisse créer un serveur
@@ -1038,6 +1071,867 @@ def liste_utilisateurs(request):
     
     return render(request, 'dashboards/admin/liste_utilisateurs.html', context)
 
+
+# ==================== GESTION DES CATÉGORIES (ADMIN) ====================
+
+@login_required
+def gestion_categories(request):
+    """Vue pour gérer les catégories (Admin seulement)"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    categories = Categorie.objects.all().order_by('ordre_affichage', 'nom')
+    
+    context = {
+        'categories': categories,
+        'total_categories': categories.count(),
+    }
+    
+    return render(request, 'dashboards/admin/gestion_categories.html', context)
+
+@login_required
+def ajouter_categorie(request):
+    """Vue pour ajouter une nouvelle catégorie"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = CategorieForm(request.POST, request.FILES)
+        if form.is_valid():
+            categorie = form.save()
+            
+            # Enregistrer l'action
+            enregistrer_action(
+                utilisateur=request.user,
+                type_action='categorie_ajout',
+                description=f"Ajout de la catégorie '{categorie.nom}'",
+                objet_concerne=f"Catégorie #{categorie.id}",
+                objet_id=categorie.id,
+                request=request
+            )
+            
+            messages.success(request, f"Catégorie '{categorie.nom}' ajoutée avec succès")
+            return redirect('gestion_categories')
+    else:
+        form = CategorieForm()
+    
+    return render(request, 'dashboards/admin/ajouter_categorie.html', {'form': form})
+
+@login_required
+def modifier_categorie(request, categorie_id):
+    """Vue pour modifier une catégorie"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    categorie = get_object_or_404(Categorie, id=categorie_id)
+    
+    if request.method == 'POST':
+        form = CategorieForm(request.POST, request.FILES, instance=categorie)
+        if form.is_valid():
+            categorie = form.save()
+            
+            # Enregistrer l'action
+            enregistrer_action(
+                utilisateur=request.user,
+                type_action='categorie_modif',
+                description=f"Modification de la catégorie '{categorie.nom}'",
+                objet_concerne=f"Catégorie #{categorie.id}",
+                objet_id=categorie.id,
+                request=request
+            )
+            
+            messages.success(request, f"Catégorie '{categorie.nom}' modifiée avec succès")
+            return redirect('gestion_categories')
+    else:
+        form = CategorieForm(instance=categorie)
+    
+    return render(request, 'dashboards/admin/modifier_categorie.html', {
+        'form': form,
+        'categorie': categorie
+    })
+
+@login_required
+def supprimer_categorie(request, categorie_id):
+    """Vue pour supprimer une catégorie"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    categorie = get_object_or_404(Categorie, id=categorie_id)
+    
+    if request.method == 'POST':
+        nom_categorie = categorie.nom
+        
+        # Vérifier s'il y a des produits liés
+        if categorie.produits.exists():
+            messages.error(request, f"Impossible de supprimer la catégorie '{nom_categorie}' car elle contient des produits")
+            return redirect('gestion_categories')
+        
+        # Enregistrer l'action avant suppression
+        enregistrer_action(
+            utilisateur=request.user,
+            type_action='categorie_suppr',
+            description=f"Suppression de la catégorie '{nom_categorie}'",
+            objet_concerne=f"Catégorie #{categorie.id}",
+            objet_id=categorie.id,
+            request=request
+        )
+        
+        categorie.delete()
+        messages.success(request, f"Catégorie '{nom_categorie}' supprimée avec succès")
+        return redirect('gestion_categories')
+    
+    return render(request, 'dashboards/admin/supprimer_categorie.html', {
+        'categorie': categorie,
+        'nb_produits': categorie.produits.count()
+    })
+
+# ==================== GESTION DES COUPONS (ADMIN) ====================
+
+@login_required
+def gestion_coupons(request):
+    """Vue pour gérer les coupons (Admin seulement)"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    coupons = Coupon.objects.all().order_by('-date_creation')
+    
+    context = {
+        'coupons': coupons,
+        'total_coupons': coupons.count(),
+        'coupons_actifs': coupons.filter(actif=True).count(),
+    }
+    
+    return render(request, 'dashboards/admin/gestion_coupons.html', context)
+
+@login_required
+def ajouter_coupon(request):
+    """Vue pour ajouter un nouveau coupon"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = CouponForm(request.POST)
+        if form.is_valid():
+            coupon = form.save()
+            
+            # Enregistrer l'action
+            enregistrer_action(
+                utilisateur=request.user,
+                type_action='coupon_ajout',
+                description=f"Ajout du coupon '{coupon.code}'",
+                objet_concerne=f"Coupon #{coupon.id}",
+                objet_id=coupon.id,
+                request=request
+            )
+            
+            messages.success(request, f"Coupon '{coupon.code}' ajouté avec succès")
+            return redirect('gestion_coupons')
+    else:
+        form = CouponForm()
+    
+    return render(request, 'dashboards/admin/ajouter_coupon.html', {'form': form})
+
+@login_required
+def modifier_coupon(request, coupon_id):
+    """Vue pour modifier un coupon"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    coupon = get_object_or_404(Coupon, id=coupon_id)
+    
+    if request.method == 'POST':
+        form = CouponForm(request.POST, instance=coupon)
+        if form.is_valid():
+            coupon = form.save()
+            
+            # Enregistrer l'action
+            enregistrer_action(
+                utilisateur=request.user,
+                type_action='coupon_modif',
+                description=f"Modification du coupon '{coupon.code}'",
+                objet_concerne=f"Coupon #{coupon.id}",
+                objet_id=coupon.id,
+                request=request
+            )
+            
+            messages.success(request, f"Coupon '{coupon.code}' modifié avec succès")
+            return redirect('gestion_coupons')
+    else:
+        form = CouponForm(instance=coupon)
+    
+    return render(request, 'dashboards/admin/modifier_coupon.html', {
+        'form': form,
+        'coupon': coupon
+    })
+
+@login_required
+def supprimer_coupon(request, coupon_id):
+    """Vue pour supprimer un coupon"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    coupon = get_object_or_404(Coupon, id=coupon_id)
+    
+    if request.method == 'POST':
+        code_coupon = coupon.code
+        
+        # Enregistrer l'action avant suppression
+        enregistrer_action(
+            utilisateur=request.user,
+            type_action='coupon_suppr',
+            description=f"Suppression du coupon '{code_coupon}'",
+            objet_concerne=f"Coupon #{coupon.id}",
+            objet_id=coupon.id,
+            request=request
+        )
+        
+        coupon.delete()
+        messages.success(request, f"Coupon '{code_coupon}' supprimé avec succès")
+        return redirect('gestion_coupons')
+    
+    return render(request, 'dashboards/admin/supprimer_coupon.html', {
+        'coupon': coupon
+    })
+
+# ==================== RAPPORTS ET ANALYSES (ADMIN) ====================
+
+@login_required
+def rapports_admin(request):
+    """Vue pour les rapports et analyses avancées (Admin et Gérant)"""
+    if request.user.role not in ['admin', 'gerant']:
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    # Période par défaut : 30 derniers jours
+    from datetime import datetime, timedelta
+    fin = timezone.now()
+    debut = fin - timedelta(days=30)
+    
+    # Filtres de date depuis la requête
+    date_debut = request.GET.get('date_debut')
+    date_fin = request.GET.get('date_fin')
+    
+    if date_debut:
+        debut = timezone.datetime.strptime(date_debut, '%Y-%m-%d').replace(tzinfo=timezone.get_current_timezone())
+    if date_fin:
+        fin = timezone.datetime.strptime(date_fin, '%Y-%m-%d').replace(tzinfo=timezone.get_current_timezone())
+    
+    # Statistiques générales
+    commandes_periode = Commande.objects.filter(date_creation__range=[debut, fin])
+    revenus_periode = commandes_periode.aggregate(total=models.Sum('total'))['total'] or 0
+    
+    # Ventes par jour
+    ventes_par_jour = []
+    current_date = debut.date()
+    while current_date <= fin.date():
+        ventes_jour = Commande.objects.filter(
+            date_creation__date=current_date
+        ).aggregate(total=models.Sum('total'))['total'] or 0
+        
+        ventes_par_jour.append({
+            'date': current_date.strftime('%Y-%m-%d'),
+            'total': float(ventes_jour)
+        })
+        current_date += timedelta(days=1)
+    
+    # Top produits
+    from django.db.models import Count, Q, Sum, F
+    
+    # Compter les produits dans les commandes via les lignes de commande
+    top_produits = Produit.objects.annotate(
+        nb_commandes=Count('lignecommande', 
+                         filter=Q(lignecommande__commande__date_creation__range=[debut, fin]),
+                         distinct=True)
+    ).filter(nb_commandes__gt=0).order_by('-nb_commandes')[:10]
+    
+    # Performance par gérant
+    performance_gerants = []
+    gerants = Gerant.objects.all()
+    
+    for gerant in gerants:
+        # Calcul des revenus des produits du gérant via les commandes
+        produits_gerant = Produit.objects.filter(gerant=gerant)
+        
+        # Calcul des revenus totaux pour les produits de ce gérant
+        resultats = LigneCommande.objects.filter(
+            produit__gerant=gerant,
+            commande__date_creation__range=[debut, fin]
+        ).aggregate(
+            total_revenus=Sum(F('quantite') * F('prix_unitaire')),
+            nb_commandes=Count('commande', distinct=True)
+        )
+        
+        # Calcul du nombre de produits distincts vendus
+        nb_produits_vendus = LigneCommande.objects.filter(
+            produit__gerant=gerant,
+            commande__date_creation__range=[debut, fin]
+        ).values('produit').distinct().count()
+        
+        performance_gerants.append({
+            'gerant': gerant,
+            'revenus': resultats['total_revenus'] or 0,
+            'nb_commandes': resultats['nb_commandes'] or 0,
+            'nb_produits': produits_gerant.count(),
+            'nb_produits_vendus': nb_produits_vendus
+        })
+    
+    context = {
+        'revenus_periode': revenus_periode,
+        'nb_commandes_periode': commandes_periode.count(),
+        'ventes_par_jour': ventes_par_jour,
+        'top_produits': top_produits,
+        'performance_gerants': performance_gerants,
+        'date_debut': debut.date(),
+        'date_fin': fin.date(),
+    }
+    
+    return render(request, 'dashboards/admin/rapports.html', context)
+
+# ==================== PARAMÈTRES SYSTÈME (ADMIN) ====================
+
+@login_required
+def parametres_systeme(request):
+    """Vue pour gérer les paramètres système"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    parametres = ParametreSysteme.objects.all().order_by('cle')
+    
+    context = {
+        'parametres': parametres,
+        'total_parametres': parametres.count(),
+    }
+    
+    return render(request, 'dashboards/admin/parametres_systeme.html', context)
+
+@login_required
+def ajouter_parametre(request):
+    """Vue pour ajouter un paramètre système"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = ParametreSystemeForm(request.POST)
+        if form.is_valid():
+            parametre = form.save()
+            
+            enregistrer_action(
+                utilisateur=request.user,
+                type_action='configuration',
+                description=f"Ajout du paramètre '{parametre.cle}'",
+                objet_concerne=f"Paramètre #{parametre.id}",
+                objet_id=parametre.id,
+                request=request
+            )
+            
+            messages.success(request, f"Paramètre '{parametre.cle}' ajouté avec succès")
+            return redirect('parametres_systeme')
+    else:
+        form = ParametreSystemeForm()
+    
+    return render(request, 'dashboards/admin/ajouter_parametre.html', {'form': form})
+
+@login_required
+def modifier_parametre(request, parametre_id):
+    """Vue pour modifier un paramètre système"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    parametre = get_object_or_404(ParametreSysteme, id=parametre_id)
+    
+    if request.method == 'POST':
+        form = ParametreSystemeForm(request.POST, instance=parametre)
+        if form.is_valid():
+            parametre = form.save()
+            
+            enregistrer_action(
+                utilisateur=request.user,
+                type_action='configuration',
+                description=f"Modification du paramètre '{parametre.cle}'",
+                objet_concerne=f"Paramètre #{parametre.id}",
+                objet_id=parametre.id,
+                request=request
+            )
+            
+            messages.success(request, f"Paramètre '{parametre.cle}' modifié avec succès")
+            return redirect('parametres_systeme')
+    else:
+        form = ParametreSystemeForm(instance=parametre)
+    
+    return render(request, 'dashboards/admin/modifier_parametre.html', {
+        'form': form,
+        'parametre': parametre
+    })
+
+# ==================== AUDIT ET SÉCURITÉ (ADMIN) ====================
+
+@login_required
+def journal_connexions(request):
+    """Vue pour consulter le journal des connexions"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    connexions = JournalConnexion.objects.all().order_by('-date_connexion')[:100]
+    
+    context = {
+        'connexions': connexions,
+        'total_connexions': JournalConnexion.objects.count(),
+        'connexions_echec': JournalConnexion.objects.filter(succes=False).count(),
+    }
+    
+    return render(request, 'dashboards/admin/journal_connexions.html', context)
+
+@login_required
+def audit_securite(request):
+    """Vue pour l'audit et la sécurité"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    # Statistiques de sécurité (simulation)
+    stats = {
+        'connexions_suspectes': 3,
+        'tentatives_echec': 12,
+        'alertes_actives': 2,
+        'derniere_sauvegarde': '2024-01-15 14:30',
+    }
+    
+    # Journal des connexions récentes
+    connexions_recentes = JournalConnexion.objects.all().order_by('-date_connexion')[:10]
+    
+    # Alertes de sécurité (simulation)
+    alertes_securite = [
+        {
+            'type': 'Tentative de connexion suspecte',
+            'description': 'Plusieurs tentatives échouées depuis IP 192.168.1.100',
+            'date': '2024-01-15 10:30',
+            'niveau': 'warning'
+        },
+        {
+            'type': 'Accès non autorisé',
+            'description': 'Tentative d\'accès à la zone admin par un utilisateur non autorisé',
+            'date': '2024-01-15 09:15',
+            'niveau': 'danger'
+        }
+    ]
+    
+    # Sauvegardes système
+    sauvegardes = SauvegardeSysteme.objects.all().order_by('-date_creation')[:5]
+    
+    context = {
+        'stats': stats,
+        'connexions_recentes': connexions_recentes,
+        'alertes_securite': alertes_securite,
+        'sauvegardes': sauvegardes,
+    }
+    
+    return render(request, 'dashboards/admin/audit_securite.html', context)
+
+@login_required
+def creer_sauvegarde(request):
+    """Vue pour créer une sauvegarde"""
+    if request.user.role != 'admin':
+        return JsonResponse({'success': False, 'error': 'Accès non autorisé'})
+    
+    if request.method == 'POST':
+        # Ici vous pourriez implémenter la création de sauvegarde
+        # Pour l'instant, on simule juste le succès
+        messages.success(request, "Sauvegarde créée avec succès")
+        return redirect('audit_securite')
+    
+    return redirect('audit_securite')
+
+@login_required
+def telecharger_sauvegarde(request, sauvegarde_id):
+    """Vue pour télécharger une sauvegarde"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    # Ici vous pourriez implémenter le téléchargement
+    messages.info(request, f"Téléchargement de la sauvegarde #{sauvegarde_id}")
+    return redirect('audit_securite')
+
+@login_required
+def configurer_sauvegarde_auto(request):
+    """Vue pour configurer les sauvegardes automatiques"""
+    if request.user.role != 'admin':
+        return JsonResponse({'success': False, 'error': 'Accès non autorisé'})
+    
+    if request.method == 'POST':
+        # Ici vous pourriez implémenter la configuration
+        messages.success(request, "Configuration des sauvegardes automatiques mise à jour")
+        return redirect('audit_securite')
+    
+    return redirect('audit_securite')
+
+@login_required
+def gestion_financiere_gerant(request):
+    """Vue pour la gestion financière du gérant"""
+    if request.user.role != 'gerant':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    # Période de filtrage
+    periode = request.GET.get('periode', '30')  # 30 jours par défaut
+    try:
+        jours = int(periode)
+    except ValueError:
+        jours = 30
+    
+    date_debut = timezone.now().date() - timedelta(days=jours)
+    
+    # Calculs financiers
+    commandes_periode = Commande.objects.filter(
+        date_creation__date__gte=date_debut,
+        statut__in=['payee', 'livree']
+    )
+    
+    # KPIs financiers
+    chiffre_affaires = commandes_periode.aggregate(
+        total=Sum('total')
+    )['total'] or 0
+    
+    nb_commandes = commandes_periode.count()
+    panier_moyen = chiffre_affaires / nb_commandes if nb_commandes > 0 else 0
+    
+    # Simulation des coûts et bénéfices
+    couts_totaux = chiffre_affaires * 0.7  # 70% de coûts
+    benefice_net = chiffre_affaires - couts_totaux
+    marge_beneficiaire = (benefice_net / chiffre_affaires * 100) if chiffre_affaires > 0 else 0
+    roi = (benefice_net / couts_totaux * 100) if couts_totaux > 0 else 0
+    
+    # Top produits par CA
+    top_produits = []
+    produits = Produit.objects.all()[:10]
+    for produit in produits:
+        # Simulation des ventes
+        ventes_simulees = 20 + (produit.id % 50)
+        ca_produit = ventes_simulees * produit.prix
+        top_produits.append({
+            'nom': produit.nom,
+            'ventes': ventes_simulees,
+            'ca': ca_produit,
+            'pourcentage': (ca_produit / chiffre_affaires * 100) if chiffre_affaires > 0 else 0
+        })
+    
+    # Données pour les graphiques (simulation)
+    evolution_ca = [1200, 1350, 1100, 1450, 1600, 1400, 1550]  # 7 derniers jours
+    repartition_ventes = [30, 25, 20, 15, 10]  # Par catégorie
+    previsions = [1600, 1700, 1650, 1800, 1750, 1900, 1850]  # Prévisions
+    
+    # Recommandations
+    recommandations = [
+        {
+            'type': 'success',
+            'titre': 'Croissance positive',
+            'description': f'Le CA a augmenté de 12% sur les {jours} derniers jours'
+        },
+        {
+            'type': 'warning',
+            'titre': 'Stock faible',
+            'description': 'Certains produits populaires sont en rupture de stock'
+        },
+        {
+            'type': 'info',
+            'titre': 'Opportunité',
+            'description': 'Considérez une promotion sur les produits à faible rotation'
+        }
+    ]
+    
+    context = {
+        'periode': jours,
+        'chiffre_affaires': chiffre_affaires,
+        'benefice_net': benefice_net,
+        'marge_beneficiaire': marge_beneficiaire,
+        'roi': roi,
+        'nb_commandes': nb_commandes,
+        'panier_moyen': panier_moyen,
+        'top_produits': top_produits,
+        'evolution_ca': json.dumps(evolution_ca),
+        'repartition_ventes': json.dumps(repartition_ventes),
+        'previsions': json.dumps(previsions),
+        'recommandations': recommandations,
+    }
+    
+    return render(request, 'dashboards/gerant/gestion_financiere.html', context)
+
+
+# @login_required
+# def ajouter_categorie(request):
+#     """Vue pour ajouter une catégorie"""
+#     if request.user.role != 'admin':
+#         messages.error(request, "Accès non autorisé")
+#         return redirect('home')
+    
+#     if request.method == 'POST':
+#         # Traitement du formulaire (simulation)
+#         messages.success(request, "Catégorie ajoutée avec succès")
+#         return redirect('gestion_categories')
+    
+#     return render(request, 'dashboards/admin/ajouter_categorie.html')
+
+# @login_required
+# def modifier_categorie(request, categorie_id):
+#     """Vue pour modifier une catégorie"""
+#     if request.user.role != 'admin':
+#         messages.error(request, "Accès non autorisé")
+#         return redirect('home')
+    
+#     categorie = get_object_or_404(Categorie, id=categorie_id)
+    
+#     if request.method == 'POST':
+#         # Traitement du formulaire (simulation)
+#         messages.success(request, "Catégorie modifiée avec succès")
+#         return redirect('gestion_categories')
+    
+#     context = {'categorie': categorie}
+#     return render(request, 'dashboards/admin/modifier_categorie.html', context)
+
+# @login_required
+# def supprimer_categorie(request, categorie_id):
+    """Vue pour supprimer une catégorie"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    categorie = get_object_or_404(Categorie, id=categorie_id)
+    
+    if request.method == 'POST':
+        # Vérifier si la catégorie a des produits
+        if categorie.produits.exists():
+            messages.error(request, "Impossible de supprimer une catégorie qui contient des produits")
+        else:
+            categorie.delete()
+            messages.success(request, "Catégorie supprimée avec succès")
+        return redirect('gestion_categories')
+    
+    context = {'categorie': categorie}
+    return render(request, 'dashboards/admin/supprimer_categorie.html', context)
+
+
+# @login_required
+# def ajouter_coupon(request):
+#     """Vue pour ajouter un coupon"""
+#     if request.user.role != 'admin':
+#         messages.error(request, "Accès non autorisé")
+#         return redirect('home')
+    
+#     if request.method == 'POST':
+#         # Traitement du formulaire (simulation)
+#         messages.success(request, "Coupon ajouté avec succès")
+#         return redirect('gestion_coupons')
+    
+#     return render(request, 'dashboards/admin/ajouter_coupon.html')
+
+# @login_required
+# def modifier_coupon(request, coupon_id):
+#     """Vue pour modifier un coupon"""
+#     if request.user.role != 'admin':
+#         messages.error(request, "Accès non autorisé")
+#         return redirect('home')
+    
+#     coupon = get_object_or_404(Coupon, id=coupon_id)
+    
+#     if request.method == 'POST':
+#         # Traitement du formulaire (simulation)
+#         messages.success(request, "Coupon modifié avec succès")
+#         return redirect('gestion_coupons')
+    
+#     context = {'coupon': coupon}
+#     return render(request, 'dashboards/admin/modifier_coupon.html', context)
+
+# @login_required
+# def supprimer_coupon(request, coupon_id):
+    """Vue pour supprimer un coupon"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    coupon = get_object_or_404(Coupon, id=coupon_id)
+    
+    if request.method == 'POST':
+        coupon.delete()
+        messages.success(request, "Coupon supprimé avec succès")
+        return redirect('gestion_coupons')
+    
+    context = {'coupon': coupon}
+    return render(request, 'dashboards/admin/supprimer_coupon.html', context)
+
+
+# @login_required
+# def parametres_systeme(request):
+#     """Vue pour les paramètres système"""
+#     if request.user.role != 'admin':
+#         messages.error(request, "Accès non autorisé")
+#         return redirect('home')
+    
+#     # Paramètres organisés par catégories (simulés)
+#     parametres = {
+#         'general': [
+#             {'nom': 'Nom du site', 'valeur': 'Canaan Glacier', 'type': 'text'},
+#             {'nom': 'Email contact', 'valeur': 'contact@canaanglacier.com', 'type': 'email'},
+#             {'nom': 'Téléphone', 'valeur': '+237 123 456 789', 'type': 'tel'},
+#         ],
+#         'commandes': [
+#             {'nom': 'Délai de livraison (heures)', 'valeur': '24', 'type': 'number'},
+#             {'nom': 'Frais de livraison (FCFA)', 'valeur': '1000', 'type': 'number'},
+#             {'nom': 'Commande minimum (FCFA)', 'valeur': '5000', 'type': 'number'},
+#         ],
+#         'paiement': [
+#             {'nom': 'Mode de paiement par défaut', 'valeur': 'especes', 'type': 'select'},
+#             {'nom': 'TVA (%)', 'valeur': '19.25', 'type': 'number'},
+#         ],
+#         'livraison': [
+#             {'nom': 'Frais de livraison', 'valeur': '2500 FCFA', 'description': 'Coût standard de livraison'},
+#             {'nom': 'Délai de livraison', 'valeur': '24-48h', 'description': 'Délai moyen de livraison'},
+#         ],
+#         'paiement': [
+#             {'nom': 'Méthodes acceptées', 'valeur': 'Carte, Mobile Money', 'description': 'Moyens de paiement disponibles'},
+#             {'nom': 'Devise', 'valeur': 'FCFA', 'description': 'Devise principale'},
+#         ],
+#         'application': [
+#             {'nom': 'Nom du site', 'valeur': 'Canaan Glacier', 'description': 'Nom affiché sur le site'},
+#         ],
+#     }
+    
+#     context = {'parametres': parametres}
+#     return render(request, 'dashboards/admin/parametres_systeme.html', context)
+
+# @login_required
+# def ajouter_parametre(request):
+#     """Vue pour ajouter un paramètre système"""
+#     if request.user.role != 'admin':
+#         messages.error(request, "Accès non autorisé")
+#         return redirect('home')
+    
+#     if request.method == 'POST':
+#         # Traitement du formulaire (simulation)
+#         messages.success(request, "Paramètre ajouté avec succès")
+#         return redirect('parametres_systeme')
+    
+#     return render(request, 'dashboards/admin/ajouter_parametre.html')
+
+# @login_required
+# def modifier_parametre(request, parametre_id):
+#     """Vue pour modifier un paramètre système"""
+#     if request.user.role != 'admin':
+#         messages.error(request, "Accès non autorisé")
+#         return redirect('home')
+    
+#     if request.method == 'POST':
+#         # Traitement du formulaire (simulation)
+#         messages.success(request, "Paramètre modifié avec succès")
+#         return redirect('parametres_systeme')
+    
+#     context = {'parametre_id': parametre_id}
+#     return render(request, 'dashboards/admin/modifier_parametre.html', context)
+
+# @login_required
+# def ajouter_parametre(request):
+#     """Vue pour ajouter un paramètre"""
+#     if request.user.role != 'admin':
+#         return JsonResponse({'success': False, 'error': 'Accès non autorisé'})
+    
+#     if request.method == 'POST':
+#         messages.success(request, "Paramètre ajouté avec succès")
+#         return redirect('parametres_systeme')
+    
+#     return redirect('parametres_systeme')
+
+# @login_required
+# def modifier_parametre(request, parametre_id):
+    """Vue pour modifier un paramètre"""
+    if request.user.role != 'admin':
+        return JsonResponse({'success': False, 'error': 'Accès non autorisé'})
+    
+    if request.method == 'POST':
+        messages.success(request, "Paramètre modifié avec succès")
+        return redirect('parametres_systeme')
+    
+    return redirect('parametres_systeme')
+
+@login_required
+def sauvegardes_systeme(request):
+    """Vue pour gérer les sauvegardes système"""
+    if request.user.role != 'admin':
+        messages.error(request, "Accès non autorisé")
+        return redirect('dashboard_admin')
+    
+    sauvegardes = SauvegardeSysteme.objects.all().order_by('-date_creation')
+    
+    context = {
+        'sauvegardes': sauvegardes,
+        'total_sauvegardes': sauvegardes.count(),
+    }
+    return render(request, 'dashboards/admin/sauvegardes_systeme.html', context)
+
+
+# ==================== VUES MANQUANTES POUR LE DASHBOARD ADMIN ====================
+
+@login_required
+@user_passes_test(lambda u: u.role == 'admin')
+def gestion_utilisateurs(request):
+    """Vue pour la gestion des utilisateurs"""
+    utilisateurs = Utilisateur.objects.all().order_by('-date_joined')
+    
+    context = {
+        'utilisateurs': utilisateurs,
+        'total_utilisateurs': utilisateurs.count(),
+        'utilisateurs_actifs': utilisateurs.filter(is_active=True).count(),
+        'nouveaux_utilisateurs': utilisateurs.filter(date_joined__gte=timezone.now() - timedelta(days=30)).count(),
+    }
+    return render(request, 'dashboards/admin/gestion_utilisateurs.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.role == 'admin')
+def gestion_commandes_admin(request):
+    """Vue pour la gestion des commandes par l'admin"""
+    commandes = Commande.objects.all().order_by('-date_creation')
+    
+    context = {
+        'commandes': commandes,
+        'total_commandes': commandes.count(),
+        'commandes_en_attente': commandes.filter(statut='en_attente').count(),
+        'commandes_livrees': commandes.filter(statut='livree').count(),
+        'ca_total': commandes.filter(statut='livree').aggregate(total=Sum('total'))['total'] or 0,
+    }
+    return render(request, 'dashboards/admin/gestion_commandes.html', context)
+
+@login_required
+@user_passes_test(lambda u: u.role == 'admin')
+def statistiques_admin(request):
+    """Vue pour les statistiques détaillées"""
+    # Statistiques générales
+    stats = {
+        'total_utilisateurs': Utilisateur.objects.count(),
+        'total_produits': Produit.objects.count(),
+        'total_commandes': Commande.objects.count(),
+        'ca_mensuel': Commande.objects.filter(
+            date_commande__month=timezone.now().month,
+            statut='livree'
+        ).aggregate(total=Sum('total'))['total'] or 0,
+    }
+    
+    context = {
+        'stats': stats,
+        'ventes_mensuelles': [12000, 19000, 15000, 25000, 22000, 30000],
+        'produits_populaires': ['Glace Vanille', 'Glace Chocolat', 'Sorbet Fraise'],
+    }
+    return render(request, 'dashboards/admin/statistiques.html', context)
+    
 
 # ==================== GESTION DES NOTIFICATIONS ====================
 
@@ -1137,7 +2031,12 @@ class ListeProduitsView(ListView):
     
     def get_queryset(self):
         queryset = super().get_queryset()
-        queryset = queryset.filter(gerant=self.request.user.gerant)
+        # Vérifier si l'utilisateur a un profil gérant
+        if hasattr(self.request.user, 'gerant') and self.request.user.gerant:
+            queryset = queryset.filter(gerant=self.request.user.gerant)
+        else:
+            # Si pas de gérant associé, retourner queryset vide
+            queryset = queryset.none()
         
         # Filtrage par catégorie
         categorie_id = self.request.GET.get('categorie')
@@ -1313,6 +2212,387 @@ def rapport_serveur(request, pk):
     }
     
     return render(request, 'dashboards/gerant/rapport_serveur.html', context)
+
+@login_required
+def gestion_serveurs_avancee(request):
+    """Vue pour la gestion avancée des serveurs"""
+    if request.user.role != 'gerant':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    # Récupérer tous les serveurs avec leurs statistiques
+    serveurs = []
+    for serveur in Utilisateur.objects.filter(role='serveur').order_by('last_name', 'first_name'):
+        # Commandes traitées aujourd'hui
+        commandes_aujourdhui = HistoriqueAction.objects.filter(
+            utilisateur=serveur,
+            type_action='commande_statut',
+            date_action__date=timezone.now().date()
+        ).count()
+        
+        # Dernière activité
+        derniere_action = HistoriqueAction.objects.filter(utilisateur=serveur).order_by('-date_action').first()
+        
+        serveurs.append({
+            'id': serveur.id,
+            'nom_complet': f"{serveur.first_name} {serveur.last_name}",
+            'email': serveur.email,
+            'date_embauche': serveur.date_joined.date() if serveur.date_joined else None,
+            'photo': serveur.photo_profil,
+            'commandes_aujourdhui': commandes_aujourdhui,
+            'derniere_activite': derniere_action.date_action if derniere_action else None,
+            'statut': 'actif' if derniere_action and derniere_action.date_action >= timezone.now() - timedelta(hours=1) else 'inactif'
+        })
+    
+    # Statistiques générales
+    total_serveurs = len(serveurs)
+    serveurs_actifs = len([s for s in serveurs if s['statut'] == 'actif'])
+    
+    # Commandes traitées aujourd'hui
+    commandes_traitees = HistoriqueAction.objects.filter(
+        type_action='commande_statut',
+        date_action__date=timezone.now().date()
+    ).count()
+    
+    # Temps moyen de traitement (basé sur les 30 derniers jours)
+    actions_commandes = HistoriqueAction.objects.filter(
+        type_action='commande_statut',
+        date_action__gte=timezone.now() - timedelta(days=30)
+    )
+    
+    temps_moyen = actions_commandes.aggregate(
+        avg_temps=models.Avg('details__temps_traitement', output_field=models.FloatField())
+    )['avg_temps'] or 15  # Valeur par défaut si pas de données
+    
+    # Efficacité basée sur le nombre de commandes traitées par rapport au nombre de commandes reçues
+    commandes_recues = Commande.objects.filter(
+        date_creation__gte=timezone.now() - timedelta(days=30)
+    ).count()
+    
+    efficacite = 0
+    if commandes_recues > 0:
+        efficacite = min(100, (commandes_traitees / commandes_recues) * 100)
+    
+    stats = {
+        'total_serveurs': total_serveurs,
+        'serveurs_actifs': serveurs_actifs,
+        'commandes_traitees': commandes_traitees,
+        'temps_moyen_traitement': round(temps_moyen, 1),
+        'efficacite_moyenne': round(efficacite, 1),
+    }
+    
+    # Préparer le contexte pour le template
+    context = {
+        'stats': stats,
+        'serveurs': serveurs,
+        'page_title': 'Gestion avancée des serveurs',
+        'now': timezone.now(),
+    }
+    
+    # Ajout des données de performance aux serveurs
+    serveurs_data = []
+    for serveur in serveurs:
+        # Simulation des données de performance
+        serveur_data = serveur.copy()  # Copie des données existantes
+        serveur_data.update({
+            'est_actif_aujourd_hui': serveur['statut'] == 'actif',
+            'temps_moyen_traitement': 12 + (serveur['id'] % 10),  # Simulation
+            'efficacite': 70 + (serveur['id'] % 25),  # Simulation
+            'note_moyenne': 3.5 + (serveur['id'] % 3) * 0.5,  # Simulation
+        })
+        serveurs_data.append(serveur_data)
+    
+    # Tâches planifiées (simulation)
+    taches_planifiees = []
+    
+    # Évaluations récentes (simulation)
+    evaluations_recentes = []
+    
+    # Statistiques hebdomadaires pour le graphique
+    stats_hebdo = [25, 30, 28, 35, 32, 20, 15]  # Simulation
+    
+    # Mise à jour du contexte avec les nouvelles données
+    context.update({
+        'serveurs': serveurs_data,
+        'taches_planifiees': taches_planifiees,
+        'evaluations_recentes': evaluations_recentes,
+        'stats_hebdo': json.dumps(stats_hebdo),
+    })
+    
+    return render(request, 'dashboards/gerant/gestion_serveurs_avancee.html', context)
+
+@login_required
+def communication_notifications(request):
+    """Vue pour la communication et les notifications"""
+    if request.user.role != 'gerant':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    # Statistiques de communication (simulation)
+    stats = {
+        'messages_non_lus': 5,
+        'messages_envoyes_mois': 42,
+        'notifications_actives': 8,
+        'taux_reponse': 87.5,
+    }
+    
+    # Conversations (simulation)
+    conversations = []
+    
+    # Serveurs et admins pour les destinataires
+    serveurs = Utilisateur.objects.filter(role='serveur')
+    admins = Utilisateur.objects.filter(role='admin')
+    
+    # Historique des notifications (simulation)
+    historique_notifications = []
+    
+    context = {
+        'stats': stats,
+        'conversations': conversations,
+        'serveurs': serveurs,
+        'admins': admins,
+        'historique_notifications': historique_notifications,
+    }
+    
+    return render(request, 'dashboards/gerant/communication_notifications.html', context)
+
+@login_required
+def planifier_tache(request):
+    """Vue pour planifier une tâche"""
+    if request.user.role != 'gerant':
+        return JsonResponse({'success': False, 'error': 'Accès non autorisé'})
+    
+    if request.method == 'POST':
+        # Ici vous pourriez créer un modèle TachePlanifiee
+        # Pour l'instant, on simule juste le succès
+        messages.success(request, "Tâche planifiée avec succès")
+        return redirect('gestion_serveurs_avancee')
+    
+    return redirect('gestion_serveurs_avancee')
+
+@login_required
+def evaluer_serveur(request):
+    """Vue pour évaluer un serveur"""
+    if request.user.role != 'gerant':
+        return JsonResponse({'success': False, 'error': 'Accès non autorisé'})
+    
+    if request.method == 'POST':
+        # Ici vous pourriez créer un modèle EvaluationServeur
+        # Pour l'instant, on simule juste le succès
+        messages.success(request, "Évaluation enregistrée avec succès")
+        return redirect('gestion_serveurs_avancee')
+    
+    return redirect('gestion_serveurs_avancee')
+
+@login_required
+def envoyer_notification_push(request):
+    """Vue pour envoyer une notification push"""
+    if request.user.role != 'gerant':
+        return JsonResponse({'success': False, 'error': 'Accès non autorisé'})
+    
+    if request.method == 'POST':
+        # Ici vous pourriez implémenter l'envoi de notifications push
+        # Pour l'instant, on simule juste le succès
+        messages.success(request, "Notification envoyée avec succès")
+        return redirect('communication_notifications')
+    
+    return redirect('communication_notifications')
+
+@login_required
+def envoyer_message(request):
+    """Vue pour envoyer un message"""
+    if request.user.role != 'gerant':
+        return JsonResponse({'success': False, 'error': 'Accès non autorisé'})
+    
+    if request.method == 'POST':
+        # Ici vous pourriez créer un modèle Message
+        # Pour l'instant, on simule juste le succès
+        messages.success(request, "Message envoyé avec succès")
+        return redirect('communication_notifications')
+    
+    return redirect('communication_notifications')
+
+@login_required
+def gestion_stocks_avancee(request):
+    """Vue pour la gestion avancée des stocks"""
+    if request.user.role not in ['admin', 'gerant']:
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    # Statistiques des stocks
+    produits = Produit.objects.all()
+    stock_critique = produits.filter(quantite_disponible__lte=5).count()
+    stock_faible = produits.filter(quantite_disponible__lte=10, quantite_disponible__gt=5).count()
+    
+    # Valeur totale du stock
+    valeur_stock = sum(p.prix * p.quantite_disponible for p in produits)
+    
+    # Rotation du stock (simulation)
+    rotation_stock = 4.2
+    
+    stats = {
+        'stock_critique': stock_critique,
+        'stock_faible': stock_faible,
+        'valeur_stock': valeur_stock,
+        'rotation_stock': rotation_stock,
+    }
+    
+    # Produits avec détails de stock
+    produits_data = []
+    for produit in produits:
+        produit_data = {
+            'id': produit.id,
+            'nom': produit.nom,
+            'categorie': produit.categorie.nom if produit.categorie else 'Sans catégorie',
+            'quantite_disponible': produit.quantite_disponible,
+            'prix': produit.prix,
+            'valeur_stock': produit.prix * produit.quantite_disponible,
+            'statut': 'critique' if produit.quantite_disponible <= 5 else 'faible' if produit.quantite_disponible <= 10 else 'normal',
+            'derniere_commande': '2024-01-15',  # Simulation
+            'rotation': 3.5 + (produit.id % 5),  # Simulation
+        }
+        produits_data.append(produit_data)
+    
+    # Données pour les graphiques
+    categories_stock = {}
+    for produit in produits:
+        cat_nom = produit.categorie.nom if produit.categorie else 'Sans catégorie'
+        if cat_nom not in categories_stock:
+            categories_stock[cat_nom] = 0
+        categories_stock[cat_nom] += produit.quantite_disponible
+    
+    context = {
+        'stats': stats,
+        'produits': produits_data,
+        'categories_stock': json.dumps(list(categories_stock.values())),
+        'categories_labels': json.dumps(list(categories_stock.keys())),
+    }
+    
+    return render(request, 'dashboards/gerant/gestion_stocks_avancee.html', context)
+
+@login_required
+def ajuster_stock(request):
+    """Vue pour ajuster le stock d'un produit"""
+    if request.user.role not in ['admin', 'gerant']:
+        return JsonResponse({'success': False, 'error': 'Accès non autorisé'}, status=403)
+    
+    if request.method == 'POST':
+        try:
+            produit_id = request.POST.get('produit_id')
+            quantite = int(request.POST.get('quantite', 0))
+            motif = request.POST.get('motif', '')
+            
+            produit = Produit.objects.get(id=produit_id)
+            ancienne_quantite = produit.quantite_disponible
+            
+            # Mise à jour de la quantité
+            produit.quantite_disponible = F('quantite_disponible') + quantite
+            produit.save()
+            produit.refresh_from_db()
+            
+            # Enregistrement de l'historique
+            HistoriqueAction.objects.create(
+                utilisateur=request.user,
+                type_action='ajustement_stock',
+                description=f"Ajustement de stock: {ancienne_quantite} → {produit.quantite_disponible}. {motif}",
+                details={
+                    'produit_id': produit.id,
+                    'produit_nom': produit.nom,
+                    'ancienne_quantite': ancienne_quantite,
+                    'nouvelle_quantite': produit.quantite_disponible,
+                    'quantite_ajustee': quantite,
+                    'motif': motif
+                }
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'quantite': produit.quantite_disponible,
+                'statut': 'critique' if produit.quantite_disponible <= 5 else 'faible' if produit.quantite_disponible <= 10 else 'normal'
+            })
+            
+        except (ValueError, Produit.DoesNotExist) as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Méthode non autorisée'}, status=405)
+
+@login_required
+def analyse_performances_gerant(request):
+    """Vue pour l'analyse des performances"""
+    if request.user.role != 'gerant':
+        messages.error(request, "Accès non autorisé")
+        return redirect('home')
+    
+    # KPIs de performance
+    total_commandes = Commande.objects.count()
+    commandes_mois = Commande.objects.filter(
+        date_commande__month=timezone.now().month
+    ).count()
+    
+    # Chiffre d'affaires
+    ca_total = Commande.objects.aggregate(
+        total=Sum('total')
+    )['total'] or 0
+    
+    ca_mois = Commande.objects.filter(
+        date_commande__month=timezone.now().month
+    ).aggregate(
+        total=Sum('total')
+    )['total'] or 0
+    
+    # Temps moyen de traitement (simulation)
+    temps_moyen = 25  # minutes
+    
+    # Taux de satisfaction (simulation)
+    taux_satisfaction = 92.5
+    
+    stats = {
+        'total_commandes': total_commandes,
+        'commandes_mois': commandes_mois,
+        'ca_total': ca_total,
+        'ca_mois': ca_mois,
+        'temps_moyen': temps_moyen,
+        'taux_satisfaction': taux_satisfaction,
+    }
+    
+    # Top produits
+    top_produits = []
+    produits = Produit.objects.all()[:10]
+    for produit in produits:
+        # Simulation des ventes
+        ventes = 50 + (produit.id % 100)
+        ca_produit = ventes * produit.prix
+        top_produits.append({
+            'nom': produit.nom,
+            'ventes': ventes,
+            'ca': ca_produit,
+            'marge': ca_produit * 0.3,  # Simulation 30% de marge
+        })
+    
+    # Performance des serveurs (simulation)
+    serveurs = Utilisateur.objects.filter(role='serveur')
+    performance_serveurs = []
+    for serveur in serveurs:
+        performance_serveurs.append({
+            'nom': f"{serveur.first_name} {serveur.last_name}",
+            'commandes_traitees': 15 + (serveur.id % 20),
+            'temps_moyen': 20 + (serveur.id % 15),
+            'note': 3.5 + (serveur.id % 3) * 0.5,
+        })
+    
+    # Données pour les graphiques (simulation)
+    performance_data = [85, 92, 78, 96, 88, 91, 87]
+    heures_pointe = [12, 15, 8, 25, 30, 35, 28, 22, 18, 15, 12, 10]
+    
+    context = {
+        'stats': stats,
+        'top_produits': top_produits,
+        'performance_serveurs': performance_serveurs,
+        'performance_data': json.dumps(performance_data),
+        'heures_pointe': json.dumps(heures_pointe),
+    }
+    
+    return render(request, 'dashboards/gerant/analyse_performances.html', context)
 
 #===============================Client============================
 @login_required

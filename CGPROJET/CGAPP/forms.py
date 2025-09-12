@@ -8,6 +8,88 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+# ==================== FORMULAIRES ADMIN ====================
+
+class CategorieForm(forms.ModelForm):
+    class Meta:
+        model = Categorie
+        fields = ['nom', 'description', 'image', 'ordre_affichage']
+        widgets = {
+            'nom': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nom de la catégorie'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Description de la catégorie'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control'
+            }),
+            'ordre_affichage': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'placeholder': 'Ordre d\'affichage'
+            })
+        }
+
+class CouponForm(forms.ModelForm):
+    class Meta:
+        model = Coupon
+        fields = ['code', 'type_reduction', 'valeur', 'date_debut', 'date_fin', 'usage_max', 'actif']
+        widgets = {
+            'code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Code du coupon (ex: NOEL2024)'
+            }),
+            'type_reduction': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'valeur': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'date_debut': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'date_fin': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'usage_max': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': 'Nombre maximum d\'utilisations'
+            }),
+            'actif': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            })
+        }
+
+class ParametreSystemeForm(forms.ModelForm):
+    class Meta:
+        model = ParametreSysteme
+        fields = ['cle', 'valeur', 'description']
+        widgets = {
+            'cle': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Clé du paramètre'
+            }),
+            'valeur': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Valeur du paramètre'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Description du paramètre'
+            })
+        }
+
 class ProfilForm(forms.ModelForm):
     telephone = forms.CharField(max_length=20, required=False, label='Téléphone')
 

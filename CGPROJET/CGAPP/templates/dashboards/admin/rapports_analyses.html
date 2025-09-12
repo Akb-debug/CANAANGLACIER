@@ -1,0 +1,420 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Rapports et Analyses{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Rapports et Analyses
+                    </h1>
+                    <p class="mb-0">Analyses détaillées des performances</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>Imprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Période</label>
+                            <select name="periode" class="form-select">
+                                <option value="7" {% if periode == '7' %}selected{% endif %}>7 derniers jours</option>
+                                <option value="30" {% if periode == '30' %}selected{% endif %}>30 derniers jours</option>
+                                <option value="90" {% if periode == '90' %}selected{% endif %}>3 derniers mois</option>
+                                <option value="365" {% if periode == '365' %}selected{% endif %}>12 derniers mois</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Type de rapport</label>
+                            <select name="type_rapport" class="form-select">
+                                <option value="ventes" {% if type_rapport == 'ventes' %}selected{% endif %}>Ventes</option>
+                                <option value="produits" {% if type_rapport == 'produits' %}selected{% endif %}>Produits</option>
+                                <option value="clients" {% if type_rapport == 'clients' %}selected{% endif %}>Clients</option>
+                                <option value="gerants" {% if type_rapport == 'gerants' %}selected{% endif %}>Gérants</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block">
+                                <i class="fas fa-search me-2"></i>Filtrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques générales -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Chiffre d'affaires</div>
+                            <div class="h4 mb-0">{{ stats.chiffre_affaires|floatformat:0 }} FCFA</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-money-bill-wave fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Commandes</div>
+                            <div class="h4 mb-0">{{ stats.total_commandes }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Panier moyen</div>
+                            <div class="h4 mb-0">{{ stats.panier_moyen|floatformat:0 }} FCFA</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-calculator fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Nouveaux clients</div>
+                            <div class="h4 mb-0">{{ stats.nouveaux_clients }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-plus fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Évolution des ventes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="ventesChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Répartition par catégorie
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoriesChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top produits -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>Top 10 Produits
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if top_produits %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Rang</th>
+                                        <th>Produit</th>
+                                        <th>Ventes</th>
+                                        <th>CA</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for produit in top_produits %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary">{{ forloop.counter }}</span>
+                                        </td>
+                                        <td>{{ produit.nom }}</td>
+                                        <td>{{ produit.total_ventes }}</td>
+                                        <td>{{ produit.chiffre_affaires|floatformat:0 }} FCFA</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-chart-bar fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Aucune donnée disponible</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Performance des Gérants
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if performance_gerants %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Gérant</th>
+                                        <th>Commandes</th>
+                                        <th>CA</th>
+                                        <th>Note</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for gerant in performance_gerants %}
+                                    <tr>
+                                        <td>{{ gerant.nom_complet }}</td>
+                                        <td>{{ gerant.total_commandes }}</td>
+                                        <td>{{ gerant.chiffre_affaires|floatformat:0 }} FCFA</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                    <div class="progress-bar bg-success" style="width: {{ gerant.note }}0%"></div>
+                                                </div>
+                                                <small>{{ gerant.note }}/10</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-user-tie fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Aucune donnée disponible</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tendances -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trending-up me-2"></i>Analyses et Tendances
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-success">Points positifs</h6>
+                            <ul class="list-unstyled">
+                                {% for point in tendances.positifs %}
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ point }}
+                                </li>
+                                {% empty %}
+                                <li class="text-muted">Aucune tendance positive détectée</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-warning">Points d'attention</h6>
+                            <ul class="list-unstyled">
+                                {% for point in tendances.attention %}
+                                <li class="mb-2">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    {{ point }}
+                                </li>
+                                {% empty %}
+                                <li class="text-muted">Aucun point d'attention</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+@media print {
+    .btn, .card-header {
+        display: none !important;
+    }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+        // Graphique des ventes par mois
+        const ctxVentes = document.getElementById('ventesChart').getContext('2d');
+        new Chart(ctxVentes, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+                datasets: [{
+                    label: 'Ventes (FCFA)',
+                    data: [12000, 19000, 15000, 25000, 22000, 30000],
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' FCFA';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Graphique des produits populaires
+        const ctxProduits = document.getElementById('produitsChart').getContext('2d');
+        new Chart(ctxProduits, {
+            type: 'doughnut',
+            data: {
+                labels: ['Glace Vanille', 'Glace Chocolat', 'Sorbet Fraise', 'Glace Pistache', 'Autres'],
+                datasets: [{
+                    data: [30, 25, 20, 15, 10],
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Graphique des performances par gérant
+        const ctxGerants = document.getElementById('gerantsChart').getContext('2d');
+        new Chart(ctxGerants, {
+            type: 'bar',
+            data: {
+                labels: ['Jean Dupont', 'Marie Martin', 'Paul Durand', 'Sophie Leroy'],
+                datasets: [{
+                    label: 'CA (FCFA)',
+                    data: [450000, 380000, 520000, 410000],
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' FCFA';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Graphique d'évolution des commandes
+        const ctxCommandes = document.getElementById('commandesChart').getContext('2d');
+        new Chart(ctxCommandes, {
+            type: 'line',
+            data: {
+                labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+                datasets: [{
+                    label: 'Commandes',
+                    data: [12, 19, 15, 25, 22, 30, 28],
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+</script>
+{% endblock %}

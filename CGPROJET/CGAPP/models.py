@@ -241,14 +241,6 @@ class AdresseLivraison(models.Model):
     def __str__(self):
         return f"{self.rue}, {self.ville} {self.code_postal}, {self.pays}"
 
-class Coupon(models.Model):
-    code = models.CharField(max_length=20, unique=True)
-    reduction = models.DecimalField(max_digits=5, decimal_places=2)
-    actif = models.BooleanField(default=True)
-    date_expiration = models.DateField()
-
-    def __str__(self):
-        return self.code
 
 class Commande(models.Model):
 
@@ -273,7 +265,7 @@ class Commande(models.Model):
     adresse_livraison = models.ForeignKey(AdresseLivraison, on_delete=models.SET_NULL, null=True,  blank=True)
     methode_paiement = models.CharField(max_length=50)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default=STATUT_EN_ATTENTE)
-    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
+    coupon = models.ForeignKey('Coupon', on_delete=models.SET_NULL, null=True, blank=True)
     
 
     def __str__(self):
@@ -579,3 +571,102 @@ class ProblemeCommande(models.Model):
 
     def __str__(self):
         return f"Problème {self.get_type_probleme_display()} - Commande #{self.commande.id}"
+
+# ==================== COUPONS ET PROMOTIONS ====================
+class Coupon(models.Model):
+    TYPE_REDUCTION_CHOICES = [
+        ('pourcentage', 'Pourcentage'),
+        ('montant_fixe', 'Montant fixe'),
+    ]
+    
+    code = models.CharField(max_length=50, unique=True, verbose_name="Code du coupon")
+    type_reduction = models.CharField(max_length=20, choices=TYPE_REDUCTION_CHOICES, default='pourcentage')
+    valeur = models.DecimalField(max_digits=10, decimal_places=2, default=0.0, verbose_name="Valeur de la réduction")
+    date_debut = models.DateTimeField(verbose_name="Date de début")
+    date_fin = models.DateTimeField(verbose_name="Date de fin")
+    usage_max = models.PositiveIntegerField(default=1, verbose_name="Utilisation maximum")
+    usage_actuel = models.PositiveIntegerField(default=0, verbose_name="Utilisation actuelle")
+    actif = models.BooleanField(default=True, verbose_name="Actif")
+    date_creation = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Coupon"
+        verbose_name_plural = "Coupons"
+        ordering = ['-date_creation']
+    
+    def __str__(self):
+        return f"{self.code} - {self.valeur}{'%' if self.type_reduction == 'pourcentage' else 'FCFA'}"
+    
+    @property
+    def est_valide(self):
+        from django.utils import timezone
+        now = timezone.now()
+        return (self.actif and 
+                self.date_debut <= now <= self.date_fin and 
+                self.usage_actuel < self.usage_max)
+    
+    def calculer_reduction(self, montant):
+        if not self.est_valide:
+            return 0
+        
+        if self.type_reduction == 'pourcentage':
+            return montant * (self.valeur / 100)
+        else:
+            return min(self.valeur, montant)
+
+
+# ==================== PARAMÈTRES SYSTÈME ====================
+class ParametreSysteme(models.Model):
+    cle = models.CharField(max_length=100, unique=True, verbose_name="Clé")
+    valeur = models.TextField(verbose_name="Valeur")
+    description = models.TextField(blank=True, verbose_name="Description")
+    date_modification = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Paramètre système"
+        verbose_name_plural = "Paramètres système"
+        ordering = ['cle']
+    
+    def __str__(self):
+        return f"{self.cle}: {self.valeur[:50]}..."
+    
+    @classmethod
+    def get_valeur(cls, cle, defaut=None):
+        try:
+            return cls.objects.get(cle=cle).valeur
+        except cls.DoesNotExist:
+            return defaut
+
+
+# ==================== AUDIT ET SÉCURITÉ ====================
+class JournalConnexion(models.Model):
+    utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    adresse_ip = models.GenericIPAddressField()
+    user_agent = models.TextField(blank=True)
+    date_connexion = models.DateTimeField(auto_now_add=True)
+    succes = models.BooleanField(default=True)
+    
+    class Meta:
+        verbose_name = "Journal de connexion"
+        verbose_name_plural = "Journaux de connexions"
+        ordering = ['-date_connexion']
+    
+    def __str__(self):
+        status = "Succès" if self.succes else "Échec"
+        return f"{self.utilisateur.username} - {status} - {self.date_connexion}"
+
+
+class SauvegardeSysteme(models.Model):
+    nom = models.CharField(max_length=200)
+    fichier = models.FileField(upload_to='sauvegardes/')
+    taille = models.BigIntegerField(help_text="Taille en octets")
+    date_creation = models.DateTimeField(auto_now_add=True)
+    cree_par = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    
+    class Meta:
+        verbose_name = "Sauvegarde système"
+        verbose_name_plural = "Sauvegardes système"
+        ordering = ['-date_creation']
+    
+    def __str__(self):
+        return f"{self.nom} - {self.date_creation}"

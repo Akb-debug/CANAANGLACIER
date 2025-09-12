@@ -1,0 +1,473 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Communication et Notifications{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-comments me-2"></i>Communication et Notifications
+                    </h1>
+                    <p class="mb-0">Messagerie interne et gestion des notifications</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nouveauMessageModal">
+                        <i class="fas fa-plus me-2"></i>Nouveau Message
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques de communication -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Messages Non Lus</div>
+                            <div class="h3 mb-0">{{ stats.messages_non_lus }}</div>
+                            <div class="small">Nécessitent attention</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-envelope fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Messages Envoyés</div>
+                            <div class="h3 mb-0">{{ stats.messages_envoyes_mois }}</div>
+                            <div class="small">Ce mois</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-paper-plane fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Notifications Actives</div>
+                            <div class="h3 mb-0">{{ stats.notifications_actives }}</div>
+                            <div class="small">En cours</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-bell fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Taux de Réponse</div>
+                            <div class="h3 mb-0">{{ stats.taux_reponse|floatformat:1 }}%</div>
+                            <div class="small">Messages répondus</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-reply fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interface de messagerie -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+            <!-- Liste des conversations -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-inbox me-2"></i>Conversations
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for conversation in conversations %}
+                        <div class="list-group-item list-group-item-action {% if conversation.non_lu %}bg-light{% endif %}" 
+                             onclick="ouvrirConversation({{ conversation.id }})">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-2">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">{{ conversation.participant.nom_complet }}</h6>
+                                        <p class="mb-1 text-muted small">{{ conversation.dernier_message|truncatechars:50 }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">{{ conversation.date_dernier_message|date:"H:i" }}</small>
+                                    {% if conversation.non_lu %}
+                                        <div class="badge bg-primary rounded-pill">{{ conversation.nb_non_lus }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comments fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Aucune conversation</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <!-- Zone de conversation -->
+            <div class="card">
+                <div class="card-header" id="conversation-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comment me-2"></i>Sélectionnez une conversation
+                    </h5>
+                </div>
+                <div class="card-body" id="conversation-body" style="height: 400px; overflow-y: auto;">
+                    <div class="text-center py-5">
+                        <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Sélectionnez une conversation pour commencer à discuter</p>
+                    </div>
+                </div>
+                <div class="card-footer" id="conversation-footer" style="display: none;">
+                    <form id="message-form" onsubmit="envoyerMessage(event)">
+                        <div class="input-group">
+                            <input type="text" id="message-input" class="form-control" placeholder="Tapez votre message...">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gestion des notifications push -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>Notifications Push
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'envoyer_notification_push' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Destinataires</label>
+                            <select name="destinataires" class="form-select" multiple>
+                                <option value="tous_serveurs">Tous les serveurs</option>
+                                <option value="tous_clients">Tous les clients</option>
+                                <option value="serveurs_actifs">Serveurs actifs uniquement</option>
+                                {% for serveur in serveurs %}
+                                <option value="serveur_{{ serveur.id }}">{{ serveur.nom_complet }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Maintenez Ctrl pour sélectionner plusieurs destinataires</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Titre de la notification</label>
+                            <input type="text" name="titre" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea name="message" class="form-control" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Type</label>
+                                    <select name="type" class="form-select">
+                                        <option value="info">Information</option>
+                                        <option value="urgent">Urgent</option>
+                                        <option value="promotion">Promotion</option>
+                                        <option value="maintenance">Maintenance</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Programmation</label>
+                                    <select name="programmation" class="form-select">
+                                        <option value="maintenant">Envoyer maintenant</option>
+                                        <option value="programmer">Programmer l'envoi</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="programmation-fields" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Date d'envoi</label>
+                                        <input type="date" name="date_envoi" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Heure d'envoi</label>
+                                        <input type="time" name="heure_envoi" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Envoyer Notification
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Historique des Notifications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if historique_notifications %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Titre</th>
+                                        <th>Destinataires</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for notif in historique_notifications %}
+                                    <tr>
+                                        <td>{{ notif.date_envoi|date:"d/m H:i" }}</td>
+                                        <td>
+                                            <div class="fw-bold">{{ notif.titre }}</div>
+                                            <small class="text-muted">{{ notif.message|truncatechars:30 }}</small>
+                                        </td>
+                                        <td>{{ notif.nb_destinataires }} personnes</td>
+                                        <td>
+                                            <span class="badge bg-{% if notif.statut == 'envoye' %}success{% elif notif.statut == 'programme' %}warning{% else %}danger{% endif %}">
+                                                {{ notif.get_statut_display }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-bell fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Aucune notification envoyée</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nouveau Message -->
+<div class="modal fade" id="nouveauMessageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Nouveau Message
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'envoyer_message' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Destinataire</label>
+                        <select name="destinataire_id" class="form-select" required>
+                            <option value="">Sélectionner un destinataire</option>
+                            {% for serveur in serveurs %}
+                            <option value="{{ serveur.id }}">{{ serveur.nom_complet }} (Serveur)</option>
+                            {% endfor %}
+                            {% for admin in admins %}
+                            <option value="{{ admin.id }}">{{ admin.nom_complet }} (Admin)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Sujet</label>
+                        <input type="text" name="sujet" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <textarea name="message" class="form-control" rows="5" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="urgent" id="urgent">
+                            <label class="form-check-label" for="urgent">
+                                Message urgent
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Envoyer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.avatar-circle {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+.list-group-item-action:hover {
+    background-color: #f8f9fa;
+}
+.message-bubble {
+    max-width: 70%;
+    margin-bottom: 10px;
+}
+.message-sent {
+    margin-left: auto;
+    background-color: #007bff;
+    color: white;
+}
+.message-received {
+    background-color: #f8f9fa;
+    color: #333;
+}
+</style>
+
+<script>
+let conversationActive = null;
+
+function ouvrirConversation(conversationId) {
+    conversationActive = conversationId;
+    
+    // Charger les messages de la conversation
+    fetch(`/gerant/conversation/${conversationId}/messages/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('conversation-header').innerHTML = `
+                <h5 class="mb-0">
+                    <i class="fas fa-comment me-2"></i>${data.participant_nom}
+                </h5>
+            `;
+            
+            let messagesHtml = '';
+            data.messages.forEach(message => {
+                const isOwn = message.expediteur_id === {{ user.id }};
+                messagesHtml += `
+                    <div class="message-bubble ${isOwn ? 'message-sent' : 'message-received'} p-2 rounded mb-2">
+                        <div class="fw-bold small">${message.expediteur_nom}</div>
+                        <div>${message.contenu}</div>
+                        <div class="small text-muted">${message.date_envoi}</div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('conversation-body').innerHTML = messagesHtml;
+            document.getElementById('conversation-footer').style.display = 'block';
+            
+            // Faire défiler vers le bas
+            const body = document.getElementById('conversation-body');
+            body.scrollTop = body.scrollHeight;
+        });
+}
+
+function envoyerMessage(event) {
+    event.preventDefault();
+    
+    if (!conversationActive) return;
+    
+    const messageInput = document.getElementById('message-input');
+    const message = messageInput.value.trim();
+    
+    if (!message) return;
+    
+    fetch(`/gerant/conversation/${conversationActive}/envoyer/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+            message: message
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            messageInput.value = '';
+            ouvrirConversation(conversationActive); // Recharger la conversation
+        }
+    });
+}
+
+// Gestion de la programmation des notifications
+document.querySelector('select[name="programmation"]').addEventListener('change', function() {
+    const programmationFields = document.getElementById('programmation-fields');
+    if (this.value === 'programmer') {
+        programmationFields.style.display = 'block';
+    } else {
+        programmationFields.style.display = 'none';
+    }
+});
+
+// Actualisation automatique des conversations toutes les 30 secondes
+setInterval(() => {
+    if (conversationActive) {
+        ouvrirConversation(conversationActive);
+    }
+}, 30000);
+</script>
+{% endblock %}

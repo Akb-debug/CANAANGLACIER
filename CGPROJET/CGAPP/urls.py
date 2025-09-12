@@ -1,6 +1,6 @@
-from django.urls import path,include
+from django.urls import path, include
 from . import views
-from .views import CustomPasswordChangeView,DeleteAccountView
+from .views import CustomPasswordChangeView, DeleteAccountView, deconnexion
 from django.contrib.auth.decorators import login_required
 
 
@@ -42,6 +42,7 @@ urlpatterns = [
     path('compte/', views.ProfileView.as_view(), name='profile'),
     path('changer-mot-de-passe/', CustomPasswordChangeView.as_view(), name='password_change'),
     path('supprimer-compte/', DeleteAccountView.as_view(), name='delete_account'),
+    path('deconnexion/', views.deconnexion, name='deconnexion'),
     
     # Dashboards
     path('dashboard/admin/', views.dashboard_admin, name='dashboard_admin'),
@@ -52,11 +53,52 @@ urlpatterns = [
     # Actions pour les dashboards
     path('commande/changer-statut/<int:commande_id>/', views.changer_statut_commande, name='changer_statut_commande'),
     
-    # Gestion des utilisateurs par l'admin
+    # Gestion des utilisateurs    # Audit et sécurité
+    path('gestion/audit-securite/', views.audit_securite, name='audit_securite'),
+    path('gestion/creer-sauvegarde/', views.creer_sauvegarde, name='creer_sauvegarde'),
+    path('gestion/telecharger-sauvegarde/<int:sauvegarde_id>/', views.telecharger_sauvegarde, name='telecharger_sauvegarde'),
+    path('gestion/configurer-sauvegarde-auto/', views.configurer_sauvegarde_auto, name='configurer_sauvegarde_auto'),
+    
+    # ===== URLS GÉRANT =====
+    # Gérant - Gestion financière
+    path('gerant/gestion-financiere/', views.gestion_financiere_gerant, name='gestion_financiere_gerant'),
+    # Gérant - Gestion avancée des stocks
+    path('gerant/gestion-stocks-avancee/', views.gestion_stocks_avancee, name='gestion_stocks_avancee'),
+    # Gérant - Analyse des performances
+    path('gerant/analyse-performances/', views.analyse_performances_gerant, name='analyse_performances_gerant'),
+    # Gérant - Gestion avancée des serveurs
+    path('gerant/gestion-serveurs-avancee/', views.gestion_serveurs_avancee, name='gestion_serveurs_avancee'),
+    path('gerant/planifier-tache/', views.planifier_tache, name='planifier_tache'),
+    path('gerant/evaluer-serveur/', views.evaluer_serveur, name='evaluer_serveur'),
+    # Gérant - Communication et notifications
+    path('gerant/communication-notifications/', views.communication_notifications, name='communication_notifications'),
+    path('gerant/envoyer-notification-push/', views.envoyer_notification_push, name='envoyer_notification_push'),
+    path('gerant/envoyer-message/', views.envoyer_message, name='envoyer_message'),
+    path('gestion/categories/ajouter/', views.ajouter_categorie, name='ajouter_categorie'),
+    path('gestion/categories/modifier/<int:categorie_id>/', views.modifier_categorie, name='modifier_categorie'),
+    path('gestion/categories/supprimer/<int:categorie_id>/', views.supprimer_categorie, name='supprimer_categorie'),
+    path('gestion/coupons/', views.gestion_coupons, name='gestion_coupons'),
+    path('gestion/coupons/ajouter/', views.ajouter_coupon, name='ajouter_coupon'),
     path('gestion/creer-gerant/', views.creer_gerant, name='creer_gerant'),
-    path('gestion/creer-serveur/', views.creer_serveur, name='creer_serveur'),
+    # URL déplacée vers la section gérant
+    path('gerant/creer-serveur/', views.creer_serveur, name='creer_serveur_gerant'),
     path('gestion/liste-utilisateurs/', views.liste_utilisateurs, name='liste_utilisateurs'),
+    path('gestion/categories/', views.gestion_categories, name='gestion_categories'),
+    path('gestion/coupons/modifier/<int:coupon_id>/', views.modifier_coupon, name='modifier_coupon'),
+    path('gestion/coupons/supprimer/<int:coupon_id>/', views.supprimer_coupon, name='supprimer_coupon'),
+    path('gestion/rapports/', views.rapports_admin, name='rapports_admin'),
+    path('gestion/parametres/', views.parametres_systeme, name='parametres_systeme'),
+    path('gestion/parametres/ajouter/', views.ajouter_parametre, name='ajouter_parametre'),
+    path('gestion/parametres/modifier/<int:parametre_id>/', views.modifier_parametre, name='modifier_parametre'),
+    path('gestion/stocks/ajuster/', views.ajuster_stock, name='ajuster_stock'),
+    path('gestion/journal-connexions/', views.journal_connexions, name='journal_connexions'),
+    path('gestion/sauvegardes/', views.sauvegardes_systeme, name='sauvegardes_systeme'),
     path('gestion/historique-actions/', views.historique_actions, name='historique_actions'),
+    
+    # URLs manquantes pour le dashboard admin
+    path('gestion/utilisateurs/', views.gestion_utilisateurs, name='gestion_utilisateurs'),
+    path('gestion/commandes/', views.gestion_commandes_admin, name='gestion_commandes_admin'),
+    path('gestion/statistiques/', views.statistiques_admin, name='statistiques_admin'),
     
     # Gestion des produits par le gérant
       # CRUD
@@ -90,11 +132,6 @@ urlpatterns = [
     path('deconnexion/', views.deconnexion, name='deconnexion'),
     path('password-reset/', include('django.contrib.auth.urls')),
     
-    # Dashboards
-    path('dashboard/admin/', views.dashboard_admin, name='dashboard_admin'),
-    path('dashboard/serveur/', views.dashboard_serveur, name='dashboard_serveur'),
-    path('dashboard/gerant/', views.dashboard_gerant, name='dashboard_gerant'),
-    path('dashboard/client/', views.dashboard_client, name='dashboard_client'),
     path('commande/<int:commande_id>/changer-statut-dahboard/', views.changer_statut, name='changer_statut'),
 
     #Gestion serveur

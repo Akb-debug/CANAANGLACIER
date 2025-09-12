@@ -1,0 +1,153 @@
+{% extends 'dashboards/base_gerant.html' %}
+{% load static %}
+
+{% block title %}Créer un serveur - Tableau de bord Gérant{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Créer un nouveau serveur</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard_gerant' %}">Tableau de bord</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'gestion_serveurs_avancee' %}">Gestion des serveurs</a></li>
+        <li class="breadcrumb-item active">Nouveau serveur</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-user-plus me-1"></i>
+            Informations du serveur
+        </div>
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_username" class="form-label">Nom d'utilisateur *</label>
+                            {{ form.username }}
+                            <div class="invalid-feedback">
+                                Veuillez entrer un nom d'utilisateur valide.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_email" class="form-label">Adresse email *</label>
+                            {{ form.email }}
+                            <div class="invalid-feedback">
+                                Veuillez entrer une adresse email valide.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_first_name" class="form-label">Prénom *</label>
+                            {{ form.first_name }}
+                            <div class="invalid-feedback">
+                                Veuillez entrer un prénom.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_last_name" class="form-label">Nom *</label>
+                            {{ form.last_name }}
+                            <div class="invalid-feedback">
+                                Veuillez entrer un nom.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_password1" class="form-label">Mot de passe *</label>
+                            {{ form.password1 }}
+                            <div class="form-text">
+                                Le mot de passe doit contenir au moins 8 caractères et ne pas être trop courant.
+                            </div>
+                            <div class="invalid-feedback">
+                                Veuillez entrer un mot de passe valide.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_password2" class="form-label">Confirmation du mot de passe *</label>
+                            {{ form.password2 }}
+                            <div class="invalid-feedback">
+                                Les mots de passe ne correspondent pas.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_telephone" class="form-label">Téléphone</label>
+                            {{ form.telephone }}
+                            <div class="form-text">
+                                Format: +225 XX XX XX XX
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_photo_profil" class="form-label">Photo de profil</label>
+                            {{ form.photo_profil }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'gestion_serveurs_avancee' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Créer le compte serveur
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Ajout de la validation des champs du formulaire -->
+<script>
+// Désactive l'envoi du formulaire s'il y a des champs invalides
+(function () {
+    'use strict'
+    
+    // Récupère tous les formulaires auxquels nous voulons appliquer le style de validation Bootstrap
+    var forms = document.querySelectorAll('.needs-validation')
+    
+    // Boucle sur les formulaires et empêche la soumission
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                
+                form.classList.add('was-validated')
+            }, false)
+        })
+})()
+</script>
+{% endblock %}
