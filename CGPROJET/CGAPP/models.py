@@ -22,6 +22,28 @@ class Utilisateur(AbstractUser):
     class Meta:
         verbose_name = "Utilisateur"
 
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        # Créer le profil spécifique selon le rôle
+        if is_new:
+            self.create_profile_based_on_role()
+
+    def create_profile_based_on_role(self):
+        """Crée le profil spécifique selon le rôle de l'utilisateur"""
+        if self.role == 'livreur':
+            Livreur.objects.get_or_create(utilisateur=self)
+        elif self.role == 'serveur':
+            Serveur.objects.get_or_create(utilisateur=self)
+        elif self.role == 'gerant':
+            Gerant.objects.get_or_create(utilisateur=self)
+        elif self.role == 'admin':
+            Admin.objects.get_or_create(utilisateur=self)
+        elif self.role == 'client':
+            Client.objects.get_or_create(utilisateur=self)
+
+
 
 # -------------------- ROLES SPÉCIFIQUES --------------------
 class Gerant(models.Model):
@@ -274,7 +296,10 @@ class Commande(models.Model):
     methode_paiement = models.CharField(max_length=50)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default=STATUT_EN_ATTENTE)
     coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
-    
+    date_modification = models.DateTimeField(auto_now=True)
+    date_livraison = models.DateTimeField(null=True, blank=True)
+    livreur = models.ForeignKey(Livreur, on_delete=models.SET_NULL, null=True, blank=True)
+        
 
     def __str__(self):
         return f"Commande #{self.id} - {self.utilisateur.username}"

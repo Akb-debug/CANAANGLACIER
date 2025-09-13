@@ -60,37 +60,37 @@
                 </a>
 
            {% elif user.role == 'client' %}
-            <a href="{% url 'dashboard_client' %}" 
-            class="nav-item nav-link {% if request.resolver_match.url_name == 'dashboard_client' %}active{% endif %}">
-            <i class="fas fa-home me-2"></i>Dashboard
-            </a>
+                <a href="{% url 'dashboard_client' %}" 
+                class="nav-item nav-link {% if request.resolver_match.url_name == 'dashboard_client' %}active{% endif %}">
+                <i class="fas fa-home me-2"></i>Dashboard
+                </a>
 
-            <a href="{% url 'produits' %}" 
-            class="nav-item nav-link {% if request.resolver_match.url_name == 'produits' %}active{% endif %}">
-            <i class="fas fa-shopping-bag me-2"></i>Achat
-            </a>
+                <a href="{% url 'produits' %}" 
+                class="nav-item nav-link {% if request.resolver_match.url_name == 'produits' %}active{% endif %}">
+                <i class="fas fa-shopping-bag me-2"></i>Achat
+                </a>
 
-            <a href="{% url 'panier' %}"  
-            class="nav-item nav-link {% if request.resolver_match.url_name == 'panier' %}active{% endif %}">
-            <i class="fas fa-shopping-cart me-2"></i>Panier
-            </a>
+                <a href="{% url 'panier' %}"  
+                class="nav-item nav-link {% if request.resolver_match.url_name == 'panier' %}active{% endif %}">
+                <i class="fas fa-shopping-cart me-2"></i>Panier
+                </a>
 
-            <a href="{% url 'historique_client' %}" 
-            class="nav-item nav-link {% if request.resolver_match.url_name == 'historique_client' %}active{% endif %}">
-            <i class="fas fa-history me-2"></i>Historiques
-            </a>
+                <a href="{% url 'historique_client' %}" 
+                class="nav-item nav-link {% if request.resolver_match.url_name == 'historique_client' %}active{% endif %}">
+                <i class="fas fa-history me-2"></i>Historiques
+                </a>
 
-            <a href="{% url 'contact' %}" 
-            class="nav-item nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
-            <i class="fas fa-headset me-2"></i>Support
-            </a>
+                <a href="{% url 'contact' %}" 
+                class="nav-item nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+                <i class="fas fa-headset me-2"></i>Support
+                </a>
 
-            <a href="{% url 'tableau_avis' %}" 
-            class="nav-item nav-link {% if request.resolver_match.url_name == 'tableau_avis' %}active{% endif %}">
-            <i class="fas fa-headset me-2"></i> tableau d'avis
-            </a>
+                <a href="{% url 'tableau_avis' %}" 
+                class="nav-item nav-link {% if request.resolver_match.url_name == 'tableau_avis' %}active{% endif %}">
+                <i class="fas fa-headset me-2"></i> tableau d'avis
+                </a>
 
-
+                
             {% elif user.role == 'admin' %}
                 <a href="{% url 'dashboard_admin' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'dashboard_admin' %}active{% endif %}">
                     <i class="fa fa-home me-2"></i>Dashboard
@@ -135,6 +135,10 @@
                 <a href="#" class="nav-item nav-link">
                     <i class="fa fa-warehouse me-2"></i>Gestion Stock
                 </a>
+                <a href="{% url 'profile' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                    <i class="fa fa-user-circle me-2"></i>Profil
+                </a>
+
             {% elif user.role == 'serveur' %}
                 <a href="{% url 'dashboard_serveur' %}" 
                 class="nav-item nav-link {% if request.resolver_match.url_name == 'dashboard_serveur' %}active{% endif %}">
@@ -160,16 +164,37 @@
                 class="nav-item nav-link {% if request.resolver_match.url_name == 'commandes_livrees_serveur' %}active{% endif %}">
                 <i class="fa fa-check-circle me-2"></i>Cmdes livrées
                 </a>
-            {% endif %}
-
-
-             <a href="{% url 'profile' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+                <a href="{% url 'profile' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                     <i class="fa fa-user-circle me-2"></i>Profil
                 </a>
 
-                <a href="{% url 'deconnexion' %}" class="nav-item nav-link text-danger">
-                    <i class="fa fa-sign-out-alt me-2"></i>Déconnexion
+          {% elif user.role == 'livreur' %}
+                <a href="{% url 'dashboard_livreur' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'dashboard_livreur' %}active{% endif %}">
+                    <i class="fa fa-home me-2"></i>Dashboard
                 </a>
+
+                <a href="{% url 'commandes_a_livrer' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'commandes_a_livrer' %}active{% endif %}">
+                    <i class="fa fa-truck me-2"></i>Commandes à Livrer
+                </a>
+
+                <a href="{% url 'commandes_livrees' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'commandes_livrees' %}active{% endif %}">
+                    <i class="fa fa-check-circle me-2"></i>Commandes Livrées
+                </a>
+
+                <a href="{% url 'historique_actions' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'historique_actions' %}active{% endif %}">
+                    <i class="fa fa-history me-2"></i>Historique Actions
+                </a>
+
+                <a href="{% url 'profil_livreur' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'profil_livreur' %}active{% endif %}">
+                    <i class="fa fa-user-circle me-2"></i>Mon Profil
+                </a>
+
+        
+            {% endif %}
+            
+            <a href="{% url 'deconnexion' %}" class="nav-item nav-link text-danger">
+                <i class="fa fa-sign-out-alt me-2"></i>Déconnexion
+            </a>
 
         </div>
     </nav>

@@ -140,4 +140,12 @@ urlpatterns = [
     path('notation-commande/<int:notation_id>/', views.detail_notation_commande, name='detail_notation_commande'),
     path('signaler-probleme/<int:commande_id>/', views.signaler_probleme, name='signaler_probleme'),
     path('mes-notations-commandes/', views.mes_notations_commandes, name='mes_notations_commandes'),
+    #Urls pour le livreur
+    path('dashboard/', views.dashboard_livreur, name='dashboard_livreur'),
+    path('commandes/a-livrer/', views.commandes_a_livrer, name='commandes_a_livrer'),
+    path('commandes/livrees/', views.commandes_livrees, name='commandes_livrees'),
+    path('commande/livreur/<int:commande_id>/', views.detail_commande, name='detail_commande_livreur'),
+    path('historique-actions/', views.historique_actions, name='historique_actions'),
+    path('profil/', views.profil_livreur, name='profil_livreur'),
+    path('commande/<int:commande_id>/livrer/', views.changer_statut_commande_livreur, name='livrer_commande'),
 ]

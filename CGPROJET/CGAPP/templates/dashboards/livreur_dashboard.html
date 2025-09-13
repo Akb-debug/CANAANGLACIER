@@ -1,0 +1,222 @@
+<!-- dashboards/livreur_dashboard.html -->
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h2 class="mb-1">Tableau de Bord Livreur</h2>
+                        <p class="mb-0 text-muted">Bienvenue {{ user.get_full_name|default:user.username }}, voici votre activité du jour</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-primary me-2">Livreur</span>
+                        <span class="badge bg-success">{{ aujourd_hui|date:"d F Y" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-2">Commandes à Livrer</h6>
+                    <h3 class="mb-0 text-primary">{{ stats.total_a_livrer }}</h3>
+                    <small class="text-muted">Aujourd'hui</small>
+                </div>
+                <div class="bg-primary rounded-circle p-3">
+                    <i class="fa fa-truck fa-2x text-white"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-2">Livrées Aujourd'hui</h6>
+                    <h3 class="mb-0 text-success">{{ stats.livrees_aujourdhui }}</h3>
+                    <small class="text-muted">Total journalier</small>
+                </div>
+                <div class="bg-success rounded-circle p-3">
+                    <i class="fa fa-check-circle fa-2x text-white"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-2">En Retard</h6>
+                    <h3 class="mb-0 text-warning">{{ stats.en_retard }}</h3>
+                    <small class="text-muted">Commandes en attente</small>
+                </div>
+                <div class="bg-warning rounded-circle p-3">
+                    <i class="fa fa-clock fa-2x text-white"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-2">Performance</h6>
+                    <h3 class="mb-0 text-info">
+                        {% if stats.total_a_livrer > 0 %}
+                            {{ stats.livrees_aujourdhui|floatformat:0 }}/{{ stats.total_a_livrer }}
+                        {% else %}
+                            100%
+                        {% endif %}
+                    </h3>
+                    <small class="text-muted">Taux de livraison</small>
+                </div>
+                <div class="bg-info rounded-circle p-3">
+                    <i class="fa fa-chart-line fa-2x text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commandes à Livrer Aujourd'hui -->
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h5 class="mb-0">
+                        <i class="fa fa-list-alt me-2 text-primary"></i>
+                        Commandes à Livrer Aujourd'hui
+                    </h5>
+                    <a href="{% url 'commandes_a_livrer' %}" class="btn btn-primary btn-sm">
+                        <i class="fa fa-eye me-1"></i>Voir Toutes
+                    </a>
+                </div>
+
+                {% if commandes_a_livrer %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col"># Commande</th>
+                                <th scope="col">Client</th>
+                                <th scope="col">Contact</th>
+                                <th scope="col">Adresse</th>
+                                <th scope="col">Montant</th>
+                                <th scope="col">Heure</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commande in commandes_a_livrer|slice:":5" %}
+                            <tr>
+                                <th scope="row" class="fw-bold">#{{ commande.id }}</th>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
+                                             style="width: 35px; height: 35px; font-size: 14px;">
+                                            {{ commande.utilisateur.username|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">{{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}</div>
+                                            <small class="text-muted">{{ commande.utilisateur.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if commande.utilisateur.telephone %}
+                                        <span class="badge bg-info">{{ commande.utilisateur.telephone }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Non renseigné</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>
+                                        {{ commande.adresse_livraison.rue|truncatewords:3 }}<br>
+                                        <span class="badge bg-secondary">{{ commande.adresse_livraison.ville }}</span>
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-success">{{ commande.total }} FCFA</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark">{{ commande.date_creation|time }}</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{% url 'detail_commande_livreur' commande.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fa fa-eye me-1"></i>Détails
+                                        </a>
+                                        <a href="{% url 'livrer_commande' commande.id %}" class="btn btn-sm btn-success">
+                                            <i class="fa fa-check me-1"></i>Livrer
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fa fa-check-circle fa-3x text-success mb-3"></i>
+                    <h5 class="text-muted">Aucune commande à livrer aujourd'hui</h5>
+                    <p class="text-muted">Toutes les commandes ont été traitées avec succès !</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <h5 class="mb-4">
+                    <i class="fa fa-bolt me-2 text-warning"></i>
+                    Actions Rapides
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="{% url 'commandes_a_livrer' %}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center py-3">
+                            <i class="fa fa-list-alt fa-2x me-2"></i>
+                            <div>
+                                <div class="fw-bold">Voir Toutes</div>
+                                <small>Commandes à livrer</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'commandes_livrees' %}" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center py-3">
+                            <i class="fa fa-check-circle fa-2x me-2"></i>
+                            <div>
+                                <div class="fw-bold">Historique</div>
+                                <small>Commandes livrées</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'historique_actions' %}" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center py-3">
+                            <i class="fa fa-history fa-2x me-2"></i>
+                            <div>
+                                <div class="fw-bold">Activité</div>
+                                <small>Historique actions</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'profil_livreur' %}" class="btn btn-outline-warning w-100 d-flex align-items-center justify-content-center py-3">
+                            <i class="fa fa-user fa-2x me-2"></i>
+                            <div>
+                                <div class="fw-bold">Profil</div>
+                                <small>Mon compte</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
