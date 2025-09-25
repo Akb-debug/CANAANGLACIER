@@ -1,0 +1,375 @@
+/* Variables */
+:root {
+    --yellow-canaan: #FDCB05;
+    --teal-glacier: #00B8B5;
+    --pink-swoosh: #E91E63;
+    --black-shadow: #000000;
+    --white-bg: #FFFFFF;
+    --teal-light: rgba(0, 184, 181, 0.1);
+    --pink-light: rgba(233, 30, 99, 0.1);
+}
+
+.min-text {
+    font-size: 10rem;
+    color: var(--teal-glacier);
+}
+
+/* Background Hero */
+.mi-hero-bg {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--pink-swoosh) 100%);
+}
+
+/* Contact Container */
+.mi-contact-container {
+    position: relative;
+    z-index: 2;
+}
+
+/* Cards */
+.mi-form-card, .mi-info-card {
+    background: var(--white-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    border: 1px solid var(--teal-light);
+}
+
+.mi-form-card:hover, .mi-info-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px var(--pink-light);
+}
+
+/* Headers */
+.mi-form-header, .mi-info-header {
+    background: var(--teal-glacier);
+    padding: 25px;
+    text-align: center;
+    color: var(--white-bg);
+}
+
+.mi-form-title, .mi-info-title {
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--white-bg);
+}
+
+/* Form Elements */
+.mi-contact-form {
+    padding: 30px;
+}
+
+.mi-input-group {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.mi-form-input, .mi-form-select, .mi-form-textarea {
+    width: 100%;
+    padding: 15px 0 5px 0;
+    border: none;
+    border-bottom: 2px solid #ddd;
+    background: transparent;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    color: var(--black-shadow);
+}
+
+.mi-form-textarea {
+    min-height: 100px;
+    resize: none;
+}
+
+.mi-input-label, .mi-select-label, .mi-textarea-label {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    color: var(--black-shadow);
+    font-size: 16px;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.mi-form-input:focus, .mi-form-select:focus, .mi-form-textarea:focus {
+    outline: none;
+    border-color: var(--pink-swoosh);
+}
+
+.mi-form-input:focus + label,
+.mi-form-input:valid + label,
+.mi-form-select:focus + label,
+.mi-form-select:valid + label,
+.mi-form-textarea:focus + label,
+.mi-form-textarea:valid + label {
+    top: -5px;
+    font-size: 12px;
+    color: var(--pink-swoosh);
+}
+
+.mi-input-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--pink-swoosh);
+    transition: width 0.3s ease;
+}
+
+.mi-form-input:focus ~ .mi-input-bar,
+.mi-form-select:focus ~ .mi-input-bar {
+    width: 100%;
+}
+
+/* Select Dropdown */
+.mi-form-select {
+    appearance: none;
+    cursor: pointer;
+}
+
+.mi-select-arrow {
+    position: absolute;
+    right: 0;
+    bottom: 10px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid var(--black-shadow);
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.mi-form-select:focus ~ .mi-select-arrow {
+    border-top-color: var(--pink-swoosh);
+}
+
+/* Submit Button */
+.mi-submit-btn {
+    background: var(--teal-glacier);
+    color: var(--white-bg);
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s ease;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(0, 184, 181, 0.3);
+}
+
+.mi-submit-btn:hover {
+    background: var(--pink-swoosh);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(233, 30, 99, 0.3);
+}
+
+/* Contact Info */
+.mi-info-content {
+    padding: 30px;
+}
+
+.mi-contact-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.mi-contact-item:hover {
+    transform: translateX(5px);
+}
+
+.mi-contact-icon {
+    background: var(--teal-glacier);
+    color: var(--white-bg);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.mi-contact-item:hover .mi-contact-icon {
+    background: var(--pink-swoosh);
+    transform: rotate(15deg);
+}
+
+.mi-contact-category {
+    color: var(--teal-glacier);
+    font-size: 1rem;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.mi-contact-detail {
+    color: var(--black-shadow);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Social Links */
+.mi-social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.mi-social-link {
+    color: var(--teal-glacier);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--teal-glacier);
+    background: var(--teal-light);
+}
+
+.mi-social-link:hover {
+    background: var(--teal-glacier);
+    color: var(--white-bg);
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 184, 181, 0.3);
+}
+
+/* FAQ Section */
+.custom-accordion .accordion-button {
+    background-color: var(--white-bg);
+    transition: all 0.3s ease;
+}
+
+.custom-accordion .accordion-button:not(.collapsed) {
+    background-color: var(--teal-light);
+    color: var(--teal-glacier);
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.05);
+}
+
+.custom-accordion .accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem var(--teal-light);
+    border-color: transparent;
+}
+
+.custom-accordion .accordion-button::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2300B8B5'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    transition: transform 0.3s ease;
+}
+
+.custom-accordion .accordion-button:not(.collapsed)::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2300B8B5'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.list-check {
+    list-style: none;
+    padding-left: 0;
+}
+
+.list-check li {
+    position: relative;
+    padding-left: 1.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.list-check li:before {
+    content: "\f00c";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    color: var(--teal-glacier);
+}
+
+.btn.lift {
+    transition: all 0.2s ease;
+}
+
+.btn.lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 184, 181, 0.3);
+}
+
+/* Parallax FAQ Section */
+.faq-section {
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    position: relative;
+    z-index: 1;
+}
+
+.parallax-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    z-index: -1;
+    opacity: 0.7;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 184, 181, 0.8) 0%, rgba(233, 30, 99, 0.8) 100%);
+    z-index: -1;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .mi-hero-bg {
+        height: 40vh;
+    }
+    .mi-contact-container {
+        margin-top: -100px;
+    }
+}
+
+@media (max-width: 768px) {
+    .mi-hero-bg {
+        height: 30vh;
+    }
+    .mi-form-card, .mi-info-card {
+        margin-bottom: 30px;
+    }
+    .parallax-bg {
+        background-attachment: scroll;
+    }
+    .faq-section {
+        min-height: auto;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.mi-form-card, .mi-info-card {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+.mi-info-card {
+    animation-delay: 0.2s;
+}

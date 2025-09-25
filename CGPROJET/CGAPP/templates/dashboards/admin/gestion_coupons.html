@@ -1,0 +1,165 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Coupons{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-ticket-alt me-2"></i>Gestion des Coupons
+                    </h1>
+                    <p class="mb-0">Gérer les codes promotionnels</p>
+                </div>
+                <div>
+                    <a href="{% url 'ajouter_coupon' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Nouveau Coupon
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Total Coupons</div>
+                            <div class="h3 mb-0">{{ total_coupons }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-ticket-alt fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Coupons Actifs</div>
+                            <div class="h3 mb-0">{{ coupons_actifs }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des coupons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Liste des Coupons
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if coupons %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Type</th>
+                                        <th>Valeur</th>
+                                        <th>Période</th>
+                                        <th>Usage</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for coupon in coupons %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">{{ coupon.code }}</div>
+                                        </td>
+                                        <td>
+                                            {% if coupon.type_reduction == 'pourcentage' %}
+                                                <span class="badge bg-info">Pourcentage</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Montant fixe</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <strong>
+                                                {{ coupon.valeur }}{% if coupon.type_reduction == 'pourcentage' %}%{% else %} FCFA{% endif %}
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                Du {{ coupon.date_debut|date:"d/m/Y" }}<br>
+                                                Au {{ coupon.date_fin|date:"d/m/Y" }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                {{ coupon.usage_actuel }}/{{ coupon.usage_max }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if coupon.est_valide %}
+                                                <span class="badge bg-success">Valide</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Expiré</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'modifier_coupon' coupon.id %}" 
+                                                   class="btn btn-sm btn-outline-primary" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'supprimer_coupon' coupon.id %}" 
+                                                   class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucun coupon trouvé</h5>
+                            <p class="text-muted">Commencez par créer votre premier coupon</p>
+                            <a href="{% url 'ajouter_coupon' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Créer un coupon
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+</style>
+{% endblock %}

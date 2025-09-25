@@ -1,0 +1,452 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Gestion Financière{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.financial-card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    transition: all 0.3s;
+}
+.financial-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.25rem 2rem 0 rgba(58, 59, 69, 0.2);
+}
+.metric-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+}
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Gestion Financière
+                    </h1>
+                    <p class="mb-0">Analyse des performances financières et KPIs</p>
+                </div>
+                <div>
+                    <select class="form-select" id="periodeSelect" onchange="changerPeriode()">
+                        <option value="7" {% if periode == 7 %}selected{% endif %}>7 derniers jours</option>
+                        <option value="30" {% if periode == 30 %}selected{% endif %}>30 derniers jours</option>
+                        <option value="90" {% if periode == 90 %}selected{% endif %}>3 derniers mois</option>
+                        <option value="365" {% if periode == 365 %}selected{% endif %}>12 derniers mois</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres de période -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Période</label>
+                            <select name="periode" class="form-select" onchange="this.form.submit()">
+                                <option value="7" {% if periode == '7' %}selected{% endif %}>7 derniers jours</option>
+                                <option value="30" {% if periode == '30' %}selected{% endif %}>30 derniers jours</option>
+                                <option value="90" {% if periode == '90' %}selected{% endif %}>3 derniers mois</option>
+                                <option value="365" {% if periode == '365' %}selected{% endif %}>12 derniers mois</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Date début</label>
+                            <input type="date" name="date_debut" class="form-control" value="{{ date_debut }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Date fin</label>
+                            <input type="date" name="date_fin" class="form-control" value="{{ date_fin }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block w-100">
+                                <i class="fas fa-search me-2"></i>Filtrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs Financiers -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Chiffre d'Affaires</div>
+                            <div class="h3 mb-0">{{ kpis.chiffre_affaires|floatformat:0 }} FCFA</div>
+                            <div class="small">
+                                {% if kpis.evolution_ca > 0 %}
+                                    <i class="fas fa-arrow-up me-1"></i>+{{ kpis.evolution_ca|floatformat:1 }}%
+                                {% elif kpis.evolution_ca < 0 %}
+                                    <i class="fas fa-arrow-down me-1"></i>{{ kpis.evolution_ca|floatformat:1 }}%
+                                {% else %}
+                                    <i class="fas fa-minus me-1"></i>0%
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-money-bill-wave fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Bénéfice Net</div>
+                            <div class="h3 mb-0">{{ kpis.benefice_net|floatformat:0 }} FCFA</div>
+                            <div class="small">
+                                Marge: {{ kpis.marge_beneficiaire|floatformat:1 }}%
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Panier Moyen</div>
+                            <div class="h3 mb-0">{{ kpis.panier_moyen|floatformat:0 }} FCFA</div>
+                            <div class="small">
+                                {{ kpis.nb_commandes }} commandes
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">ROI</div>
+                            <div class="h3 mb-0">{{ kpis.roi|floatformat:1 }}%</div>
+                            <div class="small">
+                                Retour sur investissement
+                            </div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-percentage fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Évolution du Chiffre d'Affaires
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="caChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Répartition par Produit
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="produitsChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Détails financiers -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calculator me-2"></i>Détail des Revenus
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Ventes Brutes</strong></td>
+                                    <td class="text-end">{{ details.ventes_brutes|floatformat:0 }} FCFA</td>
+                                </tr>
+                                <tr>
+                                    <td>- Remises et Coupons</td>
+                                    <td class="text-end text-danger">-{{ details.remises|floatformat:0 }} FCFA</td>
+                                </tr>
+                                <tr>
+                                    <td>- Frais de Livraison</td>
+                                    <td class="text-end text-warning">-{{ details.frais_livraison|floatformat:0 }} FCFA</td>
+                                </tr>
+                                <tr class="table-primary">
+                                    <td><strong>Chiffre d'Affaires Net</strong></td>
+                                    <td class="text-end"><strong>{{ details.ca_net|floatformat:0 }} FCFA</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>- Coût des Produits</td>
+                                    <td class="text-end text-danger">-{{ details.cout_produits|floatformat:0 }} FCFA</td>
+                                </tr>
+                                <tr>
+                                    <td>- Frais Opérationnels</td>
+                                    <td class="text-end text-warning">-{{ details.frais_operationnels|floatformat:0 }} FCFA</td>
+                                </tr>
+                                <tr class="table-success">
+                                    <td><strong>Bénéfice Net</strong></td>
+                                    <td class="text-end"><strong>{{ details.benefice_net|floatformat:0 }} FCFA</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>Top 10 Produits Rentables
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if top_produits %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th>Ventes</th>
+                                        <th>CA</th>
+                                        <th>Marge</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for produit in top_produits %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">{{ produit.nom }}</div>
+                                            <small class="text-muted">{{ produit.quantite_vendue }} unités</small>
+                                        </td>
+                                        <td>{{ produit.nb_ventes }}</td>
+                                        <td class="fw-bold text-success">{{ produit.chiffre_affaires|floatformat:0 }} FCFA</td>
+                                        <td>
+                                            <span class="badge bg-{% if produit.marge > 30 %}success{% elif produit.marge > 15 %}warning{% else %}danger{% endif %}">
+                                                {{ produit.marge|floatformat:1 }}%
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-chart-bar fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Aucune donnée disponible</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prévisions -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-crystal-ball me-2"></i>Prévisions Financières
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="previsionsChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Recommandations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recommandations %}
+                        {% for recommandation in recommandations %}
+                        <div class="alert alert-{{ recommandation.type }} d-flex align-items-start" role="alert">
+                            <i class="fas fa-{{ recommandation.icone }} me-2 mt-1"></i>
+                            <div>
+                                <strong>{{ recommandation.titre }}</strong><br>
+                                <small>{{ recommandation.description }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <p class="text-success mb-0">Performances optimales</p>
+                            <small class="text-muted">Continuez sur cette lancée !</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+        // Graphique CA
+        const caCtx = document.getElementById('caChart').getContext('2d');
+        new Chart(caCtx, {
+            type: 'line',
+            data: {
+                labels: {{ ca_labels|safe }},
+                datasets: [{
+                    label: 'Chiffre d\'Affaires',
+                    data: {{ ca_data|safe }},
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }, {
+                    label: 'Bénéfice',
+                    data: {{ benefice_data|safe }},
+                    borderColor: '#1cc88a',
+                    backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' FCFA';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Graphique produits
+        const produitsCtx = document.getElementById('produitsChart').getContext('2d');
+        new Chart(produitsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ produits_labels|safe }},
+                datasets: [{
+                    data: {{ produits_data|safe }},
+                    backgroundColor: [
+                        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                        '#858796', '#5a5c69', '#6f42c1', '#e83e8c', '#fd7e14'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+        labels: {{ previsions_labels|safe }},
+        datasets: [{
+            label: 'CA Réel',
+            data: {{ ca_reel_data|safe }},
+            borderColor: '#4e73df',
+            backgroundColor: 'rgba(78, 115, 223, 0.1)',
+            tension: 0.3
+        }, {
+            label: 'CA Prévu',
+            data: {{ ca_prevu_data|safe }},
+            borderColor: '#f6c23e',
+            backgroundColor: 'rgba(246, 194, 62, 0.1)',
+            borderDash: [5, 5],
+            tension: 0.3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return value.toLocaleString() + ' FCFA';
+                    }
+                }
+            }
+        }
+    }
+});
+
+function exporterRapport() {
+    window.print();
+}
+</script>
+{% endblock %}

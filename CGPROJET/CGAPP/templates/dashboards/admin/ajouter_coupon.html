@@ -1,0 +1,282 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Ajouter un Coupon{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-plus me-2"></i>Ajouter un Coupon
+                    </h1>
+                    <p class="mb-0">Créer un nouveau code promotionnel</p>
+                </div>
+                <div>
+                    <a href="{% url 'gestion_coupons' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages d'alerte -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Formulaire -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-ticket-alt me-2"></i>Informations du Coupon
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if errors.global %}
+                        <div class="alert alert-danger">
+                            {{ errors.global }}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="code" class="form-label">
+                                        Code du coupon <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="code" class="form-control {% if errors.code %}is-invalid{% endif %}" 
+                                           id="code" placeholder="Code du coupon (ex: NOEL2024)" required
+                                           value="{{ form_data.code|default:'' }}">
+                                    {% if errors.code %}
+                                        <div class="text-danger small mt-1">
+                                            {{ errors.code }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Code unique que les clients utiliseront (lettres majuscules, chiffres et underscores uniquement)
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="type_reduction" class="form-label">
+                                        Type de réduction <span class="text-danger">*</span>
+                                    </label>
+                                    <select name="type_reduction" class="form-select {% if errors.type_reduction %}is-invalid{% endif %}" 
+                                            id="type_reduction" required>
+                                        <option value="">Sélectionnez un type</option>
+                                        <option value="pourcentage" {% if form_data.type_reduction == "pourcentage" %}selected{% endif %}>Pourcentage</option>
+                                        <option value="montant_fixe" {% if form_data.type_reduction == "montant_fixe" %}selected{% endif %}>Montant fixe</option>
+                                    </select>
+                                    {% if errors.type_reduction %}
+                                        <div class="text-danger small mt-1">
+                                            {{ errors.type_reduction }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="valeur" class="form-label">
+                                        Valeur <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" name="valeur" step="0.01" min="0" 
+                                           class="form-control {% if errors.valeur %}is-invalid{% endif %}" 
+                                           id="valeur" required value="{{ form_data.valeur|default:'' }}">
+                                    {% if errors.valeur %}
+                                        <div class="text-danger small mt-1">
+                                            {{ errors.valeur }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Pourcentage (ex: 10) ou montant fixe (ex: 5000)
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="usage_max" class="form-label">
+                                        Usage maximum <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" name="usage_max" min="1" 
+                                           class="form-control {% if errors.usage_max %}is-invalid{% endif %}" 
+                                           id="usage_max" placeholder="Nombre maximum d'utilisations" required
+                                           value="{{ form_data.usage_max|default:'' }}">
+                                    {% if errors.usage_max %}
+                                        <div class="text-danger small mt-1">
+                                            {{ errors.usage_max }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Nombre maximum d'utilisations
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="date_debut" class="form-label">
+                                        Date de début <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="datetime-local" name="date_debut" 
+                                           class="form-control {% if errors.date_debut %}is-invalid{% endif %}" 
+                                           id="date_debut" required value="{{ form_data.date_debut|default:'' }}">
+                                    {% if errors.date_debut %}
+                                        <div class="text-danger small mt-1">
+                                            {{ errors.date_debut }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="date_fin" class="form-label">
+                                        Date de fin <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="datetime-local" name="date_fin" 
+                                           class="form-control {% if errors.date_fin %}is-invalid{% endif %}" 
+                                           id="date_fin" required value="{{ form_data.date_fin|default:'' }}">
+                                    {% if errors.date_fin %}
+                                        <div class="text-danger small mt-1">
+                                            {{ errors.date_fin }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" name="actif" class="form-check-input" id="actif" 
+                                    {% if form_data.actif or not form_data.actif %}checked{% endif %}>
+                                <label class="form-check-label" for="actif">
+                                    Coupon actif
+                                </label>
+                                <div class="form-text">
+                                    Décochez pour désactiver temporairement le coupon
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'gestion_coupons' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Créer le coupon
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.form-control, .form-select {
+    border: 1px solid #d1d3e2;
+    border-radius: 0.35rem;
+    padding: 0.5rem 0.75rem;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #5a5c69;
+    box-shadow: 0 0 0 0.2rem rgba(90, 92, 105, 0.25);
+}
+.form-check-input {
+    margin-top: 0.2rem;
+}
+.alert {
+    border-radius: 0.35rem;
+}
+.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation côté client pour le code
+    const codeInput = document.getElementById('code');
+    if (codeInput) {
+        codeInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase().replace(/[^A-Z0-9_]/g, '');
+        });
+    }
+    
+    // Validation pour la valeur selon le type de réduction
+    const typeReductionSelect = document.getElementById('type_reduction');
+    const valeurInput = document.getElementById('valeur');
+    
+    if (typeReductionSelect && valeurInput) {
+        typeReductionSelect.addEventListener('change', function() {
+            if (this.value === 'pourcentage') {
+                valeurInput.setAttribute('max', '100');
+                valeurInput.setAttribute('step', '1');
+            } else {
+                valeurInput.removeAttribute('max');
+                valeurInput.setAttribute('step', '0.01');
+            }
+        });
+        
+        // Déclencher l'événement change au chargement si une valeur est déjà sélectionnée
+        if (typeReductionSelect.value) {
+            typeReductionSelect.dispatchEvent(new Event('change'));
+        }
+    }
+    
+    // Set default dates if not already set
+    const dateDebutInput = document.getElementById('date_debut');
+    const dateFinInput = document.getElementById('date_fin');
+    
+    if (dateDebutInput && !dateDebutInput.value) {
+        const today = new Date();
+        // Format the date for datetime-local input
+        const formatDate = (date) => {
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        };
+        dateDebutInput.value = formatDate(today);
+    }
+    
+    if (dateFinInput && !dateFinInput.value) {
+        const nextMonth = new Date();
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        // Format the date for datetime-local input
+        const formatDate = (date) => {
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        };
+        dateFinInput.value = formatDate(nextMonth);
+    }
+});
+</script>
+{% endblock %}

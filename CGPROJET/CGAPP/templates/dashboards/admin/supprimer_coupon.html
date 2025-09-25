@@ -1,0 +1,121 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Supprimer le Coupon{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0 text-danger">
+                        <i class="fas fa-trash me-2"></i>Supprimer le Coupon
+                    </h1>
+                    <p class="mb-0">Cette action est irréversible</p>
+                </div>
+                <div>
+                    <a href="{% url 'gestion_coupons' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation -->
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmation de suppression
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-warning me-2"></i>
+                        <strong>Attention !</strong> Vous êtes sur le point de supprimer définitivement ce coupon.
+                    </div>
+
+                    <!-- Détails du coupon -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Détails du coupon à supprimer :</h6>
+                        
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Code :</strong></div>
+                            <div class="col-sm-8">{{ coupon.code }}</div>
+                        </div>
+                        
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Type :</strong></div>
+                            <div class="col-sm-8">
+                                {% if coupon.type_reduction == 'pourcentage' %}
+                                    Pourcentage ({{ coupon.valeur }}%)
+                                {% else %}
+                                    Montant fixe ({{ coupon.valeur }} FCFA)
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Période :</strong></div>
+                            <div class="col-sm-8">
+                                Du {{ coupon.date_debut|date:"d/m/Y H:i" }} au {{ coupon.date_fin|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Utilisations :</strong></div>
+                            <div class="col-sm-8">{{ coupon.usage_actuel }}/{{ coupon.usage_max }}</div>
+                        </div>
+                        
+                        <div class="row mt-2">
+                            <div class="col-sm-4"><strong>Statut :</strong></div>
+                            <div class="col-sm-8">
+                                {% if coupon.est_valide %}
+                                    <span class="badge bg-success">Valide</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Expiré</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Impact de la suppression -->
+                    {% if coupon.usage_actuel > 0 %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Impact :</strong> Ce coupon a été utilisé {{ coupon.usage_actuel }} fois. 
+                        Sa suppression n'affectera pas les commandes déjà passées.
+                    </div>
+                    {% endif %}
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'gestion_coupons' %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>Confirmer la suppression
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.card.border-danger {
+    border: 2px solid #dc3545 !important;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,375 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Audit et Sécurité{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>Audit et Sécurité
+                    </h1>
+                    <p class="mb-0">Surveillance et sécurité du système</p>
+                </div>
+                <div>
+                    <button class="btn btn-success" onclick="creerSauvegarde()">
+                        <i class="fas fa-download me-2"></i>Créer Sauvegarde
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques de sécurité -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Connexions aujourd'hui</div>
+                            <div class="h4 mb-0">{{ stats.connexions_jour }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-sign-in-alt fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Tentatives échouées</div>
+                            <div class="h4 mb-0">{{ stats.tentatives_echouees }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Dernière sauvegarde</div>
+                            <div class="h6 mb-0">{{ stats.derniere_sauvegarde|date:"d/m/Y" }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-database fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Utilisateurs actifs</div>
+                            <div class="h4 mb-0">{{ stats.utilisateurs_actifs }}</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Journal des connexions -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Journal des Connexions
+                    </h5>
+                    <div>
+                        <select class="form-select form-select-sm" onchange="filtrerJournal(this.value)">
+                            <option value="all">Toutes les connexions</option>
+                            <option value="success">Réussies uniquement</option>
+                            <option value="failed">Échouées uniquement</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date/Heure</th>
+                                    <th>Utilisateur</th>
+                                    <th>IP</th>
+                                    <th>Statut</th>
+                                    <th>Navigateur</th>
+                                </tr>
+                            </thead>
+                            <tbody id="journalTableBody">
+                                {% for log in journal_connexions %}
+                                <tr class="{% if not log.succes %}table-warning{% endif %}">
+                                    <td>{{ log.date_connexion|date:"d/m/Y H:i:s" }}</td>
+                                    <td>
+                                        {% if log.utilisateur %}
+                                            {{ log.utilisateur.nom_complet }}
+                                        {% else %}
+                                            <em class="text-muted">Utilisateur inconnu</em>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <code>{{ log.adresse_ip }}</code>
+                                    </td>
+                                    <td>
+                                        {% if log.succes %}
+                                            <span class="badge bg-success">Réussie</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Échouée</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ log.user_agent|truncatechars:50 }}</small>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">
+                                        Aucune connexion enregistrée
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertes de sécurité -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-circle me-2"></i>Alertes de Sécurité
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if alertes_securite %}
+                        {% for alerte in alertes_securite %}
+                        <div class="alert alert-{{ alerte.niveau }} alert-dismissible fade show" role="alert">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-{{ alerte.icone }} me-2"></i>
+                                </div>
+                                <div>
+                                    <strong>{{ alerte.titre }}</strong><br>
+                                    <small>{{ alerte.message }}</small><br>
+                                    <small class="text-muted">{{ alerte.date|date:"d/m/Y H:i" }}</small>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                            <p class="text-success mb-0">Aucune alerte de sécurité</p>
+                            <small class="text-muted">Système sécurisé</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sauvegardes -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-database me-2"></i>Gestion des Sauvegardes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Taille</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for sauvegarde in sauvegardes %}
+                                        <tr>
+                                            <td>{{ sauvegarde.date_creation|date:"d/m/Y H:i:s" }}</td>
+                                            <td>
+                                                <span class="badge bg-{% if sauvegarde.type_sauvegarde == 'automatique' %}info{% else %}primary{% endif %}">
+                                                    {{ sauvegarde.get_type_sauvegarde_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ sauvegarde.taille_fichier|filesizeformat }}</td>
+                                            <td>
+                                                {% if sauvegarde.statut == 'complete' %}
+                                                    <span class="badge bg-success">Complète</span>
+                                                {% elif sauvegarde.statut == 'en_cours' %}
+                                                    <span class="badge bg-warning">En cours</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Échouée</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if sauvegarde.statut == 'complete' %}
+                                                    <a href="{% url 'telecharger_sauvegarde' sauvegarde.id %}" 
+                                                       class="btn btn-sm btn-outline-primary" title="Télécharger">
+                                                        <i class="fas fa-download"></i>
+                                                    </a>
+                                                {% endif %}
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        onclick="supprimerSauvegarde({{ sauvegarde.id }})" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-3">
+                                                Aucune sauvegarde disponible
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="fw-bold">Configuration Automatique</h6>
+                                    <form method="post" action="{% url 'configurer_sauvegarde_auto' %}">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <label class="form-label">Fréquence</label>
+                                            <select name="frequence" class="form-select">
+                                                <option value="quotidienne">Quotidienne</option>
+                                                <option value="hebdomadaire">Hebdomadaire</option>
+                                                <option value="mensuelle">Mensuelle</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Heure</label>
+                                            <input type="time" name="heure" class="form-control" value="02:00">
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="actif" id="sauvegardeAuto" checked>
+                                                <label class="form-check-label" for="sauvegardeAuto">
+                                                    Activer les sauvegardes automatiques
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm w-100">
+                                            <i class="fas fa-save me-2"></i>Configurer
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+</style>
+
+<script>
+function filtrerJournal(filtre) {
+    const rows = document.querySelectorAll('#journalTableBody tr');
+    rows.forEach(row => {
+        const badge = row.querySelector('.badge');
+        if (!badge) return;
+        
+        const isSuccess = badge.classList.contains('bg-success');
+        const isFailed = badge.classList.contains('bg-danger');
+        
+        if (filtre === 'all') {
+            row.style.display = '';
+        } else if (filtre === 'success' && isSuccess) {
+            row.style.display = '';
+        } else if (filtre === 'failed' && isFailed) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function creerSauvegarde() {
+    if (confirm('Créer une nouvelle sauvegarde du système ?')) {
+        fetch('{% url "creer_sauvegarde" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Sauvegarde créée avec succès');
+                location.reload();
+            } else {
+                alert('Erreur lors de la création de la sauvegarde');
+            }
+        });
+    }
+}
+
+function supprimerSauvegarde(id) {
+    if (confirm('Supprimer définitivement cette sauvegarde ?')) {
+        fetch(`/admin/supprimer-sauvegarde/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur lors de la suppression');
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

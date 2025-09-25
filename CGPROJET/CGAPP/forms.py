@@ -8,6 +8,88 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+# ==================== FORMULAIRES ADMIN ====================
+
+class CategorieForm(forms.ModelForm):
+    class Meta:
+        model = Categorie
+        fields = ['nom', 'description', 'image', 'ordre_affichage']
+        widgets = {
+            'nom': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nom de la catégorie'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Description de la catégorie'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control'
+            }),
+            'ordre_affichage': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+                'placeholder': 'Ordre d\'affichage'
+            })
+        }
+
+class CouponForm(forms.ModelForm):
+    class Meta:
+        model = Coupon
+        fields = ['code', 'type_reduction', 'valeur', 'date_debut', 'date_fin', 'usage_max', 'actif']
+        widgets = {
+            'code': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Code du coupon (ex: NOEL2024)'
+            }),
+            'type_reduction': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'valeur': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0'
+            }),
+            'date_debut': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'date_fin': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'usage_max': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'placeholder': 'Nombre maximum d\'utilisations'
+            }),
+            'actif': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            })
+        }
+
+class ParametreSystemeForm(forms.ModelForm):
+    class Meta:
+        model = ParametreSysteme
+        fields = ['cle', 'valeur', 'description']
+        widgets = {
+            'cle': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Clé du paramètre'
+            }),
+            'valeur': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 2,
+                'placeholder': 'Valeur du paramètre'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Description du paramètre'
+            })
+        }
+
 class ProfilForm(forms.ModelForm):
     telephone = forms.CharField(max_length=20, required=False, label='Téléphone')
 
@@ -328,8 +410,8 @@ class CreerGerantForm(UserCreationForm):
         user.role = 'gerant'  # Définir le rôle comme gérant
         if commit:
             user.save()
-            # Créer l'instance Gerant associée
-            Gerant.objects.create(utilisateur=user)
+            # # Créer l'instance Gerant associée
+            # Gerant.objects.create(utilisateur=user)
         return user
 
 
@@ -404,19 +486,28 @@ class CreerServeurForm(UserCreationForm):
         if commit:
             user.save()
             # Créer l'instance Serveur associée
-            Serveur.objects.create(utilisateur=user)
+            # Serveur.objects.create(utilisateur=user)
         return user
 
 
 # ==================== FORMULAIRES GÉRANT ====================
 
+from django import forms
+from .models import Produit, Gerant
+
 class ProduitForm(forms.ModelForm):
     """
-    Formulaire pour que le gérant puisse ajouter/modifier des produits
+    Formulaire pour ajouter/modifier des produits - accessible aux admins et gérants
     """
+    
     class Meta:
         model = Produit
-        fields = ['nom', 'description', 'prix', 'quantite_disponible', 'categorie', 'image']
+        fields = [
+            'nom', 'description', 'description_longue', 'prix', 'promotion',
+            'quantite_disponible', 'categorie', 'gerant', 'image',
+            'ingredients', 'allergenes', 'poids_net', 'conseil_conservation',
+            'est_populaire'
+        ]
         widgets = {
             'nom': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -424,33 +515,99 @@ class ProduitForm(forms.ModelForm):
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 4,
-                'placeholder': 'Description du produit'
+                'rows': 3,
+                'placeholder': 'Description courte du produit'
+            }),
+            'description_longue': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 5,
+                'placeholder': 'Description détaillée du produit'
             }),
             'prix': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'step': '0.01',
-                'min': '0'
+                'min': '0',
+                'placeholder': '0.00'
+            }),
+            'promotion': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '0',
+                'max': '100',
+                'placeholder': '0'
             }),
             'quantite_disponible': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'min': '0'
+                'min': '0',
+                'placeholder': '0'
             }),
             'categorie': forms.Select(attrs={
                 'class': 'form-select'
             }),
+            'gerant': forms.Select(attrs={
+                'class': 'form-select'
+            }),
             'image': forms.FileInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'ingredients': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Liste des ingrédients, séparés par des virgules'
+            }),
+            'allergenes': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Lait, œufs, fruits à coque...'
+            }),
+            'poids_net': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: 500g, 1kg, 250ml...'
+            }),
+            'conseil_conservation': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: À conserver à -18°C'
+            }),
+            'est_populaire': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
             })
         }
         labels = {
             'nom': 'Nom du produit',
-            'description': 'Description',
-            'prix': 'Prix (€)',
-            'quantite_disponible': 'Quantité disponible',
+            'description': 'Description courte',
+            'description_longue': 'Description détaillée',
+            'prix': 'Prix (FCFA)',
+            'promotion': 'Pourcentage de réduction (%)',
+            'quantite_disponible': 'Quantité en stock',
             'categorie': 'Catégorie',
-            'image': 'Image du produit'
+            'gerant': 'Gérant responsable',
+            'image': 'Image principale',
+            'ingredients': 'Liste des ingrédients',
+            'allergenes': 'Allergènes',
+            'poids_net': 'Poids net',
+            'conseil_conservation': 'Conseil de conservation',
+            'est_populaire': 'Produit populaire'
         }
+    
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Adapter le formulaire selon le type d'utilisateur
+        if self.user:
+            if hasattr(self.user, 'gerant'):
+                # Pour les gérants : champ gérant caché et valeur automatique
+                self.fields['gerant'].widget = forms.HiddenInput()
+                self.fields['gerant'].required = False
+            elif hasattr(self.user, 'role') and self.user.role == 'admin':
+                # Pour les admins : montrer la liste des gérants
+                self.fields['gerant'].queryset = Gerant.objects.filter(actif=True)
+                self.fields['gerant'].empty_label = "Sélectionnez un gérant"
+                self.fields['gerant'].required = True
+        
+        # Rendre certains champs facultatifs
+        for field in ['description', 'description_longue', 'allergenes', 'poids_net', 
+                     'ingredients', 'conseil_conservation', 'promotion', 'categorie']:
+            self.fields[field].required = False
     
     def clean_prix(self):
         prix = self.cleaned_data.get('prix')
@@ -458,26 +615,41 @@ class ProduitForm(forms.ModelForm):
             raise forms.ValidationError("Le prix doit être supérieur à 0.")
         return prix
     
+    def clean_promotion(self):
+        promotion = self.cleaned_data.get('promotion') or 0
+        if promotion < 0:
+            raise forms.ValidationError("La promotion ne peut pas être négative.")
+        if promotion > 100:
+            raise forms.ValidationError("La promotion ne peut pas dépasser 100%.")
+        return promotion
+    
     def clean_quantite_disponible(self):
         quantite = self.cleaned_data.get('quantite_disponible')
         if quantite is not None and quantite < 0:
             raise forms.ValidationError("La quantité ne peut pas être négative.")
         return quantite
     
-
-class ProduitForm(forms.ModelForm):
-    class Meta:
-        model = Produit
-        fields = ['nom', 'description', 'prix', 'quantite_disponible', 'image', 'categorie']
-        widgets = {
-            'description': forms.Textarea(attrs={'rows': 3}),
-        }
+    def clean_gerant(self):
+        gerant = self.cleaned_data.get('gerant')
+        if self.user and hasattr(self.user, 'gerant'):
+            # Pour les gérants, utiliser leur propre compte
+            return self.user.gerant
+        return gerant
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs.update({'class': 'form-control'})
-        self.fields['image'].widget.attrs.update({'class': 'form-control-file'})
+
+# class ProduitForm(forms.ModelForm):
+#     class Meta:
+#         model = Produit
+#         fields = ['nom', 'description', 'prix', 'quantite_disponible', 'image', 'categorie']
+#         widgets = {
+#             'description': forms.Textarea(attrs={'rows': 3}),
+#         }
+    
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         for field in self.fields:
+#             self.fields[field].widget.attrs.update({'class': 'form-control'})
+#         self.fields['image'].widget.attrs.update({'class': 'form-control-file'})
 
 #==================================Adresse==================================
 

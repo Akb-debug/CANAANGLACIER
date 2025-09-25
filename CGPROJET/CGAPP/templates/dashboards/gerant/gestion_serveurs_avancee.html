@@ -1,0 +1,665 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Gestion Avancée des Serveurs{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-users-cog me-2"></i>Gestion Avancée des Serveurs
+                    </h1>
+                    <p class="mb-0">Supervision, planification et évaluation des performances</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'creer_serveur_gerant' %}" class="btn btn-success">
+                        <i class="fas fa-plus-circle me-2"></i>Nouveau Serveur
+                    </a>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#planificationModal">
+                        <i class="fas fa-calendar-plus me-2"></i>Planifier Tâche
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques des serveurs -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Serveurs Actifs</div>
+                            <div class="h3 mb-0">{{ stats.serveurs_actifs }}/{{ stats.total_serveurs }}</div>
+                            <div class="small">En service aujourd'hui</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-check fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Commandes Traitées</div>
+                            <div class="h3 mb-0">{{ stats.commandes_traitees }}</div>
+                            <div class="small">Aujourd'hui</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-tasks fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Temps Moyen</div>
+                            <div class="h3 mb-0">{{ stats.temps_moyen_traitement }} min</div>
+                            <div class="small">Par commande</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Efficacité Moyenne</div>
+                            <div class="h3 mb-0">{{ stats.efficacite_moyenne|floatformat:1 }}%</div>
+                            <div class="small">Performance globale</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des serveurs avec performances -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>Performance des Serveurs
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Serveur</th>
+                                    <th>Email</th>
+                                    <th>Statut</th>
+                                    <th>Commandes Aujourd'hui</th>
+                                    <th>Dernière Activité</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for serveur in serveurs %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle me-3">
+                                                {% if serveur.photo %}
+                                                    <img src="{{ serveur.photo }}" alt="" class="img-fluid rounded-circle" width="40">
+                                                {% else %}
+                                                    <img src="{% static 'img/avatar.png' %}" alt="" class="img-fluid rounded-circle" width="40">
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ serveur.nom_complet }}</h6>
+                                                <small class="text-muted">Embauché le {{ serveur.date_embauche|date:'d/m/Y' }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ serveur.email }}</td>
+                                    <td>
+                                        {% if serveur.statut == 'actif' %}
+                                            <span class="badge bg-success">En ligne</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Hors ligne</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ serveur.commandes_aujourdhui }}</span>
+                                    </td>
+                                    <td>
+                                        {% if serveur.derniere_activite %}
+                                            Il y a {{ serveur.derniere_activite|timesince }}
+                                        {% else %}
+                                            Aucune activité
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-primary action-btn" 
+                                                    data-action="details" 
+                                                    data-id="{{ serveur.id }}" 
+                                                    title="Détails">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-success action-btn" 
+                                                    data-action="assign" 
+                                                    data-id="{{ serveur.id }}" 
+                                                    data-nom="{{ serveur.nom_complet|escapejs }}" 
+                                                    title="Assigner tâche">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-warning action-btn" 
+                                                    data-action="evaluate" 
+                                                    data-id="{{ serveur.id }}" 
+                                                    data-nom="{{ serveur.nom_complet|escapejs }}" 
+                                                    title="Évaluer">
+                                                <i class="fas fa-star"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">Aucun serveur disponible</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Planification et tâches -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Planning des Tâches
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if taches_planifiees %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Tâche</th>
+                                        <th>Serveur Assigné</th>
+                                        <th>Date/Heure</th>
+                                        <th>Priorité</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tache in taches_planifiees %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">{{ tache.titre }}</div>
+                                            <small class="text-muted">{{ tache.description|truncatechars:50 }}</small>
+                                        </td>
+                                        <td>{{ tache.serveur_assigne.nom_complet }}</td>
+                                        <td>{{ tache.date_prevue|date:"d/m/Y H:i" }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if tache.priorite == 'haute' %}danger{% elif tache.priorite == 'moyenne' %}warning{% else %}info{% endif %}">
+                                                {{ tache.get_priorite_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{% if tache.statut == 'terminee' %}success{% elif tache.statut == 'en_cours' %}primary{% elif tache.statut == 'en_retard' %}danger{% else %}secondary{% endif %}">
+                                                {{ tache.get_statut_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="Voir les détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="Voir le rapport">
+                                                    <i class="fas fa-chart-bar"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-warning" data-bs-toggle="tooltip" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-plus fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucune tâche planifiée</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#planificationModal">
+                                <i class="fas fa-plus me-2"></i>Planifier une tâche
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiques Hebdomadaires
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statsChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Évaluations et feedback -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments me-2"></i>Évaluations Récentes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if evaluations_recentes %}
+                        <div class="row g-3">
+                            {% for eval in evaluations_recentes %}
+                            <div class="col-md-6">
+                                <div class="card border-left-{% if eval.note >= 4 %}success{% elif eval.note >= 3 %}warning{% else %}danger{% endif %}">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h6 class="mb-0">{{ eval.serveur.nom_complet }}</h6>
+                                            <div class="d-flex">
+                                                {% for i in "12345" %}
+                                                    <i class="fas fa-star {% if forloop.counter <= eval.note %}text-warning{% else %}text-muted{% endif %}"></i>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <p class="mb-1">{{ eval.commentaire|truncatechars:100 }}</p>
+                                        <small class="text-muted">{{ eval.date_evaluation|date:"d/m/Y" }} - {{ eval.evaluateur.nom_complet }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucune évaluation récente</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Planification Tâche -->
+<div class="modal fade" id="planificationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-plus me-2"></i>Planifier une Tâche
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'planifier_tache' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Titre de la tâche <span class="text-danger">*</span></label>
+                                <input type="text" name="titre" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Serveur assigné <span class="text-danger">*</span></label>
+                                <select name="serveur_id" class="form-select" required>
+                                    <option value="">Sélectionner un serveur</option>
+                                    {% for serveur in serveurs %}
+                                    <option value="{{ serveur.id }}">{{ serveur.nom_complet }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Date prévue <span class="text-danger">*</span></label>
+                                <input type="date" name="date_prevue" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Heure prévue <span class="text-danger">*</span></label>
+                                <input type="time" name="heure_prevue" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Priorité <span class="text-danger">*</span></label>
+                                <select name="priorite" class="form-select" required>
+                                    <option value="basse">Basse</option>
+                                    <option value="moyenne" selected>Moyenne</option>
+                                    <option value="haute">Haute</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Planifier la tâche</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Évaluation Serveur -->
+<div class="modal fade" id="evaluationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-star me-2"></i>Évaluer le Serveur
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'evaluer_serveur' %}">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="serveur_id" id="eval_serveur_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Serveur</label>
+                        <input type="text" id="eval_serveur_nom" class="form-control" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Note <span class="text-danger">*</span></label>
+                        <div class="rating-stars">
+                            {% for i in "12345" %}
+                            <i class="fas fa-star rating-star" data-rating="{{ forloop.counter }}"></i>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="note" id="eval_note" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Commentaire</label>
+                        <textarea name="commentaire" class="form-control" rows="4" placeholder="Votre évaluation du serveur..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer l'évaluation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+.border-left-success {
+    border-left: 4px solid #1cc88a !important;
+}
+.border-left-warning {
+    border-left: 4px solid #f6c23e !important;
+}
+.border-left-danger {
+    border-left: 4px solid #e74a3b !important;
+}
+.rating-stars {
+    font-size: 1.5rem;
+}
+.rating-star {
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.rating-star:hover,
+.rating-star.active {
+    color: #ffc107;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Graphique des statistiques
+function initStatsChart() {
+    const statsCanvas = document.getElementById('statsChart');
+    if (!statsCanvas) return;
+    
+    const statsCtx = statsCanvas.getContext('2d');
+    if (!statsCtx) return;
+    
+    const chartData = {
+        type: 'bar',
+        data: {
+            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+            datasets: [{
+                label: 'Commandes traitées',
+                data: {{ stats_hebdo|safe }},
+                backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                borderColor: '#4e73df',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    };
+    
+    new Chart(statsCtx, chartData);
+}
+
+// Initialisation au chargement du DOM
+document.addEventListener('DOMContentLoaded', function() {
+    initStatsChart();
+});
+
+function voirDetails(serveurId) {
+    alert('Détails du serveur ID: ' + serveurId);
+    // Implémentation complète à ajouter
+}
+
+function assignerTache(serveurId, serveurNom) {
+    alert('Assigner une tâche à: ' + serveurNom + ' (ID: ' + serveurId + ')');
+    // Implémentation complète à ajouter
+    document.querySelector('select[name="serveur_id"]').value = serveurId;
+    const modal = new bootstrap.Modal(document.getElementById('planificationModal'));
+    modal.show();
+}
+
+function evaluerServeur(serveurId, serveurNom) {
+    var evaluationModal = new bootstrap.Modal(document.getElementById('evaluationModal'));
+    document.getElementById('evaluationModalLabel').textContent = 'Évaluer ' + serveurNom;
+    document.getElementById('serveurId').value = serveurId;
+    evaluationModal.show();
+}
+
+function modifierTache(tacheId) {
+    alert('Modifier la tâche ID: ' + tacheId);
+    // Implémentation complète à ajouter
+}
+
+function supprimerTache(tacheId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
+        // Implémentation AJAX pour supprimer la tâche
+        console.log('Suppression de la tâche ID: ' + tacheId);
+        // Exemple d'implémentation AJAX (à décommenter et adapter)
+        /*
+        fetch('/api/taches/' + tacheId + '/', {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur lors de la suppression');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Une erreur est survenue lors de la suppression');
+        });
+        */
+    }
+}
+
+// Fonction utilitaire pour récupérer le token CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Gestion des événements
+document.addEventListener('DOMContentLoaded', function() {
+    // Gestion des clics sur les boutons d'action
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.action-btn');
+        if (!btn) return;
+
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        const nom = btn.dataset.nom;
+
+        switch(action) {
+            case 'details':
+                voirDetails(id);
+                break;
+            case 'assign':
+                assignerTache(id, nom);
+                break;
+            case 'evaluate':
+                evaluerServeur(id, nom);
+                break;
+        }
+    });
+
+    // Gestion des étoiles de notation
+    var ratingContainer = document.querySelector('.rating-stars');
+    if (!ratingContainer) return;
+
+    var ratingStars = document.querySelectorAll('.rating-star');
+    var noteField = document.getElementById('eval_note');
+    
+    // Fonction pour mettre à jour l'affichage des étoiles
+    function updateStarsDisplay(rating) {
+        ratingStars.forEach(function(star) {
+            var starRating = parseInt(star.getAttribute('data-rating'), 10);
+            if (starRating <= rating) {
+                star.classList.add('active', 'text-warning');
+            } else {
+                star.classList.remove('active', 'text-warning');
+            }
+        });
+    }
+
+    // Gestion du clic sur une étoile
+    ratingStars.forEach(function(star) {
+        star.addEventListener('click', function() {
+            var rating = parseInt(this.getAttribute('data-rating'), 10);
+            if (noteField) {
+                noteField.value = rating;
+            }
+            updateStarsDisplay(rating);
+        });
+
+        // Gestion du survol des étoiles
+        star.addEventListener('mouseover', function() {
+            var hoverRating = parseInt(this.getAttribute('data-rating'), 10);
+            updateStarsDisplay(hoverRating);
+        });
+    });
+
+    // Réinitialisation au survol de la zone de notation
+    ratingContainer.addEventListener('mouseleave', function() {
+        var currentRating = noteField ? parseInt(noteField.value, 10) || 0 : 0;
+        updateStarsDisplay(currentRating);
+    });
+});
+</script>
+{% endblock %}

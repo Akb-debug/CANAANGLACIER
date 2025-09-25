@@ -1,0 +1,523 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Analyse des Performances{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Analyse des Performances
+                    </h1>
+                    <p class="mb-0">Tableaux de bord et métriques de performance</p>
+                </div>
+                <div>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-outline-primary" onclick="exporterDonnees()">
+                            <i class="fas fa-download me-2"></i>Exporter
+                        </button>
+                        <button class="btn btn-primary" onclick="actualiserDonnees()">
+                            <i class="fas fa-sync me-2"></i>Actualiser
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Période de sélection -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-2">
+                            <label class="form-label">Période</label>
+                            <select name="periode" class="form-select" onchange="this.form.submit()">
+                                <option value="7" {% if periode == '7' %}selected{% endif %}>7 jours</option>
+                                <option value="30" {% if periode == '30' %}selected{% endif %}>30 jours</option>
+                                <option value="90" {% if periode == '90' %}selected{% endif %}>3 mois</option>
+                                <option value="365" {% if periode == '365' %}selected{% endif %}>1 an</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Date début</label>
+                            <input type="date" name="date_debut" class="form-control" value="{{ date_debut }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Date fin</label>
+                            <input type="date" name="date_fin" class="form-control" value="{{ date_fin }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Comparaison</label>
+                            <select name="comparaison" class="form-select">
+                                <option value="precedente" {% if comparaison == 'precedente' %}selected{% endif %}>Période précédente</option>
+                                <option value="annee" {% if comparaison == 'annee' %}selected{% endif %}>Même période l'an dernier</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary d-block w-100">
+                                <i class="fas fa-search me-2"></i>Analyser
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs Principaux -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                    <h4>{{ kpis.chiffre_affaires|floatformat:0 }} FCFA</h4>
+                    <small>Chiffre d'Affaires</small>
+                    <div class="mt-1">
+                        <small class="{% if kpis.evolution_ca > 0 %}text-success{% elif kpis.evolution_ca < 0 %}text-danger{% else %}text-white{% endif %}">
+                            {% if kpis.evolution_ca > 0 %}+{% endif %}{{ kpis.evolution_ca|floatformat:1 }}%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                    <h4>{{ kpis.nb_commandes }}</h4>
+                    <small>Commandes</small>
+                    <div class="mt-1">
+                        <small class="{% if kpis.evolution_commandes > 0 %}text-success{% elif kpis.evolution_commandes < 0 %}text-danger{% else %}text-white{% endif %}">
+                            {% if kpis.evolution_commandes > 0 %}+{% endif %}{{ kpis.evolution_commandes|floatformat:1 }}%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-calculator fa-2x mb-2"></i>
+                    <h4>{{ kpis.panier_moyen|floatformat:0 }} FCFA</h4>
+                    <small>Panier Moyen</small>
+                    <div class="mt-1">
+                        <small class="{% if kpis.evolution_panier > 0 %}text-success{% elif kpis.evolution_panier < 0 %}text-danger{% else %}text-white{% endif %}">
+                            {% if kpis.evolution_panier > 0 %}+{% endif %}{{ kpis.evolution_panier|floatformat:1 }}%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <h4>{{ kpis.nb_clients }}</h4>
+                    <small>Clients Actifs</small>
+                    <div class="mt-1">
+                        <small class="{% if kpis.evolution_clients > 0 %}text-success{% elif kpis.evolution_clients < 0 %}text-danger{% else %}text-white{% endif %}">
+                            {% if kpis.evolution_clients > 0 %}+{% endif %}{{ kpis.evolution_clients|floatformat:1 }}%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-secondary text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-2x mb-2"></i>
+                    <h4>{{ kpis.taux_conversion|floatformat:1 }}%</h4>
+                    <small>Taux Conversion</small>
+                    <div class="mt-1">
+                        <small class="{% if kpis.evolution_conversion > 0 %}text-success{% elif kpis.evolution_conversion < 0 %}text-danger{% else %}text-white{% endif %}">
+                            {% if kpis.evolution_conversion > 0 %}+{% endif %}{{ kpis.evolution_conversion|floatformat:1 }}%
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-dark text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h4>{{ kpis.satisfaction|floatformat:1 }}/5</h4>
+                    <small>Satisfaction</small>
+                    <div class="mt-1">
+                        <small class="{% if kpis.evolution_satisfaction > 0 %}text-success{% elif kpis.evolution_satisfaction < 0 %}text-danger{% else %}text-white{% endif %}">
+                            {% if kpis.evolution_satisfaction > 0 %}+{% endif %}{{ kpis.evolution_satisfaction|floatformat:1 }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques principaux -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Évolution des Performances
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="performanceChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>Heures de Pointe
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="heuresChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analyses détaillées -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>Top Produits Performants
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if top_produits %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Rang</th>
+                                        <th>Produit</th>
+                                        <th>Ventes</th>
+                                        <th>CA</th>
+                                        <th>Performance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for produit in top_produits %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-{% if forloop.counter <= 3 %}warning{% else %}secondary{% endif %}">
+                                                {{ forloop.counter }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-bold">{{ produit.nom }}</div>
+                                            <small class="text-muted">{{ produit.categorie }}</small>
+                                        </td>
+                                        <td>{{ produit.quantite_vendue }}</td>
+                                        <td class="fw-bold text-success">{{ produit.chiffre_affaires|floatformat:0 }} FCFA</td>
+                                        <td>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar bg-success" style="width: {{ produit.performance }}%"></div>
+                                            </div>
+                                            <small>{{ produit.performance|floatformat:0 }}%</small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-chart-bar fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Aucune donnée disponible</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users-cog me-2"></i>Performance des Serveurs
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if performance_serveurs %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Serveur</th>
+                                        <th>Commandes</th>
+                                        <th>CA Généré</th>
+                                        <th>Efficacité</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for serveur in performance_serveurs %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">{{ serveur.nom }}</div>
+                                            <small class="text-muted">{{ serveur.email }}</small>
+                                        </td>
+                                        <td>{{ serveur.nb_commandes }}</td>
+                                        <td class="fw-bold text-success">{{ serveur.ca_genere|floatformat:0 }} FCFA</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2" style="height: 6px;">
+                                                    <div class="progress-bar bg-{% if serveur.efficacite > 80 %}success{% elif serveur.efficacite > 60 %}warning{% else %}danger{% endif %}" 
+                                                         style="width: {{ serveur.efficacite }}%"></div>
+                                                </div>
+                                                <small>{{ serveur.efficacite|floatformat:0 }}%</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-user-tie fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Aucun serveur actif</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analyses comportementales -->
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Répartition par Catégorie
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoriesChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Tendances Hebdomadaires
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="tendancesChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Recommandations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recommandations %}
+                        {% for rec in recommandations %}
+                        <div class="alert alert-{{ rec.type }} d-flex align-items-start mb-2" role="alert">
+                            <i class="fas fa-{{ rec.icone }} me-2 mt-1"></i>
+                            <div>
+                                <strong>{{ rec.titre }}</strong><br>
+                                <small>{{ rec.description }}</small>
+                                {% if rec.action %}
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-{{ rec.type }}" onclick="{{ rec.action }}">
+                                            {{ rec.action_label }}
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-thumbs-up fa-2x text-success mb-2"></i>
+                            <p class="text-success mb-0">Excellentes performances !</p>
+                            <small class="text-muted">Continuez sur cette lancée</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: #495057;
+}
+.progress {
+    background-color: #e9ecef;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Graphique des performances
+const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+new Chart(performanceCtx, {
+    type: 'line',
+    data: {
+        labels: {{ performance_labels|safe }},
+        datasets: [{
+            label: 'Chiffre d\'Affaires',
+            data: {{ ca_data|safe }},
+            borderColor: '#4e73df',
+            backgroundColor: 'rgba(78, 115, 223, 0.1)',
+            tension: 0.3,
+            fill: true
+        }, {
+            label: 'Nombre de Commandes',
+            data: {{ commandes_data|safe }},
+            borderColor: '#1cc88a',
+            backgroundColor: 'rgba(28, 200, 138, 0.1)',
+            tension: 0.3,
+            yAxisID: 'y1'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return value.toLocaleString() + ' FCFA';
+                    }
+                }
+            },
+            y1: {
+                type: 'linear',
+                display: true,
+                position: 'right',
+                grid: {
+                    drawOnChartArea: false,
+                }
+            }
+        }
+    }
+});
+
+// Graphique heures de pointe
+const heuresCtx = document.getElementById('heuresChart').getContext('2d');
+new Chart(heuresCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ heures_labels|safe }},
+        datasets: [{
+            label: 'Commandes par heure',
+            data: {{ heures_data|safe }},
+            backgroundColor: 'rgba(54, 185, 204, 0.8)',
+            borderColor: '#36b9cc',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// Graphique catégories
+const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
+new Chart(categoriesCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ categories_labels|safe }},
+        datasets: [{
+            data: {{ categories_data|safe }},
+            backgroundColor: [
+                '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                '#858796', '#5a5c69', '#6f42c1', '#e83e8c', '#fd7e14'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Graphique tendances
+const tendancesCtx = document.getElementById('tendancesChart').getContext('2d');
+new Chart(tendancesCtx, {
+    type: 'radar',
+    data: {
+        labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+        datasets: [{
+            label: 'Cette semaine',
+            data: {{ tendances_semaine|safe }},
+            borderColor: '#4e73df',
+            backgroundColor: 'rgba(78, 115, 223, 0.2)',
+            pointBackgroundColor: '#4e73df'
+        }, {
+            label: 'Semaine précédente',
+            data: {{ tendances_precedente|safe }},
+            borderColor: '#858796',
+            backgroundColor: 'rgba(133, 135, 150, 0.2)',
+            pointBackgroundColor: '#858796'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            r: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+function exporterDonnees() {
+    window.print();
+}
+
+function actualiserDonnees() {
+    location.reload();
+}
+</script>
+{% endblock %}

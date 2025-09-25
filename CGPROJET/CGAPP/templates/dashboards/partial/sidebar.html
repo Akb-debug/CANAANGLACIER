@@ -1,267 +1,663 @@
 {% load static %}
 
-<div class="sidebar pe-4 pb-3" style="width: 250px; min-height: 100vh; position: fixed; left: 0; top: 0; background-color: var(--white-bg); z-index: 1000; overflow-y: auto;">
-    <nav class="navbar navbar-light" style="background-color: var(--white-bg); flex-direction: column; align-items: flex-start;">
-        <a href="{% url 'home' %}" class="navbar-brand mx-4 mb-3">
-            <h3 class="text-primary">
-                <img class="rounded-circle" src="{% static 'logo.png' %}" alt="Logo" style="width: 40px; height: 40px;">
-            </h3>
+<div class="sidebar-custom">
+    <nav class="sidebar-nav">
+        <!-- Logo -->
+        <a href="{% url 'home' %}" class="sidebar-brand">
+            <div class="sidebar-logo-container">
+                <img class="sidebar-logo-img" src="{% static 'logo.png' %}" alt="Logo">
+                <span class="sidebar-logo-text">CanaanGlacier</span>
+            </div>
         </a>
 
-        <div class="d-flex align-items-center ms-4 mb-4">
-            <div class="position-relative">
+        <!-- Profil utilisateur -->
+        <div class="sidebar-user-profile">
+            <div class="sidebar-avatar-container">
                 {% if user.profile_picture %}
-                    <img class="rounded-circle" src="{{ user.profile_picture.url }}" alt="{{ user.username }}" style="width: 40px; height: 40px; object-fit: cover;">
+                    <img class="sidebar-avatar" src="{{ user.profile_picture.url }}" alt="{{ user.username }}">
                 {% else %}
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #00B8B5; color: white; font-weight: bold;">
+                    <div class="sidebar-avatar-default">
                         {{ user.username|first|upper }}
                     </div>
                 {% endif %}
-                <div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>
+                <div class="sidebar-online-indicator"></div>
             </div>
-            <div class="ms-3">
-                <h6 class="mb-0">{{ user.username }}</h6>
-                <span>{{ user.date_joined|date }}</span>
+            <div class="sidebar-user-info">
+                <h6 class="sidebar-username">{{ user.username }}</h6>
+                <span class="sidebar-join-date">Membre depuis {{ user.date_joined|date:"M Y" }}</span>
+                <span class="sidebar-user-role">{{ user.get_role_display }}</span>
             </div>
         </div>
 
-        <div class="navbar-nav w-100">
+        <!-- Menu de navigation -->
+        <div class="sidebar-nav-menu">
             {% if user.role == 'gerant' %}
-                <a href="{% url 'dashboard_gerant' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'dashboard_gerant' %}active{% endif %}">
-                    <i class="fa fa-home me-2"></i>Dashboard
+                <!-- Tableau de bord -->
+                <a href="{% url 'dashboard_gerant' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'dashboard_gerant' %}sidebar-active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Tableau de bord</span>
                 </a>
 
-                <a href="{% url 'liste_produits' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'liste_produits' %}active{% endif %}">
-                    <i class="fa fa-box me-2"></i>Gestion Produits
+                <!-- Gestion des Produits -->
+                <div class="sidebar-nav-item sidebar-dropdown">
+                    <div class="sidebar-dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-boxes"></i>
+                        <span>Produits</span>
+                        <i class="sidebar-dropdown-arrow fas fa-chevron-down"></i>
+                    </div>
+                    <div class="sidebar-dropdown-menu">
+                        <a href="{% url 'liste_produits' %}" class="sidebar-dropdown-item {% if request.resolver_match.url_name == 'liste_produits' %}sidebar-active{% endif %}">
+                            <i class="fas fa-list-ul"></i>Liste des produits
+                        </a>
+                        <a href="{% url 'ajouter_produit' %}" class="sidebar-dropdown-item {% if request.resolver_match.url_name == 'ajouter_produit' %}sidebar-active{% endif %}">
+                            <i class="fas fa-plus-circle"></i>Ajouter un produit
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Gestion des Stocks -->
+                <a href="{% url 'gestion_stocks_avancee' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'gestion_stocks_avancee' %}sidebar-active{% endif %}">
+                    <i class="fas fa-warehouse"></i>
+                    <span>Gestion des stocks</span>
                 </a>
 
-                <a href="#" class="nav-item nav-link">
-                    <i class="fa fa-tags me-2"></i>Gestion Catégories
+                <!-- Gestion du Personnel -->
+                <div class="sidebar-nav-item sidebar-dropdown">
+                    <div class="sidebar-dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Personnel</span>
+                        <i class="sidebar-dropdown-arrow fas fa-chevron-down"></i>
+                    </div>
+                    <div class="sidebar-dropdown-menu">
+                        <a href="{% url 'liste_serveurs' %}" class="sidebar-dropdown-item {% if request.resolver_match.url_name == 'liste_serveurs' %}sidebar-active{% endif %}">
+                            <i class="fas fa-user-friends"></i>Liste des serveurs
+                        </a>
+                        <a href="{% url 'gestion_serveurs_avancee' %}" class="sidebar-dropdown-item {% if request.resolver_match.url_name == 'gestion_serveurs_avancee' %}sidebar-active{% endif %}">
+                            <i class="fas fa-chart-line"></i>Performances
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Analyse Financière -->
+                <a href="{% url 'gestion_financiere_gerant' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'gestion_financiere_gerant' %}sidebar-active{% endif %}">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Analyse financière</span>
                 </a>
 
-                <a href="{% url 'liste_serveurs' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'liste_serveurs' %}active{% endif %}">
-                    <i class="fa fa-user-friends me-2"></i>Gestion Serveurs
+                <!-- Rapports -->
+                <a href="{% url 'rapports_admin' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'rapports_admin' %}sidebar-active{% endif %}">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Rapports</span>
                 </a>
 
-                <a href="#" class="nav-item nav-link">
-                    <i class="fa fa-receipt me-2"></i>Gestion Cmd
-                </a>
-
-                <a href="#" class="nav-item nav-link">
-                    <i class="fa fa-warehouse me-2"></i>Gestion Stock
-                </a>
-
-                <a href="{% url 'profile' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                    <i class="fa fa-user-circle me-2"></i>Profil
-                </a>
-
-                <a href="{% url 'deconnexion' %}" class="nav-item nav-link text-danger">
-                    <i class="fa fa-sign-out-alt me-2"></i>Déconnexion
+                <!-- Communication -->
+                <a href="{% url 'communication_notifications' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'communication_notifications' %}sidebar-active{% endif %}">
+                    <i class="fas fa-comments"></i>
+                    <span>Messages</span>
+                    <span class="sidebar-notification-badge">3</span>
                 </a>
 
            {% elif user.role == 'client' %}
-                <a href="{% url 'dashboard_client' %}" 
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'dashboard_client' %}active{% endif %}">
-                <i class="fas fa-home me-2"></i>Dashboard
+                <a href="{% url 'dashboard_client' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'dashboard_client' %}sidebar-active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Tableau de bord</span>
                 </a>
 
-                <a href="{% url 'produits' %}" 
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'produits' %}active{% endif %}">
-                <i class="fas fa-shopping-bag me-2"></i>Achat
+                <a href="{% url 'produits' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'produits' %}sidebar-active{% endif %}">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Acheter</span>
                 </a>
 
-                <a href="{% url 'panier' %}"  
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'panier' %}active{% endif %}">
-                <i class="fas fa-shopping-cart me-2"></i>Panier
+                <a href="{% url 'panier' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'panier' %}sidebar-active{% endif %}">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Panier</span>
+                    <span class="sidebar-cart-badge">2</span>
                 </a>
 
-                <a href="{% url 'historique_client' %}" 
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'historique_client' %}active{% endif %}">
-                <i class="fas fa-history me-2"></i>Historiques
+                <a href="{% url 'historique_client' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'historique_client' %}sidebar-active{% endif %}">
+                    <i class="fas fa-history"></i>
+                    <span>Historique</span>
                 </a>
 
-                <a href="{% url 'contact' %}" 
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
-                <i class="fas fa-headset me-2"></i>Support
+                <a href="{% url 'tableau_avis' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'tableau_avis' %}sidebar-active{% endif %}">
+                    <i class="fas fa-star"></i>
+                    <span>Avis</span>
                 </a>
 
-                <a href="{% url 'tableau_avis' %}" 
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'tableau_avis' %}active{% endif %}">
-                <i class="fas fa-headset me-2"></i> tableau d'avis
+                <a href="{% url 'contact' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'contact' %}sidebar-active{% endif %}">
+                    <i class="fas fa-headset"></i>
+                    <span>Support</span>
                 </a>
-
                 
             {% elif user.role == 'admin' %}
-                <a href="{% url 'dashboard_admin' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'dashboard_admin' %}active{% endif %}">
-                    <i class="fa fa-home me-2"></i>Dashboard
+                <a href="{% url 'dashboard_admin' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'dashboard_admin' %}sidebar-active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Tableau de bord</span>
                 </a>
 
-                <a href="{% url 'creer_gerant' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'creer_gerant' %}active{% endif %}">
-                    <i class="fa fa-user-plus me-2"></i>Ajout Gérant
-                </a>
-
-                <a href="{% url 'creer_serveur' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'creer_serveur' %}active{% endif %}">
-                    <i class="fa fa-user-plus me-2"></i>Ajout Serveur
-                </a>
-
-                <a href="{% url 'liste_utilisateurs' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'liste_utilisateurs' %}active{% endif %}">
-                    <i class="fa fa-users me-2"></i>Liste utilisateurs
-                </a>
-
-                <a href="{% url 'historique_actions' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'historique_actions' %}active{% endif %}">
-                    <i class="fa fa-history me-2"></i>Historique
-                </a>
-
-                <a href="#" class="nav-item nav-link">
-                    <i class="fa fa-cogs me-2"></i>Paramètres
-                </a>
+                <div class="sidebar-section-label">Gestion des utilisateurs</div>
                 
-                <a href="{% url 'liste_produits' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'liste_produits' %}active{% endif %}">
-                    <i class="fa fa-box me-2"></i>Gestion Produits
+                <a href="{% url 'creer_gerant' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'creer_gerant' %}sidebar-active{% endif %}">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Ajouter un gérant</span>
                 </a>
 
-                <a href="#" class="nav-item nav-link">
-                    <i class="fa fa-tags me-2"></i>Gestion Catégories
+                <a href="{% url 'creer_serveur_gerant' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'creer_serveur_gerant' %}sidebar-active{% endif %}">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Ajouter un serveur</span>
                 </a>
 
-                <a href="{% url 'liste_serveurs' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'liste_serveurs' %}active{% endif %}">
-                    <i class="fa fa-user-friends me-2"></i>Gestion Serveurs
+                <a href="{% url 'liste_utilisateurs' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'liste_utilisateurs' %}sidebar-active{% endif %}">
+                    <i class="fas fa-users"></i>
+                    <span>Liste des utilisateurs</span>
                 </a>
 
-                <a href="#" class="nav-item nav-link">
-                    <i class="fa fa-receipt me-2"></i>Gestion Cmd
+                <div class="sidebar-section-label">Gestion du contenu</div>
+                
+                <a href="{% url 'liste_produits' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'liste_produits' %}sidebar-active{% endif %}">
+                    <i class="fas fa-box"></i>
+                    <span>Produits</span>
                 </a>
 
-                <a href="#" class="nav-item nav-link">
-                    <i class="fa fa-warehouse me-2"></i>Gestion Stock
+                <a href="{% url 'gestion_categories' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'gestion_categories' %}sidebar-active{% endif %}">
+                    <i class="fas fa-tags"></i>
+                    <span>Catégories</span>
                 </a>
-                <a href="{% url 'profile' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                    <i class="fa fa-user-circle me-2"></i>Profil
+
+                <a href="{% url 'liste_serveurs' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'liste_serveurs' %}sidebar-active{% endif %}">
+                    <i class="fas fa-user-friends"></i>
+                    <span>Serveurs</span>
+                </a>
+
+                <a href="{% url 'gestion_commandes_admin' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'gestion_commandes_admin' %}sidebar-active{% endif %}">
+                    <i class="fas fa-receipt"></i>
+                    <span>Commandes</span>
+                </a>
+
+                <a href="{% url 'gestion_stocks_avancee' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'gestion_stocks_avancee' %}sidebar-active{% endif %}">
+                    <i class="fas fa-warehouse"></i>
+                    <span>Stocks</span>
+                </a>
+
+                <div class="sidebar-section-label">Système</div>
+                
+                <a href="{% url 'historique_actions_gerant' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'historique_actions' %}sidebar-active{% endif %}">
+                    <i class="fas fa-history"></i>
+                    <span>Historique</span>
+                </a>
+
+                <a href="{% url 'parametres_systeme' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'parametres_systeme' %}sidebar-active{% endif %}">
+                    <i class="fas fa-cogs"></i>
+                    <span>Paramètres</span>
                 </a>
 
             {% elif user.role == 'serveur' %}
-                <a href="{% url 'dashboard_serveur' %}" 
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'dashboard_serveur' %}active{% endif %}">
-                <i class="fa fa-home me-2"></i>Dashboard
+                <a href="{% url 'dashboard_serveur' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'dashboard_serveur' %}sidebar-active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Tableau de bord</span>
                 </a>
 
-                <a href="{% url 'liste_produits_serveur' %}" 
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'liste_produits_serveur' %}active{% endif %}">
-                <i class="fa fa-box me-2"></i>Listes Produits
+                <a href="{% url 'liste_produits_serveur' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'liste_produits_serveur' %}sidebar-active{% endif %}">
+                    <i class="fas fa-utensils"></i>
+                    <span>Produits</span>
                 </a>
 
-                <a href="{% url 'commandes_en_attente' %}" 
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'commandes_en_attente' %}active{% endif %}">
-                <i class="fa fa-hourglass-half me-2"></i>Listes cmdes
+                <a href="{% url 'commandes_en_attente' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'commandes_en_attente' %}sidebar-active{% endif %}">
+                    <i class="fas fa-list-alt"></i>
+                    <span>Commandes en attente</span>
+                    <span class="sidebar-notification-badge">5</span>
                 </a>
 
-                <a href="{% url 'nouvelle_commande_serveur' %}" 
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'nouvelle_commande_serveur' %}active{% endif %}">
-                <i class="fa fa-plus-circle me-2"></i>Ajout cmdes
+                <a href="{% url 'nouvelle_commande_serveur' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'nouvelle_commande_serveur' %}sidebar-active{% endif %}">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Nouvelle commande</span>
                 </a>
 
-                <a href="{% url 'commandes_livrees_serveur' %}" 
-                class="nav-item nav-link {% if request.resolver_match.url_name == 'commandes_livrees_serveur' %}active{% endif %}">
-                <i class="fa fa-check-circle me-2"></i>Cmdes livrées
-                </a>
-                <a href="{% url 'profile' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                    <i class="fa fa-user-circle me-2"></i>Profil
+                <a href="{% url 'commandes_livrees_serveur' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'commandes_livrees_serveur' %}sidebar-active{% endif %}">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Commandes livrées</span>
                 </a>
 
           {% elif user.role == 'livreur' %}
-                <a href="{% url 'dashboard_livreur' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'dashboard_livreur' %}active{% endif %}">
-                    <i class="fa fa-home me-2"></i>Dashboard
+                <a href="{% url 'dashboard_livreur' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'dashboard_livreur' %}sidebar-active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    <span>Tableau de bord</span>
                 </a>
 
-                <a href="{% url 'commandes_a_livrer' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'commandes_a_livrer' %}active{% endif %}">
-                    <i class="fa fa-truck me-2"></i>Commandes à Livrer
+                <a href="{% url 'commandes_a_livrer' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'commandes_a_livrer' %}sidebar-active{% endif %}">
+                    <i class="fas fa-truck"></i>
+                    <span>À livrer</span>
+                    <span class="sidebar-notification-badge">3</span>
                 </a>
 
-                <a href="{% url 'commandes_livrees' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'commandes_livrees' %}active{% endif %}">
-                    <i class="fa fa-check-circle me-2"></i>Commandes Livrées
+                <a href="{% url 'commandes_livrees' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'commandes_livrees' %}sidebar-active{% endif %}">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Livrées</span>
                 </a>
 
-                <a href="{% url 'historique_actions' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'historique_actions' %}active{% endif %}">
-                    <i class="fa fa-history me-2"></i>Historique Actions
+                <a href="{% url 'historique_actions' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'historique_actions' %}sidebar-active{% endif %}">
+                    <i class="fas fa-history"></i>
+                    <span>Historique</span>
                 </a>
-
-                <a href="{% url 'profil_livreur' %}" class="nav-item nav-link {% if request.resolver_match.url_name == 'profil_livreur' %}active{% endif %}">
-                    <i class="fa fa-user-circle me-2"></i>Mon Profil
-                </a>
-
-        
             {% endif %}
             
-            <a href="{% url 'deconnexion' %}" class="nav-item nav-link text-danger">
-                <i class="fa fa-sign-out-alt me-2"></i>Déconnexion
+            <!-- Séparateur -->
+            <div class="sidebar-divider"></div>
+            
+            <!-- Liens communs à tous les utilisateurs -->
+            <a href="{% url 'profile' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'profile' %}sidebar-active{% endif %}">
+                <i class="fas fa-user-cog"></i>
+                <span>Mon profil</span>
             </a>
-
+            
+            <a href="{% url 'deconnexion' %}" class="sidebar-nav-item sidebar-logout-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+            </a>
+        </div>
+        
+        <!-- Version de l'application -->
+        <div class="sidebar-app-version">
+            v1.2.0
         </div>
     </nav>
 </div>
 
 <style>
-:root {
-    --yellow-canaan: #FDCB05;
-    --teal-glacier: #00B8B5;
-    --pink-swoosh: #E91E63;
-    --black-shadow: #000000;
-    --white-bg: #FFFFFF;
+.sidebar-custom {
+    /* Variables CSS spécifiques au sidebar */
+    --sidebar-bg: var(--teal-glacier);
+    --sidebar-text: var(--white-bg);
+    --sidebar-hover: rgba(0, 0, 0, 0.1);
+    --sidebar-active: var(--yellow-canaan);
+    --sidebar-submenu-bg: rgba(0, 0, 0, 0.1);
+    --sidebar-icon: rgba(255, 255, 255, 0.8);
+    --sidebar-accent: var(--yellow-canaan);
+    --sidebar-divider: rgba(255, 255, 255, 0.2);
+    --sidebar-width: 280px;
+    --sidebar-notification-badge: var(--pink-swoosh);
+    --sidebar-logout-color: var(--pink-swoosh);
+    --sidebar-transition-speed: 0.3s;
+    
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: var(--sidebar-width);
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    z-index: 1000;
+    overflow-y: auto;
+    transition: all var(--sidebar-transition-speed) ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.sidebar {
+/* Logo styling */
+.sidebar-logo-container {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem 1rem 1rem;
+    border-bottom: 1px solid var(--sidebar-divider);
+    margin-bottom: 1rem;
+}
+
+.sidebar-logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    margin-right: 12px;
+    object-fit: cover;
     background-color: var(--white-bg);
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    padding: 4px;
 }
 
-
-
-.nav-link {
-    transition: all 0.3s ease;
-    border-radius: 0.375rem;
-    padding: 12px 15px;
-    margin: 4px 10px;
-    color: var(--black-shadow);
-    position: relative;
-    display: block;
-    width: calc(100% - 20px);
-}
-
-.nav-link:hover {
-    background-color: rgba(253, 203, 5, 0.15);
-    color: ;
-}
-
-.nav-link.active {
-    background-color: var(--teal-glacier);
+.sidebar-logo-text {
+    font-weight: 700;
+    font-size: 1.4rem;
     color: var(--white-bg);
-    font-weight: 500;
 }
 
-.nav-link.active::before {
+/* User profile styling */
+.sidebar-user-profile {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background-color: var(--sidebar-submenu-bg);
+    border-radius: 8px;
+    margin: 0 1rem 1.5rem;
+}
+
+.sidebar-avatar-container {
+    position: relative;
+    margin-right: 12px;
+}
+
+.sidebar-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--sidebar-accent);
+}
+
+.sidebar-avatar-default {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal-glacier), var(--yellow-canaan));
+    color: var(--white-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    border: 2px solid var(--sidebar-accent);
+}
+
+.sidebar-online-indicator {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 12px;
+    height: 12px;
+    background-color: var(--yellow-canaan);
+    border: 2px solid var(--sidebar-bg);
+    border-radius: 50%;
+}
+
+.sidebar-user-info {
+    flex: 1;
+}
+
+.sidebar-username {
+    margin: 0;
+    font-weight: 600;
+    color: var(--white-bg);
+    font-size: 0.95rem;
+}
+
+.sidebar-join-date {
+    font-size: 0.75rem;
+    color: var(--sidebar-icon);
+    display: block;
+    margin-top: 2px;
+}
+
+.sidebar-user-role {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    background-color: var(--sidebar-accent);
+    color: var(--black-shadow);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Navigation items */
+.sidebar-nav-menu {
+    padding: 0 1rem;
+}
+
+.sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.25rem;
+    border-radius: 8px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.sidebar-nav-item i:first-child {
+    width: 20px;
+    text-align: center;
+    margin-right: 12px;
+    color: var(--sidebar-icon);
+    transition: all 0.2s ease;
+}
+
+.sidebar-nav-item span {
+    flex: 1;
+}
+
+.sidebar-nav-item:hover {
+    background-color: var(--sidebar-hover);
+    color: var(--white-bg);
+}
+
+.sidebar-nav-item:hover i {
+    color: var(--white-bg);
+}
+
+.sidebar-nav-item.sidebar-active {
+    background-color: var(--sidebar-active);
+    color: var(--black-shadow);
+}
+
+.sidebar-nav-item.sidebar-active i {
+    color: var(--black-shadow);
+}
+
+.sidebar-nav-item.sidebar-active::before {
     content: '';
     position: absolute;
-    left: 0;
+    left: -1rem;
     top: 50%;
     transform: translateY(-50%);
     width: 4px;
     height: 70%;
-    background-color: var(--yellow-canaan);
+    background-color: var(--white-bg);
     border-radius: 0 4px 4px 0;
 }
 
-.nav-link.text-danger {
-    color: var(--pink-swoosh) !important;
+/* Dropdown styles */
+.sidebar-dropdown {
+    position: relative;
 }
 
-.nav-link.text-danger:hover {
-    background-color: rgba(233, 30, 99, 0.15);
-    color: var(--pink-swoosh) !important;
+.sidebar-dropdown-toggle {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
 }
 
-/* Ajustement pour le contenu principal */
-.content {
-    margin-left: 250px;
-    width: calc(100% - 250px);
+.sidebar-dropdown-arrow {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+    margin-left: auto;
+    color: var(--sidebar-icon);
+}
+
+.sidebar-dropdown-menu {
+    position: static;
+    float: none;
+    width: 100%;
+    margin: 0.25rem 0 0.5rem;
+    padding: 0;
+    background-color: var(--sidebar-submenu-bg);
+    border: none;
+    border-radius: 8px;
+    box-shadow: none;
+    display: none;
+}
+
+.sidebar-dropdown-menu.show {
+    display: block;
+}
+
+.sidebar-dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 0.7rem 1rem 0.7rem 2.5rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    border-radius: 6px;
+    margin: 0.15rem 0.5rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.sidebar-dropdown-item i {
+    width: 18px;
+    margin-right: 10px;
+    font-size: 0.9rem;
+    color: var(--sidebar-icon);
+}
+
+.sidebar-dropdown-item:hover, .sidebar-dropdown-item.sidebar-active {
+    background-color: var(--sidebar-hover);
+    color: var(--white-bg);
+}
+
+.sidebar-dropdown-item.sidebar-active {
+    font-weight: 600;
+}
+
+/* Badges */
+.sidebar-notification-badge, .sidebar-cart-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background-color: var(--sidebar-notification-badge);
+    color: var(--white-bg);
+    font-size: 0.7rem;
+    font-weight: bold;
+    margin-left: auto;
+}
+
+.sidebar-cart-badge {
+    background-color: var(--yellow-canaan);
+    color: var(--black-shadow);
+}
+
+/* Section labels */
+.sidebar-section-label {
+    padding: 1rem 1rem 0.5rem;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--sidebar-icon);
+    border-top: 1px solid var(--sidebar-divider);
+}
+
+.sidebar-divider {
+    height: 1px;
+    background-color: var(--sidebar-divider);
+    margin: 1rem 0;
+}
+
+/* Logout link */
+.sidebar-logout-link {
+    color: var(--sidebar-logout-color) !important;
+}
+
+.sidebar-logout-link i {
+    color: var(--sidebar-logout-color) !important;
+}
+
+.sidebar-logout-link:hover {
+    background-color: rgba(233, 30, 99, 0.15) !important;
+}
+
+/* App version */
+.sidebar-app-version {
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--sidebar-icon);
+    margin-top: 1rem;
+    border-top: 1px solid var(--sidebar-divider);
+}
+
+/* Scrollbar styling */
+.sidebar-custom::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar-custom::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-custom::-webkit-scrollbar-thumb {
+    background: var(--sidebar-divider);
+    border-radius: 10px;
+}
+
+.sidebar-custom::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .sidebar-custom {
+        transform: translateX(-100%);
+        box-shadow: none;
+    }
+    
+    .sidebar-custom.sidebar-show {
+        transform: translateX(0);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Animation pour les flèches des menus déroulants */
+.sidebar-dropdown-toggle[aria-expanded="true"] .sidebar-dropdown-arrow {
+    transform: rotate(-180deg);
 }
 </style>
+
+<script>
+// Gestion des menus déroulants
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownToggles = document.querySelectorAll('.sidebar-dropdown-toggle');
+    
+    dropdownToggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const dropdownMenu = this.nextElementSibling;
+            const isShowing = dropdownMenu.classList.contains('show');
+            
+            // Fermer tous les autres menus déroulants
+            document.querySelectorAll('.sidebar-dropdown-menu').forEach(menu => {
+                if (menu !== dropdownMenu) {
+                    menu.classList.remove('show');
+                }
+            });
+            
+            // Basculer l'état du menu actuel
+            if (!isShowing) {
+                dropdownMenu.classList.add('show');
+            } else {
+                dropdownMenu.classList.remove('show');
+            }
+            
+            // Empêcher la propagation pour éviter de fermer immédiatement
+            event.stopPropagation();
+        });
+    });
+    
+    // Fermer les menus déroulants en cliquant à l'extérieur
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.sidebar-dropdown-menu').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    });
+    
+    // Empêcher la fermeture lorsque vous cliquez à l'intérieur du menu
+    document.querySelectorAll('.sidebar-dropdown-menu').forEach(menu => {
+        menu.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+});
+</script>

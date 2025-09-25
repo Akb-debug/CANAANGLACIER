@@ -41,15 +41,22 @@
             100% { transform: translateX(-100%); }
         }
         
-        /* Navbar principale */
+        /* Navbar principale - TRANSPARENT AU DÉPART */
         .main-navbar {
-            background: linear-gradient(135deg, var(--yellow-canaan) 0%, var(--teal-glacier) 100%);
+            background: transparent;
             padding: 0;
             position: fixed;
             top: 35px;
             width: 100%;
             z-index: 1029;
+            transition: all 0.4s ease-in-out;
+        }
+        
+        /* Classe qui sera ajoutée au scroll */
+        .main-navbar.scrolled {
+            background: var(--teal-glacier);
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
         
         .nav-container {
@@ -58,19 +65,27 @@
             justify-content: space-between;
             padding: 0 20px;
             height: 80px;
+            transition: all 0.3s ease;
         }
         
-        /* Logo Container */
+        /* Logo Container - Transparent au départ */
         .logo-container {
             display: inline-block;
             position: relative;
             padding: 10px;
-            background: linear-gradient(135deg, var(--yellow-canaan) 0%, var(--teal-glacier) 100%);
+            background: transparent;
             border-radius: 50%;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             z-index: 1;
             overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Logo avec fond teal-glacier au scroll */
+        .main-navbar.scrolled .logo-container {
+            background: var(--teal-glacier);
+            border-color: transparent;
         }
 
         /* Effet de halo */
@@ -81,10 +96,7 @@
             left: -2px;
             right: -2px;
             bottom: -2px;
-            background: linear-gradient(135deg, 
-                rgba(253, 203, 5, 0.8) 0%, 
-                rgba(0, 184, 181, 0.8) 50%, 
-                rgba(233, 30, 99, 0.8) 100%);
+            background: var(--teal-glacier);
             border-radius: 50%;
             z-index: -1;
             opacity: 0;
@@ -129,188 +141,216 @@
             animation: logoFloat 4s ease-in-out infinite;
         }
 
+        /* Menu principal - Blanc au départ */
+        .main-menu {
+            display: flex;
+            gap: 1.5rem;
+            margin: 0 auto;
+        }
+        
+        .nav-item {
+            position: relative;
+        }
+        
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            position: relative;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        /* Supprimer l'ombre au scroll */
+        .main-navbar.scrolled .nav-link {
+            text-shadow: none;
+        }
+        
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: white;
+            transition: width 0.3s;
+        }
+        
+        .nav-link:hover:after,
+        .nav-link.active:after {
+            width: 100%;
+        }
+        
+        /* Actions utilisateur */
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        /* Barre de recherche - Transparent au départ */
+        .search-box {
+            display: flex;
+            width: 220px;
+        }
+        
+        .search-input {
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-right: none;
+            border-radius: 20px 0 0 20px;
+            padding: 0.35rem 1rem;
+            outline: none;
+            transition: all 0.3s;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+        
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .search-input:focus {
+            border-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Au scroll, le champ de recherche devient plus visible */
+        .main-navbar.scrolled .search-input {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--black-shadow);
+            border-color: white;
+        }
+        
+        .main-navbar.scrolled .search-input::placeholder {
+            color: rgba(0, 0, 0, 0.6);
+        }
+        
+        .search-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 0 20px 20px 0;
+            padding: 0 1rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .search-btn:hover {
+            background: white;
+            color: var(--teal-glacier);
+        }
+        
+        /* Panier - Transparent au départ */
+        .cart-btn {
+            position: relative;
+            color: white;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            padding: 0.35rem 0.75rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .cart-btn:hover {
+            background: white;
+            color: var(--teal-glacier);
+        }
+        
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--yellow-canaan);
+            color: var(--black-shadow);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
+        /* Boutons auth - Transparent au départ */
+        .auth-btn {
+            border-radius: 20px;
+            padding: 0.35rem 1rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .login-btn {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+        
+        .login-btn:hover {
+            background: white;
+            color: var(--teal-glacier);
+        }
+        
+        .signup-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+        
+        .signup-btn:hover {
+            background: white;
+            color: var(--teal-glacier);
+        }
+        
         /* Version mobile */
-        @media (max-width: 768px) {
-            .logo-container {
-                padding: 8px;
+        @media (max-width: 991px) {
+            .main-navbar {
+                top: 40px;
+                padding: 10px 0;
+                background: var(--teal-glacier) !important; /* Toujours visible sur mobile */
             }
             
-            .brand-logo {
-                height: 50px;
-                width: 50px;
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+                padding: 10px;
+            }
+            
+            .main-menu {
+                flex-direction: column;
+                width: 100%;
+                text-align: center;
+                margin: 15px 0;
+            }
+            
+            .user-actions {
+                width: 100%;
+                justify-content: center;
+                margin: 15px 0;
+                flex-wrap: wrap;
+            }
+            
+            .search-box {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            /* Sur mobile, pas d'effet de transparence */
+            .search-input {
+                background: rgba(255, 255, 255, 0.9);
+                color: var(--black-shadow);
+            }
+            
+            .search-input::placeholder {
+                color: rgba(0, 0, 0, 0.6);
             }
         }
-                /* Menu principal */
-                .main-menu {
-                    display: flex;
-                    gap: 1.5rem;
-                    margin: 0 auto;
-                }
-                
-                .nav-item {
-                    position: relative;
-                }
-                
-                .nav-link {
-                    color: white !important;
-                    font-weight: 500;
-                    padding: 0.5rem 0;
-                    position: relative;
-                }
-                
-                .nav-link:after {
-                    content: '';
-                    position: absolute;
-                    bottom: 0;
-                    left: 0;
-                    width: 0;
-                    height: 2px;
-                    background: white;
-                    transition: width 0.3s;
-                }
-                
-                .nav-link:hover:after,
-                .nav-link.active:after {
-                    width: 100%;
-                }
-                
-                /* Actions utilisateur */
-                .user-actions {
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                }
-                
-                /* Barre de recherche */
-                .search-box {
-                    display: flex;
-                    width: 220px;
-                }
-                
-                .search-input {
-                    border: 1px solid white;
-                    border-right: none;
-                    border-radius: 20px 0 0 20px;
-                    padding: 0.35rem 1rem;
-                    outline: none;
-                    transition: all 0.3s;
-                    width: 100%;
-                }
-                
-                .search-input:focus {
-                    border-color: var(--pink-swoosh);
-                    box-shadow: 0 0 0 2px rgba(233,30,99,0.2);
-                }
-                
-                .search-btn {
-                    background: var(--teal-glacier);
-                    color: white;
-                    border: 1px solid var(--teal-glacier);
-                    border-radius: 0 20px 20px 0;
-                    padding: 0 1rem;
-                    transition: all 0.3s;
-                }
-                
-                .search-btn:hover {
-                    background: var(--pink-swoosh);
-                    border-color: var(--pink-swoosh);
-                }
-                
-                /* Panier */
-                .cart-btn {
-                    position: relative;
-                    color: white;
-                    background: transparent;
-                    border: 1px solid white;
-                    border-radius: 20px;
-                    padding: 0.35rem 0.75rem;
-                    transition: all 0.3s;
-                }
-                
-                .cart-btn:hover {
-                    background: white;
-                    color: var(--teal-glacier);
-                }
-                
-                .cart-badge {
-                    position: absolute;
-                    top: -8px;
-                    right: -8px;
-                    background: var(--yellow-canaan);
-                    color: var(--black-shadow);
-                    border-radius: 50%;
-                    width: 20px;
-                    height: 20px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 0.7rem;
-                    font-weight: bold;
-                }
-                
-                /* Boutons auth */
-                .auth-btn {
-                    border-radius: 20px;
-                    padding: 0.35rem 1rem;
-                    font-weight: 500;
-                    transition: all 0.3s;
-                }
-                
-                .login-btn {
-                    background: transparent;
-                    color: white;
-                    border: 1px solid white;
-                }
-                
-                .login-btn:hover {
-                    background: white;
-                    color: var(--teal-glacier);
-                }
-                
-                .signup-btn {
-                    background: var(--pink-swoosh);
-                    color: white;
-                    border: 1px solid var(--pink-swoosh);
-                }
-                
-                .signup-btn:hover {
-                    background: #c2185b;
-                    border-color: #c2185b;
-                    color : white;
-                }
-                
-                /* Version mobile */
-                @media (max-width: 991px) {
-                    .main-navbar {
-                        top: 40px;
-                        padding: 10px 0;
-                    }
-                    
-                    .nav-container {
-                        flex-direction: column;
-                        height: auto;
-                        padding: 10px;
-                    }
-                    
-                    .main-menu {
-                        flex-direction: column;
-                        width: 100%;
-                        text-align: center;
-                        margin: 15px 0;
-                    }
-                    
-                    .user-actions {
-                        width: 100%;
-                        justify-content: center;
-                        margin: 15px 0;
-                        flex-wrap: wrap;
-                    }
-                    
-                    .search-box {
-                        width: 100%;
-                        margin-bottom: 10px;
-                    }
-                }
     </style>
 </head>
 <body>
@@ -324,7 +364,7 @@
     </div>
 
     <!-- Navigation principale -->
-    <nav class="main-navbar">
+    <nav class="main-navbar" id="mainNavbar">
         <div class="container">
             <div class="nav-container">
                 <!-- Logo -->
@@ -469,6 +509,27 @@
         
         document.querySelector('.promo-bar').addEventListener('mouseleave', function() {
             this.querySelector('.promo-content').style.animationPlayState = 'running';
+        });
+
+        // Gestion du scroll pour la navbar
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('mainNavbar');
+            const scrollPosition = window.scrollY;
+            
+            // Ajouter la classe 'scrolled' après 100px de scroll
+            if (scrollPosition > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // S'assurer que la navbar a la bonne classe au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.getElementById('mainNavbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            }
         });
     </script>
 </body>

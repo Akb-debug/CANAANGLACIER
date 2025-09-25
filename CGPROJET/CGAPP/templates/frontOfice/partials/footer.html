@@ -52,24 +52,7 @@
                     <p class="mb-2"><i class="bi bi-envelope-fill me-2" style="color: var(--teal-glacier)"></i> contact@canaanglacier.com</p>
                 </address>
                 
-                <h6 class="text-uppercase mt-4 mb-2" style="color: var(--yellow-canaan)">Newsletter</h6>
-               <form class="newsletter-form" method="POST" action="{% url 'newsletter_subscribe' %}">
-    {% csrf_token %}
-    <div class="input-group">
-        <input 
-            type="email" 
-            name="email"
-            class="newsletter-input"
-            placeholder="Votre email"
-            required
-            aria-label="Votre adresse email"
-        >
-        <button type="submit" class="newsletter-btn">
-            <i class="fas fa-paper-plane"></i>
-            <span class="btn-text">S'abonner</span>
-        </button>
-    </div>
-</form>
+              
 
 <style>
     .newsletter-form {

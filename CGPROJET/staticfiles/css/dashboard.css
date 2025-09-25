@@ -1,0 +1,252 @@
+/* Variables de couleur */
+:root {
+    --primary: #00B8B5;
+    --primary-dark: #009c99;
+    --secondary: #FDCB05;
+    --dark: #2c3e50;
+    --light: #f8f9fa;
+    --danger: #dc3545;
+    --success: #28a745;
+    --warning: #ffc107;
+    --info: #17a2b8;
+    --white: #ffffff;
+    --gray: #6c757d;
+    --gray-dark: #343a40;
+    --light-gray: #f8f9fa;
+    --border-color: #e9ecef;
+}
+
+/* Styles de base */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* En-tête */
+.navbar {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    background-color: var(--white) !important;
+    padding: 0.5rem 1rem;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary) !important;
+}
+
+/* Sidebar */
+.sb-sidenav {
+    background-color: var(--white);
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.sb-sidenav .nav-link {
+    color: var(--gray);
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    border-left: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.sb-sidenav .nav-link:hover {
+    color: var(--primary);
+    background-color: rgba(0, 184, 181, 0.1);
+}
+
+.sb-sidenav .nav-link.active {
+    color: var(--primary);
+    border-left: 3px solid var(--primary);
+    background-color: rgba(0, 184, 181, 0.1);
+}
+
+.sb-sidenav .nav-link i {
+    margin-right: 0.5rem;
+    width: 1.25rem;
+    text-align: center;
+}
+
+/* Contenu principal */
+#layoutSidenav_content {
+    margin-left: 250px;
+    padding: 2rem;
+    min-height: 100vh;
+    transition: all 0.3s;
+}
+
+/* Cartes */
+.card {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-header {
+    background-color: var(--white);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+}
+
+/* Boutons */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+/* Tableaux */
+.table {
+    margin-bottom: 0;
+}
+
+.table thead th {
+    background-color: var(--light);
+    border-bottom: 2px solid var(--border-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+/* Formulaire */
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(0, 184, 181, 0.25);
+}
+
+/* Alertes */
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+}
+
+/* Pied de page */
+footer {
+    background-color: var(--white);
+    padding: 1.5rem 0;
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    #layoutSidenav_content {
+        margin-left: 0;
+    }
+    
+    .sb-sidenav {
+        transform: translateX(-250px);
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1040;
+        height: 100vh;
+        transition: transform 0.3s;
+    }
+    
+    .sb-sidenav.show {
+        transform: translateX(0);
+    }
+}
+
+/* Animation de chargement */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid var(--primary);
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+    border-radius: 50rem;
+}
+
+.badge-primary {
+    background-color: var(--primary);
+}
+
+/* Tooltips */
+.tooltip-inner {
+    background-color: var(--dark);
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+}
+
+.bs-tooltip-auto[data-popper-placement^=top] .tooltip-arrow::before, 
+.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: var(--dark);
+}
+
+/* Ombre portée pour les éléments interactifs */
+.shadow-hover {
+    transition: box-shadow 0.3s ease;
+}
+
+.shadow-hover:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Animation de fade in */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Personnalisation de la barre de défilement */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gray);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--dark);
+}

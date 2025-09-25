@@ -338,14 +338,23 @@ class AdresseLivraisonAdmin(BaseAdmin):
 
 @admin.register(Coupon)
 class CouponAdmin(BaseAdmin):
-    list_display = ('code', 'reduction', 'actif', 'date_expiration', 'utilisations')
-    list_filter = ('actif', 'date_expiration')
+    list_display = ('code', 'type_reduction', 'valeur', 'actif', 'date_fin', 'usage_actuel', 'usage_max')
+    list_filter = ('actif', 'type_reduction', 'date_fin')
     search_fields = ('code',)
+    readonly_fields = ('usage_actuel', 'date_creation')
     actions = BaseAdmin.actions + ['activate_coupons', 'deactivate_coupons']
 
-    def utilisations(self, obj):
-        return obj.commande_set.count()
-    utilisations.short_description = 'Utilisations'
+    fieldsets = (
+        (None, {
+            'fields': ('code', 'type_reduction', 'valeur')
+        }),
+        ('Validité', {
+            'fields': ('date_debut', 'date_fin', 'actif')
+        }),
+        ('Utilisation', {
+            'fields': ('usage_max', 'usage_actuel', 'date_creation')
+        }),
+    )
 
     @admin.action(description='Activer les coupons')
     def activate_coupons(self, request, queryset):
