@@ -1,9 +1,9 @@
-{% extends 'dashboards/base_gerant_dashboard.html' %}
+{% extends 'dashboards/base.html' %}
 {% load static humanize %}
 
 {% block title %}Rapports et Analyses{% endblock %}
 
-{% block content %}
+{% block body %}
 <div class="container-fluid px-4">
     <h1 class="mt-4">Rapports et Analyses</h1>
     <ol class="breadcrumb mb-4">
@@ -160,7 +160,7 @@
                     <tbody>
                         {% for perf in performance_gerants %}
                         <tr>
-                            <td>{{ perf.gerant.get_full_name|default:perf.gerant.username }}</td>
+                            <td>{{ perf.gerant.utilisateur.get_full_name|default:perf.gerant.utilisateur.username }}</td>
                             <td class="text-end">{{ perf.revenus|default:0|intcomma }}</td>
                             <td class="text-end">{{ perf.nb_commandes|intcomma }}</td>
                             <td class="text-end">{{ perf.nb_produits_vendus|intcomma }}/{{ perf.nb_produits|intcomma }}</td>
@@ -185,105 +185,105 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<!-- Inclure Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Inclure Chart.js depuis les assets statiques -->
+<script src="{% static 'admin/lib/chart/chart.min.js' %}"></script>
 <script>
 // Graphique des ventes
-const ctx = document.getElementById('ventesChart').getContext('2d');
-const ventesChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: [
-            {% for vente in ventes_par_jour %}
-                '{{ vente.date|date:"d/m" }}'{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ],
-        datasets: [{
-            label: 'Ventes (FCFA)',
-            data: [
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('ventesChart').getContext('2d');
+    const ventesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [
                 {% for vente in ventes_par_jour %}
-                    {{ vente.total|default:0|floatformat:2 }}{% if not forloop.last %},{% endif %}
+                    '{{ vente.date|date:"d/m" }}'{% if not forloop.last %},{% endif %}
                 {% endfor %}
             ],
-            backgroundColor: 'rgba(78, 115, 223, 0.05)',
-            borderColor: 'rgba(78, 115, 223, 1)',
-            pointRadius: 3,
-            pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-            pointBorderColor: 'rgba(78, 115, 223, 1)',
-            pointHoverRadius: 3,
-            pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
-            pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
-            pointHitRadius: 10,
-            pointBorderWidth: 2,
-            tension: 0.3
-        }]
-    },
-    options: {
-        maintainAspectRatio: false,
-        layout: {
-            padding: 10
+            datasets: [{
+                label: 'Ventes (FCFA)',
+                data: [
+                    {% for vente in ventes_par_jour %}
+                        {{ vente.total|default:0|floatformat:2 }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                borderColor: 'rgba(78, 115, 223, 1)',
+                pointRadius: 3,
+                pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                pointBorderColor: 'rgba(78, 115, 223, 1)',
+                pointHoverRadius: 3,
+                pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+                pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                pointHitRadius: 10,
+                pointBorderWidth: 2,
+                tension: 0.3
+            }]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    callback: function(value) {
-                        return value.toLocaleString('fr-FR') + ' FCFA';
+        options: {
+            maintainAspectRatio: false,
+            layout: {
+                padding: 10
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('fr-FR') + ' FCFA';
+                        },
+                        maxTicksLimit: 5
                     },
-                    maxTicksLimit: 5
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    }
                 },
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.05)',
-                    drawBorder: false
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        maxRotation: 0,
+                        maxTicksLimit: 10
+                    }
                 }
             },
-            x: {
-                grid: {
-                    display: false,
-                    drawBorder: false
+            plugins: {
+                legend: {
+                    display: false
                 },
-                ticks: {
-                    maxRotation: 0,
-                    maxTicksLimit: 10
-                }
-            }
-        },
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                backgroundColor: 'rgb(255,255,255)',
-                bodyFontColor: '#858796',
-                titleMarginBottom: 10,
-                titleFontColor: '#6e707e',
-                titleFontSize: 14,
-                borderColor: '#dddfeb',
-                borderWidth: 1,
-                xPadding: 15,
-                yPadding: 15,
-                displayColors: false,
-                intersect: false,
-                mode: 'index',
-                caretPadding: 10,
-                callbacks: {
-                    label: function(context) {
-                        var label = context.dataset.label || '';
-                        if (label) {
-                            label += ': ';
+                tooltip: {
+                    backgroundColor: 'rgb(255,255,255)',
+                    bodyFontColor: '#858796',
+                    titleMarginBottom: 10,
+                    titleFontColor: '#6e707e',
+                    titleFontSize: 14,
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    intersect: false,
+                    mode: 'index',
+                    caretPadding: 10,
+                    callbacks: {
+                        label: function(context) {
+                            var label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('fr-FR', {style: 'currency', currency: 'XOF'}).format(context.parsed.y);
+                            }
+                            return label;
                         }
-                        if (context.parsed.y !== null) {
-                            label += new Intl.NumberFormat('fr-FR', {style: 'currency', currency: 'XOF'}).format(context.parsed.y);
-                        }
-                        return label;
                     }
                 }
             }
         }
-    }
+    });
 });
 </script>
 {% endblock %}

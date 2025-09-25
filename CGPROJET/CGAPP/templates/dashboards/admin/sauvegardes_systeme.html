@@ -1,0 +1,131 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Sauvegardes Système - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-database me-2"></i>Sauvegardes Système
+                    </h4>
+                    <a href="{% url 'creer_sauvegarde' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Nouvelle sauvegarde
+                    </a>
+                </div>
+                <div class="card-body">
+                    <!-- Statistiques -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ total_sauvegardes }}</h3>
+                                    <p class="mb-0">Total Sauvegardes</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ espace_total|filesizeformat }}</h3>
+                                    <p class="mb-0">Espace Utilisé</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h3>{{ derniere_sauvegarde.date_creation|date:"d/m/Y"|default:"-" }}</h3>
+                                    <p class="mb-0">Dernière Sauvegarde</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste des sauvegardes -->
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Taille</th>
+                                    <th>Créée par</th>
+                                    <th>Date de création</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sauvegarde in sauvegardes %}
+                                <tr>
+                                    <td>{{ sauvegarde.nom }}</td>
+                                    <td>{{ sauvegarde.taille|filesizeformat }}</td>
+                                    <td>{{ sauvegarde.cree_par.get_full_name|default:sauvegarde.cree_par.username }}</td>
+                                    <td>{{ sauvegarde.date_creation|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ sauvegarde.fichier.url }}" class="btn btn-sm btn-outline-primary" download>
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#sauvegardeModal{{ sauvegarde.id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <form action="{% url 'supprimer_sauvegarde' sauvegarde.id %}" method="post" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette sauvegarde ?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Aucune sauvegarde trouvée</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals pour les détails des sauvegardes -->
+{% for sauvegarde in sauvegardes %}
+<div class="modal fade" id="sauvegardeModal{{ sauvegarde.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Détails - {{ sauvegarde.nom }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Nom:</strong> {{ sauvegarde.nom }}</p>
+                        <p><strong>Taille:</strong> {{ sauvegarde.taille|filesizeformat }}</p>
+                        <p><strong>Créée par:</strong> {{ sauvegarde.cree_par.get_full_name|default:sauvegarde.cree_par.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Date de création:</strong> {{ sauvegarde.date_creation|date:"d/m/Y à H:i" }}</p>
+                        <p><strong>Type:</strong> {{ sauvegarde.fichier.name|slice:"-4:"|upper }}</p>
+                        <p><strong>Emplacement:</strong> {{ sauvegarde.fichier.name }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{{ sauvegarde.fichier.url }}" class="btn btn-primary" download>
+                    <i class="fas fa-download me-1"></i>Télécharger
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

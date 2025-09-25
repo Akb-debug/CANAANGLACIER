@@ -180,5 +180,13 @@ class PrintPostMiddleware:
             print("POST DATA:", request.POST)
         response = self.get_response(request)
         return response
-    
+#Configuration de payement mobile money avec cinetpay
+
+import os
+
+CINETPAY_API_KEY = os.getenv("CINETPAY_API_KEY")
+CINETPAY_SITE_ID = os.getenv("CINETPAY_SITE_ID")
+CINETPAY_BASE_URL = "https://api-checkout.cinetpay.com/v2/payment"
+CINETPAY_CHECK_URL = "https://api-checkout.cinetpay.com/v2/payment/check"
+
 

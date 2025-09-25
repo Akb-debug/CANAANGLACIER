@@ -116,7 +116,7 @@
                             <div class="card bg-info text-white h-100">
                                 <div class="card-body text-center">
                                     <i class="fas fa-cogs fa-2x mb-2"></i>
-                                    <h4>{{ commandes_par_statut.en_cours }}</h4>
+                                    <h4>{{ commandes_par_statut.expediee }}</h4>
                                     <small>En Cours</small>
                                 </div>
                             </div>
@@ -165,7 +165,7 @@
                                         <th>Date</th>
                                         <th>Total</th>
                                         <th>Adresse</th>
-                                        <th>Actions</th>
+                                       
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -181,15 +181,6 @@
                                             {% else %}
                                                 <span class="text-muted">Non définie</span>
                                             {% endif %}
-                                        </td>
-                                        <td>
-                                            <form method="post" action="{% url 'changer_statut' commande.id %}" class="d-inline">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="statut" value="en_cours">
-                                                <button type="submit" class="btn btn-sm btn-success">
-                                                    <i class="fas fa-play"></i> Prendre en charge
-                                                </button>
-                                            </form>
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -228,7 +219,6 @@
                                         <th>Date</th>
                                         <th>Total</th>
                                         <th>Adresse</th>
-                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -245,7 +235,7 @@
                                                 <span class="text-muted">Non définie</span>
                                             {% endif %}
                                         </td>
-                                        <td>
+                                        {% comment %} <td>
                                             <form method="post" action="{% url 'changer_statut' commande.id %}" class="d-inline">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="statut" value="livree">
@@ -260,7 +250,7 @@
                                                     <i class="fas fa-times"></i> Annuler
                                                 </button>
                                             </form>
-                                        </td>
+                                        </td> {% endcomment %}
                                     </tr>
                                     {% endfor %}
                                 </tbody>

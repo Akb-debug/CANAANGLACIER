@@ -32,11 +32,13 @@ urlpatterns = [
     path("commande/finaliser/", views.finaliser_commande, name="finaliser_commande"),
     path("commande/<int:pk>/", views.commande_detail, name="commande_detail"), 
     path('commande/<int:commande_id>/paiement/', views.processus_paiement, name='processus_paiement'),
-    path('commande/<int:commande_id>/traiter-paiement/', views.traiter_paiement, name='traiter_paiement'),
+   
+   
+   # path('commande/<int:commande_id>/traiter-paiement/', views.traiter_paiement, name='traiter_paiement'),
     path('commande/<int:commande_id>/annuler-paiement/', views.annuler_paiement, name='annuler_paiement'),
 
     # Page de paiement (checkout)
-    path('checkout/', views.CheckoutView.as_view(), name='checkout'),
+    #path('checkout/', views.CheckoutView.as_view(), name='checkout'),
     # Compte
     path('mon-compte/', views.mon_compte, name='mon_compte'),
     path('compte/', views.ProfileView.as_view(), name='profile'),
@@ -78,7 +80,8 @@ urlpatterns = [
     path('gestion/categories/modifier/<int:categorie_id>/', views.modifier_categorie, name='modifier_categorie'),
     path('gestion/categories/supprimer/<int:categorie_id>/', views.supprimer_categorie, name='supprimer_categorie'),
     path('gestion/coupons/', views.gestion_coupons, name='gestion_coupons'),
-    path('gestion/coupons/ajouter/', views.ajouter_coupon, name='ajouter_coupon'),
+    # path('gestion/coupons/ajouter/', views.ajouter_coupon, name='ajouter_coupon'),
+    path('gestion/ajouter-coupon/', views.ajouter_coupon, name='ajouter_coupon'),
     path('gestion/creer-gerant/', views.creer_gerant, name='creer_gerant'),
     # URL déplacée vers la section gérant
     path('gerant/creer-serveur/', views.creer_serveur, name='creer_serveur_gerant'),
@@ -93,7 +96,7 @@ urlpatterns = [
     path('gestion/stocks/ajuster/', views.ajuster_stock, name='ajuster_stock'),
     path('gestion/journal-connexions/', views.journal_connexions, name='journal_connexions'),
     path('gestion/sauvegardes/', views.sauvegardes_systeme, name='sauvegardes_systeme'),
-    path('gestion/historique-actions/', views.historique_actions, name='historique_actions'),
+    path('gestion/historique/actions/', views.historique_actions_gestion, name='historique_actions_gerant'),
     
     # URLs manquantes pour le dashboard admin
     path('gestion/utilisateurs/', views.gestion_utilisateurs, name='gestion_utilisateurs'),
@@ -150,10 +153,10 @@ urlpatterns = [
     # Gestion des commandes
     path('commandes/en-attente/', views.commandes_en_attente, name='commandes_en_attente'),
     path('commandes/<int:commande_id>/prendre-en-charge/', views.prendre_en_charge_commande, name='prendre_en_charge_commande'),
-    path('commandes/<int:commande_id>/', views.detail_commande, name='detail_commande'),
+    path('commandes/serveur/<int:commande_id>/', views.detail_commande, name='detail_commande'),
     path('commande/<int:commande_id>/changer-statut/', views.changer_statut_commande, name='changer_statut_commande'),
     path('serveur/commandes-livrees/', views.CommandesLivreesServeurView.as_view(), name='commandes_livrees_serveur'),
-    path('commande/<int:commande_id>/', views.detail_commande, name='detail_commande'),
+    # path('commande/<int:commande_id>/', views.detail_commande, name='detail_commande'),
     path('commandes-en-cours/', views.commandes_en_cours, name='commandes_en_cours'),
 
     #Gestion par client
@@ -177,4 +180,15 @@ urlpatterns = [
     path('notation-commande/<int:notation_id>/', views.detail_notation_commande, name='detail_notation_commande'),
     path('signaler-probleme/<int:commande_id>/', views.signaler_probleme, name='signaler_probleme'),
     path('mes-notations-commandes/', views.mes_notations_commandes, name='mes_notations_commandes'),
+    #Urls pour le livreur
+    path('dashboard/', views.dashboard_livreur, name='dashboard_livreur'),
+    path('commandes/a-livrer/', views.commandes_a_livrer, name='commandes_a_livrer'),
+    path('commandes/livrees/', views.commandes_livrees, name='commandes_livrees'),
+    path('commande/livreur/<int:commande_id>/', views.detail_commande_livreur, name='detail_commande_livreur'),
+    path('historique-actions/livreur', views.historique_actions, name='historique_actions'),
+    path('profil/', views.profil_livreur, name='profil_livreur'),
+    path('commande/<int:commande_id>/livrer/', views.changer_statut_commande_livreur, name='livrer_commande'),
+    #Paiement avec cinetpay
+    path("paiement/<int:commande_id>/traiter/", views.traiter_paiement, name="traiter_paiement"),
+    path("cinetpay/notify/", views.cinetpay_notify, name="cinetpay_notify"),
 ]

@@ -79,7 +79,7 @@
                     <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Revenus Total</div>
-                            <div class="h2 mb-0">{{ total_revenus|floatformat:0 }}€</div>
+                            <div class="h2 mb-0">{{ total_revenus|floatformat:0 }}Fcfa</div>
                         </div>
                         <div class="align-self-center">
                             <i class="fas fa-euro-sign fa-2x opacity-75"></i>
@@ -321,7 +321,7 @@
                             </a>
                         </div>
                         <div class="col-md-6">
-                            <a href="{% url 'historique_actions' %}" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                            <a href="{% url 'historique_actions_gerant' %}" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
                                 <i class="fas fa-history fa-2x mb-2"></i>
                                 <span class="fw-bold">Historique Actions</span>
                                 <small class="text-muted">Journal des activités</small>
@@ -398,7 +398,7 @@
                                     <td><strong>#{{ commande.id }}</strong></td>
                                     <td>{{ commande.utilisateur.username }}</td>
                                     <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                    <td><strong>{{ commande.total }}€</strong></td>
+                                    <td><strong>{{ commande.total }}Fcfa</strong></td>
                                     <td>
                                         {% if commande.statut == 'en_attente' %}
                                             <span class="badge bg-warning">En attente</span>

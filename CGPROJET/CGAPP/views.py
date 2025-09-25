@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+import requests
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, View,DeleteView,DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.contrib import messages
@@ -25,7 +26,23 @@ logger = logging.getLogger(__name__)
 import random
 import time
 import json
+from django.utils import timezone
+from datetime import datetime, timedelta
 from django.core.paginator import Paginator
+from django.core.exceptions import ObjectDoesNotExist
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .models import Produit, Panier, LignePanier, Commande, LigneCommande, Notification, Gerant
+
+from django.urls import reverse
+import uuid
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+
+
 
 # ==================== UTILITAIRES ====================
 
@@ -132,6 +149,7 @@ def categories_context(request):
     categories = Categorie.objects.all()
     return {'categories': categories}
 
+
 def home(request):
     # Produits nouveaux (8 derniers produits)
     produits_nouveautes = Produit.objects.filter(
@@ -144,10 +162,8 @@ def home(request):
         quantite_disponible__gt=0
     ).order_by('?')[:4]  # Mélange pour varier l'affichage
     
-    # Catégories avec des produits disponibles
-    categories = Categorie.objects.filter(
-        produits__quantite_disponible__gt=0
-    ).distinct().order_by('ordre_affichage')[:6]
+    # Toutes les catégories (même celles sans produit)
+    categories = Categorie.objects.all().order_by('ordre_affichage')[:8]
     
     context = {
         'nouveautes': produits_nouveautes,
@@ -206,10 +222,7 @@ def base_view(request):
     
     return render(request, 'base.html', {'cart_items_count': cart_items_count})
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import Produit, Panier, LignePanier, Commande, LigneCommande, Notification, Gerant
+
 
 @login_required
 def ajouter_au_panier(request, produit_id):
@@ -300,58 +313,6 @@ def vider_panier(request):
     
     return redirect('panier')
 
-
-
-class CheckoutView(LoginRequiredMixin, View):
-    template_name = 'frontOffice/panier/checkout.html'
-    form_class = CommandeForm
-    login_url = reverse_lazy('connexion')  
-
-    def get(self, request):
-        panier = Panier.objects.filter(client__utilisateur=request.user).first()
-        
-        if not panier or not panier.produits.exists():
-            messages.error(request, "Votre panier est vide")
-            return redirect('panier')
-
-        initial_data = {
-            'mode_livraison': 'emporter',
-            'mode_paiement': 'espece',
-        }
-        
-        form = self.form_class(initial=initial_data)
-        return render(request, self.template_name, {
-            'form': form,
-            'panier': panier,
-            'total': panier.get_total()
-        })
-
-    def post(self, request):
-        form = self.form_class(request.POST)
-        panier = Panier.objects.filter(client__utilisateur=request.user).first()
-
-        if not panier or not panier.produits.exists():
-            messages.error(request, "Votre panier est vide")
-            return redirect('panier')
-
-        if form.is_valid():
-            commande = form.save(commit=False)
-            commande.client = panier.client
-            commande.panier = panier
-            commande.montant_total = panier.get_total()
-            commande.save()
-            
-            # Vider le panier après commande
-            panier.produits.clear()
-            
-            messages.success(request, "Votre commande a été passée avec succès!")
-            return redirect('commande_confirmation', commande_id=commande.id)
-
-        return render(request, self.template_name, {
-            'form': form,
-            'panier': panier,
-            'total': panier.get_total()
-        })
 # Contact
 
 def contact_success(request):
@@ -504,80 +465,6 @@ class DeleteAccountView(LoginRequiredMixin, DeleteView):
     def get_object(self, queryset=None):
         return self.request.user
 
-@login_required(login_url='connexion')
-def valider_commande(request):
-    # Récupérer le panier de l'utilisateur
-    panier = get_object_or_404(Panier, utilisateur=request.user)
-    
-    if request.method == 'POST':
-        # Traitement du formulaire de commande
-        adresse_id = request.POST.get('adresse_id')
-        methode_paiement = request.POST.get('methode_paiement')
-        coupon_code = request.POST.get('coupon_code')
-
-        # Création de la commande
-        total = panier.total
-        commande = Commande.objects.create(
-            utilisateur=request.user,
-            total=total,
-            adresse_livraison_id=adresse_id,
-            methode_paiement=methode_paiement
-        )
-
-        # 🔁 Création automatique du profil Client si inexistant
-        if not hasattr(request.user, 'client'):
-            Client.objects.create(utilisateur=request.user)
-
-        # Redirection vers la page de confirmation
-        return redirect('suivi_commande', commande_id=commande.id)
-    
-    # Afficher le formulaire de commande
-    return render(request, 'frontOfice/commandes/confirmation.html')
-
-@login_required
-def suivi_commande(request, commande_id):
-    commande = get_object_or_404(Commande, id=commande_id, utilisateur=request.user)
-    return render(request, 'frontOfice/commandes/suivi.html', {'commande': commande})
-
-@login_required
-def ajouter_adresse(request):
-    if request.method == 'POST':
-        # Traitement du formulaire d'adresse
-        rue = request.POST.get('rue')
-        ville = request.POST.get('ville')
-        code_postal = request.POST.get('code_postal')
-        pays = request.POST.get('pays')
-        
-        adresse = AdresseLivraison.objects.create(
-            utilisateur=request.user,
-            rue=rue,
-            ville=ville,
-            code_postal=code_postal,
-            pays=pays
-        )
-        
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': True, 'adresse_id': adresse.id})
-        
-        return redirect('valider_commande')
-    
-    return render(request, 'frontOfice/commandes/ajouter_adresse.html')
-
-@login_required
-def appliquer_coupon(request):
-    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        code = request.POST.get('code')
-        try:
-            coupon = Coupon.objects.get(code=code, actif=True)
-            return JsonResponse({
-                'success': True,
-                'reduction': coupon.reduction,
-                'code': coupon.code
-            })
-        except Coupon.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Code coupon invalide'})
-
-
 # ==================== DASHBOARDS ====================
 
 # Dashboard Admin
@@ -652,7 +539,7 @@ def dashboard_serveur(request):
     
     # Commandes à traiter par priorité
     commandes_en_attente = Commande.objects.filter(statut='en_attente').order_by('-date_creation')[:20]
-    commandes_en_cours = Commande.objects.filter(statut='en_cours').order_by('-date_creation')[:15]
+    commandes_en_cours = Commande.objects.filter(statut='expediee').order_by('-date_creation')[:15]
     commandes_livrees = Commande.objects.filter(statut='livree').order_by('-date_creation')[:10]
     
     # Statistiques détaillées du serveur
@@ -674,7 +561,7 @@ def dashboard_serveur(request):
     # Commandes par statut pour vue d'ensemble
     commandes_par_statut = {
         'en_attente': Commande.objects.filter(statut='en_attente').count(),
-        'en_cours': Commande.objects.filter(statut='en_cours').count(),
+        'expediee': Commande.objects.filter(statut='expediee').count(),
         'livree': Commande.objects.filter(statut='livree').count(),
         'annulee': Commande.objects.filter(statut='annulee').count(),
     }
@@ -925,6 +812,8 @@ def mon_compte(request):
         return redirect('dashboard_gerant')
     elif user_role == 'client':
         return redirect('dashboard_client')
+    elif user_role == 'livreur':
+        return redirect('dashboard_livreur')
     else:
         # Si le rôle n'est pas défini, rediriger vers le profil par défaut
         messages.warning(request, "Rôle utilisateur non défini. Redirection vers le profil.")
@@ -1210,32 +1099,112 @@ def gestion_coupons(request):
 
 @login_required
 def ajouter_coupon(request):
-    """Vue pour ajouter un nouveau coupon"""
+    """Vue pour ajouter un nouveau coupon sans utiliser le Form"""
     if request.user.role != 'admin':
         messages.error(request, "Accès non autorisé")
         return redirect('home')
     
     if request.method == 'POST':
-        form = CouponForm(request.POST)
-        if form.is_valid():
-            coupon = form.save()
+        # Récupération des données du formulaire
+        code = request.POST.get('code', '').strip().upper()
+        type_reduction = request.POST.get('type_reduction', 'pourcentage')
+        valeur = request.POST.get('valeur', '0')
+        date_debut = request.POST.get('date_debut')
+        date_fin = request.POST.get('date_fin')
+        usage_max = request.POST.get('usage_max', '1')
+        actif = request.POST.get('actif') == 'on'
+        
+        # Validation des données
+        errors = {}
+        
+        # Validation du code
+        if not code:
+            errors['code'] = "Le code du coupon est obligatoire."
+        elif not code.replace('_', '').isalnum():  # Permet les underscores
+            errors['code'] = "Le code ne doit contenir que des lettres, chiffres et underscores."
+        elif Coupon.objects.filter(code=code).exists():
+            errors['code'] = "Ce code de coupon existe déjà."
+        
+        # Validation de la valeur
+        try:
+            valeur_decimal = float(valeur)
+            if valeur_decimal <= 0:
+                errors['valeur'] = "La valeur doit être supérieure à 0."
+            elif type_reduction == 'pourcentage' and valeur_decimal > 100:
+                errors['valeur'] = "La valeur ne peut pas dépasser 100%."
+        except ValueError:
+            errors['valeur'] = "Veuillez entrer une valeur numérique valide."
+        
+        # Validation des dates
+        try:
+            date_debut_obj = timezone.datetime.strptime(date_debut, '%Y-%m-%dT%H:%M')
+            date_fin_obj = timezone.datetime.strptime(date_fin, '%Y-%m-%dT%H:%M')
             
-            # Enregistrer l'action
-            enregistrer_action(
-                utilisateur=request.user,
-                type_action='coupon_ajout',
-                description=f"Ajout du coupon '{coupon.code}'",
-                objet_concerne=f"Coupon #{coupon.id}",
-                objet_id=coupon.id,
-                request=request
-            )
-            
-            messages.success(request, f"Coupon '{coupon.code}' ajouté avec succès")
-            return redirect('gestion_coupons')
-    else:
-        form = CouponForm()
+            if date_debut_obj >= date_fin_obj:
+                errors['date_fin'] = "La date de fin doit être postérieure à la date de début."
+        except (ValueError, TypeError):
+            if not date_debut:
+                errors['date_debut'] = "La date de début est obligatoire."
+            if not date_fin:
+                errors['date_fin'] = "La date de fin est obligatoire."
+        
+        # Validation de l'usage maximum
+        try:
+            usage_max_int = int(usage_max)
+            if usage_max_int < 1:
+                errors['usage_max'] = "L'usage maximum doit être au moins de 1."
+        except ValueError:
+            errors['usage_max'] = "Veuillez entrer un nombre entier valide."
+        
+        # Si aucune erreur, création du coupon
+        if not errors:
+            try:
+                coupon = Coupon.objects.create(
+                    code=code,
+                    type_reduction=type_reduction,
+                    valeur=valeur_decimal,
+                    date_debut=date_debut_obj,
+                    date_fin=date_fin_obj,
+                    usage_max=usage_max_int,
+                    actif=actif
+                )
+                
+                # Enregistrer l'action (si vous avez cette fonction)
+                try:
+                    enregistrer_action(
+                        utilisateur=request.user,
+                        type_action='coupon_ajout',
+                        description=f"Ajout du coupon '{coupon.code}'",
+                        objet_concerne=f"Coupon #{coupon.id}",
+                        objet_id=coupon.id,
+                        request=request
+                    )
+                except NameError:
+                    pass  # Si la fonction n'existe pas, on ignore
+                
+                messages.success(request, f"Coupon '{coupon.code}' ajouté avec succès")
+                return redirect('gestion_coupons')
+            except Exception as e:
+                errors['global'] = f"Une erreur s'est produite lors de la création du coupon: {str(e)}"
+        
+        # S'il y a des erreurs, on réaffiche le formulaire avec les erreurs
+        context = {
+            'errors': errors,
+            'form_data': {
+                'code': code,
+                'type_reduction': type_reduction,
+                'valeur': valeur,
+                'date_debut': date_debut,
+                'date_fin': date_fin,
+                'usage_max': usage_max,
+                'actif': actif
+            }
+        }
+        return render(request, 'dashboards/admin/ajouter_coupon.html', context)
     
-    return render(request, 'dashboards/admin/ajouter_coupon.html', {'form': form})
+    else:
+        # GET request - afficher le formulaire vide
+        return render(request, 'dashboards/admin/ajouter_coupon.html')
 
 @login_required
 def modifier_coupon(request, coupon_id):
@@ -1302,6 +1271,13 @@ def supprimer_coupon(request, coupon_id):
     })
 
 # ==================== RAPPORTS ET ANALYSES (ADMIN) ====================
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.utils import timezone
+from django.db.models import Count, Q, Sum, F
+from datetime import datetime, timedelta
+from .models import Commande, Produit, Gerant, LigneCommande
 
 @login_required
 def rapports_admin(request):
@@ -1311,7 +1287,6 @@ def rapports_admin(request):
         return redirect('home')
     
     # Période par défaut : 30 derniers jours
-    from datetime import datetime, timedelta
     fin = timezone.now()
     debut = fin - timedelta(days=30)
     
@@ -1326,7 +1301,7 @@ def rapports_admin(request):
     
     # Statistiques générales
     commandes_periode = Commande.objects.filter(date_creation__range=[debut, fin])
-    revenus_periode = commandes_periode.aggregate(total=models.Sum('total'))['total'] or 0
+    revenus_periode = commandes_periode.aggregate(total=Sum('total'))['total'] or 0
     
     # Ventes par jour
     ventes_par_jour = []
@@ -1334,18 +1309,15 @@ def rapports_admin(request):
     while current_date <= fin.date():
         ventes_jour = Commande.objects.filter(
             date_creation__date=current_date
-        ).aggregate(total=models.Sum('total'))['total'] or 0
+        ).aggregate(total=Sum('total'))['total'] or 0
         
         ventes_par_jour.append({
-            'date': current_date.strftime('%Y-%m-%d'),
+            'date': current_date,
             'total': float(ventes_jour)
         })
         current_date += timedelta(days=1)
     
     # Top produits
-    from django.db.models import Count, Q, Sum, F
-    
-    # Compter les produits dans les commandes via les lignes de commande
     top_produits = Produit.objects.annotate(
         nb_commandes=Count('lignecommande', 
                          filter=Q(lignecommande__commande__date_creation__range=[debut, fin]),
@@ -1391,6 +1363,7 @@ def rapports_admin(request):
         'performance_gerants': performance_gerants,
         'date_debut': debut.date(),
         'date_fin': fin.date(),
+        'user': request.user,  # Ajout de l'utilisateur au contexte
     }
     
     return render(request, 'dashboards/admin/rapports.html', context)
@@ -1669,200 +1642,6 @@ def gestion_financiere_gerant(request):
     return render(request, 'dashboards/gerant/gestion_financiere.html', context)
 
 
-# @login_required
-# def ajouter_categorie(request):
-#     """Vue pour ajouter une catégorie"""
-#     if request.user.role != 'admin':
-#         messages.error(request, "Accès non autorisé")
-#         return redirect('home')
-    
-#     if request.method == 'POST':
-#         # Traitement du formulaire (simulation)
-#         messages.success(request, "Catégorie ajoutée avec succès")
-#         return redirect('gestion_categories')
-    
-#     return render(request, 'dashboards/admin/ajouter_categorie.html')
-
-# @login_required
-# def modifier_categorie(request, categorie_id):
-#     """Vue pour modifier une catégorie"""
-#     if request.user.role != 'admin':
-#         messages.error(request, "Accès non autorisé")
-#         return redirect('home')
-    
-#     categorie = get_object_or_404(Categorie, id=categorie_id)
-    
-#     if request.method == 'POST':
-#         # Traitement du formulaire (simulation)
-#         messages.success(request, "Catégorie modifiée avec succès")
-#         return redirect('gestion_categories')
-    
-#     context = {'categorie': categorie}
-#     return render(request, 'dashboards/admin/modifier_categorie.html', context)
-
-# @login_required
-# def supprimer_categorie(request, categorie_id):
-    """Vue pour supprimer une catégorie"""
-    if request.user.role != 'admin':
-        messages.error(request, "Accès non autorisé")
-        return redirect('home')
-    
-    categorie = get_object_or_404(Categorie, id=categorie_id)
-    
-    if request.method == 'POST':
-        # Vérifier si la catégorie a des produits
-        if categorie.produits.exists():
-            messages.error(request, "Impossible de supprimer une catégorie qui contient des produits")
-        else:
-            categorie.delete()
-            messages.success(request, "Catégorie supprimée avec succès")
-        return redirect('gestion_categories')
-    
-    context = {'categorie': categorie}
-    return render(request, 'dashboards/admin/supprimer_categorie.html', context)
-
-
-# @login_required
-# def ajouter_coupon(request):
-#     """Vue pour ajouter un coupon"""
-#     if request.user.role != 'admin':
-#         messages.error(request, "Accès non autorisé")
-#         return redirect('home')
-    
-#     if request.method == 'POST':
-#         # Traitement du formulaire (simulation)
-#         messages.success(request, "Coupon ajouté avec succès")
-#         return redirect('gestion_coupons')
-    
-#     return render(request, 'dashboards/admin/ajouter_coupon.html')
-
-# @login_required
-# def modifier_coupon(request, coupon_id):
-#     """Vue pour modifier un coupon"""
-#     if request.user.role != 'admin':
-#         messages.error(request, "Accès non autorisé")
-#         return redirect('home')
-    
-#     coupon = get_object_or_404(Coupon, id=coupon_id)
-    
-#     if request.method == 'POST':
-#         # Traitement du formulaire (simulation)
-#         messages.success(request, "Coupon modifié avec succès")
-#         return redirect('gestion_coupons')
-    
-#     context = {'coupon': coupon}
-#     return render(request, 'dashboards/admin/modifier_coupon.html', context)
-
-# @login_required
-# def supprimer_coupon(request, coupon_id):
-    """Vue pour supprimer un coupon"""
-    if request.user.role != 'admin':
-        messages.error(request, "Accès non autorisé")
-        return redirect('home')
-    
-    coupon = get_object_or_404(Coupon, id=coupon_id)
-    
-    if request.method == 'POST':
-        coupon.delete()
-        messages.success(request, "Coupon supprimé avec succès")
-        return redirect('gestion_coupons')
-    
-    context = {'coupon': coupon}
-    return render(request, 'dashboards/admin/supprimer_coupon.html', context)
-
-
-# @login_required
-# def parametres_systeme(request):
-#     """Vue pour les paramètres système"""
-#     if request.user.role != 'admin':
-#         messages.error(request, "Accès non autorisé")
-#         return redirect('home')
-    
-#     # Paramètres organisés par catégories (simulés)
-#     parametres = {
-#         'general': [
-#             {'nom': 'Nom du site', 'valeur': 'Canaan Glacier', 'type': 'text'},
-#             {'nom': 'Email contact', 'valeur': 'contact@canaanglacier.com', 'type': 'email'},
-#             {'nom': 'Téléphone', 'valeur': '+237 123 456 789', 'type': 'tel'},
-#         ],
-#         'commandes': [
-#             {'nom': 'Délai de livraison (heures)', 'valeur': '24', 'type': 'number'},
-#             {'nom': 'Frais de livraison (FCFA)', 'valeur': '1000', 'type': 'number'},
-#             {'nom': 'Commande minimum (FCFA)', 'valeur': '5000', 'type': 'number'},
-#         ],
-#         'paiement': [
-#             {'nom': 'Mode de paiement par défaut', 'valeur': 'especes', 'type': 'select'},
-#             {'nom': 'TVA (%)', 'valeur': '19.25', 'type': 'number'},
-#         ],
-#         'livraison': [
-#             {'nom': 'Frais de livraison', 'valeur': '2500 FCFA', 'description': 'Coût standard de livraison'},
-#             {'nom': 'Délai de livraison', 'valeur': '24-48h', 'description': 'Délai moyen de livraison'},
-#         ],
-#         'paiement': [
-#             {'nom': 'Méthodes acceptées', 'valeur': 'Carte, Mobile Money', 'description': 'Moyens de paiement disponibles'},
-#             {'nom': 'Devise', 'valeur': 'FCFA', 'description': 'Devise principale'},
-#         ],
-#         'application': [
-#             {'nom': 'Nom du site', 'valeur': 'Canaan Glacier', 'description': 'Nom affiché sur le site'},
-#         ],
-#     }
-    
-#     context = {'parametres': parametres}
-#     return render(request, 'dashboards/admin/parametres_systeme.html', context)
-
-# @login_required
-# def ajouter_parametre(request):
-#     """Vue pour ajouter un paramètre système"""
-#     if request.user.role != 'admin':
-#         messages.error(request, "Accès non autorisé")
-#         return redirect('home')
-    
-#     if request.method == 'POST':
-#         # Traitement du formulaire (simulation)
-#         messages.success(request, "Paramètre ajouté avec succès")
-#         return redirect('parametres_systeme')
-    
-#     return render(request, 'dashboards/admin/ajouter_parametre.html')
-
-# @login_required
-# def modifier_parametre(request, parametre_id):
-#     """Vue pour modifier un paramètre système"""
-#     if request.user.role != 'admin':
-#         messages.error(request, "Accès non autorisé")
-#         return redirect('home')
-    
-#     if request.method == 'POST':
-#         # Traitement du formulaire (simulation)
-#         messages.success(request, "Paramètre modifié avec succès")
-#         return redirect('parametres_systeme')
-    
-#     context = {'parametre_id': parametre_id}
-#     return render(request, 'dashboards/admin/modifier_parametre.html', context)
-
-# @login_required
-# def ajouter_parametre(request):
-#     """Vue pour ajouter un paramètre"""
-#     if request.user.role != 'admin':
-#         return JsonResponse({'success': False, 'error': 'Accès non autorisé'})
-    
-#     if request.method == 'POST':
-#         messages.success(request, "Paramètre ajouté avec succès")
-#         return redirect('parametres_systeme')
-    
-#     return redirect('parametres_systeme')
-
-# @login_required
-# def modifier_parametre(request, parametre_id):
-    """Vue pour modifier un paramètre"""
-    if request.user.role != 'admin':
-        return JsonResponse({'success': False, 'error': 'Accès non autorisé'})
-    
-    if request.method == 'POST':
-        messages.success(request, "Paramètre modifié avec succès")
-        return redirect('parametres_systeme')
-    
-    return redirect('parametres_systeme')
-
 @login_required
 def sauvegardes_systeme(request):
     """Vue pour gérer les sauvegardes système"""
@@ -1980,7 +1759,7 @@ def notifications_non_lues_count(request):
 # ==================== HISTORIQUE DES ACTIONS ====================
 
 @login_required
-def historique_actions(request):
+def historique_actions_gestion(request):
     """
     Affiche l'historique des actions (pour admin seulement)
     """
@@ -2057,16 +1836,66 @@ class ListeProduitsView(ListView):
         context['categories'] = Categorie.objects.all()
         return context
 
-class AjouterProduitView(CreateView):
+# class AjouterProduitView(CreateView):
+#     model = Produit
+#     form_class = ProduitForm
+#     template_name = 'dashboards/gerant/ajouter_produit.html'
+#     success_url = reverse_lazy('liste_produits')
+    
+#     def form_valid(self, form):
+#         form.instance.gerant = self.request.user.gerant
+#         messages.success(self.request, "Le produit a été ajouté avec succès.")
+#         return super().form_valid(form)
+
+
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.urls import reverse_lazy
+from django.views.generic import CreateView
+from .models import Produit
+from .forms import ProduitForm
+
+class AjouterProduitView(LoginRequiredMixin, CreateView):
     model = Produit
     form_class = ProduitForm
     template_name = 'dashboards/gerant/ajouter_produit.html'
     success_url = reverse_lazy('liste_produits')
     
+    def dispatch(self, request, *args, **kwargs):
+        # Vérifier que l'utilisateur a le rôle admin ou est un gérant
+        if not (hasattr(request.user, 'gerant') or 
+                (hasattr(request.user, 'role') and request.user.role == 'admin')):
+            messages.error(request, "Vous n'avez pas la permission d'ajouter des produits.")
+            return redirect('login')
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_form_kwargs(self):
+        """Passe l'utilisateur connecté au formulaire"""
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
     def form_valid(self, form):
-        form.instance.gerant = self.request.user.gerant
-        messages.success(self.request, "Le produit a été ajouté avec succès.")
+        # Pour les admins, on n'assigne pas de gérant automatiquement
+        # Le gérant sera sélectionné dans le formulaire
+        if hasattr(self.request.user, 'gerant'):
+            # L'utilisateur est un gérant
+            form.instance.gerant = self.request.user.gerant
+            messages.success(self.request, "Le produit a été ajouté avec succès à votre boutique.")
+        else:
+            # L'utilisateur est un admin
+            messages.success(self.request, "Le produit a été ajouté avec succès.")
+            
         return super().form_valid(form)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titre'] = "Ajouter un produit"
+        context['titre_icon'] = "plus"
+        context['submit_text'] = "Ajouter le produit"
+        context['est_admin'] = hasattr(self.request.user, 'role') and self.request.user.role == 'admin'
+        context['est_gerant'] = hasattr(self.request.user, 'gerant')
+        return context
 
 class ModifierProduitView(UpdateView):
     model = Produit
@@ -2725,8 +2554,8 @@ def traiter_paiement(request, commande_id):
             paiement.save()
             
             # Mettre à jour le statut de la commande
-            commande.statut = 'payée'
-            commande.save()
+            # commande.statut = 'payée'
+            # commande.save()
             
             messages.success(request, f"Paiement effectué avec succès! Numéro de transaction: {numero_transaction}")
             return redirect('commande_detail', pk=commande_id)
@@ -2741,6 +2570,86 @@ def traiter_paiement(request, commande_id):
     
     return redirect('commande_detail', pk=commande_id)
 
+# @login_required
+# def traiter_paiement(request, commande_id):
+#     commande = get_object_or_404(Commande, id=commande_id, utilisateur=request.user)
+#     methode = commande.methode_paiement
+
+#     if methode in ['carte_bancaire', 'flooz', 'tmoney']:
+#         transaction_id = str(uuid.uuid4())  # ID unique CinetPay
+#         montant = float(commande.total)
+
+#         payload = {
+#             "apikey": settings.CINETPAY_API_KEY,
+#             "site_id": settings.CINETPAY_SITE_ID,
+#             "transaction_id": transaction_id,
+#             "amount": montant,
+#             "currency": "XOF",
+#             "description": f"Paiement commande #{commande.id}",
+#             "notify_url": request.build_absolute_uri(reverse("cinetpay_notify")),
+#             "return_url": request.build_absolute_uri(reverse("commande_detail", args=[commande.id])),
+#             "channels": "ALL",
+#             "lang": "fr"
+#         }
+
+#         response = requests.post(settings.CINETPAY_BASE_URL, json=payload)
+#         data = response.json()
+
+#         if data.get("code") == "201":
+#             # Créer un paiement lié à la commande avec le transaction_id
+#             Paiement.objects.update_or_create(
+#                 commande=commande,
+#                 defaults={
+#                     "montant": commande.total,
+#                     "statut": "en cours",
+#                     "transaction_id": transaction_id  # ⚡ Sauvegarde l’ID de CinetPay
+#                 }
+#             )
+#             return redirect(data["data"]["payment_url"])
+#         else:
+#             messages.error(request, f"Erreur CinetPay : {data.get('message', 'Inconnue')}")
+#             return redirect("commande_detail", pk=commande.id)
+
+#     elif methode == 'paiement_livraison':
+#         messages.info(request, "Vous paierez à la livraison.")
+#         return redirect('commande_detail', pk=commande_id)
+
+#     elif methode == 'retrait_magasin':
+#         messages.info(request, "Vous paierez lors du retrait en magasin.")
+#         return redirect('commande_detail', pk=commande_id)
+
+#     return redirect('commande_detail', pk=commande_id)
+
+
+@csrf_exempt
+def cinetpay_notify(request):
+    if request.method == "POST":
+        data = request.POST.dict()
+        transaction_id = data.get("transaction_id")
+
+        if not transaction_id:
+            return JsonResponse({"error": "transaction_id manquant"}, status=400)
+
+        # Vérification auprès de CinetPay
+        payload = {
+            "apikey": settings.CINETPAY_API_KEY,
+            "site_id": settings.CINETPAY_SITE_ID,
+            "transaction_id": transaction_id
+        }
+        response = requests.post(settings.CINETPAY_CHECK_URL, json=payload)
+        result = response.json()
+
+        if result.get("code") == "00":  # Paiement validé
+            paiement = Paiement.objects.filter(transaction_id=transaction_id).first()
+            if paiement:
+                paiement.statut = "payé"
+                paiement.save()
+                paiement.commande.statut = "payée"
+                paiement.commande.save()
+
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"error": "Méthode non autorisée"}, status=405)
+
 @login_required
 def annuler_paiement(request, commande_id):
     """Vue pour annuler un paiement"""
@@ -2750,9 +2659,10 @@ def annuler_paiement(request, commande_id):
     for ligne in commande.lignes.all():
         ligne.produit.quantite_disponible += ligne.quantite
         ligne.produit.save()
-    
+
+   #Modification fait par Benjamin 12/09/2025 
     # Marquer la commande comme annulée
-    commande.statut = 'annulee'
+    commande.statut = Commande.STATUT_ANNULEE
     commande.save()
     
     messages.info(request, "Paiement annulé. Votre commande a été annulée.")
@@ -2937,7 +2847,7 @@ def paiement_commande_serveur(request, commande_id):
             montant_paye = form.cleaned_data['montant_paye']
             
             commande.methode_paiement = methode_paiement
-            commande.statut = "en_cours"
+            commande.statut = Commande.STATUT_TRAITEMENT
             commande.save()
             
             Paiement.objects.create(
@@ -3014,6 +2924,7 @@ def changer_statut_commande(request, commande_id):
     
     if request.method == 'POST':
         nouveau_statut = request.POST.get('statut')
+        ancien_statut = commande.statut
         
         # Définir les statuts valides directement dans la vue
         statuts_valides = {
@@ -3027,6 +2938,44 @@ def changer_statut_commande(request, commande_id):
         if nouveau_statut in statuts_valides:
             commande.statut = nouveau_statut
             commande.save()
+
+             # Enregistrer l'action dans l'historique
+            enregistrer_action(
+                utilisateur=request.user,
+                type_action='commande_statut',
+                description=f"Changement de statut de '{ancien_statut}' vers '{nouveau_statut}'",
+                objet_concerne=f"Commande #{commande.id}",
+                objet_id=commande.id,
+                details={'ancien_statut': ancien_statut, 'nouveau_statut': nouveau_statut},
+                request=request
+            )
+            
+            # Créer une notification pour le client
+            titre_notification = ""
+            message_notification = ""
+            type_notification = ""
+            
+            if nouveau_statut == 'en_traitement':
+                titre_notification = "Commande en préparation"
+                message_notification = f"Votre commande #{commande.id} est maintenant en préparation."
+                type_notification = 'commande_preparation'
+            elif nouveau_statut == 'livree':
+                titre_notification = "Commande livrée"
+                message_notification = f"Votre commande #{commande.id} a été livrée avec succès !"
+                type_notification = 'commande_livree'
+            elif nouveau_statut == 'annulee':
+                titre_notification = "Commande annulée"
+                message_notification = f"Votre commande #{commande.id} a été annulée."
+                type_notification = 'commande_annulee'
+            
+            if type_notification:
+                creer_notification(
+                    utilisateur=commande.utilisateur,
+                    type_notification=type_notification,
+                    titre=titre_notification,
+                    message=message_notification,
+                    commande=commande
+                )
             messages.success(request, f"Statut de la commande #{commande.id} changé en {statuts_valides[nouveau_statut]}")
         else:
             messages.error(request, "Statut invalide")
@@ -3319,11 +3268,6 @@ def supprimer_preference(request, preference_id):
     }
     
     return render(request, 'dashboards/client/supprimer_preference.html', context)
-from django import forms
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.core.paginator import Paginator
 
 # Widget personnalisé pour gérer plusieurs fichiers
 class MultipleFileInput(forms.ClearableFileInput):
@@ -3631,3 +3575,442 @@ def mes_notations_commandes(request):
     }
     
     return render(request, 'client/mes_notations_commandes.html', context)
+
+#-----------------------------Livreur-------------------------------------------
+
+
+
+# Fonction utilitaire pour récupérer l'IP du client
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+# Fonction utilitaire pour obtenir ou créer l'objet Livreur
+def get_livreur(user):
+    """Retourne l'objet Livreur associé à l'utilisateur ou le crée s'il n'existe pas"""
+    try:
+        return user.livreur
+    except ObjectDoesNotExist:
+        # Si l'utilisateur a le rôle livreur mais pas d'objet Livreur, on le crée
+        if hasattr(user, 'role') and user.role == 'livreur':
+            livreur = Livreur.objects.create(utilisateur=user)
+            return livreur
+        return None
+
+@login_required
+def dashboard_livreur(request):
+    if not hasattr(request.user, 'role') or request.user.role != 'livreur':
+        messages.error(request, "Accès réservé aux livreurs.")
+        return redirect('home')
+    
+    livreur = get_livreur(request.user)
+    if livreur is None:
+        messages.error(request, "Profil livreur non disponible.")
+        return redirect('home')
+    
+    aujourd_hui = timezone.now().date()
+    
+    # Commandes à livrer aujourd'hui
+    commandes_a_livrer = Commande.objects.filter(
+        statut=Commande.STATUT_EXPEDIEE,
+    ).order_by('date_creation')
+    
+    # Commandes livrées aujourd'hui par ce livreur
+    commandes_livrees_aujourdhui = Commande.objects.filter(
+        statut=Commande.STATUT_LIVREE,
+        date_livraison__date=aujourd_hui,
+        livreur=livreur
+    ).count()
+    
+    # Statistiques
+    stats = {
+        'total_a_livrer': commandes_a_livrer.count(),
+        'livrees_aujourdhui': commandes_livrees_aujourdhui,
+        'en_retard': Commande.objects.filter(
+            statut=Commande.STATUT_EXPEDIEE,
+            date_creation__date__lt=aujourd_hui
+        ).count()
+    }
+    
+    context = {
+        'commandes_a_livrer': commandes_a_livrer,
+        'stats': stats,
+        'aujourd_hui': aujourd_hui
+    }
+    
+    return render(request, 'dashboards/livreur_dashboard.html', context)
+
+@login_required
+def commandes_a_livrer(request):
+    if not hasattr(request.user, 'role') or request.user.role != 'livreur':
+        messages.error(request, "Accès réservé aux livreurs.")
+        return redirect('home')
+    
+    livreur = get_livreur(request.user)
+    if livreur is None:
+        messages.error(request, "Profil livreur non disponible.")
+        return redirect('home')
+    
+    statut = request.GET.get('statut', 'expediee')
+    
+    # Filtres de base
+    commandes = Commande.objects.filter(statut=Commande.STATUT_EXPEDIEE)
+    
+    # Filtre par date
+    date_filter = request.GET.get('date')
+    if date_filter:
+        try:
+            filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
+            commandes = commandes.filter(date_creation__date=filter_date)
+        except ValueError:
+            pass
+    
+    # Filtre par recherche
+    search_query = request.GET.get('q')
+    if search_query:
+        commandes = commandes.filter(
+            Q(id__icontains=search_query) |
+            Q(utilisateur__username__icontains=search_query) |
+            Q(adresse_livraison__ville__icontains=search_query)
+        )
+    
+    # Pagination
+    paginator = Paginator(commandes.order_by('date_creation'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'statut_filter': statut,
+        'date_filter': date_filter,
+        'search_query': search_query
+    }
+    
+    return render(request, 'dashboards/livreur/commandes_a_livrer.html', context)
+
+@login_required
+def detail_commande_livreur(request, commande_id):
+    if not hasattr(request.user, 'role') or request.user.role != 'livreur':
+        messages.error(request, "Accès réservé aux livreurs.")
+        return redirect('home')
+    
+    livreur = get_livreur(request.user)
+    if livreur is None:
+        messages.error(request, "Profil livreur non disponible.")
+        return redirect('home')
+    
+    commande = get_object_or_404(Commande, id=commande_id)
+    
+    if request.method == 'POST':
+        # Marquer comme livrée
+        if 'livrer' in request.POST:
+            commande.statut = Commande.STATUT_LIVREE
+            commande.date_livraison = timezone.now()
+            commande.livreur = livreur
+            commande.save()
+            
+            # Créer une notification pour le client
+            Notification.objects.create(
+                utilisateur=commande.utilisateur,
+                type_notification='commande_livree',
+                titre='Commande livrée',
+                message=f'Votre commande #{commande.id} a été livrée avec succès.',
+                commande=commande
+            )
+            
+            # Historique d'action
+            HistoriqueAction.objects.create(
+                utilisateur=request.user,
+                type_action='commande_statut',
+                description=f'Commande #{commande.id} marquée comme livrée',
+                objet_concerne=f'Commande #{commande.id}',
+                objet_id=commande.id,
+                adresse_ip=get_client_ip(request)
+            )
+            
+            messages.success(request, f'Commande #{commande.id} marquée comme livrée avec succès.')
+            return redirect('commandes_a_livrer')
+    
+    context = {
+        'commande': commande,
+        'lignes_commande': commande.lignes.all()
+    }
+    
+    return render(request, 'dashboards/livreur/detail_commande.html', context)
+
+@login_required
+def commandes_livrees(request):
+    if not hasattr(request.user, 'role') or request.user.role != 'livreur':
+        messages.error(request, "Accès réservé aux livreurs.")
+        return redirect('home')
+    
+    livreur = get_livreur(request.user)
+    if livreur is None:
+        messages.error(request, "Profil livreur non disponible.")
+        return redirect('home')
+    
+    # Commandes livrées par ce livreur
+    commandes = Commande.objects.filter(
+        statut=Commande.STATUT_LIVREE,
+        livreur=livreur
+    )
+    
+    # Filtres
+    date_debut = request.GET.get('date_debut')
+    date_fin = request.GET.get('date_fin')
+    
+    if date_debut:
+        commandes = commandes.filter(date_livraison__date__gte=date_debut)
+    if date_fin:
+        commandes = commandes.filter(date_livraison__date__lte=date_fin)
+    
+    # Statistiques
+    stats = {
+        'total_livrees': commandes.count(),
+        'livrees_semaine': commandes.filter(
+            date_livraison__gte=timezone.now() - timedelta(days=7)
+        ).count(),
+        'moyenne_journaliere': commandes.filter(
+            date_livraison__gte=timezone.now() - timedelta(days=30)
+        ).count() / 30
+    }
+    
+    # Pagination
+    paginator = Paginator(commandes.order_by('-date_livraison'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'stats': stats,
+        'date_debut': date_debut,
+        'date_fin': date_fin
+    }
+    
+    return render(request, 'dashboards/livreur/commandes_livrees.html', context)
+
+@login_required
+def historique_actions(request):
+    if not hasattr(request.user, 'role') or request.user.role != 'livreur':
+        messages.error(request, "Accès réservé aux livreurs.")
+        return redirect('home')
+    
+    actions = HistoriqueAction.objects.filter(utilisateur=request.user)
+    
+    # Filtre par type d'action
+    type_action = request.GET.get('type_action')
+    if type_action:
+        actions = actions.filter(type_action=type_action)
+    
+    # Filtre par date
+    date_filter = request.GET.get('date')
+    if date_filter:
+        try:
+            filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
+            actions = actions.filter(date_action__date=filter_date)
+        except ValueError:
+            pass
+    
+    # Pagination
+    paginator = Paginator(actions.order_by('-date_action'), 15)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'type_action_filter': type_action,
+        'date_filter': date_filter,
+        'types_actions': HistoriqueAction.TYPE_ACTION_CHOICES
+    }
+    
+    return render(request, 'dashboards/livreur/historique_actions.html', context)
+
+@login_required
+def profil_livreur(request):
+    if not hasattr(request.user, 'role') or request.user.role != 'livreur':
+        messages.error(request, "Accès réservé aux livreurs.")
+        return redirect('home')
+    
+    livreur = get_livreur(request.user)
+    if livreur is None:
+        messages.error(request, "Profil livreur non disponible.")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        # Mettre à jour les informations du profil
+        user = request.user
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.email = request.POST.get('email', user.email)
+        user.telephone = request.POST.get('telephone', user.telephone)
+        user.save()
+        
+        messages.success(request, 'Profil mis à jour avec succès.')
+        return redirect('profil_livreur')
+    
+    # Statistiques du livreur
+    stats = {
+        'commandes_livrees': Commande.objects.filter(
+            livreur=livreur, 
+            statut=Commande.STATUT_LIVREE
+        ).count(),
+        'commandes_mois': Commande.objects.filter(
+            livreur=livreur,
+            statut=Commande.STATUT_LIVREE,
+            date_livraison__month=timezone.now().month
+        ).count()
+    }
+    
+    context = {
+        'stats': stats
+    }
+    
+    return render(request, 'dashboards/livreur/profil.html', context)
+
+# views.py
+@login_required
+def changer_statut_commande_livreur(request, commande_id):
+    """
+    View pour changer le statut d'une commande de 'expédiée' à 'livrée'
+    """
+    if not hasattr(request.user, 'role') or request.user.role != 'livreur':
+        messages.error(request, "Accès réservé aux livreurs.")
+        return redirect('home')
+    
+    livreur = get_livreur(request.user)
+    if livreur is None:
+        messages.error(request, "Profil livreur non disponible.")
+        return redirect('home')
+    
+    # Récupérer la commande
+    commande = get_object_or_404(Commande, id=commande_id)
+    
+    # Vérifier que la commande est bien expédiée
+    if commande.statut != Commande.STATUT_EXPEDIEE:
+        messages.error(request, f"La commande #{commande.id} n'est pas expédiée.")
+        return redirect('commandes_a_livrer')
+    
+    if request.method == 'POST':
+        try:
+            # Mettre à jour le statut de la commande
+            commande.statut = Commande.STATUT_LIVREE
+            commande.date_livraison = timezone.now()
+            commande.livreur = livreur
+            commande.save()
+            
+            # Créer une notification pour le client
+            Notification.objects.create(
+                utilisateur=commande.utilisateur,
+                type_notification='commande_livree',
+                titre='Commande livrée',
+                message=f'Votre commande #{commande.id} a été livrée avec succès par {request.user.get_full_name()}.',
+                commande=commande
+            )
+            
+            # Enregistrer dans l'historique des actions
+            HistoriqueAction.objects.create(
+                utilisateur=request.user,
+                type_action='commande_statut',
+                description=f'Commande #{commande.id} marquée comme livrée',
+                objet_concerne=f'Commande #{commande.id}',
+                objet_id=commande.id,
+                adresse_ip=get_client_ip(request)
+            )
+            
+            messages.success(request, f'Commande #{commande.id} marquée comme livrée avec succès.')
+            return redirect('commandes_a_livrer')
+                
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la mise à jour: {str(e)}")
+            return redirect('detail_commande', commande_id=commande.id)
+    
+    # Si méthode GET, afficher la page de confirmation
+    context = {
+        'commande': commande,
+        'lignes_commande': commande.lignes.all()
+    }
+    
+    return render(request, 'dashboards/livreur/livreur_confirmation_livraison.html', context)
+
+
+
+
+#++++++++++++++++++++++++++++ +++++++++++++++++++++++++++++++++++
+
+@login_required(login_url='connexion')
+def valider_commande(request):
+    # Récupérer le panier de l'utilisateur
+    panier = get_object_or_404(Panier, utilisateur=request.user)
+    
+    if request.method == 'POST':
+        # Traitement du formulaire de commande
+        adresse_id = request.POST.get('adresse_id')
+        methode_paiement = request.POST.get('methode_paiement')
+        coupon_code = request.POST.get('coupon_code')
+
+        # Création de la commande
+        total = panier.total
+        commande = Commande.objects.create(
+            utilisateur=request.user,
+            total=total,
+            adresse_livraison_id=adresse_id,
+            methode_paiement=methode_paiement
+        )
+
+        # 🔁 Création automatique du profil Client si inexistant
+        if not hasattr(request.user, 'client'):
+            Client.objects.create(utilisateur=request.user)
+
+        # Redirection vers la page de confirmation
+        return redirect('suivi_commande', commande_id=commande.id)
+    
+    # Afficher le formulaire de commande
+    return render(request, 'frontOfice/commandes/confirmation.html')
+
+@login_required
+def suivi_commande(request, commande_id):
+    commande = get_object_or_404(Commande, id=commande_id, utilisateur=request.user)
+    return render(request, 'frontOfice/commandes/suivi.html', {'commande': commande})
+
+@login_required
+def ajouter_adresse(request):
+    if request.method == 'POST':
+        # Traitement du formulaire d'adresse
+        rue = request.POST.get('rue')
+        ville = request.POST.get('ville')
+        code_postal = request.POST.get('code_postal')
+        pays = request.POST.get('pays')
+        
+        adresse = AdresseLivraison.objects.create(
+            utilisateur=request.user,
+            rue=rue,
+            ville=ville,
+            code_postal=code_postal,
+            pays=pays
+        )
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'adresse_id': adresse.id})
+        
+        return redirect('valider_commande')
+    
+    return render(request, 'frontOfice/commandes/ajouter_adresse.html')
+
+@login_required
+def appliquer_coupon(request):
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        code = request.POST.get('code')
+        try:
+            coupon = Coupon.objects.get(code=code, actif=True)
+            return JsonResponse({
+                'success': True,
+                'reduction': coupon.reduction,
+                'code': coupon.code
+            })
+        except Coupon.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Code coupon invalide'})
+

@@ -1,0 +1,142 @@
+<!-- dashboards/livreur_confirmation_livraison.html -->
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="bg-light rounded p-4">
+                <!-- En-tête -->
+                <div class="text-center mb-4">
+                    <i class="fa fa-check-circle fa-4x text-success mb-3"></i>
+                    <h2>Confirmation de Livraison</h2>
+                    <p class="text-muted">Confirmez la livraison de la commande</p>
+                </div>
+
+                <!-- Détails de la commande -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fa fa-info-circle me-2"></i>
+                            Détails de la Commande #{{ commande.id }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Client:</strong><br>
+                                {{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Adresse:</strong><br>
+                                {{ commande.adresse_livraison.rue }}, {{ commande.adresse_livraison.ville }}
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Montant:</strong><br>
+                                <span class="text-success fw-bold">{{ commande.total }} FCFA</span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Statut actuel:</strong><br>
+                                <span class="badge bg-warning">{{ commande.get_statut_display }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Produits -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fa fa-shopping-basket me-2"></i>
+                            Produits à Livrer
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th>Quantité</th>
+                                        <th>Prix</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ligne in lignes_commande %}
+                                    <tr>
+                                        <td>{{ ligne.produit.nom }}</td>
+                                        <td>{{ ligne.quantite }}</td>
+                                        <td>{{ ligne.prix_unitaire }} FCFA</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulaire de confirmation -->
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fa fa-check me-2"></i>
+                            Confirmation
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fa fa-info-circle me-2"></i>
+                            <strong>Important:</strong> Confirmez uniquement après avoir remis la commande au client.
+                            Cette action est irréversible.
+                        </div>
+
+                        <form method="post" id="livraisonForm">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Notes de livraison (optionnel)</label>
+                                <textarea class="form-control" name="notes_livraison" 
+                                          rows="3" placeholder="Remarques, observations..."></textarea>
+                            </div>
+
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="confirmationCheck" required>
+                                <label class="form-check-label" for="confirmationCheck">
+                                    Je confirme avoir livré cette commande au client
+                                </label>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fa fa-check-circle me-2"></i>
+                                    Confirmer la Livraison
+                                </button>
+                                <a href="{% url 'commandes_a_livrer' %}" class="btn btn-secondary">
+                                    <i class="fa fa-arrow-left me-2"></i>
+                                    Retour aux commandes
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Validation du formulaire
+document.getElementById('livraisonForm').addEventListener('submit', function(e) {
+    const checkbox = document.getElementById('confirmationCheck');
+    if (!checkbox.checked) {
+        e.preventDefault();
+        alert('Veuillez confirmer que vous avez livré la commande.');
+    }
+});
+</script>
+{% endblock %}

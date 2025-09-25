@@ -1,0 +1,281 @@
+<!-- dashboards/livreur_profil.html -->
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fa fa-user-circle me-2 text-primary"></i>
+                            Mon Profil
+                        </h2>
+                        <p class="mb-0 text-muted">Gérez vos informations personnelles et préférences</p>
+                    </div>
+                    <div class="d-flex">
+                        <span class="badge bg-primary">Livreur</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Informations Personnelles -->
+        <div class="col-xl-8">
+            <div class="bg-light rounded p-4">
+                <h5 class="mb-4">
+                    <i class="fa fa-user me-2 text-info"></i>
+                    Informations Personnelles
+                </h5>
+                
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Prénom</label>
+                            <input type="text" class="form-control" name="first_name" 
+                                   value="{{ user.first_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nom</label>
+                            <input type="text" class="form-control" name="last_name" 
+                                   value="{{ user.last_name }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" class="form-control" name="email" 
+                                   value="{{ user.email }}" required>
+                            <div class="form-text">Votre adresse email principale</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Téléphone</label>
+                            <input type="tel" class="form-control" name="telephone" 
+                                   value="{{ user.telephone|default:'' }}" 
+                                   placeholder="+228 XX XX XX XX">
+                            <div class="form-text">Numéro de contact principal</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nom d'utilisateur</label>
+                            <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                            <div class="form-text">Identifiant unique (non modifiable)</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Rôle</label>
+                            <input type="text" class="form-control" value="Livreur" disabled>
+                            <div class="form-text">Votre fonction dans l'entreprise</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save me-2"></i>Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Section Mot de Passe -->
+            <div class="bg-light rounded p-4 mt-4">
+                <h5 class="mb-4">
+                    <i class="fa fa-lock me-2 text-warning"></i>
+                    Sécurité du Compte
+                </h5>
+                
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle me-2"></i>
+                    Pour modifier votre mot de passe, veuillez contacter l'administrateur système.
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="fa fa-shield-alt fa-2x text-success mb-3"></i>
+                                <h6>Compte Sécurisé</h6>
+                                <p class="text-muted small">Votre compte est protégé</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="fa fa-clock fa-2x text-info mb-3"></i>
+                                <h6>Dernière connexion</h6>
+                                <p class="text-muted small">{{ user.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques et Sidebar -->
+        <div class="col-xl-4">
+            <!-- Avatar et Statut -->
+            <div class="bg-light rounded p-4 mb-4">
+                <div class="text-center">
+                    <div class="position-relative d-inline-block mb-3">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" 
+                             class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+                        {% else %}
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                             style="width: 120px; height: 120px; font-size: 48px;">
+                            {{ user.username|first|upper }}
+                        </div>
+                        {% endif %}
+                        <div class="position-absolute bottom-0 end-0 bg-success rounded-circle p-2 border border-3 border-white">
+                            <i class="fa fa-check text-white"></i>
+                        </div>
+                    </div>
+                    
+                    <h4>{{ user.get_full_name|default:user.username }}</h4>
+                    <p class="text-muted">Livreur - Canaan Glacier</p>
+                    
+                    <div class="d-flex justify-content-center gap-2">
+                        <span class="badge bg-primary">Actif</span>
+                        <span class="badge bg-secondary">Membre depuis {{ user.date_joined|date:"M Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques de Performance -->
+            <div class="bg-light rounded p-4">
+                <h5 class="mb-4">
+                    <i class="fa fa-chart-line me-2 text-success"></i>
+                    Mes Statistiques
+                </h5>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon bg-primary">
+                            <i class="fa fa-truck"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h6>Total Livraisons</h6>
+                            <h4>{{ stats.commandes_livrees }}</h4>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon bg-success">
+                            <i class="fa fa-calendar"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h6>Ce Mois</h6>
+                            <h4>{{ stats.commandes_mois }}</h4>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon bg-info">
+                            <i class="fa fa-trophy"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h6>Performance</h6>
+                            <h4>
+                                {% if stats.commandes_mois > 0 %}
+                                    {{ stats.commandes_mois }}/j
+                                {% else %}
+                                    0/j
+                                {% endif %}
+                            </h4>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-icon bg-warning">
+                            <i class="fa fa-star"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h6>Note Moyenne</h6>
+                            <h4>4.8/5</h4>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress mt-4" style="height: 10px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 95%;" 
+                         aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <small class="text-muted">Taux de satisfaction</small>
+                    <small class="text-success">95%</small>
+                </div>
+            </div>
+
+            <!-- Actions Rapides -->
+            <div class="bg-light rounded p-4 mt-4">
+                <h5 class="mb-4">
+                    <i class="fa fa-bolt me-2 text-warning"></i>
+                    Actions Rapides
+                </h5>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'commandes_a_livrer' %}" class="btn btn-outline-primary">
+                        <i class="fa fa-truck me-2"></i>Commandes à Livrer
+                    </a>
+                    <a href="{% url 'commandes_livrees' %}" class="btn btn-outline-success">
+                        <i class="fa fa-check-circle me-2"></i>Historique Livraisons
+                    </a>
+                    <a href="{% url 'historique_actions' %}" class="btn btn-outline-info">
+                        <i class="fa fa-history me-2"></i>Mes Actions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 0.5rem;
+    border-left: 4px solid var(--bs-primary);
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: white;
+}
+
+.stat-info h6 {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.stat-info h4 {
+    margin: 0;
+    font-weight: bold;
+    color: #495057;
+}
+
+.stats-grid {
+    display: grid;
+    gap: 1rem;
+}
+</style>
+{% endblock %}

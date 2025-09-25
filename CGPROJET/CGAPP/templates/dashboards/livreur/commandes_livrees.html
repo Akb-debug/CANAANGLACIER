@@ -1,0 +1,277 @@
+<!-- dashboards/livreur_commandes_livrees.html -->
+{% extends "dashboards/base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fa fa-check-circle me-2 text-success"></i>
+                            Commandes Livrées
+                        </h2>
+                        <p class="mb-0 text-muted">Historique de toutes vos livraisons effectuées</p>
+                    </div>
+                    <div class="d-flex">
+                        <span class="badge bg-success me-2">{{ stats.total_livrees }} livraison(s)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-2">Total Livrées</h6>
+                    <h3 class="mb-0 text-primary">{{ stats.total_livrees }}</h3>
+                    <small class="text-muted">Toutes périodes</small>
+                </div>
+                <div class="bg-primary rounded-circle p-3">
+                    <i class="fa fa-check-circle fa-2x text-white"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-2">Cette Semaine</h6>
+                    <h3 class="mb-0 text-success">{{ stats.livrees_semaine }}</h3>
+                    <small class="text-muted">7 derniers jours</small>
+                </div>
+                <div class="bg-success rounded-circle p-3">
+                    <i class="fa fa-calendar-week fa-2x text-white"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-2">Moyenne Journalière</h6>
+                    <h3 class="mb-0 text-info">{{ stats.moyenne_journaliere|floatformat:1 }}</h3>
+                    <small class="text-muted">Sur 30 jours</small>
+                </div>
+                <div class="bg-info rounded-circle p-3">
+                    <i class="fa fa-chart-line fa-2x text-white"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-2">Performance</h6>
+                    <h3 class="mb-0 text-warning">
+                        {% if stats.moyenne_journaliere > 0 %}
+                            {{ stats.moyenne_journaliere|floatformat:1 }}/j
+                        {% else %}
+                            0/j
+                        {% endif %}
+                    </h3>
+                    <small class="text-muted">Moyenne quotidienne</small>
+                </div>
+                <div class="bg-warning rounded-circle p-3">
+                    <i class="fa fa-trophy fa-2x text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <h5 class="mb-3">
+                    <i class="fa fa-filter me-2 text-info"></i>
+                    Filtres de Recherche
+                </h5>
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Date de début</label>
+                        <input type="date" name="date_debut" value="{{ date_debut }}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Date de fin</label>
+                        <input type="date" name="date_fin" value="{{ date_fin }}" class="form-control">
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fa fa-filter me-1"></i>Appliquer
+                        </button>
+                    </div>
+                </form>
+                {% if date_debut or date_fin %}
+                <div class="mt-3">
+                    <span class="badge bg-info">
+                        <i class="fa fa-info-circle me-1"></i>
+                        Filtre appliqué : 
+                        {% if date_debut %}Du {{ date_debut }}{% endif %}
+                        {% if date_fin %}au {{ date_fin }}{% endif %}
+                    </span>
+                    <a href="{% url 'commandes_livrees' %}" class="btn btn-sm btn-outline-secondary ms-2">
+                        <i class="fa fa-times me-1"></i>Effacer
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des commandes livrées -->
+    <div class="row">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h5 class="mb-0">
+                        <i class="fa fa-list me-2 text-primary"></i>
+                        Historique des Livraisons
+                    </h5>
+                    <span class="badge bg-light text-dark">
+                        {{ page_obj.paginator.count }} résultat(s)
+                    </span>
+                </div>
+
+                {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-success">
+                            <tr>
+                                <th scope="col"># Commande</th>
+                                <th scope="col">Client</th>
+                                <th scope="col">Adresse</th>
+                                <th scope="col">Montant</th>
+                                <th scope="col">Date Commande</th>
+                                <th scope="col">Date Livraison</th>
+                                <th scope="col">Délai</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commande in page_obj %}
+                            <tr>
+                                <th scope="row" class="fw-bold">#{{ commande.id }}</th>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
+                                             style="width: 35px; height: 35px; font-size: 14px;">
+                                            {{ commande.utilisateur.username|first|upper }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">{{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}</div>
+                                            <small class="text-muted">{{ commande.utilisateur.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <small>
+                                        {{ commande.adresse_livraison.rue|truncatewords:3 }}<br>
+                                        <span class="badge bg-secondary">{{ commande.adresse_livraison.ville }}</span>
+                                    </small>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-success">{{ commande.total }} FCFA</span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ commande.date_creation|date:"d/m/Y" }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        {{ commande.date_livraison|date:"d/m/Y H:i" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% with delai=commande.date_livraison|timesince:commande.date_creation %}
+                                    <span class="badge bg-info">{{ delai }}</span>
+                                    {% endwith %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'detail_commande_livreur' commande.id %}" class="btn btn-sm btn-primary">
+                                        <i class="fa fa-eye me-1"></i>Détails
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Aucune commande livrée</h5>
+                    <p class="text-muted">
+                        {% if date_debut or date_fin %}
+                        Aucune livraison ne correspond à vos critères de recherche
+                        {% else %}
+                        Vous n'avez pas encore effectué de livraison
+                        {% endif %}
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if date_debut %}&date_debut={{ date_debut }}{% endif %}{% if date_fin %}&date_fin={{ date_fin }}{% endif %}" aria-label="Previous">
+                                <i class="fa fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for i in page_obj.paginator.page_range %}
+                            {% if page_obj.number == i %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ i }}</span>
+                            </li>
+                            {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ i }}{% if date_debut %}&date_debut={{ date_debut }}{% endif %}{% if date_fin %}&date_fin={{ date_fin }}{% endif %}">{{ i }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if date_debut %}&date_debut={{ date_debut }}{% endif %}{% if date_fin %}&date_fin={{ date_fin }}{% endif %}" aria-label="Next">
+                                <i class="fa fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphique de performance (placeholder) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <h5 class="mb-4">
+                    <i class="fa fa-chart-bar me-2 text-warning"></i>
+                    Performance Mensuelle
+                </h5>
+                <div class="text-center py-4">
+                    <div class="bg-info text-white rounded p-3 d-inline-block">
+                        <i class="fa fa-chart-line fa-2x mb-2"></i>
+                        <h6>Graphique de Performance</h6>
+                        <small>Visualisation des livraisons par jour/semaine</small>
+                    </div>
+                    <p class="text-muted mt-3">
+                        <i class="fa fa-info-circle me-1"></i>
+                        Cette section affichera bientôt vos statistiques de performance détaillées
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
