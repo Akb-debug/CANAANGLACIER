@@ -86,6 +86,9 @@ class InscriptionView(CreateView):
         return next_url if next_url else reverse_lazy('home')
 
     def form_valid(self, form):
+        # Attribuer le rôle "client" avant de sauvegarder
+        form.instance.role = 'client'
+        
         response = super().form_valid(form)
         login(self.request, self.object)  
         messages.success(self.request, "Inscription réussie !")
@@ -95,7 +98,6 @@ class InscriptionView(CreateView):
         context = super().get_context_data(**kwargs)
         context['next'] = self.request.GET.get('next', '')
         return context
-
 
 def connexion(request):
     next_url = request.GET.get('next', 'home')

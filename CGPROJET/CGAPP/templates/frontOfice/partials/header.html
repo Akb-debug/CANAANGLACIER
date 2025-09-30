@@ -403,13 +403,13 @@
                 
                 <!-- Actions utilisateur -->
                 <div class="user-actions">
-                    <!-- Recherche -->
+                    {% comment %} <!-- Recherche -->
                     <form class="search-box d-none d-lg-flex" action="#" method="get">
                         <input type="text" name="q" class="search-input" placeholder="Rechercher...">
                         <button type="submit" class="search-btn">
                             <i class="fas fa-search"></i>
                         </button>
-                    </form>
+                    </form> {% endcomment %}
                     
                     <!-- Panier -->
                     <a href="{% url 'panier' %}" class="cart-btn position-relative">
