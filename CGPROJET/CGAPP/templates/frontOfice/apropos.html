@@ -5,12 +5,26 @@
 
 {% block extra_css %}
 <style>
-    .hero-section {
-    background: url('{% static "apropos-hero.png" %}');
-    background-size: cover;
-    background-position: center;
-    min-height: 100vh;
+  .hero-section {
+    position: relative;
+    background: url('{% static "banner-apropos.jpg" %}') center/cover no-repeat;
+    padding: 100px 0;
+    color: white; /* pour que le texte ressorte */
+    z-index: 1;
 }
+
+/* Ombre et dégradé */
+.hero-section::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        rgba(0, 0, 0, 0.6),  /* léger assombrissement en haut */
+        rgba(0, 0, 0, 0.2)   /* plus marqué en bas */
+    );
+    z-index: -1; /* reste derrière le contenu */
+}
+
     .feature-icon {
         width: 70px;
         height: 70px;
