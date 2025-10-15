@@ -11,140 +11,902 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h1 class="h3 mb-0">
-                        <i class="fas fa-user me-2"></i>Mon Espace Client
+                        <i class="fas fa-user me-2" style="color: var(--teal-glacier);"></i>Mon Espace Client
                     </h1>
-                    <p class="mb-0">Bienvenue dans votre espace personnel</p>
+                    <p class="mb-0 text-muted">Bienvenue dans votre espace personnel</p>
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-primary">Client</span>
+                    <span class="badge" style="background-color: var(--teal-glacier); color: white;">Client</span>
                     <p class="mb-0 text-muted small">{{ user.username }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Statistiques principales -->
-    <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-primary rounded">
-                    <div class="d-flex justify-content-between text-white">
-                        <div>
-                            <div class="text-white-50 small">Total Commandes</div>
-                            <div class="h2 mb-0">{{ total_commandes }}</div>
+<!-- Statistiques principales -->
+<div class="row g-4 mb-4">
+    <!-- Total Commandes -->
+    <div class="col-xl-3 col-md-6">
+        <div class="stats-card card h-100 border-0">
+            <div class="card-body">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <div class="stats-label">Total Commandes</div>
+                        <div class="stats-value">{{ total_commandes }}</div>
+                        <div class="stats-trend">
+                            <i class="fas fa-chart-line me-1"></i>
+                            <span>Vue d'ensemble</span>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-shopping-bag fa-2x opacity-75"></i>
+                    </div>
+                    <div class="stats-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-shopping-bag"></i>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-danger rounded">
-                    <div class="d-flex justify-content-between text-white">
-                        <div>
-                            <div class="text-white-50 small">Total Dépensé</div>
-                            <div class="h2 mb-0">{{ total_depense|floatformat:0 }}fcfa</div>
-                        </div>
-                        <div class="align-self-center">
-                        <i class="fas fa-money-bill fa-2x opacity-75"></i>
-
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-warning rounded">
-                    <div class="d-flex justify-content-between text-white">
-                        <div>
-                            <div class="text-white-50 small">Commandes en Cours</div>
-                            <div class="h2 mb-0">{{ commandes_en_cours }}</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-clock fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-info rounded">
-                    <div class="d-flex justify-content-between text-white">
-                        <div>
-                            <div class="text-white-50 small">Articles Panier</div>
-                            <div class="h2 mb-0">{{ nb_articles_panier }}</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
-                        </div>
-                    </div>
+                <div class="stats-footer">
+                    <small>Toutes vos commandes</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Actions rapides -->
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-bolt me-2"></i>Actions Rapides
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <a href="{% url 'produits' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
-                                <i class="fas fa-shopping-bag fa-2x mb-2"></i>
-                                <span class="fw-bold">Continuer mes Achats</span>
-                            </a>
+    <!-- Total Dépensé -->
+    <div class="col-xl-3 col-md-6">
+        <div class="stats-card card h-100 border-0">
+            <div class="card-body">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <div class="stats-label">Total Dépensé</div>
+                        <div class="stats-value">{{ total_depense|floatformat:0 }} FCFA</div>
+                        <div class="stats-trend">
+                            <i class="fas fa-wallet me-1"></i>
+                            <span>Dépenses totales</span>
                         </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'panier' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
-                                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
-                                <span class="fw-bold">Voir mon Panier</span>
+                    </div>
+                    <div class="stats-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-footer">
+                    <small>Montant cumulé</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commandes en Cours -->
+    <div class="col-xl-3 col-md-6">
+        <div class="stats-card card h-100 border-0">
+            <div class="card-body">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <div class="stats-label">Commandes en Cours</div>
+                        <div class="stats-value">{{ commandes_en_cours }}</div>
+                        <div class="stats-trend">
+                            <i class="fas fa-sync-alt me-1"></i>
+                            <span>En traitement</span>
+                        </div>
+                    </div>
+                    <div class="stats-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-footer">
+                    <small>En attente de livraison</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Articles Panier -->
+    <div class="col-xl-3 col-md-6">
+        <div class="stats-card card h-100 border-0">
+            <div class="card-body">
+                <div class="stats-content">
+                    <div class="stats-info">
+                        <div class="stats-label">Articles Panier</div>
+                        <div class="stats-value">{{ nb_articles_panier }}</div>
+                        <div class="stats-trend">
+                            <i class="fas fa-cube me-1"></i>
+                            <span>Articles sélectionnés</span>
+                        </div>
+                    </div>
+                    <div class="stats-icon">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-footer">
+                    <small>Dans votre panier</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Cartes de statistiques */
+.stats-card {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, #009c99 100%);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 184, 181, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    position: relative;
+    border: none;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        rgba(255,255,255,0.6) 0%, 
+        rgba(255,255,255,0.3) 50%, 
+        rgba(255,255,255,0.6) 100%);
+}
+
+.stats-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 184, 181, 0.3);
+}
+
+.stats-card .card-body {
+    padding: 25px;
+    color: white;
+    position: relative;
+    z-index: 2;
+}
+
+/* Contenu des statistiques */
+.stats-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.stats-info {
+    flex: 1;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.9;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stats-trend {
+    display: flex;
+    align-items: center;
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-top: 5px;
+}
+
+.stats-trend i {
+    font-size: 0.7rem;
+}
+
+/* Icônes */
+.stats-icon {
+    margin-left: 15px;
+}
+
+.icon-wrapper {
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover .icon-wrapper {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.1) rotate(5deg);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.icon-wrapper i {
+    font-size: 1.8rem;
+    color: white;
+    opacity: 0.9;
+}
+
+/* Pied de carte */
+.stats-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    padding-top: 15px;
+    margin-top: 10px;
+}
+
+.stats-footer small {
+    opacity: 0.7;
+    font-size: 0.8rem;
+}
+
+/* Effets de brillance au survol */
+.stats-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+    opacity: 0;
+}
+
+.stats-card:hover::after {
+    opacity: 1;
+    animation: shine 1.5s ease;
+}
+
+@keyframes shine {
+    0% {
+        transform: rotate(45deg) translateX(-100%);
+    }
+    100% {
+        transform: rotate(45deg) translateX(100%);
+    }
+}
+
+/* Variantes de couleurs pour différencier les cartes */
+.stats-card:nth-child(1) {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, #00a8a5 100%);
+}
+
+.stats-card:nth-child(2) {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, #008b88 100%);
+}
+
+.stats-card:nth-child(3) {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, #007a77 100%);
+}
+
+.stats-card:nth-child(4) {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, #006966 100%);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .stats-value {
+        font-size: 2.2rem;
+    }
+    
+    .icon-wrapper {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .icon-wrapper i {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-card .card-body {
+        padding: 20px;
+    }
+    
+    .stats-value {
+        font-size: 2rem;
+    }
+    
+    .stats-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .stats-icon {
+        margin: 15px 0 0 0;
+        order: -1;
+    }
+    
+    .icon-wrapper {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto;
+    }
+    
+    .icon-wrapper i {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-card {
+        margin-bottom: 15px;
+    }
+    
+    .stats-value {
+        font-size: 1.8rem;
+    }
+    
+    .stats-label {
+        font-size: 0.8rem;
+    }
+}
+
+/* Accessibilité - réduction des animations */
+@media (prefers-reduced-motion: reduce) {
+    .stats-card,
+    .icon-wrapper,
+    .stats-card::after {
+        transition: none;
+        animation: none;
+    }
+    
+    .stats-card:hover {
+        transform: none;
+    }
+    
+    .stats-card:hover .icon-wrapper {
+        transform: none;
+    }
+    
+    .stats-card::after {
+        display: none;
+    }
+}
+
+/* Mode sombre support */
+@media (prefers-color-scheme: dark) {
+    .stats-card {
+        box-shadow: 0 10px 30px rgba(0, 184, 181, 0.3);
+    }
+    
+    .stats-card:hover {
+        box-shadow: 0 20px 40px rgba(0, 184, 181, 0.4);
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation au chargement
+    const statsCards = document.querySelectorAll('.stats-card');
+    
+    statsCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Effet de comptage (optionnel)
+    const statsValues = document.querySelectorAll('.stats-value');
+    
+    statsValues.forEach(valueElement => {
+        const finalValue = parseInt(valueElement.textContent.replace(/\D/g, ''));
+        if (!isNaN(finalValue) && finalValue > 0) {
+            // Animation de comptage simple
+            let current = 0;
+            const increment = finalValue / 30;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= finalValue) {
+                    valueElement.textContent = valueElement.textContent.replace(/\d+/, finalValue);
+                    clearInterval(timer);
+                } else {
+                    valueElement.textContent = valueElement.textContent.replace(/\d+/, Math.floor(current));
+                }
+            }, 50);
+        }
+    });
+});
+</script>
+<!-- Actions rapides -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="quick-actions-card card h-100 border-0">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <div class="header-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-bold">Actions Rapides</h5>
+                        <small class="text-muted">Accédez rapidement aux fonctionnalités principales</small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- Continuer mes Achats -->
+                    <div class="col-xl-3 col-md-6">
+                        <a href="{% url 'produits' %}" class="quick-action-btn">
+                            <div class="action-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                                <div class="icon-bg"></div>
+                            </div>
+                            <div class="action-content">
+                                <h6 class="action-title">Continuer mes Achats</h6>
+                                <p class="action-desc">Découvrir nos produits</p>
+                            </div>
+                            <div class="action-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Voir mon Panier -->
+                    <div class="col-xl-3 col-md-6">
+                        <a href="{% url 'panier' %}" class="quick-action-btn">
+                            <div class="action-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                                <div class="icon-bg"></div>
                                 {% if nb_articles_panier > 0 %}
-                                    <span class="badge bg-danger mt-1">{{ nb_articles_panier }}</span>
+                                    <span class="cart-badge">{{ nb_articles_panier }}</span>
                                 {% endif %}
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'profile' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
-                                <i class="fas fa-user-edit fa-2x mb-2"></i>
-                                <span class="fw-bold">Mon Profil</span>
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'contact' %}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
-                                <i class="fas fa-headset fa-2x mb-2"></i>
-                                <span class="fw-bold">Support</span>
-                            </a>
-                        </div>
+                            </div>
+                            <div class="action-content">
+                                <h6 class="action-title">Voir mon Panier</h6>
+                                <p class="action-desc">Gérer mes articles</p>
+                            </div>
+                            <div class="action-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Mon Profil -->
+                    <div class="col-xl-3 col-md-6">
+                        <a href="{% url 'profile' %}" class="quick-action-btn">
+                            <div class="action-icon">
+                                <i class="fas fa-user-edit"></i>
+                                <div class="icon-bg"></div>
+                            </div>
+                            <div class="action-content">
+                                <h6 class="action-title">Mon Profil</h6>
+                                <p class="action-desc">Modifier mes informations</p>
+                            </div>
+                            <div class="action-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
+                    </div>
+
+                    <!-- Support -->
+                    <div class="col-xl-3 col-md-6">
+                        <a href="{% url 'contact' %}" class="quick-action-btn">
+                            <div class="action-icon">
+                                <i class="fas fa-headset"></i>
+                                <div class="icon-bg"></div>
+                            </div>
+                            <div class="action-content">
+                                <h6 class="action-title">Support Client</h6>
+                                <p class="action-desc">Nous contacter</p>
+                            </div>
+                            <div class="action-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<style>
+/* Carte principale */
+.quick-actions-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.quick-actions-card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+/* En-tête de la carte */
+.quick-actions-card .card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: none;
+    padding: 25px 30px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.header-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--teal-glacier), #009c99);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: white;
+    font-size: 1.3rem;
+}
+
+/* Boutons d'action */
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    padding: 25px 20px;
+    background: #f8f9fa;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.4), 
+        transparent);
+    transition: left 0.6s ease;
+}
+
+.quick-action-btn:hover {
+    background: white;
+    border-color: var(--teal-glacier);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 184, 181, 0.15);
+    color: inherit;
+}
+
+.quick-action-btn:hover::before {
+    left: 100%;
+}
+
+/* Icônes d'action */
+.action-icon {
+    position: relative;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.action-icon i {
+    font-size: 1.8rem;
+    color: var(--teal-glacier);
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.icon-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 184, 181, 0.1);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.quick-action-btn:hover .action-icon i {
+    color: white;
+    transform: scale(1.1);
+}
+
+.quick-action-btn:hover .icon-bg {
+    background: var(--teal-glacier);
+    transform: translate(-50%, -50%) scale(1.2);
+    border-radius: 15px;
+}
+
+/* Badge panier */
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: linear-gradient(135deg, var(--pink-swoosh), #d81b60);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(233, 30, 99, 0.3);
+    z-index: 3;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Contenu de l'action */
+.action-content {
+    flex: 1;
+}
+
+.action-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 4px;
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+.action-desc {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0;
+    transition: color 0.3s ease;
+}
+
+.quick-action-btn:hover .action-title {
+    color: var(--teal-glacier);
+}
+
+.quick-action-btn:hover .action-desc {
+    color: #495057;
+}
+
+/* Flèche d'action */
+.action-arrow {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+    color: var(--teal-glacier);
+}
+
+.quick-action-btn:hover .action-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.action-arrow i {
+    font-size: 1.1rem;
+}
+
+/* Variantes de couleurs au survol */
+.quick-action-btn:nth-child(1):hover {
+    border-color: var(--teal-glacier);
+}
+
+.quick-action-btn:nth-child(2):hover {
+    border-color: #28a745;
+}
+
+.quick-action-btn:nth-child(3):hover {
+    border-color: #17a2b8;
+}
+
+.quick-action-btn:nth-child(4):hover {
+    border-color: #ffc107;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .quick-action-btn {
+        padding: 20px 15px;
+    }
+    
+    .action-icon i {
+        font-size: 1.6rem;
+    }
+    
+    .icon-bg {
+        width: 45px;
+        height: 45px;
+    }
+}
+
+@media (max-width: 768px) {
+    .quick-actions-card .card-header {
+        padding: 20px;
+    }
+    
+    .header-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+    }
+    
+    .quick-action-btn {
+        flex-direction: column;
+        text-align: center;
+        padding: 25px 15px;
+    }
+    
+    .action-icon {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    
+    .action-content {
+        margin-bottom: 10px;
+    }
+    
+    .action-arrow {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@media (max-width: 576px) {
+    .quick-actions-card .card-body {
+        padding: 15px;
+    }
+    
+    .quick-action-btn {
+        padding: 20px 10px;
+    }
+    
+    .action-title {
+        font-size: 0.9rem;
+    }
+    
+    .action-desc {
+        font-size: 0.8rem;
+    }
+}
+
+/* Animations au chargement */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quick-action-btn {
+    animation: fadeInUp 0.6s ease;
+}
+
+.quick-action-btn:nth-child(1) { animation-delay: 0.1s; }
+.quick-action-btn:nth-child(2) { animation-delay: 0.2s; }
+.quick-action-btn:nth-child(3) { animation-delay: 0.3s; }
+.quick-action-btn:nth-child(4) { animation-delay: 0.4s; }
+
+/* Accessibilité */
+@media (prefers-reduced-motion: reduce) {
+    .quick-action-btn,
+    .quick-actions-card,
+    .action-icon i,
+    .icon-bg,
+    .action-arrow,
+    .cart-badge {
+        transition: none;
+        animation: none;
+    }
+    
+    .quick-action-btn:hover {
+        transform: none;
+    }
+    
+    .quick-action-btn:hover::before {
+        display: none;
+    }
+}
+
+/* Mode sombre support */
+@media (prefers-color-scheme: dark) {
+    .quick-actions-card {
+        background: #2d3748;
+    }
+    
+    .quick-actions-card .card-header {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        color: white;
+    }
+    
+    .quick-action-btn {
+        background: #4a5568;
+        color: white;
+    }
+    
+    .quick-action-btn:hover {
+        background: #2d3748;
+    }
+    
+    .action-title {
+        color: white;
+    }
+    
+    .action-desc {
+        color: #cbd5e0;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation au chargement
+    const actionButtons = document.querySelectorAll('.quick-action-btn');
+    
+    actionButtons.forEach((btn, index) => {
+        setTimeout(() => {
+            btn.style.opacity = '1';
+            btn.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Effet de vibration sur le badge panier
+    const cartBadge = document.querySelector('.cart-badge');
+    if (cartBadge) {
+        setInterval(() => {
+            cartBadge.style.animation = 'none';
+            setTimeout(() => {
+                cartBadge.style.animation = 'pulse 2s infinite';
+            }, 10);
+        }, 4000);
+    }
+    
+    // Effet de clic amélioré
+    actionButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            // Animation de clic
+            this.style.transform = 'translateY(-2px) scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = 'translateY(-5px)';
+            }, 150);
+        });
+    });
+});
+</script>
 
     <div class="row g-4">
         <!-- Mon Panier Actuel -->
         <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
                     <h5 class="mb-0">
-                        <i class="fas fa-shopping-cart me-2"></i>Mon Panier
+                        <i class="fas fa-shopping-cart me-2" style="color: var(--teal-glacier);"></i>Mon Panier
                         {% if total_panier > 0 %}
-                            <span class="badge bg-success ms-2">{{ total_panier }}fcfa</span>
+                            <span class="badge ms-2" style="background-color: var(--teal-glacier); color: white;">{{ total_panier }}fcfa</span>
                         {% endif %}
                     </h5>
                 </div>
@@ -166,12 +928,12 @@
                                 <small class="text-muted">{{ ligne.quantite }} x {{ ligne.produit.prix }}fcfa</small>
                             </div>
                             <div class="text-end">
-                                <div class="fw-bold text-success">{{ ligne.produit.prix|floatformat:2 }}fcfa</div>
+                                <div class="fw-bold" style="color: var(--teal-glacier);">{{ ligne.produit.prix|floatformat:2 }}fcfa</div>
                             </div>
                         </div>
                         {% endfor %}
                         <div class="text-center mt-3">
-                            <a href="{% url 'panier' %}" class="btn btn-primary btn-sm">
+                            <a href="{% url 'panier' %}" class="btn btn-sm" style="background-color: var(--teal-glacier); color: white;">
                                 <i class="fas fa-eye me-1"></i>Voir le panier complet
                             </a>
                         </div>
@@ -179,7 +941,7 @@
                         <div class="text-center py-3">
                             <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
                             <p class="text-muted mb-2">Votre panier est vide</p>
-                            <a href="{% url 'produits' %}" class="btn btn-primary btn-sm">
+                            <a href="{% url 'produits' %}" class="btn btn-sm" style="background-color: var(--teal-glacier); color: white;">
                                 <i class="fas fa-shopping-bag me-1"></i>Découvrir nos produits
                             </a>
                         </div>
@@ -190,10 +952,10 @@
 
         <!-- Mes Commandes Récentes -->
         <div class="col-lg-8">
-            <div class="card h-100">
-                <div class="card-header">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
                     <h5 class="mb-0">
-                        <i class="fas fa-history me-2"></i>Mes Commandes Récentes
+                        <i class="fas fa-history me-2" style="color: var(--teal-glacier);"></i>Mes Commandes Récentes
                     </h5>
                 </div>
                 <div class="card-body">
@@ -202,33 +964,30 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
-                                        
                                         <th>Date</th>
                                         <th>Total</th>
                                         <th>Statut</th>
-                                        <th>moyen de payement</th>
-                                        
+                                        <th>Moyen de paiement</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for commande in mes_commandes %}
                                     <tr>
-                                        
                                         <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                        <td class="fw-bold text-success">{{ commande.total }}fcfa</td>
+                                        <td class="fw-bold" style="color: var(--teal-glacier);">{{ commande.total }}fcfa</td>
                                         <td>
                                             {% if commande.statut == 'en_attente' %}
-                                                <span class="badge bg-warning">En attente</span>
+                                                <span class="badge" style="background-color: var(--yellow-canaan); color: var(--black-shadow);">En attente</span>
                                             {% elif commande.statut == 'en_cours' %}
-                                                <span class="badge bg-info">En cours</span>
+                                                <span class="badge" style="background-color: var(--teal-light); color: var(--black-shadow);">En cours</span>
                                             {% elif commande.statut == 'livree' %}
-                                                <span class="badge bg-success">Livrée</span>
+                                                <span class="badge" style="background-color: var(--teal-glacier); color: white;">Livrée</span>
                                             {% else %}
-                                                <span class="badge bg-danger">Annulée</span>
+                                                <span class="badge" style="background-color: var(--pink-swoosh); color: white;">Annulée</span>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            {{commande.methode_paiement}}
+                                            {{ commande.methode_paiement }}
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -240,7 +999,7 @@
                             <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">Aucune commande</h5>
                             <p class="text-muted">Vous n'avez pas encore passé de commande</p>
-                            <a href="{% url 'produits' %}" class="btn btn-primary">
+                            <a href="{% url 'produits' %}" class="btn" style="background-color: var(--teal-glacier); color: white;">
                                 <i class="fas fa-shopping-bag me-2"></i>Commencer mes achats
                             </a>
                         </div>
@@ -253,23 +1012,23 @@
     <div class="row g-4 mt-4">
         <!-- Mes Adresses -->
         <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
                     <h5 class="mb-0">
-                        <i class="fas fa-map-marker-alt me-2"></i>Mes Adresses
+                        <i class="fas fa-map-marker-alt me-2" style="color: var(--teal-glacier);"></i>Mes Adresses
                     </h5>
                 </div>
                 <div class="card-body">
                     {% if mes_adresses %}
                         {% for adresse in mes_adresses %}
-                        <div class="border rounded p-3 mb-2">
+                        <div class="border rounded p-3 mb-2" style="border-color: var(--teal-light) !important;">
                             <div class="fw-bold">{{ adresse.rue }}</div>
                             <div class="text-muted">{{ adresse.code_postal }} {{ adresse.ville }}</div>
                             <div class="text-muted">{{ adresse.pays }}</div>
                         </div>
                         {% endfor %}
                         <div class="text-center mt-3">
-                            <a href="{% url 'ajouter_adresse' %}" class="btn btn-outline-primary btn-sm">
+                            <a href="{% url 'ajouter_adresse' %}" class="btn btn-outline-primary btn-sm" style="border-color: var(--teal-glacier); color: var(--teal-glacier);">
                                 <i class="fas fa-plus me-1"></i>Ajouter une adresse
                             </a>
                         </div>
@@ -285,18 +1044,18 @@
 
         <!-- Produits Recommandés -->
         <div class="col-lg-6">
-            <div class="card h-100">
-                <div class="card-header">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
                     <h5 class="mb-0">
-                        <i class="fas fa-heart me-2"></i>Recommandés pour vous
+                        <i class="fas fa-heart me-2" style="color: var(--pink-swoosh);"></i>Recommandés pour vous
                     </h5>
                 </div>
                 <div class="card-body">
                     {% if produits_favoris %}
                         <div class="row g-3">
                             {% for produit in produits_favoris %}
-                            <div class="col-sm-6">
-                                <div class="card h-100">
+                            <div class="col-sm-6 col-12">
+                                <div class="card h-100 border-0 shadow-sm">
                                     {% if produit.image %}
                                         <img src="{{ produit.image.url }}" class="card-img-top" alt="{{ produit.nom }}" 
                                              style="height: 120px; object-fit: cover;">
@@ -308,8 +1067,8 @@
                                     {% endif %}
                                     <div class="card-body p-2">
                                         <h6 class="card-title mb-1">{{ produit.nom|truncatechars:20 }}</h6>
-                                        <p class="card-text text-success fw-bold mb-1">{{ produit.prix }}fcfa</p>
-                                        <a href="{% url 'detail_produit_client' produit.id %}" class="btn btn-primary btn-sm w-100">
+                                        <p class="card-text fw-bold mb-1" style="color: var(--teal-glacier);">{{ produit.prix }}fcfa</p>
+                                        <a href="{% url 'detail_produit_client' produit.id %}" class="btn btn-sm w-100" style="background-color: var(--teal-glacier); color: white;">
                                             <i class="fas fa-eye me-1"></i>Voir
                                         </a>
                                     </div>
@@ -330,33 +1089,76 @@
 </div>
 
 <style>
+    :root {
+        --teal-glacier: #00B8B5;
+        --pink-swoosh: #E91E63;
+        --yellow-canaan: #FDCB05;
+        --black-shadow: #000000;
+        --white-bg: #FFFFFF;
+        --teal-light: rgba(0, 184, 181, 0.1);
+        --pink-light: rgba(233, 30, 99, 0.1);
+    }
+
     .card {
         transition: transform 0.2s;
         border: none;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
     }
+    
     .card:hover {
         transform: translateY(-2px);
+        box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.15);
     }
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    .bg-gradient-danger {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-    .bg-gradient-warning {
-        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-    }
-    .bg-gradient-info {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-    }
+
     .table th {
         border-top: none;
         font-weight: 600;
         color: #495057;
+        background-color: var(--teal-light);
     }
+
     .border-bottom {
         border-bottom: 1px solid #dee2e6 !important;
+    }
+
+    .btn-outline-primary {
+        border-color: var(--teal-glacier);
+        color: var(--teal-glacier);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--teal-glacier);
+        color: white;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 1rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .h2 {
+            font-size: 1.5rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .col-6 {
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
     }
 </style>
 {% endblock %}

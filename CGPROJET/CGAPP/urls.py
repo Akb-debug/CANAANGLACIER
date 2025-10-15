@@ -14,6 +14,7 @@ urlpatterns = [
     path('produits/', views.ProduitListView.as_view(), name='produits'),
     path('produits/<slug:categorie_slug>/', views.ProduitListView.as_view(), name='produits_par_categorie'),
     path('produit/<int:pk>/', views.ProduitDetailView.as_view(), name='detail_produit'),
+    path('produit/<int:pk>/', views.ProduitDetailView.as_view(), name='produit_detail'),
     path('categories/<int:id>/', views.detail_categorie, name='detail_categorie'),
     
     # #Panier
@@ -191,4 +192,27 @@ urlpatterns = [
     #Paiement avec cinetpay
     path("paiement/<int:commande_id>/traiter/", views.traiter_paiement, name="traiter_paiement"),
     path("cinetpay/notify/", views.cinetpay_notify, name="cinetpay_notify"),
+
+    #Gestion livreur par admin
+    path('gestion_admin/livreurs/ajouter/', views.ajouter_livreur, name='ajouter_livreur'),
+    
+    
+    # ==================== URLs POUR LA GESTION DES UTILISATEURS PAR L'ADMIN ====================
+    
+    
+    # URLs pour les Gérants
+    path('gestion/gerant/<int:pk>/modifier/', views.modifier_gerant, name='modifier_gerant'),
+    path('gestion/gerant/<int:pk>/supprimer/', views.supprimer_gerant, name='supprimer_gerant'),
+    
+    # URLs pour les Serveurs
+    path('gestion_admin/serveurs/<int:pk>/modifier/', views.modifier_serveur, name='modifier_serveur'),
+    path('gestion_admin/serveurs/<int:pk>/supprimer/', views.supprimer_serveur, name='supprimer_serveur'),
+    
+    # URLs pour les Livreurs
+    path('gestion_admin/livreurs/<int:pk>/modifier/', views.modifier_livreur, name='modifier_livreur'),
+    path('gestion_admin/livreurs/<int:pk>/supprimer/', views.supprimer_livreur, name='supprimer_livreur'),
+    
+    # URLs pour les Clients
+    path('gestion_admin/clients/<int:pk>/modifier/', views.modifier_client, name='modifier_client'),
+    path('gestion_admin/clients/<int:pk>/supprimer/', views.supprimer_client, name='supprimer_client'),
 ]

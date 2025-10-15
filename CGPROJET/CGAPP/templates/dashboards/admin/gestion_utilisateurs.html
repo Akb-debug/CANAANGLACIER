@@ -8,8 +8,8 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">
+                <div class="card-header bg-gradient-teal text-white">
+                    <h4 class="mb-0 text-white">
                         <i class="fas fa-users me-2"></i>Gestion des Utilisateurs
                     </h4>
                 </div>
@@ -17,33 +17,33 @@
                     <!-- Statistiques -->
                     <div class="row mb-4">
                         <div class="col-md-3">
-                            <div class="card bg-primary text-white">
+                            <div class="card bg-teal text-white">
                                 <div class="card-body text-center">
-                                    <h3>{{ total_utilisateurs }}</h3>
+                                    <h3 class= "text-white">{{ total_utilisateurs }}</h3>
                                     <p class="mb-0">Total Utilisateurs</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-success text-white">
+                            <div class="card bg-teal text-white">
                                 <div class="card-body text-center">
-                                    <h3>{{ utilisateurs_actifs }}</h3>
+                                    <h3 class= "text-white">{{ utilisateurs_actifs }}</h3>
                                     <p class="mb-0">Utilisateurs Actifs</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-info text-white">
+                            <div class="card bg-teal text-white">
                                 <div class="card-body text-center">
-                                    <h3>{{ nouveaux_utilisateurs }}</h3>
+                                    <h3 class= "text-white">{{ nouveaux_utilisateurs }}</h3>
                                     <p class="mb-0">Nouveaux (30j)</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-warning text-white">
-                                <div class="card-body text-center">
-                                    <h3>{{ utilisateurs.count }}</h3>
+                            <div class="card bg-teal text-white">
+                                <div class="card-body text-center ">
+                                    <h3 class= "text-white">{{ utilisateurs.count }}</h3>
                                     <p class="mb-0">Total Comptes</p>
                                 </div>
                             </div>
@@ -69,18 +69,18 @@
                                     <td>{{ utilisateur.get_full_name|default:utilisateur.username }}</td>
                                     <td>{{ utilisateur.email }}</td>
                                     <td>
-                                        <span class="badge bg-{% if utilisateur.role == 'admin' %}danger{% elif utilisateur.role == 'gerant' %}warning{% else %}primary{% endif %}">
+                                        <span class="badge bg-{% if utilisateur.role == 'admin' %}teal-dark{% elif utilisateur.role == 'gerant' %}teal-warning{% else %}teal{% endif %}">
                                             {{ utilisateur.get_role_display }}
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-{% if utilisateur.is_active %}success{% else %}secondary{% endif %}">
+                                        <span class="badge bg-{% if utilisateur.is_active %}teal{% else %}teal-secondary{% endif %}">
                                             {% if utilisateur.is_active %}Actif{% else %}Inactif{% endif %}
                                         </span>
                                     </td>
                                     <td>{{ utilisateur.date_joined|date:"d/m/Y" }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#userModal{{ utilisateur.id }}">
+                                        <button class="btn btn-sm btn-teal-outline" data-bs-toggle="modal" data-bs-target="#userModal{{ utilisateur.id }}">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </td>
@@ -104,9 +104,9 @@
 <div class="modal fade" id="userModal{{ utilisateur.id }}" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Détails - {{ utilisateur.get_full_name|default:utilisateur.username }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <div class="modal-header bg-gradient-teal text-white">
+                <h5 class="modal-title text-white">Détails - {{ utilisateur.get_full_name|default:utilisateur.username }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p><strong>Email:</strong> {{ utilisateur.email }}</p>
@@ -116,10 +116,146 @@
                 <p><strong>Dernière connexion:</strong> {{ utilisateur.last_login|date:"d/m/Y à H:i"|default:"Jamais" }}</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-teal-secondary" data-bs-dismiss="modal">Fermer</button>
             </div>
         </div>
     </div>
 </div>
 {% endfor %}
+
+<style>
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --teal-light: #4DCECA;
+    --teal-secondary: #66C6C4;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+}
+
+.card {
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 184, 181, 0.15);
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Classes de couleur teal-glacier */
+.bg-gradient-teal {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--teal-dark) 100%) !important;
+}
+
+.bg-teal {
+    background-color: var(--teal-glacier) !important;
+}
+
+.bg-teal-dark {
+    background-color: var(--teal-dark) !important;
+}
+
+.bg-teal-light {
+    background-color: var(--teal-light) !important;
+}
+
+.bg-teal-secondary {
+    background-color: var(--teal-secondary) !important;
+}
+
+.text-teal {
+    color: var(--teal-glacier) !important;
+}
+
+/* Badges teal */
+.badge.bg-teal {
+    background-color: var(--teal-glacier) !important;
+}
+
+.badge.bg-teal-dark {
+    background-color: var(--teal-dark) !important;
+}
+
+.badge.bg-teal-warning {
+    background-color: var(--yellow-canaan) !important;
+    color: white !important;
+}
+
+.badge.bg-teal-secondary {
+    background-color: var(--teal-secondary) !important;
+}
+
+/* Boutons teal */
+.btn-teal {
+    background-color: var(--teal-glacier) !important;
+    border-color: var(--teal-glacier) !important;
+    color: white !important;
+}
+
+.btn-teal:hover {
+    background-color: var(--teal-dark) !important;
+    border-color: var(--teal-dark) !important;
+    color: white !important;
+    transform: translateY(-1px);
+}
+
+.btn-teal-outline {
+    background-color: transparent !important;
+    border-color: var(--teal-glacier) !important;
+    color: var(--teal-glacier) !important;
+}
+
+.btn-teal-outline:hover {
+    background-color: var(--teal-glacier) !important;
+    border-color: var(--teal-glacier) !important;
+    color: white !important;
+}
+
+.btn-teal-secondary {
+    background-color: var(--teal-dark) !important;
+    border-color: var(--teal-dark) !important;
+    color: white !important;
+}
+
+.btn-teal-secondary:hover {
+    background-color: var(--teal-glacier) !important;
+    border-color: var(--teal-glacier) !important;
+    color: white !important;
+}
+
+/* Table styling */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 184, 181, 0.05);
+}
+
+.table-striped tbody tr:hover {
+    background-color: rgba(0, 184, 181, 0.1);
+}
+
+/* Modal styling */
+.modal-header.bg-gradient-teal {
+    border-bottom: none;
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .row.mb-4 .col-md-3 {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+<script>
+// Initialiser les tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
 {% endblock %}

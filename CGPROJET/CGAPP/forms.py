@@ -826,7 +826,7 @@ class CouponForm(forms.Form):
 
 class ClientForm(forms.Form):
     nom_complet = forms.CharField(max_length=100, label="Nom complet", widget=forms.TextInput(attrs={'placeholder': 'Prénom Nom', 'class': 'form-control'}))
-    telephone = forms.CharField(max_length=15, label="Téléphone", widget=forms.TextInput(attrs={'placeholder': '+225 XX XX XX XX', 'class': 'form-control'}))
+    telephone = forms.CharField(max_length=15, label="Téléphone", widget=forms.TextInput(attrs={'placeholder': '+228 XX XX XX XX', 'class': 'form-control'}))
     email = forms.EmailField(required=False, label="Email", widget=forms.EmailInput(attrs={'placeholder': 'email@exemple.com', 'class': 'form-control'}))
 
 class ProduitPanierForm(forms.Form):
@@ -954,3 +954,47 @@ class ProblemeCommandeForm(forms.ModelForm):
             'type_probleme': forms.Select(attrs={'class': 'form-select'}),
             'produit_concerne': forms.Select(attrs={'class': 'form-select'}),
         }
+
+
+
+#++++++++++++++++++++++++ Gestion livreur par admin +++++++++++++++++++++++++
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from .models import Utilisateur, Livreur
+
+class LivreurForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    telephone = forms.CharField(max_length=15, required=True)
+    first_name = forms.CharField(max_length=30, required=True, label='Prénom')
+    last_name = forms.CharField(max_length=30, required=True, label='Nom')
+
+    class Meta:
+        model = Utilisateur
+        fields = ['username', 'email', 'first_name', 'last_name', 'telephone', 'password1', 'password2']
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.role = 'livreur'
+        user.email = self.cleaned_data['email']
+        user.telephone = self.cleaned_data['telephone']
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        
+        if commit:
+            user.save()
+        return user
+
+class LivreurUpdateForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+    telephone = forms.CharField(max_length=15, required=True)
+    first_name = forms.CharField(max_length=30, required=True, label='Prénom')
+    last_name = forms.CharField(max_length=30, required=True, label='Nom')
+
+    class Meta:
+        model = Utilisateur
+        fields = ['username', 'email', 'first_name', 'last_name', 'telephone', 'is_active']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Rendre le champ username non modifiable si nécessaire
+        self.fields['username'].widget.attrs['readonly'] = True

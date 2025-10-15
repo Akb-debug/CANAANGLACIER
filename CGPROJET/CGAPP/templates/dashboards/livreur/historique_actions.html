@@ -1,4 +1,3 @@
-<!-- dashboards/livreur_historique_actions.html -->
 {% extends "dashboards/base.html" %}
 {% load static %}
 
@@ -7,17 +6,17 @@
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
+            <div class="bg-white rounded p-4 shadow-sm">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h2 class="mb-1">
-                            <i class="fa fa-history me-2 text-info"></i>
+                        <h2 class="mb-1 teal-glacier-text">
+                            <i class="fa fa-history me-2"></i>
                             Historique des Actions
                         </h2>
                         <p class="mb-0 text-muted">Journal de toutes vos activités sur la plateforme</p>
                     </div>
                     <div class="d-flex">
-                        <span class="badge bg-info">{{ page_obj.paginator.count }} action(s)</span>
+                        <span class="badge bg-teal-glacier">{{ page_obj.paginator.count }} action(s)</span>
                     </div>
                 </div>
             </div>
@@ -27,15 +26,15 @@
     <!-- Filtres -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
-                <h5 class="mb-3">
-                    <i class="fa fa-filter me-2 text-primary"></i>
+            <div class="bg-white rounded p-4 shadow-sm">
+                <h5 class="mb-3 teal-glacier-text">
+                    <i class="fa fa-filter me-2"></i>
                     Filtres de Recherche
                 </h5>
                 <form method="get" class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label">Type d'action</label>
-                        <select name="type_action" class="form-select">
+                        <select name="type_action" class="form-select teal-glacier-border">
                             <option value="">Tous les types</option>
                             {% for value, label in types_actions %}
                             <option value="{{ value }}" {% if type_action_filter == value %}selected{% endif %}>
@@ -46,10 +45,10 @@
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Date spécifique</label>
-                        <input type="date" name="date" value="{{ date_filter }}" class="form-control">
+                        <input type="date" name="date" value="{{ date_filter }}" class="form-control teal-glacier-border">
                     </div>
                     <div class="col-md-4 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
+                        <button type="submit" class="btn btn-teal-glacier w-100">
                             <i class="fa fa-search me-1"></i>Rechercher
                         </button>
                     </div>
@@ -57,13 +56,13 @@
                 
                 {% if type_action_filter or date_filter %}
                 <div class="mt-3">
-                    <span class="badge bg-info">
+                    <span class="badge bg-teal-light text-teal-dark">
                         <i class="fa fa-filter me-1"></i>
                         Filtres appliqués : 
                         {% if type_action_filter %}Type: {{ type_action_filter }}{% endif %}
                         {% if date_filter %}Date: {{ date_filter }}{% endif %}
                     </span>
-                    <a href="{% url 'historique_actions' %}" class="btn btn-sm btn-outline-secondary ms-2">
+                    <a href="{% url 'historique_actions' %}" class="btn btn-sm btn-outline-teal ms-2">
                         <i class="fa fa-times me-1"></i>Tout effacer
                     </a>
                 </div>
@@ -75,13 +74,13 @@
     <!-- Tableau des actions -->
     <div class="row">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
+            <div class="bg-white rounded p-4 shadow-sm">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h5 class="mb-0">
-                        <i class="fa fa-list-alt me-2 text-primary"></i>
+                    <h5 class="mb-0 teal-glacier-text">
+                        <i class="fa fa-list-alt me-2"></i>
                         Journal d'Activité
                     </h5>
-                    <span class="badge bg-light text-dark">
+                    <span class="badge bg-teal-light text-teal-dark">
                         Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
                     </span>
                 </div>
@@ -89,13 +88,13 @@
                 {% if page_obj %}
                 <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead class="table-info">
+                        <thead class="teal-glacier-bg">
                             <tr>
-                                <th scope="col">Date/Heure</th>
-                                <th scope="col">Type</th>
-                                <th scope="col">Description</th>
-                                <th scope="col">Objet</th>
-                                <th scope="col">Adresse IP</th>
+                                <th scope="col" class="text-white">Date/Heure</th>
+                                <th scope="col" class="text-white">Type</th>
+                                <th scope="col" class="text-white">Description</th>
+                                <th scope="col" class="text-white">Objet</th>
+                                <th scope="col" class="text-white">Adresse IP</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,17 +102,17 @@
                             <tr>
                                 <td>
                                     <div class="text-nowrap">
-                                        <div class="fw-semibold">{{ action.date_action|date:"d/m/Y" }}</div>
+                                        <div class="fw-semibold teal-glacier-text">{{ action.date_action|date:"d/m/Y" }}</div>
                                         <small class="text-muted">{{ action.date_action|time }}</small>
                                     </div>
                                 </td>
                                 <td>
                                     <span class="badge 
                                         {% if action.type_action == 'commande_statut' %}bg-success
-                                        {% elif action.type_action == 'creation' %}bg-primary
+                                        {% elif action.type_action == 'creation' %}bg-teal-glacier
                                         {% elif action.type_action == 'modification' %}bg-warning
                                         {% elif action.type_action == 'suppression' %}bg-danger
-                                        {% else %}bg-secondary{% endif %}">
+                                        {% else %}bg-teal-light text-teal-dark{% endif %}">
                                         {{ action.get_type_action_display }}
                                     </span>
                                 </td>
@@ -129,7 +128,7 @@
                                 </td>
                                 <td>
                                     {% if action.objet_concerne %}
-                                    <span class="badge bg-light text-dark">
+                                    <span class="badge bg-teal-light text-teal-dark">
                                         {{ action.objet_concerne }}
                                     </span>
                                     {% else %}
@@ -164,7 +163,7 @@
                     <ul class="pagination justify-content-center">
                         {% if page_obj.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if type_action_filter %}&type_action={{ type_action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}" aria-label="Previous">
+                            <a class="page-link teal-glacier-text" href="?page={{ page_obj.previous_page_number }}{% if type_action_filter %}&type_action={{ type_action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}" aria-label="Previous">
                                 <i class="fa fa-chevron-left"></i>
                             </a>
                         </li>
@@ -173,18 +172,18 @@
                         {% for i in page_obj.paginator.page_range %}
                             {% if page_obj.number == i %}
                             <li class="page-item active">
-                                <span class="page-link">{{ i }}</span>
+                                <span class="page-link bg-teal-glacier border-teal-glacier">{{ i }}</span>
                             </li>
                             {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ i }}{% if type_action_filter %}&type_action={{ type_action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">{{ i }}</a>
+                                <a class="page-link teal-glacier-text" href="?page={{ i }}{% if type_action_filter %}&type_action={{ type_action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}">{{ i }}</a>
                             </li>
                             {% endif %}
                         {% endfor %}
                         
                         {% if page_obj.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if type_action_filter %}&type_action={{ type_action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}" aria-label="Next">
+                            <a class="page-link teal-glacier-text" href="?page={{ page_obj.next_page_number }}{% if type_action_filter %}&type_action={{ type_action_filter }}{% endif %}{% if date_filter %}&date={{ date_filter }}{% endif %}" aria-label="Next">
                                 <i class="fa fa-chevron-right"></i>
                             </a>
                         </li>
@@ -197,16 +196,16 @@
     </div>
 
     <!-- Résumé des actions -->
-    <div class="row mt-4">
+    {% comment %} <div class="row mt-4">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
-                <h5 class="mb-4">
-                    <i class="fa fa-chart-pie me-2 text-warning"></i>
+            <div class="bg-white rounded p-4 shadow-sm">
+                <h5 class="mb-4 teal-glacier-text">
+                    <i class="fa fa-chart-pie me-2"></i>
                     Répartition des Actions
                 </h5>
                 <div class="row text-center">
                     <div class="col-md-3">
-                        <div class="bg-primary text-white rounded p-3">
+                        <div class="bg-teal-glacier text-white rounded p-3 card-hover">
                             <i class="fa fa-check-circle fa-2x mb-2"></i>
                             <h6>Livraisons</h6>
                             <h4>{{ page_obj.paginator.count }}</h4>
@@ -214,7 +213,7 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="bg-success text-white rounded p-3">
+                        <div class="bg-success text-white rounded p-3 card-hover">
                             <i class="fa fa-truck fa-2x mb-2"></i>
                             <h6>Commandes</h6>
                             <h4>{{ page_obj.paginator.count }}</h4>
@@ -222,15 +221,15 @@
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="bg-info text-white rounded p-3">
-                            <i class="fa fa-calendar fa-2x mb-2"></i>
-                            <h6>Ce Mois</h6>
-                            <h4>{{ page_obj.paginator.count }}</h4>
-                            <small>Actions récentes</small>
+                        <div class="bg-teal-light rounded p-3 card-hover">
+                            <i class="fa fa-calendar fa-2x mb-2 teal-glacier-text"></i>
+                            <h6 class="teal-glacier-text">Ce Mois</h6>
+                            <h4 class="teal-glacier-text">{{ page_obj.paginator.count }}</h4>
+                            <small class="text-muted">Actions récentes</small>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="bg-warning text-white rounded p-3">
+                        <div class="bg-warning text-white rounded p-3 card-hover">
                             <i class="fa fa-user fa-2x mb-2"></i>
                             <h6>Profil</h6>
                             <h4>{{ page_obj.paginator.count }}</h4>
@@ -240,6 +239,101 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> {% endcomment %}
 </div>
+
+<style>
+.teal-glacier-text {
+    color: var(--teal-glacier) !important;
+}
+
+.teal-glacier-bg {
+    background-color: var(--teal-glacier) !important;
+}
+
+.bg-teal-glacier {
+    background-color: var(--teal-glacier) !important;
+}
+
+.bg-teal-light {
+    background-color: var(--teal-light) !important;
+}
+
+.text-teal-dark {
+    color: var(--teal-dark) !important;
+}
+
+.btn-teal-glacier {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-teal-glacier:hover {
+    background-color: white;
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+}
+
+.btn-outline-teal {
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+    background-color: transparent;
+}
+
+.btn-outline-teal:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.teal-glacier-border {
+    border-color: var(--teal-glacier) !important;
+}
+
+.border-teal-glacier {
+    border-color: var(--teal-glacier) !important;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 184, 181, 0.1) !important;
+}
+
+.card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 184, 181, 0.15) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--teal-light) !important;
+}
+
+.bg-white {
+    background-color: white !important;
+}
+
+.page-link.teal-glacier-text {
+    color: var(--teal-glacier) !important;
+}
+
+.page-link.teal-glacier-text:hover {
+    background-color: var(--teal-light);
+    color: var(--teal-dark) !important;
+}
+
+.page-item.active .page-link {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--teal-glacier);
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25);
+}
+</style>
 {% endblock %}

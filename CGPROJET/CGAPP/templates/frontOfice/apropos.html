@@ -5,72 +5,362 @@
 
 {% block extra_css %}
 <style>
+  /* Variables CSS pour une meilleure maintenabilité */
+  :root {
+    --teal-glacier: #00B8B5;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+    --black-shadow: #000000;
+    --white-bg: #FFFFFF;
+  }
+
+  /* Hero Section */
   .hero-section {
     position: relative;
     background: url('{% static "banner-apropos.jpg" %}') center/cover no-repeat;
-    padding: 100px 0;
-    color: white; /* pour que le texte ressorte */
+    padding: 120px 0 80px;
+    color: white;
     z-index: 1;
-}
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+  }
 
-/* Ombre et dégradé */
-.hero-section::after {
+  /* Ombre et dégradé */
+  .hero-section::after {
     content: "";
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0;
     background: linear-gradient(
-        rgba(0, 0, 0, 0.6),  /* léger assombrissement en haut */
-        rgba(0, 0, 0, 0.2)   /* plus marqué en bas */
+        rgba(0, 0, 0, 0.6),
+        rgba(0, 0, 0, 0.2)
     );
-    z-index: -1; /* reste derrière le contenu */
-}
+    z-index: -1;
+  }
 
+  /* Texte principal avec effet de brillance */
+  .hero-text {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-weight: 600;
+    color: #333;
+    text-shadow: 
+      1px 1px 3px rgba(255,255,255,0.8), 
+      -1px -1px 3px rgba(255,255,255,0.8),
+      0 0 8px rgba(255,255,255,0.8);
+    line-height: 1.5;
+    padding: 20px;
+    background-color: rgba(255,255,255,0.7);
+    border-radius: 15px;
+    max-width: 900px;
+    margin: 0 auto 30px;
+    backdrop-filter: blur(5px);
+  }
+
+  /* Boutons */
+  .btn-custom-primary {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+    font-weight: 500;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+
+  .btn-custom-secondary {
+    background-color: var(--pink-swoosh);
+    border: 2px solid var(--pink-swoosh);
+    color: white;
+    font-weight: 500;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+
+  /* Effets au survol des boutons */
+  .btn-custom-primary:hover {
+    background-color: var(--pink-swoosh);
+    border-color: var(--pink-swoosh);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-custom-secondary:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Sections générales */
+  .content-section {
+    padding: 80px 0;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .section-subtitle {
+    font-size: clamp(1.1rem, 2vw, 1.25rem);
+    color: var(--pink-swoosh);
+    margin-bottom: 2rem;
+  }
+
+  /* Section Notre Histoire */
+  .story-image {
+    border: 5px solid var(--teal-glacier);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .story-image:hover {
+    transform: scale(1.02);
+  }
+
+  .feature-list li {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+  }
+
+  .feature-list i {
+    color: var(--teal-glacier);
+    margin-right: 1rem;
+    font-size: 1.2rem;
+  }
+
+  /* Section Valeurs */
+  .feature-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+  }
+
+  .feature-icon:hover {
+    transform: scale(1.1);
+  }
+
+  .bg-glacier { background-color: var(--teal-glacier); }
+  .bg-swoosh { background-color: var(--pink-swoosh); }
+  .bg-canaan { background-color: var(--yellow-canaan); }
+
+  .text-glacier { color: var(--teal-glacier); }
+  .text-swoosh { color: var(--pink-swoosh); }
+  .text-canaan { color: var(--yellow-canaan); }
+
+  .value-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    height: 100%;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .value-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .value-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Section CTA */
+  .cta-section {
+    background-color: var(--teal-glacier);
+    padding: 80px 0;
+  }
+
+  .cta-title {
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    margin-bottom: 1.5rem;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Responsive Design */
+  /* Tablettes */
+  @media (max-width: 991px) {
+    .hero-section {
+      padding: 100px 0 60px;
+      min-height: 50vh;
+    }
+    
+    .content-section {
+      padding: 60px 0;
+    }
+    
+    .hero-text {
+      padding: 15px;
+      margin-bottom: 25px;
+    }
+    
+    .story-image {
+      margin-bottom: 2rem;
+    }
+    
     .feature-icon {
-        width: 70px;
-        height: 70px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
+      width: 70px;
+      height: 70px;
     }
     
     .value-card {
-        transition: all 0.3s ease;
-        border: none;
-        border-radius: 15px;
-        overflow: hidden;
+      padding: 1.5rem 1rem;
+    }
+  }
+
+  /* Mobiles */
+  @media (max-width: 767px) {
+    .hero-section {
+      padding: 80px 0 40px;
+      min-height: 40vh;
     }
     
-    .value-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    .content-section {
+      padding: 40px 0;
     }
+    
+    .hero-text {
+      padding: 12px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+    }
+    
+    .btn-custom-primary,
+    .btn-custom-secondary {
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    
+    .cta-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .cta-buttons .btn {
+      width: 100%;
+      max-width: 250px;
+    }
+    
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .feature-icon i {
+      font-size: 1.5rem;
+    }
+    
+    .value-card {
+      margin-bottom: 1.5rem;
+      padding: 1.5rem 1rem;
+    }
+    
+    .value-card h3 {
+      font-size: 1.3rem;
+    }
+  }
+
+  /* Très petits écrans */
+  @media (max-width: 575px) {
+    .hero-section {
+      padding: 70px 0 30px;
+    }
+    
+    .hero-text {
+      padding: 10px;
+      font-size: 0.95rem;
+    }
+    
+    .content-section {
+      padding: 30px 0;
+    }
+    
+    .feature-list li {
+      font-size: 1rem;
+    }
+    
+    .feature-list i {
+      font-size: 1.1rem;
+    }
+  }
+
+  /* Grands écrans */
+  @media (min-width: 1400px) {
+    .container {
+      max-width: 1320px;
+    }
+    
+    .hero-section {
+      min-height: 70vh;
+    }
+    
+    .value-card {
+      padding: 3rem 2rem;
+    }
+  }
+
+  /* Accessibilité - Réduction des animations */
+  @media (prefers-reduced-motion: reduce) {
+    .value-card,
+    .feature-icon,
+    .story-image,
+    .btn-custom-primary,
+    .btn-custom-secondary {
+      transition: none;
+    }
+    
+    .value-card:hover,
+    .feature-icon:hover,
+    .story-image:hover,
+    .btn-custom-primary:hover,
+    .btn-custom-secondary:hover {
+      transform: none;
+    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero-section d-flex align-items-center text-white">
-    <div class="container py-5">
-        <div class="row">
-       <p class="text-center mb-4" 
-   style="font-size: 1.4rem; 
-          font-weight: 600;
-          color: #333;
-          text-shadow: 1px 1px 3px rgba(255,255,255,0.8), 
-                      -1px -1px 3px rgba(255,255,255,0.8),
-                      0 0 8px rgba(255,255,255,0.8);
-          line-height: 1.5;
-          padding: 15px;
-          background-color: rgba(255,255,255,0.7);
-          border-radius: 10px;
-          max-width: 800px;
-          margin-left: auto;
-          margin-right: auto;">
-   Canaan Glacier, votre spécialiste des glaces artisanales à Lomé,<br> 
-   allie qualité, fraîcheur et passion pour vous offrir le meilleur du plaisir glacé.
-</p>
-            <div class="col-lg-8 mx-auto text-center">
+<section class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <p class="hero-text text-center">
+                    Canaan Glacier, votre spécialiste des glaces artisanales à Lomé,<br> 
+                    allie qualité, fraîcheur et passion pour vous offrir le meilleur du plaisir glacé.
+                </p>
+            </div>
+            <div class="col-12 text-center">
+                
+
+
+       <div class="col-lg-8 mx-auto text-center">
     <!-- Bouton principal (Notre histoire) -->
     <a href="#notre-histoire" 
        class="btn btn-lg px-4 me-2"
@@ -95,59 +385,38 @@
         Nos produits
     </a>
 </div>
-
-<!-- Ajoutez ce style dans votre balise <style> ou fichier CSS -->
-<style>
-    /* Effets au survol */
-    .col-lg-8 a:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Effet spécifique pour le bouton principal */
-    .col-lg-8 a:first-child:hover {
-        background-color: #e20b5eff !important;
-        border-color: #e20b5eff !important;
-    }
-    
-    /* Effet spécifique pour le bouton secondaire */
-    .col-lg-8 a:last-child:hover {
-        background-color: #00B8B5 !important;
-        color: white !important;
-    }
-</style>
+            </div>
         </div>
     </div>
 </section>
 
 <!-- Notre Histoire -->
-<section id="notre-histoire" class="py-5 bg-white">
-    <div class="container py-5">
+<section id="notre-histoire" class="content-section bg-white">
+    <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 mb-5 mb-lg-0">
-                <img src="{% static 'glace.png'%}" 
+                <img src="{% static 'glace.png' %}" 
                      alt="Fabrication artisanale de glaces" 
-                     class="img-fluid rounded-3 shadow-lg"
-                     style="border: 5px solid var(--teal-glacier);">
+                     class="img-fluid story-image w-100">
             </div>
             <div class="col-lg-6">
-                <h2 class="display-5 fw-bold text-glacier mb-4">Notre Histoire Gourmande</h2>
-                <p class="lead text-swoosh mb-4">Des glaces artisanales qui racontent le Togo</p>
+                <h2 class="section-title text-glacier">Notre Histoire Gourmande</h2>
+                <p class="section-subtitle">Des glaces artisanales qui racontent le Togo</p>
                 
                 <div class="mt-4">
-                    <p>Née en 2023 à Lomé, Canaan Glacier est bien plus qu'une simple enseigne de glaces. C'est une aventure humaine qui puise son inspiration dans les saveurs locales et l'artisanat togolais.</p>
+                    <p class="fs-5">Née en 2023 à Lomé, Canaan Glacier est bien plus qu'une simple enseigne de glaces. C'est une aventure humaine qui puise son inspiration dans les saveurs locales et l'artisanat togolais.</p>
                     
-                    <ul class="list-unstyled mt-4">
-                        <li class="mb-3 d-flex">
-                            <i class="fas fa-check-circle text-glacier me-3 fs-5"></i>
+                    <ul class="feature-list list-unstyled mt-4">
+                        <li class="d-flex align-items-start">
+                            <i class="fas fa-check-circle mt-1"></i>
                             <span>Recettes exclusives élaborées par nos maîtres glacier</span>
                         </li>
-                        <li class="mb-3 d-flex">
-                            <i class="fas fa-check-circle text-glacier me-3 fs-5"></i>
+                        <li class="d-flex align-items-start">
+                            <i class="fas fa-check-circle mt-1"></i>
                             <span>Fruits frais issus de l'agriculture locale</span>
                         </li>
-                        <li class="mb-3 d-flex">
-                            <i class="fas fa-check-circle text-glacier me-3 fs-5"></i>
+                        <li class="d-flex align-items-start">
+                            <i class="fas fa-check-circle mt-1"></i>
                             <span>Process de fabrication respectant les normes internationales</span>
                         </li>
                     </ul>
@@ -158,41 +427,41 @@
 </section>
 
 <!-- Nos Valeurs -->
-<section class="py-5 bg-light">
-    <div class="container py-5">
+<section class="content-section bg-light">
+    <div class="container">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold text-glacier">Nos Engagements</h2>
-            <p class="lead text-muted">Ce qui fait la singularité de Canaan Glacier</p>
+            <h2 class="section-title text-glacier">Nos Engagements</h2>
+            <p class="section-subtitle text-muted">Ce qui fait la singularité de Canaan Glacier</p>
         </div>
         
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="value-card bg-white p-4 h-100 text-center">
-                    <div class="feature-icon bg-glacier rounded-circle">
+                <div class="value-card bg-white text-center">
+                    <div class="feature-icon bg-glacier">
                         <i class="fas fa-award fs-2 text-white"></i>
                     </div>
-                    <h3 class="h4 text-glacier mb-3">Qualité Exceptionnelle</h3>
-                    <p>Nous sélectionnons rigoureusement nos ingrédients et contrôlons chaque étape de production pour vous garantir une qualité premium.</p>
+                    <h3 class="text-glacier">Qualité Exceptionnelle</h3>
+                    <p class="fs-5">Nous sélectionnons rigoureusement nos ingrédients et contrôlons chaque étape de production pour vous garantir une qualité premium.</p>
                 </div>
             </div>
             
             <div class="col-md-4">
-                <div class="value-card bg-white p-4 h-100 text-center">
-                    <div class="feature-icon bg-swoosh rounded-circle">
+                <div class="value-card bg-white text-center">
+                    <div class="feature-icon bg-swoosh">
                         <i class="fas fa-bolt fs-2 text-white"></i>
                     </div>
-                    <h3 class="h4 text-swoosh mb-3">Service Rapide</h3>
-                    <p>Notre réseau de livraison express vous permet de profiter de vos glaces préférées en moins de 90 minutes dans Lomé.</p>
+                    <h3 class="text-swoosh">Service Rapide</h3>
+                    <p class="fs-5">Notre réseau de livraison express vous permet de profiter de vos glaces préférées en moins de 90 minutes dans Lomé.</p>
                 </div>
             </div>
             
             <div class="col-md-4">
-                <div class="value-card bg-white p-4 h-100 text-center">
-                    <div class="feature-icon bg-canaan rounded-circle">
+                <div class="value-card bg-white text-center">
+                    <div class="feature-icon bg-canaan">
                         <i class="fas fa-leaf fs-2 text-white"></i>
                     </div>
-                    <h3 class="h4 text-canaan mb-3">Éco-responsabilité</h3>
-                    <p>Emballages biodégradables, circuits courts et soutien aux producteurs locaux : nous agissons pour un impact positif.</p>
+                    <h3 class="text-canaan">Éco-responsabilité</h3>
+                    <p class="fs-5">Emballages biodégradables, circuits courts et soutien aux producteurs locaux : nous agissons pour un impact positif.</p>
                 </div>
             </div>
         </div>
@@ -200,12 +469,12 @@
 </section>
 
 <!-- CTA Section -->
-<section class="py-5 bg-glacier text-white">
-    <div class="container text-center py-5">
-        <h2 class="display-5 fw-bold mb-4">Prêt à découvrir notre univers glacé ?</h2>
-        <p class="lead mb-5">Plus de 50 parfums uniques vous attendent dans notre boutique</p>
-        <div class="d-flex justify-content-center gap-3">
-            <a href="{% url 'produits' %}" class="btn btn-light btn-lg px-4" style = "color:#00B8B5">
+<section class="cta-section text-white">
+    <div class="container text-center">
+        <h2 class="cta-title fw-bold">Prêt à découvrir notre univers glacé ?</h2>
+        <p class="lead mb-5 fs-4">Plus de 50 parfums uniques vous attendent dans notre boutique</p>
+        <div class="cta-buttons">
+            <a href="{% url 'produits' %}" class="btn btn-light btn-lg px-4 fw-bold" style="color: var(--teal-glacier)">
                 Voir le catalogue <i class="fas fa-arrow-right ms-2"></i>
             </a>
             <a href="{% url 'contact' %}" class="btn btn-outline-light btn-lg px-4">
@@ -214,6 +483,4 @@
         </div>
     </div>
 </section>
-
-
 {% endblock %}

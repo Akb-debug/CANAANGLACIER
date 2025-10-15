@@ -2,6 +2,22 @@
 {% load static %}
 
 {% block content %}
+<!-- Bannière Hero -->
+<section class="checkout-hero">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h1 class="hero-title">
+                    <i class="fas fa-credit-card me-3"></i>Finalisation de Commande
+                </h1>
+                <p class="hero-subtitle">
+                    Votre bonheur glacé est à quelques clics !
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
 <div class="checkout-container">
     <!-- Header avec progression -->
     <div class="checkout-header">
@@ -32,11 +48,15 @@
             <!-- Colonne de gauche - Résumé et formulaire -->
             <div class="col-lg-8">
                 <div class="checkout-card">
-                    <h2 class="checkout-title">Finaliser ma commande</h2>
+                    <h2 class="checkout-title">
+                        <i class="fas fa-shopping-bag me-2"></i>Finaliser ma commande
+                    </h2>
                     
                     <!-- Résumé du panier version améliorée -->
                     <div class="cart-summary-card">
-                        <h4 class="summary-title">Résumé du panier</h4>
+                        <h4 class="summary-title">
+                            <i class="fas fa-list-alt me-2"></i>Résumé du panier
+                        </h4>
                         <div class="cart-items">
                             {% for ligne in panier.lignes.all %}
                             <div class="cart-item">
@@ -180,7 +200,9 @@
             <!-- Colonne de droite - Récapitulatif -->
             <div class="col-lg-4">
                 <div class="order-summary-card">
-                    <h4 class="summary-title">Votre commande</h4>
+                    <h4 class="summary-title">
+                        <i class="fas fa-clipboard-list me-2"></i>Votre commande
+                    </h4>
                     
                     <div class="order-items">
                         {% for ligne in panier.lignes.all %}
@@ -236,6 +258,57 @@
 </div>
 
 <style>
+/* Variables CSS */
+:root {
+    --teal-glacier: #00B8B5;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+    --black-shadow: #000000;
+    --white-bg: #FFFFFF;
+    --teal-light: rgba(0, 184, 181, 0.1);
+    --pink-light: rgba(233, 30, 99, 0.1);
+}
+
+/* Bannière Hero */
+.checkout-hero {
+    background: url('{% static "images/banner-checkout.jpg" %}') center/cover no-repeat;
+    padding: 120px 0 80px;
+    color: white;
+    position: relative;
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.checkout-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+}
+
+.checkout-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+    font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+    opacity: 0.9;
+}
+
+/* Styles du checkout */
 .checkout-container {
     max-width: 1200px;
     margin: 30px auto;
@@ -330,6 +403,8 @@
     margin-bottom: 25px;
     padding-bottom: 15px;
     border-bottom: 2px solid var(--teal-light);
+    display: flex;
+    align-items: center;
 }
 
 .cart-summary-card {
@@ -343,6 +418,8 @@
     color: var(--teal-glacier);
     font-weight: 600;
     margin-bottom: 15px;
+    display: flex;
+    align-items: center;
 }
 
 .cart-items {
@@ -542,11 +619,15 @@
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 184, 181, 0.3);
     transition: all 0.3s ease;
+    background-color: var(--teal-glacier);
+    border: none;
+    color: white !important;
 }
 
 .btn-confirm:hover {
+    background-color: var(--pink-swoosh);
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 184, 181, 0.4);
+    box-shadow: 0 6px 15px rgba(233, 30, 99, 0.4);
 }
 
 .order-summary-card {
@@ -630,6 +711,11 @@
 
 /* Responsive adjustments */
 @media (max-width: 992px) {
+    .checkout-hero {
+        padding: 100px 0 60px;
+        min-height: 30vh;
+    }
+    
     .order-summary-card {
         position: static;
         margin-top: 30px;
@@ -637,6 +723,20 @@
 }
 
 @media (max-width: 768px) {
+    .checkout-hero {
+        padding: 80px 0 40px;
+        min-height: 25vh;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
     .progress-bar::before,
     .progress-bar::after {
         top: 15px;
@@ -661,6 +761,10 @@
         text-align: left;
         width: 100%;
     }
+    
+    .btn-confirm {
+        width: 100%;
+    }
 }
 
 /* Animation pour l'application du coupon */
@@ -674,6 +778,20 @@
     animation: couponApplied 0.5s ease;
     color: var(--pink-swoosh);
     font-weight: 600;
+}
+
+/* Accessibilité */
+@media (prefers-reduced-motion: reduce) {
+    .btn-confirm,
+    .payment-option label,
+    .coupon-applied {
+        transition: none;
+        animation: none;
+    }
+    
+    .btn-confirm:hover {
+        transform: none;
+    }
 }
 </style>
 

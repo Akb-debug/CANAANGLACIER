@@ -5,206 +5,460 @@
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-12">
-            <!-- Breadcrumb -->
+            <!-- Breadcrumb amélioré -->
             <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
-                    <li class="breadcrumb-item"><a href="{% url 'mon_compte' %}">Mon compte</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Mon historique</li>
+                <ol class="breadcrumb bg-light rounded p-3">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'home' %}" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'mon_compte' %}" class="text-decoration-none">Mon compte</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <i class="fas fa-history me-1"></i>Mon historique
+                    </li>
                 </ol>
             </nav>
 
-            <div class="bg-light rounded h-100 p-4">
-                <!-- En-tête avec statistiques -->
-                <div class="row mb-5">
-                    <div class="col-md-3">
-                        <div class="card bg-primary text-white text-center">
-                            <div class="card-body">
-                                <h3 class="card-title">{{ total_commandes }}</h3>
-                                <p class="card-text">Commandes passées</p>
-                                <i class="fas fa-shopping-bag fa-2x"></i>
-                            </div>
-                        </div>
+            <div class="bg-white rounded-3 shadow-sm p-4">
+        <!-- En-tête avec statistiques améliorées - Version Teal Glacier Unifiée -->
+<div class="row mb-5">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 stats-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+            <div class="card-body text-white text-center p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-start">
+                        <h3 class="card-title fw-bold mb-1">{{ total_commandes }}</h3>
+                        <p class="card-text mb-0 opacity-75">Commandes passées</p>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card bg-success text-white text-center">
-                            <div class="card-body">
-                                <h3 class="card-title">{{ total_depense|floatformat:0 }} FCFA</h3>
-                                <p class="card-text">Total dépensé</p>
-                                <i class="fas fa-money-bill-wave fa-2x"></i>
-                            </div>
-                        </div>
+                    <div class="bg-white bg-opacity-30 rounded-circle p-3 icon-container">
+                        <i class="fas fa-shopping-bag fa-2x"></i>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card bg-info text-white text-center">
-                            <div class="card-body">
-                                <h3 class="card-title">{{ commandes_livrees }}</h3>
-                                <p class="card-text">Commandes livrées</p>
-                                <i class="fas fa-truck fa-2x"></i>
-                            </div>
-                        </div>
+                </div>
+            </div>
+            <div class="card-hover-overlay"></div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 stats-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+            <div class="card-body text-white text-center p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-start">
+                        <h3 class="card-title fw-bold mb-1">{{ total_depense|floatformat:0 }} FCFA</h3>
+                        <p class="card-text mb-0 opacity-75">Total dépensé</p>
                     </div>
-                    <div class="col-md-3">
-                        <div class="card bg-warning text-white text-center">
-                            <div class="card-body">
-                                <h3 class="card-title">{{ commandes_mois_count }}</h3>
-                                <p class="card-text">Ce mois-ci</p>
-                                <i class="fas fa-calendar fa-2x"></i>
-                            </div>
-                        </div>
+                    <div class="bg-white bg-opacity-30 rounded-circle p-3 icon-container">
+                        <i class="fas fa-money-bill-wave fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-hover-overlay"></div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 stats-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+            <div class="card-body text-white text-center p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-start">
+                        <h3 class="card-title fw-bold mb-1">{{ commandes_livrees }}</h3>
+                        <p class="card-text mb-0 opacity-75">Commandes livrées</p>
+                    </div>
+                    <div class="bg-white bg-opacity-30 rounded-circle p-3 icon-container">
+                        <i class="fas fa-truck fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-hover-overlay"></div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-0 shadow-sm h-100 stats-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+            <div class="card-body text-white text-center p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-start">
+                        <h3 class="card-title fw-bold mb-1">{{ commandes_mois_count }}</h3>
+                        <p class="card-text mb-0 opacity-75">Ce mois-ci</p>
+                    </div>
+                    <div class="bg-white bg-opacity-30 rounded-circle p-3 icon-container">
+                        <i class="fas fa-calendar fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-hover-overlay"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+}
+
+.stats-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Icônes toujours visibles avec bon contraste */
+.icon-container {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.stats-card .icon-container i {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Effets au hover */
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.6s ease;
+}
+
+.stats-card:hover::before {
+    left: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 184, 181, 0.4) !important;
+    background: linear-gradient(135deg, var(--teal-dark) 0%, #006664 100%) !important;
+}
+
+/* Effet sur les icônes au hover */
+.stats-card:hover .icon-container {
+    background: rgba(255, 255, 255, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.1);
+    animation: iconPulse 2s infinite;
+}
+
+.stats-card:hover .icon-container i {
+    transform: scale(1.1);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+}
+
+/* Overlay de hover subtil */
+.card-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(233, 30, 99, 0.05) 0%, rgba(253, 203, 5, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.stats-card:hover .card-hover-overlay {
+    opacity: 1;
+}
+
+/* Effet de brillance sur le texte au hover */
+.stats-card:hover .card-title {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+}
+
+.stats-card:hover .card-text {
+    opacity: 0.9 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-card .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .stats-card .icon-container {
+        padding: 0.75rem !important;
+    }
+    
+    .stats-card .fa-2x {
+        font-size: 1.5em !important;
+    }
+    
+    .stats-card:hover .icon-container {
+        transform: scale(1.05);
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-card .card-body {
+        padding: 1.25rem !important;
+    }
+    
+    .icon-container {
+        padding: 0.6rem !important;
+    }
+    
+    .stats-card .fa-2x {
+        font-size: 1.25em !important;
+    }
+}
+</style>
+
+                <!-- Navigation améliorée -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-0">
+                        <ul class="nav nav-tabs nav-justified" id="historyTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active py-3" id="commandes-tab" data-bs-toggle="tab" data-bs-target="#commandes" type="button" role="tab">
+                                    <i class="fas fa-shopping-bag me-2"></i>Mes commandes
+                                    <span class="badge bg-teal ms-2">{{ commandes.count }}</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link py-3" id="activite-tab" data-bs-toggle="tab" data-bs-target="#activite" type="button" role="tab">
+                                    <i class="fas fa-history me-2"></i>Activité récente
+                                    <span class="badge bg-yellow ms-2">{{ historique_actions.count }}</span>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link py-3" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
+                                    <i class="fas fa-bell me-2"></i>Notifications
+                                    {% if notifications_non_lues > 0 %}
+                                    <span class="badge bg-pink ms-2">{{ notifications_non_lues }}</span>
+                                    {% endif %}
+                                </button>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
-                <!-- Navigation dans l'historique -->
-                <ul class="nav nav-tabs mb-4" id="historyTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="commandes-tab" data-bs-toggle="tab" data-bs-target="#commandes" type="button" role="tab">
-                            <i class="fas fa-shopping-bag me-2"></i>Mes commandes
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="activite-tab" data-bs-toggle="tab" data-bs-target="#activite" type="button" role="tab">
-                            <i class="fas fa-history me-2"></i>Activité récente
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
-                            <i class="fas fa-bell me-2"></i>Notifications
-                            {% if notifications.count > 0 %}
-                            <span class="badge bg-danger ms-1">{{ notifications.count }}</span>
-                            {% endif %}
-                        </button>
-                    </li>
-                </ul>
-
                 <div class="tab-content" id="historyTabsContent">
-                    <!-- Onglet Commandes -->
+                    <!-- Onglet Commandes amélioré -->
                     <div class="tab-pane fade show active" id="commandes" role="tabpanel">
                         {% if commandes %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>Commande</th>
-                                        <th>Date</th>
-                                        <th>Articles</th>
-                                        <th>Montant</th>
-                                        <th>Statut</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for commande in commandes %}
-                                    <tr>
-                                        <td>
-                                            <strong>#{{ commande.id }}</strong>
-                                        </td>
-                                        <td>
-                                            {{ commande.date_creation|date:"d/m/Y" }}
-                                            <br>
-                                            <small class="text-muted">{{ commande.date_creation|date:"H:i" }}</small>
-                                        </td>
-                                        <td>
-                                            <small>{{ commande.lignes.count }} article(s)</small>
-                                        </td>
-                                        <td>
-                                            <strong class="text-success">{{ commande.total }} FCFA</strong>
-                                            {% if commande.coupon %}
-                                            <br>
-                                            <small class="text-danger">-{{ commande.coupon.reduction }} FCFA</small>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-{% if commande.statut == 'livree' %}success{% elif commande.statut == 'annulee' %}danger{% elif commande.statut == 'en_traitement' %}info{% else %}warning{% endif %}">
-                                                {{ commande.get_statut_display }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <a href="{% url 'commande_detail' commande.id %}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i> Détails
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead style="background-color: var(--teal-light);">
+                                            <tr>
+                                                <th class="border-0 ps-4">Commande</th>
+                                                <th class="border-0">Date</th>
+                                                <th class="border-0">Articles</th>
+                                                <th class="border-0">Montant</th>
+                                                <th class="border-0">Statut</th>
+                                                <th class="border-0 text-end pe-4">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for commande in commandes %}
+                                            <tr class="border-bottom">
+                                                <td class="ps-4">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="bg-teal bg-opacity-10 rounded-circle p-2 me-3">
+                                                            <i class="fas fa-receipt text-teal"></i>
+                                                        </div>
+                                                        <div>
+                                                            <strong class="d-block">#{{ commande.id }}</strong>
+                                                            <small class="text-muted">{{ commande.methode_paiement|title }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <strong>{{ commande.date_creation|date:"d/m/Y" }}</strong>
+                                                        <br>
+                                                        <small class="text-muted">{{ commande.date_creation|date:"H:i" }}</small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-light text-dark">
+                                                        {{ commande.lignes.count }} article(s)
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <strong class="text-teal">{{ commande.total }} FCFA</strong>
+                                                    {% if commande.coupon %}
+                                                    <br>
+                                                    <small class="text-pink">
+                                                        <i class="fas fa-tag me-1"></i>-{{ commande.coupon.reduction }} FCFA
+                                                    </small>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if commande.statut == 'livree' %}
+                                                    <span class="badge bg-teal text-white">
+                                                        <i class="fas fa-check-circle me-1"></i>Livrée
+                                                    </span>
+                                                    {% elif commande.statut == 'annulee' %}
+                                                    <span class="badge bg-pink text-white">
+                                                        <i class="fas fa-times me-1"></i>Annulée
+                                                    </span>
+                                                    {% elif commande.statut == 'en_traitement' %}
+                                                    <span class="badge bg-yellow text-dark">
+                                                        <i class="fas fa-cog me-1"></i>En traitement
+                                                    </span>
+                                                    {% elif commande.statut == 'expediee' %}
+                                                    <span class="badge bg-teal text-white">
+                                                        <i class="fas fa-shipping-fast me-1"></i>Expédiée
+                                                    </span>
+                                                    {% else %}
+                                                    <span class="badge bg-light text-dark">
+                                                        {{ commande.get_statut_display }}
+                                                    </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-end pe-4">
+                                                    <a href="{% url 'commande_detail' commande.id %}" class="btn btn-teal btn-sm">
+                                                        <i class="fas fa-eye me-1"></i> Détails
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                         {% else %}
                         <div class="text-center py-5">
-                            <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
-                            <h5 class="text-muted">Aucune commande passée</h5>
-                            <p class="text-muted">Vous n'avez pas encore passé de commande.</p>
-                            <a href="{% url 'boutique' %}" class="btn btn-primary">
+                            <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                                <i class="fas fa-shopping-bag fa-3x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted mb-2">Aucune commande passée</h5>
+                            <p class="text-muted mb-4">Vous n'avez pas encore passé de commande.</p>
+                            <a href="{% url 'boutique' %}" class="btn btn-teal btn-lg">
                                 <i class="fas fa-shopping-cart me-2"></i>Découvrir la boutique
                             </a>
                         </div>
                         {% endif %}
                     </div>
 
-                    <!-- Onglet Activité récente -->
+                    <!-- Onglet Activité récente amélioré -->
                     <div class="tab-pane fade" id="activite" role="tabpanel">
                         <div class="row">
-                            <div class="col-md-8">
-                                <h5 class="mb-4">Votre activité récente</h5>
-                                
-                                <!-- Timeline des activités -->
-                                <div class="timeline">
-                                    {% for action in historique_actions %}
-                                    <div class="timeline-item">
-                                        <div class="timeline-marker bg-{% if action.type_action == 'connexion' %}success{% elif 'commande' in action.type_action %}primary{% else %}info{% endif %}"></div>
-                                        <div class="timeline-content">
-                                            <div class="d-flex justify-content-between">
-                                                <h6 class="mb-1">{{ action.get_type_action_display }}</h6>
-                                                <small class="text-muted">{{ action.date_action|timesince }}</small>
+                            <div class="col-lg-8">
+                                <div class="card border-0 shadow-sm h-100">
+                                    <div class="card-header bg-white border-0 py-3">
+                                        <h5 class="mb-0 text-teal">
+                                            <i class="fas fa-chart-line me-2"></i>Votre activité récente
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="timeline-advanced">
+                                            {% for action in historique_actions %}
+                                            <div class="timeline-item-advanced">
+                                                <div class="timeline-marker-advanced bg-{% if action.type_action == 'connexion' %}teal{% elif 'commande' in action.type_action %}pink{% else %}yellow{% endif %}">
+                                                    <i class="fas fa-{{ action.icon|default:'circle' }}"></i>
+                                                </div>
+                                                <div class="timeline-content-advanced">
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <h6 class="mb-0 text-dark">{{ action.get_type_action_display }}</h6>
+                                                        <small class="text-muted">{{ action.date_action|timesince }}</small>
+                                                    </div>
+                                                    <p class="text-muted mb-2">{{ action.description }}</p>
+                                                    {% if action.objet_concerne %}
+                                                    <div class="bg-light rounded p-2">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-link me-1"></i>{{ action.objet_concerne }}
+                                                        </small>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
                                             </div>
-                                            <p class="text-muted mb-1">{{ action.description }}</p>
-                                            {% if action.objet_concerne %}
-                                            <small class="text-muted">Objet: {{ action.objet_concerne }}</small>
-                                            {% endif %}
+                                            {% empty %}
+                                            <div class="text-center py-4">
+                                                <div class="bg-light rounded-circle d-inline-flex p-3 mb-3">
+                                                    <i class="fas fa-history fa-2x text-muted"></i>
+                                                </div>
+                                                <p class="text-muted">Aucune activité récente</p>
+                                            </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
-                                    {% empty %}
-                                    <div class="text-center py-4">
-                                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
-                                        <p class="text-muted">Aucune activité récente</p>
-                                    </div>
-                                    {% endfor %}
                                 </div>
                             </div>
                             
-                            <div class="col-md-4">
-                                <!-- Statistiques mensuelles -->
-                                <div class="card">
-                                    <div class="card-header bg-dark text-white">
-                                        <h6 class="mb-0">Statistiques du mois</h6>
+                            <div class="col-lg-4">
+                                <!-- Statistiques mensuelles améliorées -->
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header bg-teal text-white border-0 py-3">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-chart-bar me-2"></i>Statistiques du mois
+                                        </h6>
                                     </div>
                                     <div class="card-body">
-                                        <div class="mb-3">
-                                            <small class="text-muted">Commandes ce mois</small>
-                                            <h4 class="text-primary">{{ commandes_mois_count }}</h4>
+                                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                            <div>
+                                                <small class="text-muted">Commandes ce mois</small>
+                                                <h4 class="text-teal mb-0">{{ commandes_mois_count }}</h4>
+                                            </div>
+                                            <div class="bg-teal bg-opacity-10 rounded-circle p-2">
+                                                <i class="fas fa-shopping-bag text-teal"></i>
+                                            </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <small class="text-muted">Dépense mensuelle</small>
-                                            <h4 class="text-success">{{ depense_mensuelle|floatformat:0 }} FCFA</h4>
+                                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                            <div>
+                                                <small class="text-muted">Dépense mensuelle</small>
+                                                <h4 class="text-pink mb-0">{{ depense_mensuelle|floatformat:0 }} FCFA</h4>
+                                            </div>
+                                            <div class="bg-pink bg-opacity-10 rounded-circle p-2">
+                                                <i class="fas fa-money-bill-wave text-pink"></i>
+                                            </div>
                                         </div>
-                                        <div class="mb-3">
-                                            <small class="text-muted">Activités ce mois</small>
-                                            <h4 class="text-info">{{ historique_actions.count }}</h4>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <small class="text-muted">Activités ce mois</small>
+                                                <h4 class="text-yellow mb-0">{{ historique_mois_count }}</h4>
+                                            </div>
+                                            <div class="bg-yellow bg-opacity-10 rounded-circle p-2">
+                                                <i class="fas fa-bell text-yellow"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <!-- Panier actuel -->
+                                <!-- Panier actuel amélioré -->
                                 {% if panier_actuel %}
-                                <div class="card mt-4">
-                                    <div class="card-header bg-warning text-dark">
-                                        <h6 class="mb-0">Panier en cours</h6>
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-yellow text-dark border-0 py-3">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-shopping-cart me-2"></i>Panier en cours
+                                        </h6>
                                     </div>
                                     <div class="card-body">
-                                        <p class="mb-2">{{ panier_actuel.lignes.count }} article(s)</p>
-                                        <p class="mb-3">Total: {{ panier_actuel.total }} FCFA</p>
-                                        <a href="{% url 'panier' %}" class="btn btn-primary btn-sm w-100">
-                                            Continuer mes achats
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="text-muted">Articles:</span>
+                                            <strong>{{ panier_actuel.lignes.count }}</strong>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="text-muted">Total:</span>
+                                            <strong class="text-teal">{{ panier_actuel.total }} FCFA</strong>
+                                        </div>
+                                        <a href="{% url 'panier' %}" class="btn btn-teal w-100">
+                                            <i class="fas fa-arrow-right me-2"></i>Continuer mes achats
                                         </a>
                                     </div>
                                 </div>
@@ -213,43 +467,63 @@
                         </div>
                     </div>
 
-                    <!-- Onglet Notifications -->
+                    <!-- Onglet Notifications amélioré -->
                     <div class="tab-pane fade" id="notifications" role="tabpanel">
                         {% if notifications %}
-                        <div class="notification-list">
-                            {% for notification in notifications %}
-                            <div class="card mb-3 {% if not notification.lue %}border-primary{% endif %}">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <h6 class="card-title {% if not notification.lue %}text-primary{% endif %}">
-                                                {{ notification.titre }}
-                                                {% if not notification.lue %}
-                                                <span class="badge bg-primary ms-2">Nouveau</span>
-                                                {% endif %}
-                                            </h6>
-                                            <p class="card-text">{{ notification.message }}</p>
-                                            <small class="text-muted">
-                                                {{ notification.date_creation|date:"d/m/Y à H:i" }}
-                                                {% if notification.commande %}
-                                                • Commande #{{ notification.commande.id }}
-                                                {% endif %}
-                                            </small>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                {% for notification in notifications %}
+                                <div class="border-bottom p-4 {% if not notification.lue %}bg-light bg-opacity-50{% endif %}">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <div class="bg-{% if notification.important %}pink{% else %}teal{% endif %} bg-opacity-10 rounded-circle p-3 me-3">
+                                                <i class="fas fa-{{ notification.icon|default:'bell' }} text-{% if notification.important %}pink{% else %}teal{% endif %}"></i>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <button class="btn btn-sm btn-outline-secondary">
-                                                <i class="fas fa-times"></i>
-                                            </button>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h6 class="mb-0 {% if not notification.lue %}text-teal{% endif %}">
+                                                    {{ notification.titre }}
+                                                    {% if not notification.lue %}
+                                                    <span class="badge bg-teal ms-2">Nouveau</span>
+                                                    {% endif %}
+                                                </h6>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-link text-muted dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li><a class="dropdown-item" href="#"><i class="fas fa-check me-2"></i>Marquer comme lu</a></li>
+                                                        <li><a class="dropdown-item" href="#"><i class="fas fa-trash me-2"></i>Supprimer</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <p class="text-muted mb-2">{{ notification.message }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>{{ notification.date_creation|date:"d/m/Y à H:i" }}
+                                                    {% if notification.commande %}
+                                                    • <i class="fas fa-receipt me-1"></i>Commande #{{ notification.commande.id }}
+                                                    {% endif %}
+                                                </small>
+                                                {% if notification.lien %}
+                                                <a href="{{ notification.lien }}" class="btn btn-teal btn-sm">
+                                                    <i class="fas fa-external-link-alt me-1"></i>Voir
+                                                </a>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
                         </div>
                         {% else %}
                         <div class="text-center py-5">
-                            <i class="fas fa-bell-slash fa-4x text-muted mb-3"></i>
-                            <h5 class="text-muted">Aucune notification</h5>
+                            <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                                <i class="fas fa-bell-slash fa-3x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted mb-2">Aucune notification</h5>
                             <p class="text-muted">Vous n'avez pas de notifications pour le moment.</p>
                         </div>
                         {% endif %}
@@ -260,79 +534,130 @@
     </div>
 </div>
 
-<!-- Styles personnalisés -->
+<!-- Styles personnalisés améliorés -->
 <style>
-.timeline {
-    position: relative;
-    padding-left: 30px;
+:root {
+    --teal-glacier: #00B8B5;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+    --black-shadow: #000000;
+    --white-bg: #FFFFFF;
+    --teal-light: rgba(0, 184, 181, 0.1);
+    --pink-light: rgba(233, 30, 99, 0.1);
 }
 
-.timeline-item {
-    position: relative;
-    padding-bottom: 25px;
+/* Couleurs utilitaires */
+.bg-teal { background-color: var(--teal-glacier) !important; }
+.text-teal { color: var(--teal-glacier) !important; }
+.bg-pink { background-color: var(--pink-swoosh) !important; }
+.text-pink { color: var(--pink-swoosh) !important; }
+.bg-yellow { background-color: var(--yellow-canaan) !important; }
+.text-yellow { color: var(--yellow-canaan) !important; }
+
+.btn-teal {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
 }
 
-.timeline-marker {
-    position: absolute;
-    left: -30px;
-    top: 0;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    z-index: 2;
+.btn-teal:hover {
+    background-color: #009a97;
+    border-color: #009a97;
+    color: white;
 }
 
-.timeline-content {
-    padding-left: 20px;
-    border-left: 2px solid #dee2e6;
-    margin-left: 10px;
-}
-
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: -21px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background-color: #dee2e6;
-}
-
+/* Navigation tabs améliorée */
 .nav-tabs .nav-link {
     font-weight: 600;
     color: #6c757d;
     border: none;
     padding: 1rem 1.5rem;
+    transition: all 0.3s ease;
 }
 
 .nav-tabs .nav-link.active {
-    color: #0d6efd;
-    border-bottom: 3px solid #0d6efd;
+    color: var(--teal-glacier);
+    border-bottom: 3px solid var(--teal-glacier);
     background: transparent;
 }
 
+.nav-tabs .nav-link:hover {
+    color: var(--teal-glacier);
+}
+
+/* Timeline avancée */
+.timeline-advanced {
+    position: relative;
+    padding-left: 40px;
+}
+
+.timeline-item-advanced {
+    position: relative;
+    padding-bottom: 30px;
+}
+
+.timeline-marker-advanced {
+    position: absolute;
+    left: -40px;
+    top: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    z-index: 2;
+}
+
+.timeline-content-advanced {
+    padding-left: 20px;
+    border-left: 2px solid var(--teal-light);
+    margin-left: 10px;
+}
+
+.timeline-advanced::before {
+    content: '';
+    position: absolute;
+    left: -29px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--teal-light);
+}
+
+/* Animations */
 .card {
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-    border: none;
-    margin-bottom: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.card-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+.card:hover {
+    transform: translateY(-2px);
 }
 
-.table th {
-    font-weight: 600;
-    background-color: #f8f9fa;
+.timeline-item-advanced {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
 }
 
-.notification-list .card {
-    transition: transform 0.2s ease;
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.notification-list .card:hover {
-    transform: translateX(5px);
+/* Badges personnalisés */
+.badge.bg-teal { background-color: var(--teal-glacier) !important; }
+.badge.bg-pink { background-color: var(--pink-swoosh) !important; }
+.badge.bg-yellow { 
+    background-color: var(--yellow-canaan) !important; 
+    color: var(--black-shadow) !important;
 }
+
+/* Opacités */
+.bg-opacity-10 { background-color: rgba(var(--color-rgb), 0.1) !important; }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -341,23 +666,33 @@
         font-size: 0.9rem;
     }
     
-    .timeline {
-        padding-left: 20px;
+    .timeline-advanced {
+        padding-left: 30px;
     }
     
-    .timeline-marker {
-        left: -20px;
-        width: 16px;
-        height: 16px;
+    .timeline-marker-advanced {
+        left: -30px;
+        width: 24px;
+        height: 24px;
     }
     
-    .row.mb-5 > .col-md-3 {
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .row.mb-5 > [class*="col-"] {
         margin-bottom: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
     }
 }
 </style>
 
-<!-- Scripts -->
+<!-- Scripts améliorés -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Sauvegarder l'onglet actif
@@ -376,15 +711,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Animation pour les timelines
-    const timelineItems = document.querySelectorAll('.timeline-item');
+    const timelineItems = document.querySelectorAll('.timeline-item-advanced');
     timelineItems.forEach((item, index) => {
-        item.style.opacity = '0';
-        item.style.transform = 'translateX(-20px)';
-        setTimeout(() => {
-            item.style.transition = 'all 0.5s ease';
-            item.style.opacity = '1';
-            item.style.transform = 'translateX(0)';
-        }, index * 100);
+        item.style.animationDelay = `${index * 0.1}s`;
+    });
+    
+    // Effet de hover sur les lignes du tableau
+    const tableRows = document.querySelectorAll('tbody tr');
+    tableRows.forEach(row => {
+        row.style.transition = 'all 0.2s ease';
+        row.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = 'var(--teal-light)';
+        });
+        row.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
     });
 });
 </script>

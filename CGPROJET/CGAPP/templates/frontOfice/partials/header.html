@@ -28,6 +28,7 @@
             width: 100%;
             z-index: 1030;
             font-size: 0.9rem;
+            overflow: hidden;
         }
         
         .promo-content {
@@ -308,47 +309,188 @@
             color: var(--teal-glacier);
         }
         
-        /* Version mobile */
-        @media (max-width: 991px) {
-            .main-navbar {
-                top: 40px;
-                padding: 10px 0;
-                background: var(--teal-glacier) !important; /* Toujours visible sur mobile */
-            }
-            
+        /* Menu mobile */
+        .mobile-menu-container {
+            background: var(--teal-glacier);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* Version tablette */
+        @media (max-width: 1199px) and (min-width: 992px) {
             .nav-container {
-                flex-direction: column;
-                height: auto;
-                padding: 10px;
+                padding: 0 15px;
             }
             
             .main-menu {
-                flex-direction: column;
-                width: 100%;
-                text-align: center;
-                margin: 15px 0;
-            }
-            
-            .user-actions {
-                width: 100%;
-                justify-content: center;
-                margin: 15px 0;
-                flex-wrap: wrap;
+                gap: 1rem;
             }
             
             .search-box {
-                width: 100%;
-                margin-bottom: 10px;
+                width: 180px;
             }
             
-            /* Sur mobile, pas d'effet de transparence */
-            .search-input {
+            .auth-btn {
+                padding: 0.35rem 0.75rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Version mobile et tablette */
+        @media (max-width: 991px) {
+            .promo-bar {
+                font-size: 0.8rem;
+                padding: 6px 0;
+            }
+            
+            .main-navbar {
+                top: 30px;
+                background: var(--teal-glacier) !important; /* Toujours visible sur mobile */
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            
+            .nav-container {
+                flex-direction: row;
+                height: 70px;
+                padding: 0 15px;
+            }
+            
+            .brand-logo {
+                height: 50px;
+                width: 50px;
+            }
+            
+            .logo-container {
+                padding: 8px;
+            }
+            
+            .user-actions {
+                gap: 0.75rem;
+            }
+            
+            .cart-btn {
+                padding: 0.3rem 0.6rem;
+            }
+            
+            .auth-btn {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.85rem;
+            }
+            
+            /* Menu mobile */
+            .mobile-menu-container {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 1029;
+            }
+            
+            .mobile-menu-container .main-menu {
+                flex-direction: column;
+                width: 100%;
+                text-align: center;
+                margin: 0;
+                padding: 1rem 0;
+            }
+            
+            .mobile-menu-container .nav-item {
+                padding: 0.5rem 0;
+            }
+            
+            .mobile-menu-container .search-box {
+                width: 90%;
+                margin: 0 auto 1rem;
+            }
+            
+            .mobile-menu-container .search-input {
                 background: rgba(255, 255, 255, 0.9);
                 color: var(--black-shadow);
             }
             
-            .search-input::placeholder {
+            .mobile-menu-container .search-input::placeholder {
                 color: rgba(0, 0, 0, 0.6);
+            }
+            
+            .mobile-menu-container .dropdown-menu {
+                position: static !important;
+                transform: none !important;
+                border: none;
+                background: rgba(255, 255, 255, 0.1);
+                text-align: center;
+            }
+        }
+        
+        /* Version mobile petite */
+        @media (max-width: 575px) {
+            .promo-bar {
+                font-size: 0.75rem;
+            }
+            
+            .nav-container {
+                padding: 0 10px;
+                height: 60px;
+            }
+            
+            .brand-logo {
+                height: 45px;
+                width: 45px;
+            }
+            
+            .logo-container {
+                padding: 6px;
+            }
+            
+            .user-actions {
+                gap: 0.5rem;
+            }
+            
+            .cart-btn {
+                padding: 0.25rem 0.5rem;
+            }
+            
+            .auth-btn {
+                padding: 0.25rem 0.6rem;
+                font-size: 0.8rem;
+            }
+            
+            .auth-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+        
+        /* Correction pour les très petits écrans */
+        @media (max-width: 360px) {
+            .promo-content {
+                animation: scroll 15s linear infinite;
+            }
+            
+            .nav-container {
+                padding: 0 8px;
+            }
+            
+            .brand-logo {
+                height: 40px;
+                width: 40px;
+            }
+            
+            .user-actions {
+                gap: 0.4rem;
+            }
+            
+            .cart-badge {
+                width: 18px;
+                height: 18px;
+                font-size: 0.65rem;
+            }
+        }
+        
+        /* Amélioration de l'accessibilité */
+        @media (prefers-reduced-motion: reduce) {
+            .promo-content,
+            .logo-container {
+                animation: none;
             }
         }
     </style>
@@ -365,21 +507,27 @@
 
     <!-- Navigation principale -->
     <nav class="main-navbar" id="mainNavbar">
-        <div class="container">
+        <div class="container-fluid px-0">
             <div class="nav-container">
                 <!-- Logo -->
                 <a href="{% url 'home' %}" class="logo-container">
                     <img src="{% static 'logo.png' %}" alt="Canaan Glacier" class="brand-logo">
                 </a>
-                <!-- Menu principal -->
+                
+                <!-- Menu principal (desktop) -->
                 <ul class="main-menu list-unstyled d-none d-lg-flex">
                     <li class="nav-item">
                         <a href="{% url 'home' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a href="{% url 'apropos' %}" class="nav-link {% if 'apropos' in request.path %}active{% endif %}">À propos</a>
+                        <a href="{% url 'apropos' %}" class="nav-link {% if 'apropos' in request.path %}active{% endif %}">A propos</a>
                     </li>
-                    <li class="nav-item dropdown">
+
+                     <li class="nav-item">
+                        <a href="{% url 'produits' %}" class="nav-link {% if 'produits' in request.path %}active{% endif %}">Nos Glaces</a>
+                    </li>
+
+                    {% comment %} <li class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle {% if 'produits' in request.path %}active{% endif %}" data-bs-toggle="dropdown">
                             Nos Glaces
                         </a>
@@ -390,7 +538,7 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-primary" href="{% url 'produits' %}">Tous les produits</a></li>
                         </ul>
-                    </li>
+                    </li> {% endcomment %}
                     <li class="nav-item">
                         <a href="{% url 'contact' %}" class="nav-link {% if 'contact' in request.path %}active{% endif %}">Contact</a>
                     </li>
@@ -403,7 +551,7 @@
                 
                 <!-- Actions utilisateur -->
                 <div class="user-actions">
-                    {% comment %} <!-- Recherche -->
+                    {% comment %} <!-- Recherche (desktop) -->
                     <form class="search-box d-none d-lg-flex" action="#" method="get">
                         <input type="text" name="q" class="search-input" placeholder="Rechercher...">
                         <button type="submit" class="search-btn">
@@ -435,7 +583,7 @@
                     
                     <!-- Authentification -->
                     {% if user.is_authenticated %}
-                    <div class="dropdown">
+                    <div class="dropdown d-none d-lg-block">
                         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
                             <span class="d-none d-lg-inline me-2">{{ user.first_name|default:user.username }}</span>
                             <i class="fas fa-user-circle"></i>
@@ -448,21 +596,21 @@
                         </ul>
                     </div>
                     {% else %}
-                    <div class="d-flex gap-2">
+                    <div class="d-none d-lg-flex gap-2">
                         <a href="{% url 'connexion' %}" class="auth-btn login-btn" style="text-decoration: none">Connexion</a>
                         <a href="{% url 'inscription' %}" class="auth-btn signup-btn"  style="text-decoration: none">Inscription</a>
                     </div>
                     {% endif %}
                     
                     <!-- Bouton mobile -->
-                    <button class="navbar-toggler d-lg-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                    <button class="navbar-toggler d-lg-none ms-2 border-0 bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu" aria-controls="mobileMenu" aria-expanded="false" aria-label="Toggle navigation">
                         <i class="fas fa-bars text-white"></i>
                     </button>
                 </div>
             </div>
             
             <!-- Menu mobile -->
-            <div class="collapse d-lg-none" id="mobileMenu">
+            <div class="collapse d-lg-none mobile-menu-container" id="mobileMenu">
                 <ul class="main-menu list-unstyled py-3">
                     <li class="nav-item py-2">
                         <a href="{% url 'home' %}" class="nav-link {% if request.path == '/' %}active{% endif %}">Accueil</a>
@@ -470,8 +618,12 @@
                     <li class="nav-item py-2">
                         <a href="{% url 'apropos' %}" class="nav-link {% if 'apropos' in request.path %}active{% endif %}">À propos</a>
                     </li>
-                    <li class="nav-item py-2">
-                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Nos Glaces</a>
+
+                    <li class="nav-item">
+                        <a href="{% url 'produits' %}" class="nav-link {% if 'produits' in request.path %}active{% endif %}">Nos Glaces</a>
+                    </li>
+                    {% comment %} <li class="nav-item py-2 dropdown">
+                        <a href="#" class="nav-link dropdown-toggle d-flex align-items-center justify-content-center" data-bs-toggle="dropdown">Nos Glaces</a>
                         <ul class="dropdown-menu">
                             {% for categorie in categories %}
                             <li><a class="dropdown-item" href="{% url 'produits_par_categorie' categorie.slug %}">{{ categorie.nom }}</a></li>
@@ -479,7 +631,7 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item text-primary" href="{% url 'produits' %}">Tous les produits</a></li>
                         </ul>
-                    </li>
+                    </li> {% endcomment %}
                     <li class="nav-item py-2">
                         <a href="{% url 'contact' %}" class="nav-link {% if 'contact' in request.path %}active{% endif %}">Contact</a>
                     </li>
@@ -487,15 +639,27 @@
                     <li class="nav-item py-2">
                         <a href="{% url 'mon_compte' %}" class="nav-link {% if 'mon_compte' in request.path %}active{% endif %}">Mon compte</a>
                     </li>
+                    <li class="nav-item py-2">
+                        <a href="{% url 'profile' %}" class="nav-link">Profil</a>
+                    </li>
+                    <li class="nav-item py-2">
+                        <a href="{% url 'deconnexion' %}" class="nav-link text-danger">Déconnexion</a>
+                    </li>
+                    {% else %}
+                    <div class="d-flex justify-content-center gap-3 mt-2 auth-buttons">
+                        <a href="{% url 'connexion' %}" class="auth-btn login-btn" style="text-decoration: none">Connexion</a>
+                        <a href="{% url 'inscription' %}" class="auth-btn signup-btn"  style="text-decoration: none">Inscription</a>
+                    </div>
                     {% endif %}
                 </ul>
                 
-                <form class="search-box px-3 mb-3" action="#" method="get">
+                <!-- Recherche mobile -->
+                {% comment %} <form class="search-box px-3 mb-3" action="#" method="get">
                     <input type="text" name="q" class="search-input" placeholder="Rechercher...">
                     <button type="submit" class="search-btn">
                         <i class="fas fa-search"></i>
                     </button>
-                </form>
+                </form> {% endcomment %}
             </div>
         </div>
     </nav>
@@ -529,6 +693,18 @@
             const navbar = document.getElementById('mainNavbar');
             if (window.scrollY > 100) {
                 navbar.classList.add('scrolled');
+            }
+            
+            // Fermer le menu mobile lors du clic sur un lien
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu) {
+                const mobileLinks = mobileMenu.querySelectorAll('.nav-link');
+                mobileLinks.forEach(link => {
+                    link.addEventListener('click', () => {
+                        const bsCollapse = new bootstrap.Collapse(mobileMenu);
+                        bsCollapse.hide();
+                    });
+                });
             }
         });
     </script>

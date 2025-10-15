@@ -1,4 +1,3 @@
-<!-- dashboards/livreur_confirmation_livraison.html -->
 {% extends "dashboards/base.html" %}
 {% load static %}
 
@@ -6,18 +5,18 @@
 <div class="container-fluid pt-4 px-4">
     <div class="row justify-content-center">
         <div class="col-lg-6">
-            <div class="bg-light rounded p-4">
+            <div class="bg-white rounded p-4 shadow-sm">
                 <!-- En-tête -->
                 <div class="text-center mb-4">
                     <i class="fa fa-check-circle fa-4x text-success mb-3"></i>
-                    <h2>Confirmation de Livraison</h2>
+                    <h2 class="teal-glacier-text">Confirmation de Livraison</h2>
                     <p class="text-muted">Confirmez la livraison de la commande</p>
                 </div>
 
                 <!-- Détails de la commande -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
+                <div class="card mb-4 border-teal">
+                    <div class="card-header teal-glacier-bg">
+                        <h5 class="mb-0 text-white">
                             <i class="fa fa-info-circle me-2"></i>
                             Détails de la Commande #{{ commande.id }}
                         </h5>
@@ -25,22 +24,22 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <strong>Client:</strong><br>
+                                <strong class="teal-glacier-text">Client:</strong><br>
                                 {{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}
                             </div>
                             <div class="col-md-6">
-                                <strong>Adresse:</strong><br>
+                                <strong class="teal-glacier-text">Adresse:</strong><br>
                                 {{ commande.adresse_livraison.rue }}, {{ commande.adresse_livraison.ville }}
                             </div>
                         </div>
-                        <hr>
+                        <hr class="teal-glacier-border">
                         <div class="row">
                             <div class="col-md-6">
-                                <strong>Montant:</strong><br>
+                                <strong class="teal-glacier-text">Montant:</strong><br>
                                 <span class="text-success fw-bold">{{ commande.total }} FCFA</span>
                             </div>
                             <div class="col-md-6">
-                                <strong>Statut actuel:</strong><br>
+                                <strong class="teal-glacier-text">Statut actuel:</strong><br>
                                 <span class="badge bg-warning">{{ commande.get_statut_display }}</span>
                             </div>
                         </div>
@@ -48,28 +47,30 @@
                 </div>
 
                 <!-- Produits -->
-                <div class="card mb-4">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">
+                <div class="card mb-4 border-teal">
+                    <div class="card-header teal-glacier-bg">
+                        <h5 class="mb-0 text-white">
                             <i class="fa fa-shopping-basket me-2"></i>
                             Produits à Livrer
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
+                            <table class="table table-sm table-hover">
+                                <thead class="teal-glacier-bg">
                                     <tr>
-                                        <th>Produit</th>
-                                        <th>Quantité</th>
-                                        <th>Prix</th>
+                                        <th class="text-white">Produit</th>
+                                        <th class="text-white">Quantité</th>
+                                        <th class="text-white">Prix</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for ligne in lignes_commande %}
                                     <tr>
                                         <td>{{ ligne.produit.nom }}</td>
-                                        <td>{{ ligne.quantite }}</td>
+                                        <td>
+                                            <span class="badge bg-teal-glacier">{{ ligne.quantite }}</span>
+                                        </td>
                                         <td>{{ ligne.prix_unitaire }} FCFA</td>
                                     </tr>
                                     {% endfor %}
@@ -80,15 +81,15 @@
                 </div>
 
                 <!-- Formulaire de confirmation -->
-                <div class="card">
+                <div class="card border-success">
                     <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
+                        <h5 class="mb-0 text-white">
                             <i class="fa fa-check me-2"></i>
                             Confirmation
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="alert alert-info">
+                        <div class="alert alert-teal">
                             <i class="fa fa-info-circle me-2"></i>
                             <strong>Important:</strong> Confirmez uniquement après avoir remis la commande au client.
                             Cette action est irréversible.
@@ -98,25 +99,25 @@
                             {% csrf_token %}
                             
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Notes de livraison (optionnel)</label>
-                                <textarea class="form-control" name="notes_livraison" 
+                                <label class="form-label fw-semibold teal-glacier-text">Notes de livraison (optionnel)</label>
+                                <textarea class="form-control teal-glacier-border" name="notes_livraison" 
                                           rows="3" placeholder="Remarques, observations..."></textarea>
                             </div>
 
                             <div class="form-check mb-4">
-                                <input class="form-check-input" type="checkbox" 
+                                <input class="form-check-input teal-glacier-border" type="checkbox" 
                                        id="confirmationCheck" required>
-                                <label class="form-check-label" for="confirmationCheck">
+                                <label class="form-check-label teal-glacier-text" for="confirmationCheck">
                                     Je confirme avoir livré cette commande au client
                                 </label>
                             </div>
 
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-success btn-lg">
+                                <button type="submit" class="btn btn-teal-glacier btn-lg">
                                     <i class="fa fa-check-circle me-2"></i>
                                     Confirmer la Livraison
                                 </button>
-                                <a href="{% url 'commandes_a_livrer' %}" class="btn btn-secondary">
+                                <a href="{% url 'commandes_a_livrer' %}" class="btn btn-outline-teal">
                                     <i class="fa fa-arrow-left me-2"></i>
                                     Retour aux commandes
                                 </a>
@@ -128,6 +129,85 @@
         </div>
     </div>
 </div>
+
+<style>
+.teal-glacier-text {
+    color: var(--teal-glacier) !important;
+}
+
+.teal-glacier-bg {
+    background-color: var(--teal-glacier) !important;
+}
+
+.bg-teal-glacier {
+    background-color: var(--teal-glacier) !important;
+}
+
+.teal-glacier-border {
+    border-color: var(--teal-glacier) !important;
+}
+
+.border-teal {
+    border-color: var(--teal-glacier) !important;
+}
+
+.btn-teal-glacier {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-teal-glacier:hover {
+    background-color: white;
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+}
+
+.btn-outline-teal {
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+    background-color: transparent;
+}
+
+.btn-outline-teal:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 184, 181, 0.1) !important;
+}
+
+.bg-white {
+    background-color: white !important;
+}
+
+.alert-teal {
+    background-color: var(--teal-light);
+    border-color: var(--teal-glacier);
+    color: var(--teal-dark);
+}
+
+.alert-teal .fa-info-circle {
+    color: var(--teal-glacier);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--teal-light) !important;
+}
+
+.form-check-input:checked {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+}
+
+.form-control:focus,
+.form-check-input:focus {
+    border-color: var(--teal-glacier);
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25);
+}
+</style>
 
 <script>
 // Validation du formulaire

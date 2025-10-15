@@ -594,7 +594,6 @@ def dashboard_serveur(request):
     
     return render(request, 'dashboards/serveur_dashboard.html', context)
 
-
 # Dashboard Gérant
 @login_required
 def dashboard_gerant(request):
@@ -603,89 +602,163 @@ def dashboard_gerant(request):
         messages.error(request, "Accès non autorisé")
         return redirect('home')
     
-    # Statistiques business
-    total_revenus_mois = Commande.objects.filter(
-        date_creation__month=timezone.now().month,
-        date_creation__year=timezone.now().year
-    ).aggregate(total=models.Sum('total'))['total'] or 0
-    
-    commandes_mois = Commande.objects.filter(
-        date_creation__month=timezone.now().month,
-        date_creation__year=timezone.now().year
-    ).count()
-    
-    # Produits du gérant
     try:
         gerant_obj = Gerant.objects.get(utilisateur=request.user)
-        mes_produits = Produit.objects.filter(gerant=gerant_obj)
-        produits_stock_faible = mes_produits.filter(quantite_disponible__lt=10)
     except Gerant.DoesNotExist:
-        mes_produits = Produit.objects.none()
-        produits_stock_faible = Produit.objects.none()
+        messages.error(request, "Profil gérant non trouvé")
+        return redirect('home')
     
-    # Commandes récentes pour les produits du gérant
-    commandes_recentes = Commande.objects.all().order_by('-date_creation')[:10]
+    # Récupérer les produits du gérant
+    mes_produits = Produit.objects.filter(gerant=gerant_obj)
     
-    # Statistiques des commandes
-    commandes_par_statut = {
-        'en_attente': Commande.objects.filter(statut='en_attente').count(),
-        'en_cours': Commande.objects.filter(statut='en_cours').count(),
-        'livree': Commande.objects.filter(statut='livree').count(),
-        'annulee': Commande.objects.filter(statut='annulee').count(),
-    }
+    # Statistiques business - Commandes liées aux produits du gérant
+    aujourd_hui = timezone.now()
+    debut_mois = aujourd_hui.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     
-    # Préparer les données pour le graphique des ventes
-    aujourd_hui = timezone.now().date()
+    # Commandes du mois avec produits du gérant
+    commandes_mois = Commande.objects.filter(
+        date_creation__gte=debut_mois,
+        lignes__produit__gerant=gerant_obj
+    ).distinct()
+    
+    total_revenus_mois = commandes_mois.aggregate(
+        total=models.Sum('total')
+    )['total'] or 0
+    
+    # Compter uniquement les commandes distinctes
+    commandes_count = commandes_mois.count()
+    
+    # Nouveaux clients ce mois-ci
+    nouveaux_clients_count = Utilisateur.objects.filter(
+        date_joined__gte=debut_mois,
+        role='client'
+    ).count()
+    
+    # Alertes stock pour les produits du gérant
+    produits_faible_stock = mes_produits.filter(
+        quantite_disponible__lt=5
+    )
+    alertes_stock = produits_faible_stock.count()
+    
+    # Produits à faible stock (limité à 5 pour l'affichage)
+    produits_faible_stock_list = produits_faible_stock[:5]
+    
+    # Meilleurs produits du gérant
+    meilleurs_produits = LigneCommande.objects.filter(
+        produit__gerant=gerant_obj
+    ).values(
+        'produit__id',
+        'produit__nom',
+        'produit__prix'
+    ).annotate(
+        quantite_vendue=models.Sum('quantite'),
+        chiffre_affaires=models.Sum(
+            models.F('quantite') * models.F('prix_unitaire')
+        )
+    ).order_by('-quantite_vendue')[:5]
+    
+    # Dernières commandes avec produits du gérant
+    dernieres_commandes = Commande.objects.filter(
+        lignes__produit__gerant=gerant_obj
+    ).distinct().order_by('-date_creation')[:5]
+    
+    # Préparer les données pour le graphique des ventes (7 derniers jours)
     debut_semaine = aujourd_hui - timezone.timedelta(days=7)
     
-    # Ventes des 7 derniers jours
     ventes_7_jours = []
     for i in range(7):
         date = debut_semaine + timezone.timedelta(days=i)
-        total_ventes = Commande.objects.filter(
-            date_creation__date=date
-        ).aggregate(total=models.Sum('total'))['total'] or 0
+        
+        # Chiffre d'affaires du jour pour les produits du gérant
+        ca_jour = LigneCommande.objects.filter(
+            commande__date_creation__date=date,
+            produit__gerant=gerant_obj
+        ).aggregate(
+            total=models.Sum(models.F('quantite') * models.F('prix_unitaire'))
+        )['total'] or 0
+        
         ventes_7_jours.append({
             'date': date,
-            'total': float(total_ventes)
+            'total': float(ca_jour)
         })
     
-    # Produits les plus vendus
-    produits_vendus = LigneCommande.objects.values('produit__nom').annotate(
-        total_vendu=models.Sum('quantite')
-    ).order_by('-total_vendu')[:5]
-    
     # Notifications non lues pour le gérant
-    notifications_non_lues = Notification.objects.filter(utilisateur=request.user, lue=False).count()
+    notifications_non_lues = Notification.objects.filter(
+        utilisateur=request.user, 
+        lue=False
+    ).count()
     
-    # Préparer les données pour le graphique des ventes (format JSON pour JavaScript)
+    # Statistiques supplémentaires
+    produits_count = mes_produits.count()
+    produits_en_rupture = mes_produits.filter(quantite_disponible=0).count()
+    
+    # Commandes par statut pour les produits du gérant
+    commandes_par_statut = {
+        'en_attente': Commande.objects.filter(
+            statut=Commande.STATUT_EN_ATTENTE,
+            lignes__produit__gerant=gerant_obj
+        ).distinct().count(),
+        'en_traitement': Commande.objects.filter(
+            statut=Commande.STATUT_TRAITEMENT,
+            lignes__produit__gerant=gerant_obj
+        ).distinct().count(),
+        'expediee': Commande.objects.filter(
+            statut=Commande.STATUT_EXPEDIEE,
+            lignes__produit__gerant=gerant_obj
+        ).distinct().count(),
+        'livree': Commande.objects.filter(
+            statut=Commande.STATUT_LIVREE,
+            lignes__produit__gerant=gerant_obj
+        ).distinct().count(),
+        'annulee': Commande.objects.filter(
+            statut=Commande.STATUT_ANNULEE,
+            lignes__produit__gerant=gerant_obj
+        ).distinct().count(),
+    }
+    
+    # Préparer les données pour le graphique JavaScript
     ventes_7_jours_json = json.dumps([{
-        'date': vente['date'].strftime('%Y-%m-%d') if hasattr(vente['date'], 'strftime') else vente['date'],
+        'date': vente['date'].strftime('%Y-%m-%d'),
         'total': vente['total']
     } for vente in ventes_7_jours])
     
     context = {
-        'total_revenus_mois': total_revenus_mois,
-        'commandes_mois': commandes_mois,
-        'mes_produits': mes_produits[:5],  # Limiter à 5 produits pour l'affichage
-        'produits_stock_faible': produits_stock_faible,
-        'commandes_recentes': commandes_recentes,
-        'nb_mes_produits': mes_produits.count(),
+        # Statistiques principales
+        'chiffre_affaires': total_revenus_mois,
+        'commandes_count': commandes_count,
+        'nouveaux_clients_count': nouveaux_clients_count,
+        'alertes_stock': alertes_stock,
+        
+        # Données produits
+        'mes_produits': mes_produits[:5],
+        'produits_faible_stock': produits_faible_stock_list,
+        'meilleurs_produits': meilleurs_produits,
+        
+        # Commandes
+        'dernieres_commandes': dernieres_commandes,
+        'commandes_par_statut': commandes_par_statut,
+        
+        # Graphiques et données temporelles
+        'ventes_7_jours': ventes_7_jours,
+        'ventes_7_jours_json': ventes_7_jours_json,
+        
+        # Notifications
+        'notifications_non_lues': notifications_non_lues,
+        
+        # Métadonnées
+        'aujourd_hui': aujourd_hui.date(),
+        'mois_courant': aujourd_hui.strftime('%B %Y'),
+        
+        # Statistiques supplémentaires
+        'produits_count': produits_count,
+        'produits_en_rupture': produits_en_rupture,
         'nb_commandes_attente': commandes_par_statut['en_attente'],
-        'nb_commandes_en_cours': commandes_par_statut['en_cours'],
+        'nb_commandes_en_cours': commandes_par_statut['en_traitement'],
         'nb_commandes_livrees': commandes_par_statut['livree'],
         'nb_commandes_annulees': commandes_par_statut['annulee'],
-        'ventes_7_jours': ventes_7_jours,
-        'ventes_7_jours_json': ventes_7_jours_json,  # Pour le graphique JavaScript
-        'produits_vendus': produits_vendus,
-        'notifications_non_lues': notifications_non_lues,
-        'aujourd_hui': timezone.now().date(),
-        'mois_courant': timezone.now().strftime('%B %Y'),
     }
     
     return render(request, 'dashboards/gerant_dashboard.html', context)
-
-
 # Action pour changer le statut d'une commande (pour serveurs)
 @login_required
 def changer_statut(request, commande_id):
@@ -759,6 +832,10 @@ def dashboard_client(request):
     mes_commandes = Commande.objects.filter(utilisateur=request.user).order_by('-date_creation')
     commandes_recentes = mes_commandes[:5]
     
+      # Commandes avec paiement effectué (statuts spécifiques)
+    commandes_payees = mes_commandes.exclude(
+        statut__in=[Commande.STATUT_EN_ATTENTE, Commande.STATUT_ANNULEE]
+    )
     # Statistiques du client
     total_commandes = mes_commandes.count()
     total_depense = mes_commandes.aggregate(total=models.Sum('total'))['total'] or 0
@@ -936,7 +1013,6 @@ def creer_serveur(request):
     
     return render(request, 'dashboards/admin/creer_serveur.html', {'form': form})
 
-
 @login_required
 def liste_utilisateurs(request):
     """
@@ -952,6 +1028,7 @@ def liste_utilisateurs(request):
         'admins': Utilisateur.objects.filter(role='admin'),
         'gerants': Utilisateur.objects.filter(role='gerant'),
         'serveurs': Utilisateur.objects.filter(role='serveur'),
+        'livreurs': Utilisateur.objects.filter(role='livreur'),
         'clients': Utilisateur.objects.filter(role='client'),
     }
     
@@ -961,7 +1038,6 @@ def liste_utilisateurs(request):
     }
     
     return render(request, 'dashboards/admin/liste_utilisateurs.html', context)
-
 
 # ==================== GESTION DES CATÉGORIES (ADMIN) ====================
 
@@ -1803,39 +1879,42 @@ def historique_actions_gestion(request):
 
 
 # ==================== GESTION DES PRODUITS (GÉRANT) ====================
+from django.views.generic import ListView
+from .models import Produit, Categorie
 
 class ListeProduitsView(ListView):
     model = Produit
     template_name = 'dashboards/gerant/liste_produit.html'
     context_object_name = 'produits'
     paginate_by = 10
-    
+
     def get_queryset(self):
-        queryset = super().get_queryset()
-        # Vérifier si l'utilisateur a un profil gérant
+        # Vérifier que l'utilisateur est bien lié à un profil gérant
         if hasattr(self.request.user, 'gerant') and self.request.user.gerant:
-            queryset = queryset.filter(gerant=self.request.user.gerant)
+            queryset = Produit.objects.filter(gerant=self.request.user.gerant)
         else:
-            # Si pas de gérant associé, retourner queryset vide
-            queryset = queryset.none()
-        
+            # Aucun gérant associé → pas de produits
+            return Produit.objects.none()
+
         # Filtrage par catégorie
         categorie_id = self.request.GET.get('categorie')
         if categorie_id:
             queryset = queryset.filter(categorie__id=categorie_id)
-            
+
         # Filtrage par statut de stock
         stock_status = self.request.GET.get('stock_status')
         if stock_status == 'disponible':
             queryset = queryset.filter(quantite_disponible__gt=0)
         elif stock_status == 'epuise':
             queryset = queryset.filter(quantite_disponible=0)
-            
+
         return queryset
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categories'] = Categorie.objects.all()
+        context['selected_categorie'] = self.request.GET.get('categorie', '')
+        context['selected_stock_status'] = self.request.GET.get('stock_status', '')
         return context
 
 # class AjouterProduitView(CreateView):
@@ -4016,3 +4095,365 @@ def appliquer_coupon(request):
         except Coupon.DoesNotExist:
             return JsonResponse({'success': False, 'error': 'Code coupon invalide'})
 
+
+from django.shortcuts import render, get_object_or_404
+from django.views.generic import DetailView
+from .models import Produit
+
+class ProduitDetailView(DetailView):
+    model = Produit
+    template_name = 'frontOfice/produits/produit_detail.html'
+    context_object_name = 'produit'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        produit = self.get_object()
+        
+        # Produits similaires (même catégorie)
+        produits_similaires = Produit.objects.filter(
+            categorie=produit.categorie
+        ).exclude(
+            pk=produit.pk
+        )[:4]
+        
+        # Produits populaires
+        produits_populaires = Produit.objects.filter(
+            est_populaire=True
+        ).exclude(
+            pk=produit.pk
+        )[:4]
+        
+        context.update({
+            'produits_similaires': produits_similaires,
+            'produits_populaires': produits_populaires,
+        })
+        
+        return context
+
+# Alternative avec fonction-based view
+def produit_detail(request, pk):
+    produit = get_object_or_404(Produit, pk=pk)
+    
+    produits_similaires = Produit.objects.filter(
+        categorie=produit.categorie
+    ).exclude(pk=pk)[:4]
+    
+    produits_populaires = Produit.objects.filter(
+        est_populaire=True
+    ).exclude(pk=pk)[:4]
+    
+    context = {
+        'produit': produit,
+        'produits_similaires': produits_similaires,
+        'produits_populaires': produits_populaires,
+    }
+    
+    return render(request, 'produits/produit_detail.html', context)
+
+#-------------------------Gestion livreur par admin----------------------
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib import messages
+from django.http import JsonResponse
+from django.db import transaction
+from .models import Utilisateur, Livreur
+from .forms import LivreurForm, LivreurUpdateForm
+
+# Vérifier si l'utilisateur est admin
+def is_admin(user):
+    return user.is_authenticated and user.role == 'admin'
+
+
+
+@user_passes_test(is_admin)
+def ajouter_livreur(request):
+    if request.method == 'POST':
+        form = LivreurForm(request.POST)
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    livreur = form.save()
+                    messages.success(request, f'Livreur {livreur.username} créé avec succès!')
+                    return redirect('liste_utilisateurs')
+            except Exception as e:
+                messages.error(request, f'Erreur lors de la création du livreur: {str(e)}')
+        else:
+            messages.error(request, 'Veuillez corriger les erreurs ci-dessous.')
+    else:
+        form = LivreurForm()
+    
+    context = {
+        'form': form,
+        'title': 'Ajouter un Livreur'
+    }
+    return render(request, 'dashboards/admin/crud_livreurs/ajouter_livreur.html', context)
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils import timezone
+from datetime import timedelta
+from .models import Utilisateur, Gerant, Serveur, Livreur, Client, Admin
+from .forms import CreerGerantForm, CreerServeurForm, LivreurForm, LivreurUpdateForm, ProfilForm
+
+def is_admin(user):
+    return user.is_authenticated and hasattr(user, 'role') and user.role == 'admin'
+
+# ==================== VUE LISTE UTILISATEURS ====================
+
+# @login_required
+# @user_passes_test(is_admin)
+# def liste_utilisateurs(request):
+#     """Vue pour afficher la liste de tous les utilisateurs par catégorie"""
+    
+#     # Récupérer tous les utilisateurs par rôle
+#     utilisateurs_par_role = {
+#         'admins': Utilisateur.objects.filter(role='admin'),
+#         'gerants': Utilisateur.objects.filter(role='gerant'),
+#         'serveurs': Utilisateur.objects.filter(role='serveur'),
+#         'livreurs': Utilisateur.objects.filter(role='livreur'),
+#         'clients': Utilisateur.objects.filter(role='client'),
+#     }
+    
+#     # Compter les instances de modèles spécifiques
+#     try:
+#         gerants_instances = Gerant.objects.all()
+#         serveurs_instances = Serveur.objects.all()
+#         livreurs_instances = Livreur.objects.all()
+#         clients_instances = Client.objects.all()
+#         admins_instances = Admin.objects.all()
+#     except:
+#         # Fallback si les modèles n'existent pas encore
+#         gerants_instances = []
+#         serveurs_instances = []
+#         livreurs_instances = []
+#         clients_instances = []
+#         admins_instances = []
+    
+#     context = {
+#         'utilisateurs': {
+#             'admins': utilisateurs_par_role['admins'],
+#             'gerants': utilisateurs_par_role['gerants'],
+#             'serveurs': utilisateurs_par_role['serveurs'],
+#             'livreurs': utilisateurs_par_role['livreurs'],
+#             'clients': utilisateurs_par_role['clients'],
+#         },
+#         'total_utilisateurs': Utilisateur.objects.count(),
+#         'utilisateurs_actifs': Utilisateur.objects.filter(is_active=True).count(),
+#         'nouveaux_utilisateurs': Utilisateur.objects.filter(
+#             date_joined__gte=timezone.now() - timedelta(days=30)
+#         ).count(),
+#     }
+    
+#     return render(request, 'admin/utilisateurs/liste_utilisateurs.html', context)
+
+# ==================== VUES POUR LES GÉRANTS ====================
+
+@login_required
+@user_passes_test(is_admin)
+def modifier_gerant(request, pk):
+    try:
+        gerant = get_object_or_404(Gerant, utilisateur__pk=pk)
+        utilisateur = gerant.utilisateur
+    except Gerant.DoesNotExist:
+        # Fallback: chercher directement l'utilisateur avec le rôle gérant
+        utilisateur = get_object_or_404(Utilisateur, utilisateur__pk=pk, role='gerant')
+    
+    if request.method == 'POST':
+        form = CreerGerantForm(request.POST, instance=utilisateur)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.role = 'gerant'  # Garder le rôle
+            user.save()
+            messages.success(request, f"Le gérant {user.username} a été modifié avec succès.")
+            return redirect('liste_utilisateurs')
+    else:
+        form = CreerGerantForm(instance=utilisateur)
+    
+    context = {
+        'form': form,
+        'utilisateur': utilisateur,
+        'titre': 'Modifier le Gérant',
+        'type_utilisateur': 'gérant'
+    }
+    return render(request, 'dashboards/admin/utilisateurs/modifier_utilisateur.html', context)
+
+
+
+@login_required
+@user_passes_test(is_admin)
+def supprimer_gerant(request, pk):
+    try:
+        gerant = get_object_or_404(Gerant, pk=pk)
+        utilisateur = gerant.utilisateur
+    except Gerant.DoesNotExist:
+        # Fallback: chercher directement l'utilisateur avec le rôle gérant
+        utilisateur = get_object_or_404(Utilisateur, pk=pk, role='gerant')
+    
+    if request.method == 'POST':
+        username = utilisateur.username
+        utilisateur.delete()
+        messages.success(request, f"Le gérant {username} a été supprimé avec succès.")
+        return redirect('liste_utilisateurs')
+    
+    context = {
+        'utilisateur': utilisateur,
+        'type_utilisateur': 'gérant'
+    }
+    return render(request, 'admin/utilisateurs/supprimer_utilisateur.html', context)
+
+# ==================== VUES POUR LES SERVEURS ====================
+
+@login_required
+@user_passes_test(is_admin)
+def modifier_serveur(request, pk):
+    try:
+        serveur = get_object_or_404(Serveur, pk=pk)
+        utilisateur = serveur.utilisateur
+    except Serveur.DoesNotExist:
+        # Fallback: chercher directement l'utilisateur avec le rôle serveur
+        utilisateur = get_object_or_404(Utilisateur, pk=pk, role='serveur')
+    
+    if request.method == 'POST':
+        form = CreerServeurForm(request.POST, instance=utilisateur)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.role = 'serveur'  # Garder le rôle
+            user.save()
+            messages.success(request, f"Le serveur {user.username} a été modifié avec succès.")
+            return redirect('liste_utilisateurs')
+    else:
+        form = CreerServeurForm(instance=utilisateur)
+    
+    context = {
+        'form': form,
+        'utilisateur': utilisateur,
+        'titre': 'Modifier le Serveur',
+        'type_utilisateur': 'serveur'
+    }
+    return render(request, 'admin/utilisateurs/modifier_utilisateur.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def supprimer_serveur(request, pk):
+    try:
+        serveur = get_object_or_404(Serveur, pk=pk)
+        utilisateur = serveur.utilisateur
+    except Serveur.DoesNotExist:
+        # Fallback: chercher directement l'utilisateur avec le rôle serveur
+        utilisateur = get_object_or_404(Utilisateur, pk=pk, role='serveur')
+    
+    if request.method == 'POST':
+        username = utilisateur.username
+        utilisateur.delete()
+        messages.success(request, f"Le serveur {username} a été supprimé avec succès.")
+        return redirect('liste_utilisateurs')
+    
+    context = {
+        'utilisateur': utilisateur,
+        'type_utilisateur': 'serveur'
+    }
+    return render(request, 'admin/utilisateurs/supprimer_utilisateur.html', context)
+
+# ==================== VUES POUR LES LIVREURS ====================
+
+@login_required
+@user_passes_test(is_admin)
+def modifier_livreur(request, pk):
+    try:
+        livreur = get_object_or_404(Livreur, pk=pk)
+        utilisateur = livreur.utilisateur
+    except Livreur.DoesNotExist:
+        # Fallback: chercher directement l'utilisateur avec le rôle livreur
+        utilisateur = get_object_or_404(Utilisateur, pk=pk, role='livreur')
+    
+    if request.method == 'POST':
+        form = LivreurUpdateForm(request.POST, instance=utilisateur)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.role = 'livreur'  # Garder le rôle
+            user.save()
+            messages.success(request, f"Le livreur {user.username} a été modifié avec succès.")
+            return redirect('liste_utilisateurs')
+    else:
+        form = LivreurUpdateForm(instance=utilisateur)
+    
+    context = {
+        'form': form,
+        'utilisateur': utilisateur,
+        'titre': 'Modifier le Livreur',
+        'type_utilisateur': 'livreur'
+    }
+    return render(request, 'admin/utilisateurs/modifier_utilisateur.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def supprimer_livreur(request, pk):
+    try:
+        livreur = get_object_or_404(Livreur, pk=pk)
+        utilisateur = livreur.utilisateur
+    except Livreur.DoesNotExist:
+        # Fallback: chercher directement l'utilisateur avec le rôle livreur
+        utilisateur = get_object_or_404(Utilisateur, pk=pk, role='livreur')
+    
+    if request.method == 'POST':
+        username = utilisateur.username
+        utilisateur.delete()
+        messages.success(request, f"Le livreur {username} a été supprimé avec succès.")
+        return redirect('liste_utilisateurs')
+    
+    context = {
+        'utilisateur': utilisateur,
+        'type_utilisateur': 'livreur'
+    }
+    return render(request, 'admin/utilisateurs/supprimer_utilisateur.html', context)
+
+# ==================== VUES POUR LES CLIENTS ====================
+
+@login_required
+@user_passes_test(is_admin)
+def modifier_client(request, pk):
+    try:
+        client = get_object_or_404(Client, pk=pk)
+        utilisateur = client.utilisateur
+    except Client.DoesNotExist:
+        # Fallback: chercher directement l'utilisateur avec le rôle client
+        utilisateur = get_object_or_404(Utilisateur, pk=pk, role='client')
+    
+    if request.method == 'POST':
+        form = ProfilForm(request.POST, instance=utilisateur)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Le client {utilisateur.username} a été modifié avec succès.")
+            return redirect('liste_utilisateurs')
+    else:
+        form = ProfilForm(instance=utilisateur)
+    
+    context = {
+        'form': form,
+        'utilisateur': utilisateur,
+        'titre': 'Modifier le Client',
+        'type_utilisateur': 'client'
+    }
+    return render(request, 'admin/utilisateurs/modifier_utilisateur.html', context)
+
+@login_required
+@user_passes_test(is_admin)
+def supprimer_client(request, pk):
+    try:
+        client = get_object_or_404(Client, pk=pk)
+        utilisateur = client.utilisateur
+    except Client.DoesNotExist:
+        # Fallback: chercher directement l'utilisateur avec le rôle client
+        utilisateur = get_object_or_404(Utilisateur, pk=pk, role='client')
+    
+    if request.method == 'POST':
+        username = utilisateur.username
+        utilisateur.delete()
+        messages.success(request, f"Le client {username} a été supprimé avec succès.")
+        return redirect('liste_utilisateurs')
+    
+    context = {
+        'utilisateur': utilisateur,
+        'type_utilisateur': 'client'
+    }
+    return render(request, 'admin/utilisateurs/supprimer_utilisateur.html', context)

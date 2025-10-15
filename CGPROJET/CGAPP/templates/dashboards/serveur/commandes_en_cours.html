@@ -5,10 +5,10 @@
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-12">
-            <div class="bg-light rounded h-100 p-4">
+            <div class="bg-white rounded h-100 p-4 shadow-sm">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4>📋 Commandes en Cours</h4>
-                    <a href="{% url 'nouvelle_commande_serveur' %}" class="btn btn-primary">
+                    <h4 class="teal-glacier-text">📋 Commandes en Cours</h4>
+                    <a href="{% url 'nouvelle_commande_serveur' %}" class="btn btn-teal-glacier">
                         <i class="fas fa-plus me-2"></i>Nouvelle Commande
                     </a>
                 </div>
@@ -16,7 +16,7 @@
                 <!-- Filtres -->
                 <div class="row mb-4">
                     <div class="col-md-4">
-                        <select class="form-select" onchange="location = this.value;">
+                        <select class="form-select teal-glacier-border" onchange="location = this.value;">
                             <option value="{% url 'commandes_en_cours_serveur' %}">Tous les statuts</option>
                             {% for value, label in commande.STATUT_CHOICES %}
                             <option value="{% url 'commandes_en_cours_serveur' %}?statut={{ value }}" 
@@ -32,27 +32,27 @@
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
-                            <tr>
-                                <th>N° Commande</th>
-                                <th>Client</th>
-                                <th>Téléphone</th>
-                                <th>Total</th>
-                                <th>Statut</th>
-                                <th>Date</th>
-                                <th>Actions</th>
+                            <tr class="teal-glacier-bg">
+                                <th class="text-white">N° Commande</th>
+                                <th class="text-white">Client</th>
+                                <th class="text-white">Téléphone</th>
+                                <th class="text-white">Total</th>
+                                <th class="text-white">Statut</th>
+                                <th class="text-white">Date</th>
+                                <th class="text-white">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for commande in commandes %}
                             <tr>
-                                <td><strong>#{{ commande.id }}</strong></td>
+                                <td><strong class="teal-glacier-text">#{{ commande.id }}</strong></td>
                                 <td>{{ commande.utilisateur.get_full_name }}</td>
                                 <td>{{ commande.utilisateur.telephone }}</td>
-                                <td>{{ commande.total }} FCFA</td>
+                                <td><strong>{{ commande.total }} FCFA</strong></td>
                                 <td>
                                     <span class="badge 
                                         {% if commande.statut == 'en_attente' %}bg-warning
-                                        {% elif commande.statut == 'en_traitement' %}bg-info
+                                        {% elif commande.statut == 'en_traitement' %}bg-teal-light text-teal-dark
                                         {% elif commande.statut == 'expediee' %}bg-primary
                                         {% elif commande.statut == 'livree' %}bg-success
                                         {% else %}bg-secondary{% endif %}">
@@ -61,16 +61,16 @@
                                 </td>
                                 <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
                                 <td>
-                                    <a href="{% url 'detail_commande' commande_id=commande.id %}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
+                                    <a href="{% url 'detail_commande' commande_id=commande.id %}" class="btn btn-sm btn-teal-light">
+                                        <i class="fas fa-eye teal-glacier-text"></i>
                                     </a>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
                                 <td colspan="7" class="text-center py-4">
-                                    <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
-                                    <p>Aucune commande en cours</p>
+                                    <i class="fas fa-inbox fa-2x teal-glacier-text mb-2"></i>
+                                    <p class="text-muted">Aucune commande en cours</p>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -81,4 +81,67 @@
         </div>
     </div>
 </div>
+
+<style>
+.teal-glacier-text {
+    color: var(--teal-glacier) !important;
+}
+
+.teal-glacier-bg {
+    background-color: var(--teal-glacier) !important;
+}
+
+.teal-glacier-border {
+    border-color: var(--teal-glacier) !important;
+}
+
+.btn-teal-glacier {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-teal-glacier:hover {
+    background-color: var(--teal-dark);
+    border-color: var(--teal-dark);
+    color: white;
+}
+
+.btn-teal-light {
+    background-color: var(--teal-light);
+    border-color: var(--teal-light);
+    color: var(--teal-dark);
+}
+
+.btn-teal-light:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.bg-teal-light {
+    background-color: var(--teal-light) !important;
+}
+
+.text-teal-dark {
+    color: var(--teal-dark) !important;
+}
+
+.bg-white {
+    background-color: white !important;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 184, 181, 0.1) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--teal-light) !important;
+}
+
+.form-select:focus {
+    border-color: var(--teal-glacier);
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25);
+}
+</style>
 {% endblock %}

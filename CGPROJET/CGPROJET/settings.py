@@ -189,4 +189,3 @@ CINETPAY_SITE_ID = os.getenv("CINETPAY_SITE_ID")
 CINETPAY_BASE_URL = "https://api-checkout.cinetpay.com/v2/payment"
 CINETPAY_CHECK_URL = "https://api-checkout.cinetpay.com/v2/payment/check"
 
-

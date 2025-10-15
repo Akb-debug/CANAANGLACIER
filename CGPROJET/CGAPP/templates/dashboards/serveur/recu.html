@@ -4,88 +4,92 @@
 {% block body %}
 <div class="container-fluid pt-4 px-4">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-8 col-lg-6 col-xl-4"> <!-- Réduction de la largeur -->
             <!-- Reçu imprimable -->
-            <div class="card" id="receipt">
-                <div class="card-body">
+            <div class="card receipt-card" id="receipt">
+                <div class="card-body p-3"> <!-- Padding réduit -->
                     <!-- En-tête du reçu -->
                     <div class="text-center mb-4">
-                        <h3 class="text-primary">VOTRE BOUTIQUE</h3>
-                        <p class="text-muted mb-0">Votre adresse ici</p>
-                        <p class="text-muted">Tél: +225 XX XX XX XX</p>
-                        <hr>
-                        <h5>📋 REÇU DE PAIEMENT</h5>
+                        <h3 class="teal-glacier-text">CANAAN GLACIER</h3>
+                        <p class="text-muted mb-0">Agoè dans le von de koffi Panou à 300 m du goudron en face de la mosquée, Lomé</p>
+                        <p class="text-muted">Tél: +228 92745959</p>
+                        <hr class="teal-glacier-border">
+                        <h5 class="teal-glacier-text">📋 REÇU DE PAIEMENT</h5>
                     </div>
 
                     <!-- Informations de la commande -->
-                    <div class="row mb-3">
+                    <div class="row mb-2">
                         <div class="col-6">
-                            <strong>N° Commande:</strong> #{{ commande.id }}
+                            <strong class="teal-glacier-text small">N° Commande:</strong><br>
+                            <span class="small">#{{ commande.id }}</span>
                         </div>
                         <div class="col-6 text-end">
-                            <strong>Date:</strong> {{ commande.date_creation|date:"d/m/Y H:i" }}
+                            <strong class="teal-glacier-text small">Date:</strong><br>
+                            <span class="small">{{ commande.date_creation|date:"d/m/Y H:i" }}</span>
                         </div>
                     </div>
 
                     <!-- Informations client -->
                     <div class="mb-3">
-                        <strong>Client:</strong> {{ client.get_full_name }}<br>
-                        <strong>Téléphone:</strong> {{ client.telephone }}
+                        <strong class="teal-glacier-text small">Client:</strong> {{ client.get_full_name }}<br>
+                        <strong class="teal-glacier-text small">Téléphone:</strong> {{ client.telephone }}
                     </div>
 
                     <!-- Détails des articles -->
-                    <div class="table-responsive mb-3">
-                        <table class="table table-sm">
+                    <div class="mb-3">
+                        <table class="table table-sm table-borderless mb-2">
                             <thead>
-                                <tr>
-                                    <th>Produit</th>
-                                    <th>Qty</th>
-                                    <th>Prix</th>
-                                    <th>Total</th>
+                                <tr class="teal-glacier-bg">
+                                    <th class="text-white small">Produit</th>
+                                    <th class="text-white small text-center">Qty</th>
+                                    <th class="text-white small text-end">Prix</th>
+                                    <th class="text-white small text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for ligne in commande.lignes.all %}
                                 <tr>
-                                    <td>{{ ligne.produit.nom }}</td>
-                                    <td>{{ ligne.quantite }}</td>
-                                    <td>{{ ligne.prix_unitaire }} FCFA</td>
-                                    <td>{{ ligne.sous_total }} FCFA</td>
+                                    <td class="small">{{ ligne.produit.nom }}</td>
+                                    <td class="small text-center">{{ ligne.quantite }}</td>
+                                    <td class="small text-end">{{ ligne.prix_unitaire }} FCFA</td>
+                                    <td class="small text-end"><strong>{{ ligne.sous_total }} FCFA</strong></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
 
+                    <!-- Ligne séparatrice -->
+                    <hr class="teal-glacier-border my-2">
+
                     <!-- Total et paiement -->
-                    <div class="border-top pt-3">
-                        <div class="row">
-                            <div class="col-6">
-                                <strong>Méthode:</strong> {{ commande.methode_paiement|title }}
-                            </div>
-                            <div class="col-6 text-end">
-                                <h5>Total: {{ commande.total }} FCFA</h5>
-                            </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <strong class="teal-glacier-text small">Méthode:</strong><br>
+                            <span class="small">{{ commande.methode_paiement|title }}</span>
+                        </div>
+                        <div class="col-6 text-end">
+                            <h6 class="teal-glacier-text mb-0">Total: {{ commande.total }} FCFA</h6>
                         </div>
                     </div>
 
                     <!-- Référence paiement -->
-                    <div class="text-center mt-4">
+                    <div class="text-center mt-3">
                         <small class="text-muted">
-                            Référence: {{ paiement.reference }}<br>
+                            <span class="teal-glacier-text">Référence: {{ paiement.reference }}</span><br>
                             Merci pour votre visite !
                         </small>
                     </div>
                 </div>
             </div>
 
-            <!-- Actions -->
-            <div class="text-center mt-4">
-                <button onclick="window.print()" class="btn btn-primary me-2">
-                    <i class="fas fa-print me-2"></i>Imprimer le reçu
+            <!-- Actions - Ne s'imprime pas -->
+            <div class="text-center mt-3 no-print">
+                <button onclick="imprimerRecu()" class="btn btn-teal-glacier me-2 btn-sm">
+                    <i class="fas fa-print me-1"></i>Imprimer le reçu
                 </button>
-                <a href="{% url 'nouvelle_commande_serveur' %}" class="btn btn-success">
-                    <i class="fas fa-plus me-2"></i>Nouvelle Commande
+                <a href="{% url 'nouvelle_commande_serveur' %}" class="btn btn-teal-light btn-sm">
+                    <i class="fas fa-plus me-1"></i>Nouvelle Commande
                 </a>
             </div>
         </div>
@@ -93,14 +97,109 @@
 </div>
 
 <style>
+.receipt-card {
+    border: 2px solid var(--teal-glacier);
+    border-radius: 8px;
+    max-width: 400px; /* Largeur fixe pour portrait */
+    margin: 0 auto;
+}
+
+.teal-glacier-text {
+    color: var(--teal-glacier) !important;
+}
+
+.teal-glacier-bg {
+    background-color: var(--teal-glacier) !important;
+}
+
+.teal-glacier-border {
+    border-color: var(--teal-glacier) !important;
+}
+
+.btn-teal-glacier {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-teal-glacier:hover {
+    background-color: white;
+    border-color: var(--teal-glacier);
+    color:var(--teal-glacier);
+}
+
+.btn-teal-light {
+    background-color: var(--teal-light);
+    border-color: var(--teal-glacier);
+    color: var(--teal-dark);
+}
+
+.btn-teal-light:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.small {
+    font-size: 0.85rem;
+}
+
+/* Styles pour l'impression */
 @media print {
-    .navbar, .sidebar, .footer, .btn {
-        display: none !important;
+    body * {
+        visibility: hidden;
+        margin: 0 !important;
+        padding: 0 !important;
     }
+    
+    #receipt, #receipt * {
+        visibility: visible;
+    }
+    
     #receipt {
+        position: fixed;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        width: 80mm !important; /* Largeur ticket */
+        max-width: 80mm !important;
         border: none !important;
         box-shadow: none !important;
+        margin: 0 !important;
+        padding: 10px !important;
+        font-size: 12px !important;
+    }
+    
+    .no-print, .no-print * {
+        display: none !important;
+    }
+    
+    .receipt-card {
+        max-width: 80mm !important;
+        border: none !important;
+    }
+    
+    /* Optimisation pour l'impression portrait */
+    @page {
+        margin: 0;
+        size: portrait;
+    }
+    
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
     }
 }
+
+/* Styles normaux (hors impression) */
+.no-print {
+    display: block;
+}
 </style>
+
+<script>
+function imprimerRecu() {
+    window.print();
+}
+</script>
 {% endblock %}

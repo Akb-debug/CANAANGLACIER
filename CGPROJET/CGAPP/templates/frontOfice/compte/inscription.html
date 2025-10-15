@@ -1,187 +1,538 @@
-{% extends "frontOfice/base.html" %}
 {% load static %}
 
-{% block title %}Inscription - Canaan Glacier{% endblock %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - Canaan Glacier</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --teal-glacier: #00B8B5;
+            --pink-swoosh: #E91E63;
+            --yellow-canaan: #FDCB05;
+            --black-shadow: #000000;
+            --white-bg: #FFFFFF;
+            --teal-light: rgba(0, 184, 181, 0.1);
+            --pink-light: rgba(233, 30, 99, 0.1);
+            --gray-light: #f8f9fa;
+            --gray-medium: #6c757d;
+        }
 
-{% block content %}
-<style>
-    /* Style général des formulaires */
-    .form-control, .form-select {
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 12px 15px;
-        font-size: 1rem;
-        transition: all 0.3s ease;
-        box-shadow: none !important;
-    }
+        body {
+            background: linear-gradient(135deg, var(--teal-light) 0%, var(--pink-light) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    .form-control:focus, .form-select:focus {
-        border-color: var(--teal-glacier);
-        box-shadow: 0 0 0 0.25rem rgba(0, 184, 181, 0.25) !important;
-    }
+        .register-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            width: 100%;
+            padding: 2rem 0;
+        }
 
-    /* Labels */
-    .form-label {
-        font-weight: 500;
-        margin-bottom: 8px;
-        color: var(--black-shadow);
-    }
+        .register-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            background-color: var(--white-bg);
+        }
 
-    /* Placeholders */
-    .form-control::placeholder {
-        color: #adb5bd;
-        opacity: 1;
-    }
+        .card-header {
+            background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            border-bottom: none;
+        }
 
-    /* Champs spécifiques */
-    input[type="tel"] {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300B8B5' viewBox='0 0 16 16'%3E%3Cpath d='M11 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6zM5 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H5z'/%3E%3Cpath d='M8 14a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 15px center;
-        background-size: 20px;
-    }
+        .brand-logo {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            line-height: 80px;
+        }
 
-    /* Messages d'aide */
-    .form-text {
-        font-size: 0.85rem;
-        color: #6c757d !important;
-        margin-top: 5px;
-    }
+        .card-title {
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
 
-    /* Messages d'erreur */
-    .invalid-feedback {
-        font-size: 0.85rem;
-        color: #dc3545;
-        margin-top: 5px;
-    }
+        .card-subtitle {
+            opacity: 0.9;
+            font-weight: 400;
+        }
 
-    .is-invalid {
-        border-color: #dc3545 !important;
-    }
+        .card-body {
+            padding: 2.5rem;
+        }
 
-    .is-invalid:focus {
-        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
-    }
+        .form-control, .form-select {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: none !important;
+        }
 
-    /* Boutons */
-    .btn-pri {
-        background-color: var(--teal-glacier);
-        border-color: var(--teal-glacier);
-        color: white;
-        font-weight: 500;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--teal-glacier);
+            box-shadow: 0 0 0 0.25rem rgba(0, 184, 181, 0.25) !important;
+        }
 
-    .btn-pri:hover {
-        background-color: #009a97;
-        border-color: #009a97;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--black-shadow);
+        }
 
-    /* Liens */
-    .text-primary {
-        color: var(--teal-glacier) !important;
-    }
-    .text-primary:hover {
-        color: var(--pink-swoosh) !important;
-    }
+        .form-text {
+            font-size: 0.85rem;
+            color: var(--gray-medium) !important;
+            margin-top: 5px;
+        }
 
-    /* Card */
-    .card {
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
+        .invalid-feedback {
+            font-size: 0.85rem;
+            color: #dc3545;
+            margin-top: 5px;
+            display: block;
+        }
 
-    /* Titre */
-    .text-accent {
-        color: var(--teal-glacier);
-        font-weight: 700;
-    }
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
 
-    /* Checkbox */
-    .form-check-input:checked {
-        background-color: var(--teal-glacier);
-        border-color: var(--teal-glacier);
-    }
-</style>
+        .is-invalid:focus {
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+        }
 
-<section class="py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card border-0 shadow-lg rounded-3">
-                    <div class="card-body p-5">
-                        <h2 class="text-center mb-4 text-accent">Créer un compte</h2>
-                        
-                        <form method="post" class="needs-validation" novalidate>
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
-                            
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    {{ form.username.label_tag }}
-                                    {{ form.username }}
-                                    <div class="invalid-feedback">{{ form.username.errors }}</div>
+        .btn-register {
+            background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 14px 20px;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 1.1rem;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 184, 181, 0.4);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--teal-glacier);
+            border-color: var(--teal-glacier);
+        }
+
+        .form-check-label a {
+            color: var(--teal-glacier);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .form-check-label a:hover {
+            color: var(--pink-swoosh);
+        }
+
+        .register-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--gray-medium);
+        }
+
+        .register-footer a {
+            color: var(--teal-glacier);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .register-footer a:hover {
+            color: var(--pink-swoosh);
+        }
+
+        .password-strength {
+            margin-top: 5px;
+            font-size: 0.85rem;
+        }
+
+        .strength-weak {
+            color: #dc3545;
+        }
+
+        .strength-medium {
+            color: #fd7e14;
+        }
+
+        .strength-strong {
+            color: #198754;
+        }
+
+        .progress {
+            height: 5px;
+            margin-top: 5px;
+        }
+
+        /* Style spécifique pour le champ téléphone */
+        .phone-input {
+            position: relative;
+        }
+
+        .phone-prefix {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-medium);
+            font-weight: 500;
+        }
+
+        .phone-input .form-control {
+            padding-left: 45px;
+        }
+
+        @media (max-width: 768px) {
+            .card-body {
+                padding: 1.5rem;
+            }
+            
+            .card-header {
+                padding: 1.5rem 1rem;
+            }
+        }
+
+        /* Styles pour le champ téléphone Togo */
+.phone-input .input-group-text {
+    background-color: var(--teal-light) !important;
+    border-color: #dee2e6;
+    border-radius: 8px 0 0 8px;
+    color: var(--teal-glacier);
+    font-weight: 600;
+}
+
+.phone-input .form-control {
+    border-radius: 0 8px 8px 0;
+}
+
+.phone-input .form-control:focus {
+    border-color: var(--teal-glacier);
+    box-shadow: 0 0 0 0.25rem rgba(0, 184, 181, 0.25);
+}
+
+/* Correction pour l'alignement visuel */
+.input-group:focus-within .input-group-text {
+    border-color: var(--teal-glacier);
+}
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card register-card">
+                        <div class="card-header">
+                            <div class="brand-logo">
+                                <i class="fas fa-mountain"></i>
+                            </div>
+                            <h1 class="card-title">Canaan Glacier</h1>
+                            <p class="card-subtitle">Rejoignez notre communauté</p>
+                        </div>
+                        <div class="card-body">
+                            <!-- Affichage des messages d'erreur -->
+                            {% if messages %}
+                                <div class="alert alert-danger">
+                                    {% for message in messages %}
+                                        {{ message }}
+                                    {% endfor %}
                                 </div>
-                                
-                                <div class="col-md-6">
-                                    {{ form.email.label_tag }}
-                                    {{ form.email }}
-                                    <div class="invalid-feedback">{{ form.email.errors }}</div>
+                            {% endif %}
+
+                            {% if form.errors %}
+                                <div class="alert alert-danger">
+                                    Veuillez corriger les erreurs ci-dessous.
                                 </div>
+                            {% endif %}
+
+                            <form method="post" class="needs-validation" novalidate>
+                                {% csrf_token %}
                                 
-                                <div class="col-12">
-                                    {{ form.telephone.label_tag }}
-                                    {{ form.telephone }}
-                                    <small class="form-text text-muted">Format: 90 12 34 56</small>
-                                    <div class="invalid-feedback">{{ form.telephone.errors }}</div>
-                                </div>
+                                <!-- Correction du champ next -->
+                                {% if request.GET.next %}
+                                    <input type="hidden" name="next" value="{{ request.GET.next }}">
+                                {% else %}
+                                    <input type="hidden" name="next" value="{% url 'home' %}">
+                                {% endif %}
                                 
-                                <div class="col-md-6">
-                                    {{ form.password1.label_tag }}
-                                    {{ form.password1 }}
-                                    <div class="invalid-feedback">{{ form.password1.errors }}</div>
-                                </div>
-                                
-                                <div class="col-md-6">
-                                    {{ form.password2.label_tag }}
-                                    {{ form.password2 }}
-                                    <div class="invalid-feedback">{{ form.password2.errors }}</div>
-                                </div>
-                                
-                                <div class="col-12 mt-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="conditions" required>
-                                        <label class="form-check-label" for="conditions">
-                                            J'accepte les <a href="#" class="text-primary">conditions générales</a>
+                                <div class="row g-3">
+                                    <!-- Champ Nom d'utilisateur -->
+                                    <div class="col-md-6">
+                                        <label for="{{ form.username.id_for_label }}" class="form-label">
+                                            Nom d'utilisateur *
                                         </label>
-                                        <div class="invalid-feedback">Vous devez accepter les conditions</div>
+                                        <input type="text" 
+                                               name="{{ form.username.name }}" 
+                                               id="{{ form.username.id_for_label }}" 
+                                               class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                                               placeholder="Choisissez un nom d'utilisateur"
+                                               value="{{ form.username.value|default:'' }}"
+                                               required>
+                                        {% if form.username.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.username.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="invalid-feedback">
+                                                Veuillez entrer un nom d'utilisateur.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Champ Email -->
+                                    <div class="col-md-6">
+                                        <label for="{{ form.email.id_for_label }}" class="form-label">
+                                            Adresse email *
+                                        </label>
+                                        <input type="email" 
+                                               name="{{ form.email.name }}" 
+                                               id="{{ form.email.id_for_label }}" 
+                                               class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                                               placeholder="votre@email.com"
+                                               value="{{ form.email.value|default:'' }}"
+                                               required>
+                                        {% if form.email.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.email.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="invalid-feedback">
+                                                Veuillez entrer une adresse email valide.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                   <!-- Champ Téléphone -->
+<div class="col-12">
+    <label for="{{ form.telephone.id_for_label }}" class="form-label">
+        Numéro de téléphone
+    </label>
+    <div class="phone-input">
+        <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2300B8B5' viewBox='0 0 16 16'%3E%3Cpath d='M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.6 17.6 0 0 0 4.168 6.608 17.6 17.6 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.75 1.75 0 0 1-1.657-.459L5.482 8.062a1.75 1.75 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328z'/%3E%3C/svg%3E" 
+                     alt="Phone" class="me-1" style="width: 16px; height: 16px;">
+                <strong>+228</strong>
+            </span>
+            <input type="tel" 
+                   name="{{ form.telephone.name }}" 
+                   id="{{ form.telephone.id_for_label }}" 
+                   class="form-control {% if form.telephone.errors %}is-invalid{% endif %} border-start-0" 
+                   placeholder="90 12 34 56"
+                   pattern="[0-9]{2} [0-9]{2} [0-9]{2} [0-9]{2}"
+                   value="{{ form.telephone.value|default:'' }}"
+                   style="border-left: none;">
+        </div>
+        <small class="form-text">Format: 90 12 34 56 (8 chiffres sans le préfixe)</small>
+        {% if form.telephone.errors %}
+            <div class="invalid-feedback d-block">
+                {% for error in form.telephone.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+                                    
+                                    <!-- Champ Mot de passe -->
+                                    <div class="col-md-6">
+                                        <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                            Mot de passe *
+                                        </label>
+                                        <input type="password" 
+                                               name="{{ form.password1.name }}" 
+                                               id="{{ form.password1.id_for_label }}" 
+                                               class="form-control {% if form.password1.errors %}is-invalid{% endif %}" 
+                                               placeholder="Créez un mot de passe sécurisé"
+                                               required
+                                               oninput="checkPasswordStrength(this.value)">
+                                        <div class="password-strength">
+                                            <small id="password-strength-text">Force du mot de passe</small>
+                                            <div class="progress">
+                                                <div id="password-strength-bar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                        {% if form.password1.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.password1.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="invalid-feedback">
+                                                Veuillez entrer un mot de passe.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Confirmation du mot de passe -->
+                                    <div class="col-md-6">
+                                        <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                            Confirmer le mot de passe *
+                                        </label>
+                                        <input type="password" 
+                                               name="{{ form.password2.name }}" 
+                                               id="{{ form.password2.id_for_label }}" 
+                                               class="form-control {% if form.password2.errors %}is-invalid{% endif %}" 
+                                               placeholder="Confirmez votre mot de passe"
+                                               required>
+                                        {% if form.password2.errors %}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.password2.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="invalid-feedback">
+                                                Veuillez confirmer votre mot de passe.
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Conditions générales -->
+                                    <div class="col-12 mt-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="conditions" required>
+                                            <label class="form-check-label" for="conditions">
+                                                J'accepte les <a href="#" class="text-primary">conditions générales d'utilisation</a> et la <a href="#" class="text-primary">politique de confidentialité</a> *
+                                            </label>
+                                            <div class="invalid-feedback">
+                                                Vous devez accepter les conditions générales pour continuer.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Bouton d'inscription -->
+                                    <div class="col-12 mt-3">
+                                        <button type="submit" class="btn btn-register btn-lg">
+                                            <i class="fas fa-user-plus me-2"></i> Créer mon compte
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Lien vers la connexion -->
+                                    <div class="col-12 text-center mt-3">
+                                        <p class="mb-0 register-footer">
+                                            Déjà un compte ?
+                                            {% url 'connexion' as connexion_url %}
+                                            {% if connexion_url %}
+                                                <a href="{{ connexion_url }}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
+                                                    Se connecter
+                                                </a>
+                                            {% else %}
+                                                <a href="#">
+                                                    Se connecter
+                                                </a>
+                                            {% endif %}
+                                        </p>
                                     </div>
                                 </div>
-                                
-                                <div class="col-12 mt-3">
-                                    <button type="submit" class="btn btn-pri btn-lg w-100">
-                                        <i class="fas fa-user-plus me-2"></i> S'inscrire
-                                    </button>
-                                </div>
-                                
-                                <div class="col-12 text-center mt-3">
-                                    <p class="mb-0">
-                                        Déjà un compte ?
-                                        <a href="{% url 'connexion' %}?next={{ request.GET.next|urlencode }}" class="text-primary fw-bold">
-                                            Se connecter
-                                        </a>
-                                    </p>
-                                </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section>
-{% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Validation des formulaires
+        (function () {
+            'use strict'
+            
+            var forms = document.querySelectorAll('.needs-validation')
+            
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+
+        // Indicateur de force du mot de passe
+        function checkPasswordStrength(password) {
+            const strengthBar = document.getElementById('password-strength-bar');
+            const strengthText = document.getElementById('password-strength-text');
+            
+            let strength = 0;
+            let feedback = "";
+            
+            if (password.length >= 8) strength += 25;
+            if (/[a-z]/.test(password)) strength += 25;
+            if (/[A-Z]/.test(password)) strength += 25;
+            if (/[0-9]/.test(password)) strength += 25;
+            
+            strengthBar.style.width = strength + '%';
+            
+            if (strength < 50) {
+                strengthBar.className = 'progress-bar bg-danger';
+                feedback = "Faible";
+            } else if (strength < 75) {
+                strengthBar.className = 'progress-bar bg-warning';
+                feedback = "Moyen";
+            } else {
+                strengthBar.className = 'progress-bar bg-success';
+                feedback = "Fort";
+            }
+            
+            strengthText.textContent = "Force du mot de passe: " + feedback;
+        }
+
+        // Formatage automatique du numéro de téléphone
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneInput = document.getElementById('{{ form.telephone.id_for_label }}');
+            
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    
+                    if (value.length > 0) {
+                        value = value.match(/.{1,2}/g).join(' ');
+                    }
+                    
+                    e.target.value = value;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

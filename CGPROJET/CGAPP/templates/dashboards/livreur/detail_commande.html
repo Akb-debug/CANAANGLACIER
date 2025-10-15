@@ -1,4 +1,3 @@
-<!-- dashboards/livreur_detail_commande.html -->
 {% extends "dashboards/base.html" %}
 {% load static %}
 
@@ -7,28 +6,22 @@
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
+            <div class="bg-white rounded p-4 shadow-sm">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h2 class="mb-1">
-                            <i class="fa fa-file-alt me-2 text-primary"></i>
+                        <h2 class="mb-1 teal-glacier-text">
+                            <i class="fa fa-file-alt me-2"></i>
                             Détails de la Commande #{{ commande.id }}
                         </h2>
                         <p class="mb-0 text-muted">Informations complètes sur la commande</p>
                     </div>
-                    <div class="d-flex">
-                        <a href="{% url 'commandes_a_livrer' %}" class="btn btn-secondary me-2">
+                    <div class="d-flex align-items-center">
+                        <a href="{% url 'commandes_a_livrer' %}" class="btn btn-outline-teal me-3">
                             <i class="fa fa-arrow-left me-1"></i>Retour
                         </a>
-                        <span class="badge {% if commande.statut == 'expediee' %}bg-warning{% elif commande.statut == 'livree' %}bg-success{% else %}bg-info{% endif %} fs-6">
+                        <span class="badge {% if commande.statut == 'expediee' %}bg-warning{% elif commande.statut == 'livree' %}bg-success{% else %}bg-teal-glacier{% endif %} fs-6">
                             {{ commande.get_statut_display }}
                         </span>
-                        {% comment %} <form method="post">
-                            {% csrf_token %}
-                            <button type="submit" name="livrer" class="btn btn-success">
-                                <i class="fa fa-check-circle me-2"></i>Marquer comme livrée
-                            </button>
-                        </form> {% endcomment %}
                     </div>
                 </div>
             </div>
@@ -38,38 +31,38 @@
     <div class="row g-4">
         <!-- Informations Client -->
         <div class="col-xl-4 col-lg-6">
-            <div class="bg-light rounded p-4 h-100">
-                <h5 class="mb-4">
-                    <i class="fa fa-user me-2 text-primary"></i>
+            <div class="bg-white rounded p-4 h-100 shadow-sm">
+                <h5 class="mb-4 teal-glacier-text">
+                    <i class="fa fa-user me-2"></i>
                     Informations Client
                 </h5>
                 <div class="client-info">
                     <div class="d-flex align-items-center mb-3">
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                        <div class="rounded-circle bg-teal-glacier text-white d-flex align-items-center justify-content-center me-3" 
                              style="width: 50px; height: 50px; font-size: 18px;">
                             {{ commande.utilisateur.username|first|upper }}
                         </div>
                         <div>
-                            <h6 class="mb-0">{{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}</h6>
+                            <h6 class="mb-0 teal-glacier-text">{{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}</h6>
                             <small class="text-muted">Membre depuis {{ commande.utilisateur.date_joined|date:"M Y" }}</small>
                         </div>
                     </div>
                     
                     <div class="row g-2">
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Email</label>
+                            <label class="form-label fw-semibold teal-glacier-text">Email</label>
                             <p class="mb-2">
-                                <a href="mailto:{{ commande.utilisateur.email }}" class="text-decoration-none">
-                                    <i class="fa fa-envelope me-2 text-primary"></i>{{ commande.utilisateur.email }}
+                                <a href="mailto:{{ commande.utilisateur.email }}" class="text-decoration-none teal-glacier-text">
+                                    <i class="fa fa-envelope me-2"></i>{{ commande.utilisateur.email }}
                                 </a>
                             </p>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Téléphone</label>
+                            <label class="form-label fw-semibold teal-glacier-text">Téléphone</label>
                             <p class="mb-2">
                                 {% if commande.utilisateur.telephone %}
-                                <a href="tel:{{ commande.utilisateur.telephone }}" class="text-decoration-none">
-                                    <i class="fa fa-phone me-2 text-success"></i>{{ commande.utilisateur.telephone }}
+                                <a href="tel:{{ commande.utilisateur.telephone }}" class="text-decoration-none teal-glacier-text">
+                                    <i class="fa fa-phone me-2"></i>{{ commande.utilisateur.telephone }}
                                 </a>
                                 {% else %}
                                 <span class="text-muted">Non renseigné</span>
@@ -83,30 +76,30 @@
 
         <!-- Adresse de Livraison -->
         <div class="col-xl-4 col-lg-6">
-            <div class="bg-light rounded p-4 h-100">
-                <h5 class="mb-4">
-                    <i class="fa fa-map-marker-alt me-2 text-danger"></i>
+            <div class="bg-white rounded p-4 h-100 shadow-sm">
+                <h5 class="mb-4 teal-glacier-text">
+                    <i class="fa fa-map-marker-alt me-2"></i>
                     Adresse de Livraison
                 </h5>
                 <div class="address-details">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Adresse complète</label>
+                        <label class="form-label fw-semibold teal-glacier-text">Adresse complète</label>
                         <p class="mb-2">{{ commande.adresse_livraison.rue }}</p>
                     </div>
                     
                     <div class="row g-2">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Ville</label>
+                            <label class="form-label fw-semibold teal-glacier-text">Ville</label>
                             <p class="mb-2">
-                                <span class="badge bg-primary">{{ commande.adresse_livraison.ville }}</span>
+                                <span class="badge bg-teal-glacier">{{ commande.adresse_livraison.ville }}</span>
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Code Postal</label>
+                            <label class="form-label fw-semibold teal-glacier-text">Code Postal</label>
                             <p class="mb-2">{{ commande.adresse_livraison.code_postal }}</p>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Pays</label>
+                            <label class="form-label fw-semibold teal-glacier-text">Pays</label>
                             <p class="mb-2">{{ commande.adresse_livraison.pays }}</p>
                         </div>
                     </div>
@@ -116,37 +109,37 @@
 
         <!-- Informations Commande -->
         <div class="col-xl-4 col-lg-6">
-            <div class="bg-light rounded p-4 h-100">
-                <h5 class="mb-4">
-                    <i class="fa fa-info-circle me-2 text-info"></i>
+            <div class="bg-white rounded p-4 h-100 shadow-sm">
+                <h5 class="mb-4 teal-glacier-text">
+                    <i class="fa fa-info-circle me-2"></i>
                     Informations Commande
                 </h5>
                 <div class="command-info">
                     <div class="row g-2">
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">N° Commande</label>
+                            <label class="form-label fw-semibold teal-glacier-text">N° Commande</label>
                             <p class="mb-2">#{{ commande.id }}</p>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Date création</label>
+                            <label class="form-label fw-semibold teal-glacier-text">Date création</label>
                             <p class="mb-2">{{ commande.date_creation|date:"d/m/Y H:i" }}</p>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Méthode Paiement</label>
+                            <label class="form-label fw-semibold teal-glacier-text">Méthode Paiement</label>
                             <p class="mb-2">
                                 <span class="badge bg-success">{{ commande.methode_paiement }}</span>
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label fw-semibold">Statut</label>
+                            <label class="form-label fw-semibold teal-glacier-text">Statut</label>
                             <p class="mb-2">
-                                <span class="badge {% if commande.statut == 'expediee' %}bg-warning{% elif commande.statut == 'livree' %}bg-success{% else %}bg-info{% endif %}">
+                                <span class="badge {% if commande.statut == 'expediee' %}bg-warning{% elif commande.statut == 'livree' %}bg-success{% else %}bg-teal-glacier{% endif %}">
                                     {{ commande.get_statut_display }}
                                 </span>
                             </p>
                         </div>
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Total Commande</label>
+                            <label class="form-label fw-semibold teal-glacier-text">Total Commande</label>
                             <h4 class="text-success mb-0">{{ commande.total }} FCFA</h4>
                         </div>
                     </div>
@@ -156,19 +149,19 @@
 
         <!-- Produits Commandés -->
         <div class="col-12">
-            <div class="bg-light rounded p-4">
-                <h5 class="mb-4">
-                    <i class="fa fa-shopping-basket me-2 text-warning"></i>
+            <div class="bg-white rounded p-4 shadow-sm">
+                <h5 class="mb-4 teal-glacier-text">
+                    <i class="fa fa-shopping-basket me-2"></i>
                     Produits Commandés
                 </h5>
                 <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead class="table-light">
+                        <thead class="teal-glacier-bg">
                             <tr>
-                                <th>Produit</th>
-                                <th>Prix Unitaire</th>
-                                <th>Quantité</th>
-                                <th>Sous-total</th>
+                                <th class="text-white">Produit</th>
+                                <th class="text-white">Prix Unitaire</th>
+                                <th class="text-white">Quantité</th>
+                                <th class="text-white">Sous-total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -180,9 +173,9 @@
                                         <img src="{{ ligne.produit.image.url }}" alt="{{ ligne.produit.nom }}" 
                                              class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;">
                                         {% else %}
-                                        <div class="rounded bg-secondary text-white d-flex align-items-center justify-content-center me-3" 
+                                        <div class="rounded bg-teal-light d-flex align-items-center justify-content-center me-3" 
                                              style="width: 50px; height: 50px;">
-                                            <i class="fa fa-ice-cream"></i>
+                                            <i class="fa fa-ice-cream teal-glacier-text"></i>
                                         </div>
                                         {% endif %}
                                         <div>
@@ -193,16 +186,16 @@
                                 </td>
                                 <td>{{ ligne.prix_unitaire }} FCFA</td>
                                 <td>
-                                    <span class="badge bg-primary rounded-pill">{{ ligne.quantite }}</span>
+                                    <span class="badge bg-teal-glacier rounded-pill">{{ ligne.quantite }}</span>
                                 </td>
                                 <td class="fw-bold text-success">{{ ligne.sous_total }} FCFA</td>
                             </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot class="table-light">
+                        <tfoot class="teal-glacier-bg">
                             <tr>
-                                <td colspan="3" class="text-end fw-bold">Total:</td>
-                                <td class="fw-bold text-success fs-5">{{ commande.total }} FCFA</td>
+                                <td colspan="3" class="text-end fw-bold text-white">Total:</td>
+                                <td class="fw-bold text-white fs-5">{{ commande.total }} FCFA</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -213,12 +206,12 @@
         <!-- Actions -->
         {% if commande.statut == Commande.STATUT_EXPEDIEE %}
         <div class="col-12">
-            <div class="bg-light rounded p-4">
-                <h5 class="mb-4">
-                    <i class="fa fa-truck-loading me-2 text-success"></i>
+            <div class="bg-white rounded p-4 shadow-sm">
+                <h5 class="mb-4 teal-glacier-text">
+                    <i class="fa fa-truck-loading me-2"></i>
                     Action de Livraison
                 </h5>
-                <div class="alert alert-info">
+                <div class="alert alert-teal">
                     <i class="fa fa-info-circle me-2"></i>
                     Cette commande est prête à être livrée. Une fois la livraison effectuée chez le client, 
                     veuillez confirmer en cliquant sur le bouton ci-dessous.
@@ -226,7 +219,7 @@
                 <form method="post">
                     {% csrf_token %}
                     <div class="d-flex justify-content-end">
-                        <button type="submit" name="livrer" class="btn btn-success btn-lg">
+                        <button type="submit" name="livrer" class="btn btn-teal-glacier btn-lg">
                             <i class="fa fa-check-circle me-2"></i>
                             Confirmer la Livraison
                         </button>
@@ -236,7 +229,7 @@
         </div>
         {% elif commande.statut == Commande.STATUT_LIVREE %}
         <div class="col-12">
-            <div class="bg-light rounded p-4">
+            <div class="bg-white rounded p-4 shadow-sm">
                 <div class="alert alert-success">
                     <i class="fa fa-check-circle me-2"></i>
                     Cette commande a été livrée avec succès le <strong>{{ commande.date_livraison|date:"d/m/Y à H:i" }}</strong>.
@@ -246,4 +239,72 @@
         {% endif %}
     </div>
 </div>
+
+<style>
+.teal-glacier-text {
+    color: var(--teal-glacier) !important;
+}
+
+.teal-glacier-bg {
+    background-color: var(--teal-glacier) !important;
+}
+
+.bg-teal-glacier {
+    background-color: var(--teal-glacier) !important;
+}
+
+.bg-teal-light {
+    background-color: var(--teal-light) !important;
+}
+
+.text-teal-dark {
+    color: var(--teal-dark) !important;
+}
+
+.btn-teal-glacier {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-teal-glacier:hover {
+    background-color: var(--teal-dark);
+    border-color: var(--teal-dark);
+    color: white;
+}
+
+.btn-outline-teal {
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+    background-color: transparent;
+}
+
+.btn-outline-teal:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 184, 181, 0.1) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--teal-light) !important;
+}
+
+.bg-white {
+    background-color: white !important;
+}
+
+.alert-teal {
+    background-color: var(--teal-light);
+    border-color: var(--teal-glacier);
+    color: var(--teal-dark);
+}
+
+.alert-teal .fa-info-circle {
+    color: var(--teal-glacier);
+}
+</style>
 {% endblock %}

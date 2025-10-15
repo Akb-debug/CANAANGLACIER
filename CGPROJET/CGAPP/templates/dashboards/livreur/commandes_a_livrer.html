@@ -1,4 +1,3 @@
-<!-- dashboards/livreur_commandes_a_livrer.html -->
 {% extends "dashboards/base.html" %}
 {% load static %}
 
@@ -7,17 +6,17 @@
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
+            <div class="bg-white rounded p-4 shadow-sm">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h2 class="mb-1">
-                            <i class="fa fa-truck me-2 text-primary"></i>
+                        <h2 class="mb-1 teal-glacier-text">
+                            <i class="fa fa-truck me-2"></i>
                             Commandes à Livrer
                         </h2>
                         <p class="mb-0 text-muted">Gestion des commandes en attente de livraison</p>
                     </div>
                     <div class="d-flex">
-                        <span class="badge bg-primary me-2">{{ page_obj.paginator.count }} commande(s)</span>
+                        <span class="badge bg-teal-glacier me-2">{{ page_obj.paginator.count }} commande(s)</span>
                     </div>
                 </div>
             </div>
@@ -27,29 +26,29 @@
     <!-- Filtres -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
-                <h5 class="mb-3">
-                    <i class="fa fa-filter me-2 text-info"></i>
+            <div class="bg-white rounded p-4 shadow-sm">
+                <h5 class="mb-3 teal-glacier-text">
+                    <i class="fa fa-filter me-2"></i>
                     Filtres de Recherche
                 </h5>
                 <form method="get" class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">Date spécifique</label>
-                        <input type="date" name="date" value="{{ date_filter }}" class="form-control">
+                        <input type="date" name="date" value="{{ date_filter }}" class="form-control teal-glacier-border">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Recherche</label>
-                        <input type="text" name="q" value="{{ search_query }}" placeholder="ID, client, ville..." class="form-control">
+                        <input type="text" name="q" value="{{ search_query }}" placeholder="ID, client, ville..." class="form-control teal-glacier-border">
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Statut</label>
-                        <select name="statut" class="form-select">
+                        <select name="statut" class="form-select teal-glacier-border">
                             <option value="expediee" {% if statut_filter == 'expediee' %}selected{% endif %}>Expédiées</option>
                             <option value="en_attente" {% if statut_filter == 'en_attente' %}selected{% endif %}>En attente</option>
                         </select>
                     </div>
                     <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
+                        <button type="submit" class="btn btn-teal-glacier w-100">
                             <i class="fa fa-search me-1"></i>Filtrer
                         </button>
                     </div>
@@ -61,28 +60,28 @@
     <!-- Tableau des commandes -->
     <div class="row">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
+            <div class="bg-white rounded p-4 shadow-sm">
                 <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead class="table-primary">
+                        <thead class="teal-glacier-bg">
                             <tr>
-                                <th scope="col"># Commande</th>
-                                <th scope="col">Client</th>
-                                <th scope="col">Contact</th>
-                                <th scope="col">Adresse de Livraison</th>
-                                <th scope="col">Montant</th>
-                                <th scope="col">Date/Heure</th>
-                                <th scope="col">Statut</th>
-                                <th scope="col">Actions</th>
+                                <th scope="col" class="text-white"># Commande</th>
+                                <th scope="col" class="text-white">Client</th>
+                                <th scope="col" class="text-white">Contact</th>
+                                <th scope="col" class="text-white">Adresse de Livraison</th>
+                                <th scope="col" class="text-white">Montant</th>
+                                <th scope="col" class="text-white">Date/Heure</th>
+                                <th scope="col" class="text-white">Statut</th>
+                                <th scope="col" class="text-white">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for commande in page_obj %}
                             <tr>
-                                <th scope="row" class="fw-bold">#{{ commande.id }}</th>
+                                <th scope="row" class="fw-bold teal-glacier-text">#{{ commande.id }}</th>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
+                                        <div class="rounded-circle bg-teal-glacier text-white d-flex align-items-center justify-content-center me-2" 
                                              style="width: 35px; height: 35px; font-size: 14px;">
                                             {{ commande.utilisateur.username|first|upper }}
                                         </div>
@@ -94,7 +93,7 @@
                                 </td>
                                 <td>
                                     {% if commande.utilisateur.telephone %}
-                                        <a href="tel:{{ commande.utilisateur.telephone }}" class="btn btn-sm btn-outline-info">
+                                        <a href="tel:{{ commande.utilisateur.telephone }}" class="btn btn-sm btn-outline-teal">
                                             <i class="fa fa-phone me-1"></i>{{ commande.utilisateur.telephone }}
                                         </a>
                                     {% else %}
@@ -105,8 +104,8 @@
                                     <div class="address-info">
                                         <div class="fw-semibold">{{ commande.adresse_livraison.rue }}</div>
                                         <div>
-                                            <span class="badge bg-secondary">{{ commande.adresse_livraison.ville }}</span>
-                                            <span class="badge bg-light text-dark">{{ commande.adresse_livraison.code_postal }}</span>
+                                            <span class="badge bg-teal-light text-teal-dark">{{ commande.adresse_livraison.ville }}</span>
+                                            <span class="badge bg-teal-light text-teal-dark">{{ commande.adresse_livraison.code_postal }}</span>
                                         </div>
                                     </div>
                                 </td>
@@ -120,16 +119,16 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge {% if commande.statut == 'expediee' %}bg-warning{% else %}bg-secondary{% endif %}">
+                                    <span class="badge {% if commande.statut == 'expediee' %}bg-warning{% else %}bg-teal-light text-teal-dark{% endif %}">
                                         {{ commande.get_statut_display }}
                                     </span>
                                 </td>
                                 <td>
                                     <div class="btn-group-vertical">
-                                        <a href="{% url 'detail_commande_livreur' commande.id %}" class="btn btn-sm btn-primary mb-1">
+                                        <a href="{% url 'detail_commande_livreur' commande.id %}" class="btn btn-sm btn-teal-light mb-1">
                                             <i class="fa fa-eye me-1"></i>Détails
                                         </a>
-                                        <a href="{% url 'livrer_commande' commande.id %}" class="btn btn-sm btn-success">
+                                        <a href="{% url 'livrer_commande' commande.id %}" class="btn btn-sm btn-teal-glacier">
                                             <i class="fa fa-check me-1"></i>Livrer
                                         </a>
                                     </div>
@@ -154,7 +153,7 @@
                     <ul class="pagination justify-content-center">
                         {% if page_obj.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if date_filter %}&date={{ date_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}" aria-label="Previous">
+                            <a class="page-link teal-glacier-text" href="?page={{ page_obj.previous_page_number }}{% if date_filter %}&date={{ date_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}" aria-label="Previous">
                                 <i class="fa fa-chevron-left"></i>
                             </a>
                         </li>
@@ -163,18 +162,18 @@
                         {% for i in page_obj.paginator.page_range %}
                             {% if page_obj.number == i %}
                             <li class="page-item active">
-                                <span class="page-link">{{ i }}</span>
+                                <span class="page-link bg-teal-glacier border-teal-glacier">{{ i }}</span>
                             </li>
                             {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ i }}{% if date_filter %}&date={{ date_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}">{{ i }}</a>
+                                <a class="page-link teal-glacier-text" href="?page={{ i }}{% if date_filter %}&date={{ date_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}">{{ i }}</a>
                             </li>
                             {% endif %}
                         {% endfor %}
                         
                         {% if page_obj.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if date_filter %}&date={{ date_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}" aria-label="Next">
+                            <a class="page-link teal-glacier-text" href="?page={{ page_obj.next_page_number }}{% if date_filter %}&date={{ date_filter }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if statut_filter %}&statut={{ statut_filter }}{% endif %}" aria-label="Next">
                                 <i class="fa fa-chevron-right"></i>
                             </a>
                         </li>
@@ -186,4 +185,102 @@
         </div>
     </div>
 </div>
+
+<style>
+.teal-glacier-text {
+    color: var(--teal-glacier) !important;
+}
+
+.teal-glacier-bg {
+    background-color: var(--teal-glacier) !important;
+}
+
+.bg-teal-glacier {
+    background-color: var(--teal-glacier) !important;
+}
+
+.bg-teal-light {
+    background-color: var(--teal-light) !important;
+}
+
+.text-teal-dark {
+    color: var(--teal-dark) !important;
+}
+
+.btn-teal-glacier {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-teal-glacier:hover {
+    background-color: white;
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+}
+
+.btn-teal-light {
+    background-color: var(--teal-light);
+    border-color: var(--teal-light);
+    color: var(--teal-glacier);
+}
+
+.btn-teal-light:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-outline-teal {
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+    background-color: transparent;
+}
+
+.btn-outline-teal:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.teal-glacier-border {
+    border-color: var(--teal-glacier) !important;
+}
+
+.border-teal-glacier {
+    border-color: var(--teal-glacier) !important;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 184, 181, 0.1) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--teal-light) !important;
+}
+
+.bg-white {
+    background-color: white !important;
+}
+
+.page-link.teal-glacier-text {
+    color: var(--teal-glacier) !important;
+}
+
+.page-link.teal-glacier-text:hover {
+    background-color: var(--teal-light);
+    color: var(--teal-dark) !important;
+}
+
+.page-item.active .page-link {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--teal-glacier);
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25);
+}
+</style>
 {% endblock %}
