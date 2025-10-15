@@ -1,0 +1,160 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}{{ titre }} - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card h-100">
+                <div class="card-header bg-gradient-teal text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        {{ titre }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Bouton retour -->
+                    <div class="mb-4">
+                        <a href="{% url 'liste_utilisateurs' %}" class="btn btn-teal-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Retour à la liste
+                        </a>
+                    </div>
+
+                    <!-- Informations de l'utilisateur -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="bg-teal-light p-3 rounded">
+                                <h6 class="text-teal mb-3">
+                                    <i class="fas fa-user me-2"></i>
+                                    Informations actuelles
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Nom d'utilisateur:</strong> {{ utilisateur.username }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Email:</strong> {{ utilisateur.email }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Nom complet:</strong> {{ utilisateur.get_full_name }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Téléphone:</strong> {{ utilisateur.telephone|default:"Non renseigné" }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Rôle:</strong> 
+                                        <span class="badge bg-teal">{{ utilisateur.get_role_display }}</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Statut:</strong> 
+                                        <span class="badge {% if utilisateur.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                            {{ utilisateur.is_active|yesno:"Actif,Inactif" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulaire de modification -->
+                    <form method="post" class="row g-3">
+                        {% csrf_token %}
+                        
+                        {% for field in form %}
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}" class="form-label">
+                                    {{ field.label }}
+                                    {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ field }}
+                                {% if field.help_text %}
+                                <small class="form-text text-muted">{{ field.help_text }}</small>
+                                {% endif %}
+                                {% if field.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ field.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Boutons d'action -->
+                        <div class="col-12 mt-4">
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-teal">
+                                    <i class="fas fa-save me-1"></i>
+                                    Enregistrer les modifications
+                                </button>
+                                <a href="{% url 'liste_utilisateurs' %}" class="btn btn-teal-outline">
+                                    <i class="fas fa-times me-1"></i>
+                                    Annuler
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --teal-light: rgba(0, 184, 181, 0.1);
+}
+
+.bg-gradient-teal {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--teal-dark) 100%) !important;
+}
+
+.bg-teal-light {
+    background-color: var(--teal-light) !important;
+}
+
+.text-teal {
+    color: var(--teal-glacier) !important;
+}
+
+.btn-teal {
+    background-color: var(--teal-glacier) !important;
+    border-color: var(--teal-glacier) !important;
+    color: white !important;
+}
+
+.btn-teal:hover {
+    background-color: var(--teal-dark) !important;
+    border-color: var(--teal-dark) !important;
+    color: white !important;
+}
+
+.btn-teal-outline {
+    background-color: transparent !important;
+    border-color: var(--teal-glacier) !important;
+    color: var(--teal-glacier) !important;
+}
+
+.btn-teal-outline:hover {
+    background-color: var(--teal-glacier) !important;
+    border-color: var(--teal-glacier) !important;
+    color: white !important;
+}
+
+.btn-teal-secondary {
+    background-color: var(--teal-dark) !important;
+    border-color: var(--teal-dark) !important;
+    color: white !important;
+}
+
+.form-control:focus {
+    border-color: var(--teal-glacier) !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25) !important;
+}
+</style>
+{% endblock %}

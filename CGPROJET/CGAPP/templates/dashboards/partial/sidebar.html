@@ -38,64 +38,48 @@
                     <span>Tableau de bord</span>
                 </a>
 
-                <!-- Gestion des Produits -->
-                <div class="sidebar-nav-item sidebar-dropdown">
-                    <div class="sidebar-dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="fas fa-boxes"></i>
-                        <span>Produits</span>
-                        <i class="sidebar-dropdown-arrow fas fa-chevron-down"></i>
-                    </div>
-                    <div class="sidebar-dropdown-menu">
-                        <a href="{% url 'liste_produits' %}" class="sidebar-dropdown-item {% if request.resolver_match.url_name == 'liste_produits' %}sidebar-active{% endif %}">
-                            <i class="fas fa-list-ul"></i>Liste des produits
-                        </a>
-                        <a href="{% url 'ajouter_produit' %}" class="sidebar-dropdown-item {% if request.resolver_match.url_name == 'ajouter_produit' %}sidebar-active{% endif %}">
-                            <i class="fas fa-plus-circle"></i>Ajouter un produit
-                        </a>
-                    </div>
-                </div>
+                <!-- Gestion du Produit -->
+
+                <!-- Tableau de bord -->
+                <a href="{% url 'liste_produits' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'liste_produits' %}sidebar-active{% endif %}">
+                    <i class="fas fa-boxes"></i>
+                    <span>Produits</span>
+                </a>
+
 
                 <!-- Gestion des Stocks -->
                 <a href="{% url 'gestion_stocks_avancee' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'gestion_stocks_avancee' %}sidebar-active{% endif %}">
                     <i class="fas fa-warehouse"></i>
                     <span>Gestion des stocks</span>
                 </a>
-
                 <!-- Gestion du Personnel -->
-                <div class="sidebar-nav-item sidebar-dropdown">
-                    <div class="sidebar-dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="fas fa-users-cog"></i>
-                        <span>Personnel</span>
-                        <i class="sidebar-dropdown-arrow fas fa-chevron-down"></i>
-                    </div>
-                    <div class="sidebar-dropdown-menu">
-                        <a href="{% url 'liste_serveurs' %}" class="sidebar-dropdown-item {% if request.resolver_match.url_name == 'liste_serveurs' %}sidebar-active{% endif %}">
-                            <i class="fas fa-user-friends"></i>Liste des serveurs
-                        </a>
-                        <a href="{% url 'gestion_serveurs_avancee' %}" class="sidebar-dropdown-item {% if request.resolver_match.url_name == 'gestion_serveurs_avancee' %}sidebar-active{% endif %}">
-                            <i class="fas fa-chart-line"></i>Performances
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Analyse Financière -->
-                <a href="{% url 'gestion_financiere_gerant' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'gestion_financiere_gerant' %}sidebar-active{% endif %}">
-                    <i class="fas fa-chart-pie"></i>
-                    <span>Analyse financière</span>
+                <a href="{% url 'liste_serveurs' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'liste_serveurs' %}sidebar-active{% endif %}">
+                 <i class="fas fa-user-friends"></i>
+                    <span>Liste des serveurs</span>
                 </a>
 
-                <!-- Rapports -->
-                <a href="{% url 'rapports_admin' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'rapports_admin' %}sidebar-active{% endif %}">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Rapports</span>
-                </a>
+               
+               
+                {% comment %} 
+                    <!-- Analyse Financière -->
+                    <a href="{% url 'gestion_financiere_gerant' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'gestion_financiere_gerant' %}sidebar-active{% endif %}">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Analyse financière</span>
+                    </a>
 
-                <!-- Communication -->
-                <a href="{% url 'communication_notifications' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'communication_notifications' %}sidebar-active{% endif %}">
-                    <i class="fas fa-comments"></i>
-                    <span>Messages</span>
-                    <span class="sidebar-notification-badge">3</span>
-                </a>
+                    <!-- Rapports -->
+                    <a href="{% url 'rapports_admin' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'rapports_admin' %}sidebar-active{% endif %}">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Rapports</span>
+                    </a>
+
+                    <!-- Communication -->
+                    <a href="{% url 'communication_notifications' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'communication_notifications' %}sidebar-active{% endif %}">
+                        <i class="fas fa-comments"></i>
+                        <span>Messages</span>
+                        <span class="sidebar-notification-badge">3</span>
+                    </a>
+                {% endcomment %}
 
            {% elif user.role == 'client' %}
                 <a href="{% url 'dashboard_client' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'dashboard_client' %}sidebar-active{% endif %}">
@@ -145,6 +129,11 @@
                 <a href="{% url 'creer_serveur_gerant' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'creer_serveur_gerant' %}sidebar-active{% endif %}">
                     <i class="fas fa-user-plus"></i>
                     <span>Ajouter un serveur</span>
+                </a>
+
+                <a href="{% url 'ajouter_livreur' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'ajouter_livreur' %}sidebar-active{% endif %}">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Ajouter un livreur</span>
                 </a>
 
                 <a href="{% url 'liste_utilisateurs' %}" class="sidebar-nav-item {% if request.resolver_match.url_name == 'liste_utilisateurs' %}sidebar-active{% endif %}">
@@ -264,400 +253,400 @@
 </div>
 
 <style>
-.sidebar-custom {
-    /* Variables CSS spécifiques au sidebar */
-    --sidebar-bg: var(--teal-glacier);
-    --sidebar-text: var(--white-bg);
-    --sidebar-hover: rgba(0, 0, 0, 0.1);
-    --sidebar-active: var(--yellow-canaan);
-    --sidebar-submenu-bg: rgba(0, 0, 0, 0.1);
-    --sidebar-icon: rgba(255, 255, 255, 0.8);
-    --sidebar-accent: var(--yellow-canaan);
-    --sidebar-divider: rgba(255, 255, 255, 0.2);
-    --sidebar-width: 280px;
-    --sidebar-notification-badge: var(--pink-swoosh);
-    --sidebar-logout-color: var(--pink-swoosh);
-    --sidebar-transition-speed: 0.3s;
-    
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    width: var(--sidebar-width);
-    background-color: var(--sidebar-bg);
-    color: var(--sidebar-text);
-    z-index: 1000;
-    overflow-y: auto;
-    transition: all var(--sidebar-transition-speed) ease;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Logo styling */
-.sidebar-logo-container {
-    display: flex;
-    align-items: center;
-    padding: 1.5rem 1rem 1rem;
-    border-bottom: 1px solid var(--sidebar-divider);
-    margin-bottom: 1rem;
-}
-
-.sidebar-logo-img {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    margin-right: 12px;
-    object-fit: cover;
-    background-color: var(--white-bg);
-    padding: 4px;
-}
-
-.sidebar-logo-text {
-    font-weight: 700;
-    font-size: 1.4rem;
-    color: var(--white-bg);
-}
-
-/* User profile styling */
-.sidebar-user-profile {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
-    background-color: var(--sidebar-submenu-bg);
-    border-radius: 8px;
-    margin: 0 1rem 1.5rem;
-}
-
-.sidebar-avatar-container {
-    position: relative;
-    margin-right: 12px;
-}
-
-.sidebar-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--sidebar-accent);
-}
-
-.sidebar-avatar-default {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--teal-glacier), var(--yellow-canaan));
-    color: var(--white-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-    border: 2px solid var(--sidebar-accent);
-}
-
-.sidebar-online-indicator {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 12px;
-    height: 12px;
-    background-color: var(--yellow-canaan);
-    border: 2px solid var(--sidebar-bg);
-    border-radius: 50%;
-}
-
-.sidebar-user-info {
-    flex: 1;
-}
-
-.sidebar-username {
-    margin: 0;
-    font-weight: 600;
-    color: var(--white-bg);
-    font-size: 0.95rem;
-}
-
-.sidebar-join-date {
-    font-size: 0.75rem;
-    color: var(--sidebar-icon);
-    display: block;
-    margin-top: 2px;
-}
-
-.sidebar-user-role {
-    display: inline-block;
-    margin-top: 4px;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.7rem;
-    background-color: var(--sidebar-accent);
-    color: var(--black-shadow);
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
-/* Navigation items */
-.sidebar-nav-menu {
-    padding: 0 1rem;
-}
-
-.sidebar-nav-item {
-    display: flex;
-    align-items: center;
-    padding: 0.8rem 1rem;
-    margin-bottom: 0.25rem;
-    border-radius: 8px;
-    color: var(--sidebar-text);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.sidebar-nav-item i:first-child {
-    width: 20px;
-    text-align: center;
-    margin-right: 12px;
-    color: var(--sidebar-icon);
-    transition: all 0.2s ease;
-}
-
-.sidebar-nav-item span {
-    flex: 1;
-}
-
-.sidebar-nav-item:hover {
-    background-color: var(--sidebar-hover);
-    color: var(--white-bg);
-}
-
-.sidebar-nav-item:hover i {
-    color: var(--white-bg);
-}
-
-.sidebar-nav-item.sidebar-active {
-    background-color: var(--sidebar-active);
-    color: var(--black-shadow);
-}
-
-.sidebar-nav-item.sidebar-active i {
-    color: var(--black-shadow);
-}
-
-.sidebar-nav-item.sidebar-active::before {
-    content: '';
-    position: absolute;
-    left: -1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 4px;
-    height: 70%;
-    background-color: var(--white-bg);
-    border-radius: 0 4px 4px 0;
-}
-
-/* Dropdown styles */
-.sidebar-dropdown {
-    position: relative;
-}
-
-.sidebar-dropdown-toggle {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    cursor: pointer;
-}
-
-.sidebar-dropdown-arrow {
-    font-size: 0.7rem;
-    transition: transform 0.3s ease;
-    margin-left: auto;
-    color: var(--sidebar-icon);
-}
-
-.sidebar-dropdown-menu {
-    position: static;
-    float: none;
-    width: 100%;
-    margin: 0.25rem 0 0.5rem;
-    padding: 0;
-    background-color: var(--sidebar-submenu-bg);
-    border: none;
-    border-radius: 8px;
-    box-shadow: none;
-    display: none;
-}
-
-.sidebar-dropdown-menu.show {
-    display: block;
-}
-
-.sidebar-dropdown-item {
-    display: flex;
-    align-items: center;
-    padding: 0.7rem 1rem 0.7rem 2.5rem;
-    color: var(--sidebar-text);
-    text-decoration: none;
-    border-radius: 6px;
-    margin: 0.15rem 0.5rem;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-}
-
-.sidebar-dropdown-item i {
-    width: 18px;
-    margin-right: 10px;
-    font-size: 0.9rem;
-    color: var(--sidebar-icon);
-}
-
-.sidebar-dropdown-item:hover, .sidebar-dropdown-item.sidebar-active {
-    background-color: var(--sidebar-hover);
-    color: var(--white-bg);
-}
-
-.sidebar-dropdown-item.sidebar-active {
-    font-weight: 600;
-}
-
-/* Badges */
-.sidebar-notification-badge, .sidebar-cart-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 5px;
-    border-radius: 9px;
-    background-color: var(--sidebar-notification-badge);
-    color: var(--white-bg);
-    font-size: 0.7rem;
-    font-weight: bold;
-    margin-left: auto;
-}
-
-.sidebar-cart-badge {
-    background-color: var(--yellow-canaan);
-    color: var(--black-shadow);
-}
-
-/* Section labels */
-.sidebar-section-label {
-    padding: 1rem 1rem 0.5rem;
-    margin-top: 1rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--sidebar-icon);
-    border-top: 1px solid var(--sidebar-divider);
-}
-
-.sidebar-divider {
-    height: 1px;
-    background-color: var(--sidebar-divider);
-    margin: 1rem 0;
-}
-
-/* Logout link */
-.sidebar-logout-link {
-    color: var(--sidebar-logout-color) !important;
-}
-
-.sidebar-logout-link i {
-    color: var(--sidebar-logout-color) !important;
-}
-
-.sidebar-logout-link:hover {
-    background-color: rgba(233, 30, 99, 0.15) !important;
-}
-
-/* App version */
-.sidebar-app-version {
-    padding: 1rem;
-    text-align: center;
-    font-size: 0.75rem;
-    color: var(--sidebar-icon);
-    margin-top: 1rem;
-    border-top: 1px solid var(--sidebar-divider);
-}
-
-/* Scrollbar styling */
-.sidebar-custom::-webkit-scrollbar {
-    width: 5px;
-}
-
-.sidebar-custom::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.sidebar-custom::-webkit-scrollbar-thumb {
-    background: var(--sidebar-divider);
-    border-radius: 10px;
-}
-
-.sidebar-custom::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-/* Responsive adjustments */
-@media (max-width: 992px) {
     .sidebar-custom {
-        transform: translateX(-100%);
-        box-shadow: none;
+        /* Variables CSS spécifiques au sidebar */
+        --sidebar-bg: var(--teal-glacier);
+        --sidebar-text: var(--white-bg);
+        --sidebar-hover: rgba(0, 0, 0, 0.1);
+        --sidebar-active: var(--yellow-canaan);
+        --sidebar-submenu-bg: rgba(0, 0, 0, 0.1);
+        --sidebar-icon: rgba(255, 255, 255, 0.8);
+        --sidebar-accent: var(--yellow-canaan);
+        --sidebar-divider: rgba(255, 255, 255, 0.2);
+        --sidebar-width: 280px;
+        --sidebar-notification-badge: var(--pink-swoosh);
+        --sidebar-logout-color: var(--pink-swoosh);
+        --sidebar-transition-speed: 0.3s;
+        
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        width: var(--sidebar-width);
+        background-color: var(--sidebar-bg);
+        color: var(--sidebar-text);
+        z-index: 1000;
+        overflow-y: auto;
+        transition: all var(--sidebar-transition-speed) ease;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     }
-    
-    .sidebar-custom.sidebar-show {
-        transform: translateX(0);
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-    }
-}
 
-/* Animation pour les flèches des menus déroulants */
-.sidebar-dropdown-toggle[aria-expanded="true"] .sidebar-dropdown-arrow {
-    transform: rotate(-180deg);
-}
+    /* Logo styling */
+    .sidebar-logo-container {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem 1rem 1rem;
+        border-bottom: 1px solid var(--sidebar-divider);
+        margin-bottom: 1rem;
+    }
+
+    .sidebar-logo-img {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        margin-right: 12px;
+        object-fit: cover;
+        background-color: var(--white-bg);
+        padding: 4px;
+    }
+
+    .sidebar-logo-text {
+        font-weight: 700;
+        font-size: 1.4rem;
+        color: var(--white-bg);
+    }
+
+    /* User profile styling */
+    .sidebar-user-profile {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        background-color: var(--sidebar-submenu-bg);
+        border-radius: 8px;
+        margin: 0 1rem 1.5rem;
+    }
+
+    .sidebar-avatar-container {
+        position: relative;
+        margin-right: 12px;
+    }
+
+    .sidebar-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--sidebar-accent);
+    }
+
+    .sidebar-avatar-default {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--teal-glacier), var(--yellow-canaan));
+        color: var(--white-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        border: 2px solid var(--sidebar-accent);
+    }
+
+    .sidebar-online-indicator {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 12px;
+        height: 12px;
+        background-color: var(--yellow-canaan);
+        border: 2px solid var(--sidebar-bg);
+        border-radius: 50%;
+    }
+
+    .sidebar-user-info {
+        flex: 1;
+    }
+
+    .sidebar-username {
+        margin: 0;
+        font-weight: 600;
+        color: var(--white-bg);
+        font-size: 0.95rem;
+    }
+
+    .sidebar-join-date {
+        font-size: 0.75rem;
+        color: var(--sidebar-icon);
+        display: block;
+        margin-top: 2px;
+    }
+
+    .sidebar-user-role {
+        display: inline-block;
+        margin-top: 4px;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        background-color: var(--sidebar-accent);
+        color: var(--black-shadow);
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    /* Navigation items */
+    .sidebar-nav-menu {
+        padding: 0 1rem;
+    }
+
+    .sidebar-nav-item {
+        display: flex;
+        align-items: center;
+        padding: 0.8rem 1rem;
+        margin-bottom: 0.25rem;
+        border-radius: 8px;
+        color: var(--sidebar-text);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .sidebar-nav-item i:first-child {
+        width: 20px;
+        text-align: center;
+        margin-right: 12px;
+        color: var(--sidebar-icon);
+        transition: all 0.2s ease;
+    }
+
+    .sidebar-nav-item span {
+        flex: 1;
+    }
+
+    .sidebar-nav-item:hover {
+        background-color: var(--sidebar-hover);
+        color: var(--white-bg);
+    }
+
+    .sidebar-nav-item:hover i {
+        color: var(--white-bg);
+    }
+
+    .sidebar-nav-item.sidebar-active {
+        background-color: var(--sidebar-active);
+        color: var(--black-shadow);
+    }
+
+    .sidebar-nav-item.sidebar-active i {
+        color: var(--black-shadow);
+    }
+
+    .sidebar-nav-item.sidebar-active::before {
+        content: '';
+        position: absolute;
+        left: -1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 70%;
+        background-color: var(--white-bg);
+        border-radius: 0 4px 4px 0;
+    }
+
+    /* Dropdown styles */
+    .sidebar-dropdown {
+        position: relative;
+    }
+
+    .sidebar-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .sidebar-dropdown-arrow {
+        font-size: 0.7rem;
+        transition: transform 0.3s ease;
+        margin-left: auto;
+        color: var(--sidebar-icon);
+    }
+
+    .sidebar-dropdown-menu {
+        position: static;
+        float: none;
+        width: 100%;
+        margin: 0.25rem 0 0.5rem;
+        padding: 0;
+        background-color: var(--sidebar-submenu-bg);
+        border: none;
+        border-radius: 8px;
+        box-shadow: none;
+        display: none;
+    }
+
+    .sidebar-dropdown-menu.show {
+        display: block;
+    }
+
+    .sidebar-dropdown-item {
+        display: flex;
+        align-items: center;
+        padding: 0.7rem 1rem 0.7rem 2.5rem;
+        color: var(--sidebar-text);
+        text-decoration: none;
+        border-radius: 6px;
+        margin: 0.15rem 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .sidebar-dropdown-item i {
+        width: 18px;
+        margin-right: 10px;
+        font-size: 0.9rem;
+        color: var(--sidebar-icon);
+    }
+
+    .sidebar-dropdown-item:hover, .sidebar-dropdown-item.sidebar-active {
+        background-color: var(--sidebar-hover);
+        color: var(--white-bg);
+    }
+
+    .sidebar-dropdown-item.sidebar-active {
+        font-weight: 600;
+    }
+
+    /* Badges */
+    .sidebar-notification-badge, .sidebar-cart-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        background-color: var(--sidebar-notification-badge);
+        color: var(--white-bg);
+        font-size: 0.7rem;
+        font-weight: bold;
+        margin-left: auto;
+    }
+
+    .sidebar-cart-badge {
+        background-color: var(--yellow-canaan);
+        color: var(--black-shadow);
+    }
+
+    /* Section labels */
+    .sidebar-section-label {
+        padding: 1rem 1rem 0.5rem;
+        margin-top: 1rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--sidebar-icon);
+        border-top: 1px solid var(--sidebar-divider);
+    }
+
+    .sidebar-divider {
+        height: 1px;
+        background-color: var(--sidebar-divider);
+        margin: 1rem 0;
+    }
+
+    /* Logout link */
+    .sidebar-logout-link {
+        color: var(--sidebar-logout-color) !important;
+    }
+
+    .sidebar-logout-link i {
+        color: var(--sidebar-logout-color) !important;
+    }
+
+    .sidebar-logout-link:hover {
+        background-color: rgba(233, 30, 99, 0.15) !important;
+    }
+
+    /* App version */
+    .sidebar-app-version {
+        padding: 1rem;
+        text-align: center;
+        font-size: 0.75rem;
+        color: var(--sidebar-icon);
+        margin-top: 1rem;
+        border-top: 1px solid var(--sidebar-divider);
+    }
+
+    /* Scrollbar styling */
+    .sidebar-custom::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .sidebar-custom::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .sidebar-custom::-webkit-scrollbar-thumb {
+        background: var(--sidebar-divider);
+        border-radius: 10px;
+    }
+
+    .sidebar-custom::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        .sidebar-custom {
+            transform: translateX(-100%);
+            box-shadow: none;
+        }
+        
+        .sidebar-custom.sidebar-show {
+            transform: translateX(0);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+        }
+    }
+
+    /* Animation pour les flèches des menus déroulants */
+    .sidebar-dropdown-toggle[aria-expanded="true"] .sidebar-dropdown-arrow {
+        transform: rotate(-180deg);
+    }
 </style>
 
 <script>
-// Gestion des menus déroulants
-document.addEventListener('DOMContentLoaded', function() {
-    const dropdownToggles = document.querySelectorAll('.sidebar-dropdown-toggle');
-    
-    dropdownToggles.forEach(toggle => {
-        toggle.addEventListener('click', function() {
-            const dropdownMenu = this.nextElementSibling;
-            const isShowing = dropdownMenu.classList.contains('show');
-            
-            // Fermer tous les autres menus déroulants
-            document.querySelectorAll('.sidebar-dropdown-menu').forEach(menu => {
-                if (menu !== dropdownMenu) {
-                    menu.classList.remove('show');
+    // Gestion des menus déroulants
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownToggles = document.querySelectorAll('.sidebar-dropdown-toggle');
+        
+        dropdownToggles.forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const dropdownMenu = this.nextElementSibling;
+                const isShowing = dropdownMenu.classList.contains('show');
+                
+                // Fermer tous les autres menus déroulants
+                document.querySelectorAll('.sidebar-dropdown-menu').forEach(menu => {
+                    if (menu !== dropdownMenu) {
+                        menu.classList.remove('show');
+                    }
+                });
+                
+                // Basculer l'état du menu actuel
+                if (!isShowing) {
+                    dropdownMenu.classList.add('show');
+                } else {
+                    dropdownMenu.classList.remove('show');
                 }
+                
+                // Empêcher la propagation pour éviter de fermer immédiatement
+                event.stopPropagation();
             });
-            
-            // Basculer l'état du menu actuel
-            if (!isShowing) {
-                dropdownMenu.classList.add('show');
-            } else {
-                dropdownMenu.classList.remove('show');
-            }
-            
-            // Empêcher la propagation pour éviter de fermer immédiatement
-            event.stopPropagation();
         });
-    });
-    
-    // Fermer les menus déroulants en cliquant à l'extérieur
-    document.addEventListener('click', function() {
+        
+        // Fermer les menus déroulants en cliquant à l'extérieur
+        document.addEventListener('click', function() {
+            document.querySelectorAll('.sidebar-dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
+            });
+        });
+        
+        // Empêcher la fermeture lorsque vous cliquez à l'intérieur du menu
         document.querySelectorAll('.sidebar-dropdown-menu').forEach(menu => {
-            menu.classList.remove('show');
+            menu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
         });
     });
-    
-    // Empêcher la fermeture lorsque vous cliquez à l'intérieur du menu
-    document.querySelectorAll('.sidebar-dropdown-menu').forEach(menu => {
-        menu.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-    });
-});
 </script>

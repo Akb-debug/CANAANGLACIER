@@ -1,0 +1,109 @@
+{% extends 'dashboards/base.html' %}
+{% load static %}
+
+{% block title %}Supprimer {{ type_utilisateur|title }} - Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid pt-4 px-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header bg-gradient-danger text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Confirmer la suppression
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <!-- Icône d'alerte -->
+                    <div class="mb-4">
+                        <i class="fas fa-trash-alt fa-4x text-danger"></i>
+                    </div>
+
+                    <!-- Message de confirmation -->
+                    <h5 class="text-danger mb-3">
+                        Êtes-vous sûr de vouloir supprimer ce {{ type_utilisateur }} ?
+                    </h5>
+
+                    <!-- Informations de l'utilisateur -->
+                    <div class="bg-light p-4 rounded mb-4">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <div class="rounded-circle bg-teal text-white d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 50px; height: 50px; font-size: 18px;">
+                                {{ utilisateur.username|first|upper }}
+                            </div>
+                            <div class="text-start">
+                                <h6 class="mb-1">{{ utilisateur.get_full_name }}</h6>
+                                <p class="text-muted mb-0">{{ utilisateur.username }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row text-start">
+                            <div class="col-md-6">
+                                <strong>Email:</strong> {{ utilisateur.email }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Téléphone:</strong> {{ utilisateur.telephone|default:"-" }}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Rôle:</strong> 
+                                <span class="badge bg-teal">{{ utilisateur.get_role_display }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Inscrit le:</strong> {{ utilisateur.date_joined|date:"d/m/Y" }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Avertissement -->
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Attention:</strong> Cette action est irréversible. 
+                        Toutes les données associées à cet utilisateur seront définitivement supprimées.
+                    </div>
+
+                    <!-- Boutons d'action -->
+                    <form method="post" class="d-flex gap-2 justify-content-center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i>
+                            Confirmer la suppression
+                        </button>
+                        <a href="{% url 'liste_utilisateurs' %}" class="btn btn-teal-outline">
+                            <i class="fas fa-times me-1"></i>
+                            Annuler
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+}
+
+.bg-gradient-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+}
+
+.bg-teal {
+    background-color: var(--teal-glacier) !important;
+}
+
+.btn-teal-outline {
+    background-color: transparent !important;
+    border-color: var(--teal-glacier) !important;
+    color: var(--teal-glacier) !important;
+}
+
+.btn-teal-outline:hover {
+    background-color: var(--teal-glacier) !important;
+    border-color: var(--teal-glacier) !important;
+    color: white !important;
+}
+</style>
+{% endblock %}

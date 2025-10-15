@@ -3,97 +3,371 @@
 {% load math_operations %}  
 
 {% block content %}
-<div class="order-detail-container">
-    <!-- En-tête avec numéro de commande -->
-    <div class="order-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h1 class="order-title">Détails de la commande</h1>
-                    <p class="order-number">Référence #{{ commande.id }}</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <div class="order-actions">
-                        <button class="btn btn-outline-glacier" aria-label="Imprimer">
-                            <i class="fas fa-print"></i> Imprimer
-                        </button>
-                        <button class="btn btn-outline-swoosh ms-2" aria-label="Recevoir par email">
-                            <i class="fas fa-envelope"></i> Recevoir par email
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- Bannière Hero -->
+<section class="order-hero">
+    <div class="container">
+        
+                <h1 class="hero-title text-center">
+                    <i class="fas fa-clipboard-list me-3"></i>Détails de votre commande
+                </h1>
+                <p class="hero-subtitle text-center">
+                    Suivez l'état de votre commande en temps réel
+                </p>
+        
     </div>
+</section>
 
+<div class="order-detail-container">
     <div class="container mt-4">
         <div class="row">
             <!-- Colonne principale -->
             <div class="col-lg-8">
                 <!-- Carte de statut de commande -->
-                <div class="order-card">
-                    <div class="order-progress">
-                        <div class="progress-steps">
-                            {% with statut=commande.statut %}
-                            <div class="step {% if statut != 'annulee' %}completed{% endif %}">
-                                <div class="step-icon">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </div>
-                                <div class="step-label">Commandé</div>
-                                <div class="step-date">{{ commande.date_creation|date:"d M Y" }}</div>
-                            </div>
-                            
-                            <div class="step {% if statut == 'payee' or statut == 'expediee' or statut == 'livree' %}completed{% endif %}">
-                                <div class="step-icon">
-                                    <i class="fas fa-credit-card"></i>
-                                </div>
-                                <div class="step-label">Payé</div>
-                                <div class="step-date">
-                                    {% if statut != 'en_attente' %}{{ commande.date_creation|date:"d M Y" }}{% endif %}
-                                </div>
-                            </div>
-                            
-                            <div class="step {% if statut == 'expediee' or statut == 'livree' %}completed{% endif %}">
-                                <div class="step-icon">
-                                    <i class="fas fa-shipping-fast"></i>
-                                </div>
-                                <div class="step-label">Expédié</div>
-                            </div>
-                            
-                            <div class="step {% if statut == 'livree' %}completed{% endif %}">
-                                <div class="step-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="step-label">Livré</div>
-                            </div>
-                            {% endwith %}
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: 
-                                {% if commande.statut == 'en_attente' %}25%
-                                {% elif commande.statut == 'payee' %}50%
-                                {% elif commande.statut == 'expediee' %}75%
-                                {% elif commande.statut == 'livree' %}100%
-                                {% else %}0%{% endif %}">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="order-status-badge status-{{ commande.statut }}">
-                        <i class="fas 
-                            {% if commande.statut == 'en_attente' %}fa-clock
-                            {% elif commande.statut == 'payee' %}fa-check
-                            {% elif commande.statut == 'expediee' %}fa-shipping-fast
-                            {% elif commande.statut == 'livree' %}fa-box-open
-                            {% else %}fa-times{% endif %}">
-                        </i>
-                        {{ commande.get_statut_display }}
-                    </div>
+<div class="order-card">
+    <div class="order-progress">
+        <div class="progress-steps">
+            {% with statut=commande.statut %}
+            <!-- Étape 1: Commande créée -->
+            <div class="step {% if statut != 'annulee' %}completed{% endif %}">
+                <div class="step-icon">
+                    <i class="fas fa-shopping-cart"></i>
                 </div>
+                <div class="step-label">Commandé</div>
+                <div class="step-date">{{ commande.date_creation|date:"d M Y" }}</div>
+            </div>
+            
+            <!-- Étape 2: Paiement -->
+            <div class="step {% if statut == 'en_traitement' or statut == 'expediee' or statut == 'livree' %}completed{% endif %}">
+                <div class="step-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="step-label">Payé</div>
+                <div class="step-date">
+                    {% if commande.paiement and commande.paiement.statut == 'payé' %}
+                        {{ commande.paiement.date_paiement|date:"d M Y" }}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Étape 3: En traitement -->
+            <div class="step {% if statut == 'expediee' or statut == 'livree' %}completed{% endif %}">
+                <div class="step-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <div class="step-label">En traitement</div>
+                <div class="step-date">
+                    {% if statut == 'expediee' or statut == 'livree' %}
+                        {{ commande.date_modification|date:"d M Y" }}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Étape 4: Expédiée -->
+            <div class="step {% if statut == 'expediee' or statut == 'livree' %}completed{% endif %}">
+                <div class="step-icon">
+                    <i class="fas fa-shipping-fast"></i>
+                </div>
+                <div class="step-label">Expédiée</div>
+                <div class="step-date">
+                    {% if statut == 'expediee' or statut == 'livree' %}
+                        {{ commande.date_modification|date:"d M Y" }}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Étape 5: Livrée -->
+            <div class="step {% if statut == 'livree' %}completed{% endif %}">
+                <div class="step-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="step-label">Livrée</div>
+                <div class="step-date">
+                    {% if commande.date_livraison %}
+                        {{ commande.date_livraison|date:"d M Y" }}
+                    {% endif %}
+                </div>
+            </div>
+            {% endwith %}
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: 
+                {% if commande.statut == 'en_attente' %}20%
+                {% elif commande.statut == 'en_traitement' %}40%
+                {% elif commande.statut == 'expediee' %}60%
+                {% elif commande.statut == 'livree' %}100%
+                {% elif commande.statut == 'annulee' %}0%
+                {% else %}20%{% endif %}">
+            </div>
+        </div>
+    </div>
+    
+    <div class="order-status-badge status-{{ commande.statut }}">
+        <i class="fas 
+            {% if commande.statut == 'en_attente' %}fa-clock
+            {% elif commande.statut == 'en_traitement' %}fa-cogs
+            {% elif commande.statut == 'expediee' %}fa-shipping-fast
+            {% elif commande.statut == 'livree' %}fa-box-open
+            {% elif commande.statut == 'annulee' %}fa-times
+            {% else %}fa-question{% endif %}">
+        </i>
+        {{ commande.get_statut_display }}
+        
+        <!-- Badge supplémentaire pour le statut de paiement -->
+        {% if commande.paiement %}
+            <span class="payment-status-badge status-{{ commande.paiement.statut }}">
+                <i class="fas 
+                    {% if commande.paiement.statut == 'payé' %}fa-check-circle
+                    {% elif commande.paiement.statut == 'en_attente' %}fa-clock
+                    {% elif commande.paiement.statut == 'échoué' %}fa-exclamation-triangle
+                    {% elif commande.paiement.statut == 'annulé' %}fa-times-circle
+                    {% else %}fa-question{% endif %} me-1">
+                </i>
+                Paiement {{ commande.paiement.get_statut_display }}
+            </span>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+/* Styles pour la barre de progression */
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    flex: 1;
+    position: relative;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+}
+
+.step.completed {
+    opacity: 1;
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    color: #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.step.completed .step-icon {
+    background: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+    transform: scale(1.1);
+}
+
+.step-label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+    color: #666;
+}
+
+.step.completed .step-label {
+    color: #333;
+    font-weight: 600;
+}
+
+.step-date {
+    font-size: 0.8rem;
+    color: #888;
+    min-height: 1.2rem;
+}
+
+.progress-bar {
+    position: absolute;
+    top: 25px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #e0e0e0;
+    z-index: 1;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--teal-glacier);
+    transition: width 0.5s ease;
+    border-radius: 2px;
+}
+
+/* Badge de statut principal */
+.order-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-top: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.order-status-badge i {
+    margin-right: 8px;
+}
+
+/* Styles pour les différents statuts de commande */
+.status-en_attente {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-en_traitement {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+.status-expediee {
+    background-color: #cce7ff;
+    color: #004085;
+    border: 1px solid #b3d7ff;
+}
+
+.status-livree {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-annulee {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Badge de statut de paiement */
+.payment-status-badge {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.status-payé {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-en_attente {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.status-échoué {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-annulé {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .progress-steps {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .step {
+        flex: 0 0 calc(33.333% - 10px);
+        margin-bottom: 15px;
+    }
+    
+    .progress-bar {
+        display: none;
+    }
+    
+    .step-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .step-label {
+        font-size: 0.8rem;
+    }
+    
+    .order-status-badge {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 576px) {
+    .step {
+        flex: 0 0 calc(50% - 10px);
+    }
+    
+    .step-icon {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .step-label {
+        font-size: 0.75rem;
+    }
+    
+    .step-date {
+        font-size: 0.7rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation pour la barre de progression
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressFill) {
+        setTimeout(() => {
+            progressFill.style.transition = 'width 1.5s ease';
+        }, 500);
+    }
+    
+    // Animation des étapes
+    const steps = document.querySelectorAll('.step');
+    steps.forEach((step, index) => {
+        setTimeout(() => {
+            step.style.opacity = '1';
+            step.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+});
+</script>
 
                 <!-- Produits commandés -->
                 <div class="order-card">
-                    <h3 class="card-title">Produits commandés</h3>
+                    <h3 class="card-title">
+                        <i class="fas fa-box me-2"></i>Produits commandés
+                    </h3>
                     <div class="ordered-products">
                         {% for ligne in commande.lignes.all %}
                         <div class="ordered-item">
@@ -116,12 +390,14 @@
 
                 <!-- Informations de livraison -->
                 <div class="order-card">
-                    <h3 class="card-title">Informations de livraison</h3>
+                    <h3 class="card-title">
+                        <i class="fas fa-truck me-2"></i>Informations de livraison
+                    </h3>
                     <div class="delivery-info">
                         {% if commande.adresse_livraison %}
                         <div class="info-row">
                             <div class="info-icon">
-                                <i class="fas fa-truck"></i>
+                                <i class="fas fa-map-marker-alt"></i>
                             </div>
                             <div class="info-content">
                                 <h5>Adresse de livraison</h5>
@@ -145,7 +421,7 @@
                             <div class="info-content">
                                 <h5>Retrait en magasin</h5>
                                 <p>Votre commande sera disponible au retrait en magasin</p>
-                                <p class="store-address">123 Avenue du Commerce, Lomé, Togo</p>
+                                <p class="store-address">Agoè dans le von de koffi Panou à 300 m du goudron en face de la mosquée, Lomé</p>
                             </div>
                         </div>
 
@@ -154,33 +430,34 @@
                                 <i class="fas fa-clock"></i>
                             </div>
                             <div class="info-content">
-                                <h5>Délai de livraison estimé</h5>
-                                <p>Dans quelques minute</p>
+                                <h5>Délai de préparation</h5>
+                                <p>Dans quelques minutes</p>
                             </div>
                         </div>
                         {% endif %}
-                        
-                        
                     </div>
                 </div>
-                  <!-- Payement -->
+
+                <!-- Paiement -->
                 <div class="order-card">
-                    <h3 class="card-title">Paiement</h3>
+                    <h3 class="card-title">
+                        <i class="fas fa-credit-card me-2"></i>Paiement
+                    </h3>
                     
                     {% if commande.statut == 'en_attente' %}
                         <div class="payment-pending">
-                            <div class="alert alert-glacier">
+                            <div class="alert alert-warning">
                                 <i class="fas fa-clock me-2"></i>
                                 <strong>En attente de paiement</strong>
                             </div>
                             
                             <div class="d-grid gap-2">
-                                <a href="{% url 'processus_paiement' commande.id %}" class="btn btn-glacier">
+                                <a href="{% url 'processus_paiement' commande.id %}" class="btn btn-primary">
                                     <i class="fas fa-credit-card me-2"></i>
                                     Procéder au paiement
                                 </a>
                                 
-                                <a href="{% url 'annuler_paiement' commande.id %}" class="btn btn-outline-swoosh" 
+                                <a href="{% url 'annuler_paiement' commande.id %}" class="btn btn-danger" 
                                 onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande?');">
                                     <i class="fas fa-times me-2"></i>
                                     Annuler la commande
@@ -215,7 +492,9 @@
             <div class="col-lg-4">
                 <!-- Récapitulatif de commande -->
                 <div class="order-card summary-card">
-                    <h3 class="card-title">Récapitulatif</h3>
+                    <h3 class="card-title">
+                        <i class="fas fa-receipt me-2"></i>Récapitulatif
+                    </h3>
                     <div class="summary-details">
                         <div class="summary-row">
                             <span>Date de commande</span>
@@ -278,480 +557,597 @@
                     </div>
 
                     <div class="support-section">
-                        <h5>Besoin d'aide ?</h5>
+                        <h5>
+                            <i class="fas fa-headset me-2"></i>Besoin d'aide ?
+                        </h5>
                         <p>Notre équipe client est là pour vous aider</p>
                         <div class="support-contacts">
-                            <a href="tel:+22890123456" class="support-link">
-                                <i class="fas fa-phone"></i> +228 92 74 59 59
+                            <a href="tel:+22892745959" class="support-link">
+                                <i class="fas fa-phone me-2"></i>+228 92 74 59 59
                             </a>
-                            <a href="mailto:support@canaanglacier.com" class="support-link">
-                                <i class="fas fa-envelope"></i>  contact@canaanglacier.com
+                            <a href="mailto:contact@canaanglacier.com" class="support-link">
+                                <i class="fas fa-envelope me-2"></i>contact@canaanglacier.com
                             </a>
                         </div>
                     </div>
                 </div>
 
-              
-
                 <!-- Actions de suivi -->
-                <div class="order-card">
-                    <h3 class="card-title">Suivi de commande</h3>
+                {% comment %} <div class="order-card">
+                    <h3 class="card-title">
+                        <i class="fas fa-shipping-fast me-2"></i>Suivi de commande
+                    </h3>
                     <div class="tracking-actions">
-                        <button class="btn btn-glacier btn-block">
-                            <i class="fas fa-map-marker-alt"></i> Suivre mon colis
+                        <button class="btn btn-primary btn-block">
+                            <i class="fas fa-map-marker-alt me-2"></i>Suivre mon colis
                         </button>
-                        <button class="btn btn-outline-glacier btn-block mt-2">
-                            <i class="fas fa-file-invoice"></i> Voir la facture
+                        <button class="btn btn-outline-primary btn-block mt-2" onclick="window.print()">
+                            <i class="fas fa-file-invoice me-2"></i>Imprimer la facture
                         </button>
                         {% if commande.statut == 'livree' %}
-                        <button class="btn btn-swoosh btn-block mt-2">
-                            <i class="fas fa-star"></i> Évaluer les produits
+                        <button class="btn btn-success btn-block mt-2">
+                            <i class="fas fa-star me-2"></i>Évaluer les produits
                         </button>
                         {% endif %}
                     </div>
-                </div>
+                </div> {% endcomment %}
             </div>
         </div>
     </div>
 </div>
 
 <style>
-.order-detail-container {
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    padding-bottom: 50px;
-}
-
-.order-header {
-    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--yellow-canaan) 100%);
-    color: white;
-    padding: 30px 0;
-    margin-bottom: 30px;
-}
-
-.order-title {
-    font-weight: 700;
-    margin-bottom: 5px;
-}
-
-.order-number {
-    opacity: 0.9;
-    font-size: 1.1rem;
-}
-
-.order-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    padding: 25px;
-    margin-bottom: 25px;
-}
-
-.card-title {
-    color: var(--teal-glacier);
-    font-weight: 600;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--teal-light);
-}
-
-/* Barre de progression */
-.order-progress {
-    position: relative;
-    margin-bottom: 30px;
-}
-
-.progress-steps {
-    display: flex;
-    justify-content: space-between;
-    position: relative;
-    z-index: 2;
-}
-
-.step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    flex: 1;
-}
-
-.step-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: white;
-    border: 3px solid #e0e0e0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 10px;
-    color: #e0e0e0;
-}
-
-.step.completed .step-icon {
-    background: var(--teal-glacier);
-    border-color: var(--teal-glacier);
-    color: white;
-}
-
-.step-label {
-    font-weight: 500;
-    font-size: 0.9rem;
-    margin-bottom: 5px;
-}
-
-.step-date {
-    font-size: 0.8rem;
-    color: #888;
-}
-
-.progress-bar {
-    position: absolute;
-    top: 25px;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: #e0e0e0;
-    z-index: 1;
-}
-
-.progress-fill {
-    height: 100%;
-    background: var(--teal-glacier);
-    transition: width 0.5s ease;
-    border-radius: 2px;
-}
-
-.order-status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-weight: 600;
-}
-
-.order-status-badge i {
-    margin-right: 8px;
-}
-
-.status-en_attente {
-    background-color: rgba(255, 193, 7, 0.2);
-    color: #ffc107;
-}
-
-.status-payee {
-    background-color: rgba(0, 184, 181, 0.2);
-    color: var(--teal-glacier);
-}
-
-.status-expediee {
-    background-color: rgba(33, 150, 243, 0.2);
-    color: #2196f3;
-}
-
-.status-livree {
-    background-color: rgba(76, 175, 80, 0.2);
-    color: #4caf50;
-}
-
-.status-annulee {
-    background-color: rgba(244, 67, 54, 0.2);
-    color: #f44336;
-}
-
-/* Produits commandés */
-.ordered-products {
-    margin-top: 20px;
-}
-
-.ordered-item {
-    display: flex;
-    padding: 15px 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.ordered-item:last-child {
-    border-bottom: none;
-}
-
-.product-image {
-    width: 80px;
-    height: 80px;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-right: 15px;
-}
-
-.product-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.product-details {
-    flex: 1;
-}
-
-.product-name {
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
-.product-sku {
-    font-size: 0.85rem;
-    color: #888;
-    margin-bottom: 5px;
-}
-
-.product-quantity {
-    font-size: 0.9rem;
-    color: #666;
-}
-
-.product-price {
-    text-align: right;
-}
-
-.unit-price {
-    color: #666;
-    font-size: 0.9rem;
-    margin-bottom: 5px;
-}
-
-.total-price {
-    font-weight: 700;
-    color: var(--teal-glacier);
-}
-
-/* Informations de livraison */
-.delivery-info {
-    margin-top: 15px;
-}
-
-.info-row {
-    display: flex;
-    margin-bottom: 20px;
-}
-
-.info-row:last-child {
-    margin-bottom: 0;
-}
-
-.info-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--teal-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 15px;
-    color: var(--teal-glacier);
-}
-
-.info-content h5 {
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
-.store-address {
-    font-style: italic;
-    color: #666;
-    margin-top: 5px;
-}
-
-/* Récapitulatif */
-.summary-card {
-    position: sticky;
-    top: 100px;
-}
-
-.summary-details {
-    margin-bottom: 20px;
-}
-
-.summary-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.summary-row:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.status-badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.summary-totals {
-    border-top: 2px dashed var(--teal-glacier);
-    padding-top: 15px;
-    margin: 20px 0;
-}
-
-.total-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-}
-
-.total-row.discount {
-    color: var(--pink-swoosh);
-}
-
-.total-row.grand-total {
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--teal-glacier);
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(0, 184, 181, 0.3);
-}
-
-/* Support */
-.support-section {
-    background: var(--teal-light);
-    border-radius: 10px;
-    padding: 15px;
-    margin-top: 20px;
-}
-
-.support-section h5 {
-    color: var(--teal-glacier);
-    margin-bottom: 5px;
-}
-
-.support-section p {
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-}
-
-.support-contacts {
-    display: flex;
-    flex-direction: column;
-}
-
-.support-link {
-    display: flex;
-    align-items: center;
-    padding: 8px 0;
-    color: var(--teal-glacier);
-    text-decoration: none;
-}
-
-.support-link i {
-    margin-right: 10px;
-}
-
-.support-link:hover {
-    color: var(--pink-swoosh);
-}
-
-/* Actions de suivi */
-.tracking-actions .btn {
-    padding: 12px;
-    font-weight: 500;
-}
-
-.btn-block {
-    width: 100%;
-}
-
-/* Responsive */
-@media (max-width: 992px) {
-    .summary-card {
-        position: static;
+    /* Bannière Hero */
+    .order-hero {
+        background: url('{% static "images/banner-order.jpg" %}') center/cover no-repeat;
+        padding: 150px 0 60px;
+        color: white;
+        position: relative;
+        margin-bottom: 30px;
     }
-}
 
-@media (max-width: 768px) {
-    .order-header {
-        text-align: center;
-        padding: 20px 0;
+    .order-hero::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1;
     }
-    
-    .order-actions {
-        margin-top: 15px;
-        justify-content: center;
+
+    .order-hero .container {
+        position: relative;
+        z-index: 2;
     }
-    
+
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+
+    .order-meta {
+        text-align: right;
+    }
+
+    .order-number {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .order-date {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    /* Styles existants conservés */
+    .order-detail-container {
+        background-color: #f8f9fa;
+        min-height: 100vh;
+        padding-bottom: 50px;
+    }
+
+    .order-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 1px solid #f0f0f0;
+    }
+
+    .card-title {
+        color: var(--teal-glacier);
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--teal-light);
+        display: flex;
+        align-items: center;
+    }
+
+    /* Barre de progression */
+    .order-progress {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
     .progress-steps {
-        flex-wrap: wrap;
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        z-index: 2;
     }
-    
+
     .step {
-        flex: 0 0 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        flex: 1;
+    }
+
+    .step-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        color: #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+    .step.completed .step-icon {
+        background: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .step-label {
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .step-date {
+        font-size: 0.8rem;
+        color: #888;
+    }
+
+    .progress-bar {
+        position: absolute;
+        top: 25px;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #e0e0e0;
+        z-index: 1;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--teal-glacier);
+        transition: width 0.5s ease;
+        border-radius: 2px;
+    }
+
+    .order-status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .order-status-badge i {
+        margin-right: 8px;
+    }
+
+    .status-en_attente {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .status-payee {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .status-expediee {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .status-livree {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-annulee {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    /* Produits commandés */
+    .ordered-products {
+        margin-top: 20px;
+    }
+
+    .ordered-item {
+        display: flex;
+        padding: 15px 0;
+        border-bottom: 1px solid #f0f0f0;
+        transition: transform 0.3s ease;
+    }
+
+    .ordered-item:hover {
+        transform: translateX(5px);
+    }
+
+    .ordered-item:last-child {
+        border-bottom: none;
+    }
+
+    .product-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-right: 15px;
+        border: 2px solid #f8f9fa;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-details {
+        flex: 1;
+    }
+
+    .product-name {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .product-sku {
+        font-size: 0.85rem;
+        color: #888;
+        margin-bottom: 5px;
+    }
+
+    .product-quantity {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .product-price {
+        text-align: right;
+    }
+
+    .unit-price {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+
+    .total-price {
+        font-weight: 700;
+        color: var(--teal-glacier);
+        font-size: 1.1rem;
+    }
+
+    /* Informations de livraison */
+    .delivery-info {
+        margin-top: 15px;
+    }
+
+    .info-row {
+        display: flex;
+        margin-bottom: 20px;
+        align-items: flex-start;
+    }
+
+    .info-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--teal-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        color: var(--teal-glacier);
+        flex-shrink: 0;
+    }
+
+    .info-content h5 {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .store-address {
+        font-style: italic;
+        color: #666;
+        margin-top: 5px;
+        background: #f8f9fa;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border-left: 3px solid var(--teal-glacier);
+    }
+
+    /* Récapitulatif */
+    .summary-card {
+        position: sticky;
+        top: 100px;
+    }
+
+    .summary-details {
         margin-bottom: 20px;
     }
-    
-    .progress-bar {
-        display: none;
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f0f0f0;
     }
-    
-    .ordered-item {
-        flex-direction: column;
+
+    .summary-row:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
     }
-    
-    .product-image {
-        margin-bottom: 15px;
+
+    .status-badge {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
     }
-    
-    .product-price {
-        text-align: left;
-        margin-top: 10px;
+
+    .summary-totals {
+        border-top: 2px dashed var(--teal-glacier);
+        padding-top: 15px;
+        margin: 20px 0;
     }
-    
-    .info-row {
-        flex-direction: column;
-    }
-    
-    .info-icon {
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
         margin-bottom: 10px;
     }
-}
 
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+    .total-row.discount {
+        color: var(--pink-swoosh);
+        font-weight: 600;
+    }
 
-.order-card {
-    animation: fadeIn 0.5s ease;
-}
+    .total-row.grand-total {
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--teal-glacier);
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(0, 184, 181, 0.3);
+    }
 
-.ordered-item {
-    transition: transform 0.3s ease;
-}
+    /* Support */
+    .support-section {
+        background: var(--teal-light);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+    }
 
-.ordered-item:hover {
-    transform: translateX(5px);
-}
+    .support-section h5 {
+        color: var(--teal-glacier);
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+    .support-section p {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        color: #666;
+    }
+
+    .support-contacts {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .support-link {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        color: var(--teal-glacier);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+    .support-link:hover {
+        color: var(--pink-swoosh);
+    }
+
+    /* Boutons */
+    .btn-primary {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #009c99;
+        border-color: #009c99;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 184, 181, 0.3);
+    }
+
+    .btn-outline-primary {
+        border-color: var(--teal-glacier);
+        color: var(--teal-glacier);
+        font-weight: 500;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background-color: var(--pink-swoosh);
+        border-color: var(--pink-swoosh);
+        font-weight: 500;
+    }
+
+    .btn-success:hover {
+        background-color: #d81b60;
+        border-color: #d81b60;
+        transform: translateY(-2px);
+    }
+
+    .btn-block {
+        width: 100%;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .summary-card {
+            position: static;
+        }
+        
+        .order-hero {
+            text-align: center;
+            padding: 60px 0 40px;
+        }
+        
+        .order-meta {
+            text-align: center;
+            margin-top: 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .progress-steps {
+            flex-wrap: wrap;
+        }
+        
+        .step {
+            flex: 0 0 50%;
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            display: none;
+        }
+        
+        .ordered-item {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .product-image {
+            margin: 0 auto 15px;
+        }
+        
+        .product-price {
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .info-row {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .info-icon {
+            margin: 0 auto 10px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .hero-title {
+            font-size: 1.6rem;
+        }
+        
+        .order-card {
+            padding: 15px;
+        }
+        
+        .step-icon {
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .order-card {
+        animation: fadeIn 0.5s ease;
+    }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Animation pour la barre de progression
-    const progressFill = document.querySelector('.progress-fill');
-    if (progressFill) {
-        setTimeout(() => {
-            progressFill.style.transition = 'width 1.5s ease';
-        }, 500);
-    }
-    
-    // Simulation d'impression
-    document.querySelector('[aria-label="Imprimer"]').addEventListener('click', function() {
-        window.print();
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation pour la barre de progression
+        const progressFill = document.querySelector('.progress-fill');
+        if (progressFill) {
+            setTimeout(() => {
+                progressFill.style.transition = 'width 1.5s ease';
+            }, 500);
+        }
+        
+        // Animation des étapes
+        const steps = document.querySelectorAll('.step');
+        steps.forEach((step, index) => {
+            setTimeout(() => {
+                step.style.opacity = '1';
+                step.style.transform = 'translateY(0)';
+            }, index * 200);
+        });
     });
-});
 </script>
 {% endblock %}

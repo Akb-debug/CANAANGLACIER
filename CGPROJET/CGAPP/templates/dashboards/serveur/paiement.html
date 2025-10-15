@@ -4,35 +4,94 @@
 {% block body %}
 <div class="container-fluid pt-4 px-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="bg-light rounded h-100 p-4">
-                <div class="text-center mb-4">
-                    <h4>💳 Paiement - Commande #{{ commande.id }}</h4>
-                    <p class="text-muted">Client: {{ client.get_full_name }} | Tél: {{ client.telephone }}</p>
+        <div class="col-lg-10">
+            <!-- Breadcrumb amélioré -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light rounded p-3">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'home' %}" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard_serveur' %}" class="text-decoration-none">Dashboard Serveur</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ajouter_produit_commande' commande_id=commande.id %}" class="text-decoration-none">Gestion Commande</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <i class="fas fa-credit-card me-1"></i>Paiement
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="bg-white rounded-3 shadow-sm p-4">
+                <!-- En-tête amélioré -->
+                <div class="text-center mb-5">
+                    <div class="bg-teal bg-opacity-10 rounded-circle d-inline-flex p-4 mb-3">
+                        <i class="fas fa-credit-card fa-3x text-white"></i>
+                    </div>
+                    <h2 class="text-teal mb-2">Paiement de la Commande</h2>
+                    <p class="text-muted mb-0">Commande #{{ commande.id }} • Client: {{ client.get_full_name }} • Tél: {{ client.telephone }}</p>
                 </div>
 
                 <div class="row">
-                    <!-- Détails de la commande -->
-                    <div class="col-md-6">
-                        <div class="card mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <h6 class="mb-0">Détails de la commande</h6>
+                    <!-- Détails de la commande amélioré -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-teal text-white border-0 py-3">
+                                <h5 class="mb-0 text-white">
+                                    <i class="fas fa-receipt me-2"></i>Détails de la Commande
+                                </h5>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
-                                    <table class="table table-sm">
+                                    <table class="table table-hover align-middle">
+                                        <thead style="background-color: var(--teal-light);">
+                                            <tr>
+                                                <th class="border-0">Produit</th>
+                                                <th class="border-0 text-center">Quantité</th>
+                                                <th class="border-0 text-end">Sous-total</th>
+                                            </tr>
+                                        </thead>
                                         <tbody>
                                             {% for ligne in commande.lignes.all %}
-                                            <tr>
-                                                <td>{{ ligne.produit.nom }} x{{ ligne.quantite }}</td>
-                                                <td class="text-end">{{ ligne.sous_total }} FCFA</td>
+                                            <tr class="border-bottom">
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if ligne.produit.image %}
+                                                        <img src="{{ ligne.produit.image.url }}" 
+                                                             alt="{{ ligne.produit.nom }}" 
+                                                             class="rounded me-3" 
+                                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                                        {% else %}
+                                                        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" 
+                                                             style="width: 40px; height: 40px;">
+                                                            <i class="fas fa-box text-muted"></i>
+                                                        </div>
+                                                        {% endif %}
+                                                        <div>
+                                                            <strong class="text-dark">{{ ligne.produit.nom }}</strong>
+                                                            <br>
+                                                            <small class="text-muted">{{ ligne.prix_unitaire }} FCFA/unité</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-teal text-white rounded-pill px-3">
+                                                        {{ ligne.quantite }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <strong class="text-teal">{{ ligne.sous_total }} FCFA</strong>
+                                                </td>
                                             </tr>
                                             {% endfor %}
                                         </tbody>
-                                        <tfoot>
-                                            <tr class="table-primary">
-                                                <th>Total</th>
-                                                <th class="text-end">{{ commande.total }} FCFA</th>
+                                        <tfoot style="background-color: var(--teal-light);">
+                                            <tr class="border-top">
+                                                <td colspan="2" class="text-end fw-bold fs-5">Total:</td>
+                                                <td class="text-end fw-bold fs-5 text-teal">{{ commande.total }} FCFA</td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -41,35 +100,85 @@
                         </div>
                     </div>
 
-                    <!-- Formulaire de paiement -->
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header bg-success text-white">
-                                <h6 class="mb-0">Informations de paiement</h6>
+                    <!-- Formulaire de paiement amélioré -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-teal text-white border-0 py-3">
+                                <h5 class="mb-0 text-white">
+                                    <i class="fas fa-money-bill-wave me-2"></i>Informations de Paiement
+                                </h5>
                             </div>
                             <div class="card-body">
                                 <form method="post">
                                     {% csrf_token %}
                                     
-                                    <div class="mb-3">
-                                        <label class="form-label">Méthode de paiement</label>
+                                    <!-- Méthode de paiement -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-medium text-dark">
+                                            <i class="fas fa-wallet me-2 text-teal"></i>Méthode de paiement
+                                        </label>
                                         {{ form.methode_paiement }}
+                                        {% if form.methode_paiement.help_text %}
+                                        <div class="form-text text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>{{ form.methode_paiement.help_text }}
+                                        </div>
+                                        {% endif %}
                                     </div>
                                     
-                                    <div class="mb-3">
-                                        <label class="form-label">Montant payé</label>
+                                    <!-- Montant payé -->
+                                    <div class="mb-4">
+                                        <label class="form-label fw-medium text-dark">
+                                            <i class="fas fa-money-bill me-2 text-teal"></i>Montant payé
+                                        </label>
                                         {{ form.montant_paye }}
                                         <div class="form-text">
-                                            Total à payer: <strong>{{ commande.total }} FCFA</strong>
+                                            <i class="fas fa-calculator me-1"></i>
+                                            Total à payer: <strong class="text-teal">{{ commande.total }} FCFA</strong>
+                                        </div>
+                                        {% if form.montant_paye.help_text %}
+                                        <div class="form-text text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>{{ form.montant_paye.help_text }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Résumé du paiement -->
+                                    <div class="alert alert-teal border-0 mb-4">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-medium">Montant à payer:</span>
+                                            <span class="fw-bold fs-5 text-teal">{{ commande.total }} FCFA</span>
                                         </div>
                                     </div>
 
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-success btn-lg">
+                                    <!-- Messages d'erreur -->
+                                    {% if form.errors %}
+                                    <div class="alert alert-danger border-0 mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                                            <div>
+                                                <h6 class="alert-heading mb-2">Veuillez corriger les erreurs suivantes :</h6>
+                                                <ul class="mb-0 ps-3">
+                                                    {% for field in form %}
+                                                        {% for error in field.errors %}
+                                                            <li>{{ field.label }}: {{ error }}</li>
+                                                        {% endfor %}
+                                                    {% endfor %}
+                                                    {% for error in form.non_field_errors %}
+                                                        <li>{{ error }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
+                                    <!-- Actions -->
+                                    <div class="d-grid gap-3 mt-4 pt-4 border-top">
+                                        <button type="submit" class="btn btn-teal btn-lg py-3">
                                             <i class="fas fa-cash-register me-2"></i>Enregistrer le paiement
                                         </button>
-                                        <a href="{% url 'ajouter_produit_commande' commande_id=commande.id %}" class="btn btn-outline-secondary">
-                                            <i class="fas fa-arrow-left me-2"></i>Retour
+                                        <a href="{% url 'ajouter_produit_commande' commande_id=commande.id %}" class="btn btn-outline-teal py-2">
+                                            <i class="fas fa-arrow-left me-2"></i>Retour à la commande
                                         </a>
                                     </div>
                                 </form>
@@ -77,8 +186,222 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
+
+<!-- Styles personnalisés améliorés -->
+<style>
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+    --teal-light: rgba(0, 184, 181, 0.1);
+}
+
+/* Couleurs utilitaires */
+.bg-teal { background-color: var(--teal-glacier) !important; }
+.text-teal { color: var(--teal-glacier) !important; }
+.bg-pink { background-color: var(--pink-swoosh) !important; }
+.text-pink { color: var(--pink-swoosh) !important; }
+.bg-yellow { background-color: var(--yellow-canaan) !important; }
+.text-yellow { color: var(--yellow-canaan) !important; }
+
+.btn-teal {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.btn-teal:hover {
+    background-color: var(--teal-dark);
+    border-color: var(--teal-dark);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 184, 181, 0.3);
+}
+
+.btn-outline-teal {
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+    transition: all 0.3s ease;
+}
+
+.btn-outline-teal:hover {
+    background-color: var(--teal-glacier);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Formulaires */
+.form-control, .form-select {
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 2px solid #e9ecef;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--teal-glacier);
+    box-shadow: 0 0 0 0.3rem rgba(0, 184, 181, 0.15);
+    transform: translateY(-1px);
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+/* Alertes personnalisées */
+.alert-teal {
+    background-color: var(--teal-light);
+    border-left: 4px solid var(--teal-glacier);
+    color: #2c3e50;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.05);
+    color: #dc3545;
+    border: none;
+    border-left: 4px solid #dc3545;
+}
+
+/* Badges */
+.badge.bg-teal { background-color: var(--teal-glacier) !important; }
+
+/* Cartes */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Tableaux */
+.table th {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card, .btn {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .text-center.mb-5 .fa-3x {
+        font-size: 2.5em;
+    }
+    
+    .d-grid.gap-3 {
+        gap: 1rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-lg {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .row.mt-4 > [class*="col-"] {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Effets de focus améliorés */
+.form-control:focus, .form-select:focus {
+    background-color: #fff;
+    border-color: var(--teal-glacier);
+    outline: 0;
+}
+
+/* Validation states */
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6.4.4.4-.4'/%3e%3cpath d='M6 7v2'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.form-control.is-valid {
+    border-color: #198754;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation pour les éléments
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Validation en temps réel pour le montant
+    const montantInput = document.querySelector('input[name="montant_paye"]');
+    if (montantInput) {
+        montantInput.addEventListener('input', function() {
+            const total = {{ commande.total }};
+            const montantPaye = parseFloat(this.value) || 0;
+            
+            if (montantPaye < total) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    }
+    
+    // Auto-remplissage du montant payé avec le total
+    const methodePaiementSelect = document.querySelector('select[name="methode_paiement"]');
+    if (methodePaiementSelect && montantInput) {
+        methodePaiementSelect.addEventListener('change', function() {
+            if (this.value && !montantInput.value) {
+                montantInput.value = {{ commande.total }};
+                montantInput.dispatchEvent(new Event('input'));
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

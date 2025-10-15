@@ -5,100 +5,163 @@
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-12">
-            <div class="bg-light rounded h-100 p-4">
-                <!-- En-tête de la commande -->
+            <!-- Breadcrumb amélioré -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light rounded p-3">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'home' %}" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'commandes_en_attente' %}" class="text-decoration-none">Commandes en Cours</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <i class="fas fa-file-invoice me-1"></i>Commande #{{ commande.id }}
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="bg-white rounded-3 shadow-sm p-4">
+                <!-- En-tête de la commande amélioré -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <h4 class="mb-0">Détails de la Commande #{{ commande.id }}</h4>
+                        <h4 class="mb-0 text-teal">
+                            <i class="fas fa-file-invoice me-2"></i>Détails de la Commande #{{ commande.id }}
+                        </h4>
                         <div class="d-flex align-items-center mt-2">
-                            <span class="badge bg-{% if commande.statut == 'en_attente' %}warning{% elif commande.statut == 'en_traitement' %}info{% elif commande.statut == 'expediee' %}primary{% elif commande.statut == 'livree' %}success{% else %}secondary{% endif %} me-2">
+                            <span class="badge bg-{% if commande.statut == 'en_attente' %}yellow text-dark{% elif commande.statut == 'en_traitement' %}teal{% elif commande.statut == 'expediee' %}teal{% elif commande.statut == 'livree' %}teal{% else %}pink{% endif %} me-2">
+                                <i class="fas fa-{% if commande.statut == 'en_attente' %}clock{% elif commande.statut == 'en_traitement' %}cog{% elif commande.statut == 'expediee' %}truck{% elif commande.statut == 'livree' %}check-circle{% else %}times-circle{% endif %} me-1"></i>
                                 {{ commande.get_statut_display }}
                             </span>
                             <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
                                 Créée le {{ commande.date_creation|date:"d/m/Y à H:i" }}
                             </small>
                         </div>
                     </div>
-                    <div>
-                        <a href="{% url 'commandes_en_attente' %}" class="btn btn-outline-secondary me-2">
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'commandes_en_attente' %}" class="btn btn-outline-teal">
                             <i class="fas fa-arrow-left me-1"></i>Retour
                         </a>
-                        <button class="btn btn-outline-primary" onclick="window.print()">
-                            <i class="fas fa-print me-1"></i>Imprimer
-                        </button>
+                       
                     </div>
                 </div>
 
                 <div class="row">
-                    <!-- Informations client -->
+                    <!-- Informations client amélioré -->
                     <div class="col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header bg-primary text-white">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-teal text-white border-0 py-3">
                                 <h5 class="card-title mb-0">
                                     <i class="fas fa-user me-2"></i>Informations Client
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center me-3" 
-                                         style="width: 50px; height: 50px;">
-                                        <i class="fas fa-user fa-lg"></i>
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-teal bg-opacity-10 rounded-circle p-3 me-3">
+                                        <i class="fas fa-user fa-lg text-teal"></i>
                                     </div>
                                     <div>
-                                        <h6 class="mb-0">{{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}</h6>
-                                        <small class="text-muted">ID: {{ commande.utilisateur.id }}</small>
+                                        <h6 class="mb-0 text-dark">{{ commande.utilisateur.get_full_name|default:commande.utilisateur.username }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-id-card me-1"></i>ID: {{ commande.utilisateur.id }}
+                                        </small>
                                     </div>
                                 </div>
                                 
-                                <div class="row">
+                                <div class="row g-3">
                                     <div class="col-12">
-                                        <p class="mb-1">
-                                            <strong><i class="fas fa-envelope me-2"></i>Email:</strong>
-                                            {{ commande.utilisateur.email }}
-                                        </p>
-                                        {% if commande.utilisateur.telephone %}
-                                        <p class="mb-1">
-                                            <strong><i class="fas fa-phone me-2"></i>Téléphone:</strong>
-                                            {{ commande.utilisateur.telephone }}
-                                        </p>
-                                        {% endif %}
+                                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                                            <i class="fas fa-envelope text-teal me-3"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Email</small>
+                                                <strong>{{ commande.utilisateur.email }}</strong>
+                                            </div>
+                                        </div>
                                     </div>
+                                    {% if commande.utilisateur.telephone %}
+                                    <div class="col-12">
+                                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                                            <i class="fas fa-phone text-teal me-3"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Téléphone</small>
+                                                <strong>{{ commande.utilisateur.telephone }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Informations livraison -->
+                    <!-- Informations livraison amélioré -->
                     <div class="col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header bg-info text-white">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-teal text-white border-0 py-3">
                                 <h5 class="card-title mb-0">
                                     <i class="fas fa-truck me-2"></i>Informations Livraison
                                 </h5>
                             </div>
                             <div class="card-body">
                                 {% if commande.adresse_livraison %}
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-info rounded-circle text-white d-flex align-items-center justify-content-center me-3" 
-                                         style="width: 50px; height: 50px;">
-                                        <i class="fas fa-map-marker-alt fa-lg"></i>
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-teal bg-opacity-10 rounded-circle p-3 me-3">
+                                        <i class="fas fa-map-marker-alt fa-lg text-teal"></i>
                                     </div>
                                     <div>
-                                        <h6 class="mb-0">Adresse de livraison</h6>
+                                        <h6 class="mb-0 text-dark">Adresse de livraison</h6>
                                         <small class="text-muted">Commande à livrer</small>
                                     </div>
                                 </div>
                                 
-                                <div class="address-details">
-                                    <p class="mb-1"><strong>Rue:</strong> {{ commande.adresse_livraison.rue }}</p>
-                                    <p class="mb-1"><strong>Ville:</strong> {{ commande.adresse_livraison.ville }}</p>
-                                    <p class="mb-1"><strong>Code postal:</strong> {{ commande.adresse_livraison.code_postal }}</p>
-                                    <p class="mb-0"><strong>Pays:</strong> {{ commande.adresse_livraison.pays }}</p>
+                                <div class="address-details bg-light rounded p-4">
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-road text-teal me-3"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Rue</small>
+                                                    <strong>{{ commande.adresse_livraison.rue }}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-city text-teal me-3"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Ville</small>
+                                                    <strong>{{ commande.adresse_livraison.ville }}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-mail-bulk text-teal me-3"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Code postal</small>
+                                                    <strong>{{ commande.adresse_livraison.code_postal }}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-flag text-teal me-3"></i>
+                                                <div>
+                                                    <small class="text-muted d-block">Pays</small>
+                                                    <strong>{{ commande.adresse_livraison.pays }}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 {% else %}
-                                <div class="text-center py-4">
-                                    <i class="fas fa-store fa-3x text-muted mb-3"></i>
-                                    <h6 class="text-muted">Retrait sur place</h6>
+                                <div class="text-center py-5">
+                                    <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                                        <i class="fas fa-store fa-3x text-teal"></i>
+                                    </div>
+                                    <h6 class="text-teal mb-2">Retrait sur place</h6>
                                     <p class="text-muted">Le client viendra récupérer sa commande</p>
                                 </div>
                                 {% endif %}
@@ -107,28 +170,29 @@
                     </div>
                 </div>
 
-                <!-- Détails des articles -->
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
+                <!-- Détails des articles amélioré -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-teal text-white border-0 py-3">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-shopping-basket me-2"></i>Détails des Articles
+                            <span class="badge bg-white text-teal ms-2">{{ commande.lignes.count }}</span>
                         </h5>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background-color: var(--teal-light);">
                                     <tr>
-                                        <th>Produit</th>
-                                        <th class="text-center">Prix unitaire</th>
-                                        <th class="text-center">Quantité</th>
-                                        <th class="text-end">Sous-total</th>
+                                        <th class="border-0 ps-4">Produit</th>
+                                        <th class="border-0 text-center">Prix unitaire</th>
+                                        <th class="border-0 text-center">Quantité</th>
+                                        <th class="border-0 text-end pe-4">Sous-total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for ligne in commande.lignes.all %}
-                                    <tr>
-                                        <td>
+                                    <tr class="border-bottom hover-row">
+                                        <td class="ps-4">
                                             <div class="d-flex align-items-center">
                                                 {% if ligne.produit.image %}
                                                 <img src="{{ ligne.produit.image.url }}" 
@@ -136,15 +200,15 @@
                                                      class="rounded me-3" 
                                                      style="width: 50px; height: 50px; object-fit: cover;">
                                                 {% else %}
-                                                <div class="bg-secondary rounded me-3 d-flex align-items-center justify-content-center" 
+                                                <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" 
                                                      style="width: 50px; height: 50px;">
-                                                    <i class="fas fa-box text-white"></i>
+                                                    <i class="fas fa-box text-muted"></i>
                                                 </div>
                                                 {% endif %}
                                                 <div>
-                                                    <h6 class="mb-0">{{ ligne.produit.nom }}</h6>
+                                                    <h6 class="mb-0 text-dark">{{ ligne.produit.nom }}</h6>
                                                     {% if ligne.produit.allergenes %}
-                                                    <small class="text-danger">
+                                                    <small class="text-pink">
                                                         <i class="fas fa-exclamation-triangle me-1"></i>
                                                         Allergènes: {{ ligne.produit.allergenes }}
                                                     </small>
@@ -152,28 +216,38 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="text-center">{{ ligne.prix_unitaire }} FCFA</td>
                                         <td class="text-center">
-                                            <span class="badge bg-primary rounded-pill">{{ ligne.quantite }}</span>
+                                            <span class="fw-bold text-teal">{{ ligne.prix_unitaire }} FCFA</span>
                                         </td>
-                                        <td class="text-end">{{ ligne.sous_total }} FCFA</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-teal text-white rounded-pill px-3 py-2">
+                                                {{ ligne.quantite }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <strong class="text-teal">{{ ligne.sous_total }} FCFA</strong>
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
-                                <tfoot class="table-group-divider">
+                                <tfoot style="background-color: var(--teal-light);">
                                     <tr>
-                                        <td colspan="3" class="text-end fw-bold">Sous-total:</td>
-                                        <td class="text-end fw-bold">{{ commande.total }} FCFA</td>
+                                        <td colspan="3" class="text-end fw-bold ps-4">Sous-total:</td>
+                                        <td class="text-end fw-bold text-teal pe-4">{{ commande.total }} FCFA</td>
                                     </tr>
                                     {% if commande.coupon %}
-                                    <tr class="table-success">
-                                        <td colspan="3" class="text-end fw-bold">Réduction ({{ commande.coupon.code }}):</td>
-                                        <td class="text-end fw-bold text-danger">-{{ commande.coupon.reduction }} FCFA</td>
+                                    <tr>
+                                        <td colspan="3" class="text-end fw-bold ps-4">
+                                            Réduction ({{ commande.coupon.code }}):
+                                        </td>
+                                        <td class="text-end fw-bold text-pink pe-4">
+                                            -{{ commande.coupon.reduction }} FCFA
+                                        </td>
                                     </tr>
                                     {% endif %}
-                                    <tr class="table-primary">
-                                        <td colspan="3" class="text-end fw-bold fs-5">Total:</td>
-                                        <td class="text-end fw-bold fs-5">{{ commande.total }} FCFA</td>
+                                    <tr class="border-top">
+                                        <td colspan="3" class="text-end fw-bold fs-5 ps-4">Total:</td>
+                                        <td class="text-end fw-bold fs-5 text-teal pe-4">{{ commande.total }} FCFA</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -181,33 +255,34 @@
                     </div>
                 </div>
 
-                <!-- Informations paiement et statut -->
+                <!-- Informations paiement et actions amélioré -->
                 <div class="row">
                     <div class="col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header bg-warning text-dark">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-teal text-white border-0 py-3">
                                 <h5 class="card-title mb-0">
                                     <i class="fas fa-credit-card me-2"></i>Informations Paiement
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="bg-warning rounded-circle text-dark d-flex align-items-center justify-content-center me-3" 
-                                         style="width: 50px; height: 50px;">
-                                        <i class="fas fa-money-bill-wave fa-lg"></i>
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-teal bg-opacity-10 rounded-circle p-3 me-3">
+                                        <i class="fas fa-{% if commande.methode_paiement == 'mobile_money' %}mobile-alt{% elif commande.methode_paiement == 'carte' %}credit-card{% else %}money-bill-wave{% endif %} fa-lg text-teal"></i>
                                     </div>
                                     <div>
-                                        <h6 class="mb-0">{{ commande.methode_paiement }}</h6>
+                                        <h6 class="mb-0 text-dark">{{ commande.methode_paiement|title }}</h6>
                                         <small class="text-muted">Méthode de paiement</small>
                                     </div>
                                 </div>
                                 
                                 {% if commande.coupon %}
-                                <div class="mt-3 p-3 bg-light rounded">
-                                    <h6 class="mb-2">Coupon utilisé</h6>
+                                <div class="mt-4 p-4 bg-light rounded">
+                                    <h6 class="mb-3 text-teal">
+                                        <i class="fas fa-tag me-2"></i>Coupon utilisé
+                                    </h6>
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <span class="badge bg-success">{{ commande.coupon.code }}</span>
-                                        <span class="text-danger fw-bold">-{{ commande.coupon.reduction }} FCFA</span>
+                                        <span class="badge bg-teal text-white">{{ commande.coupon.code }}</span>
+                                        <span class="fw-bold text-pink fs-5">-{{ commande.coupon.reduction }} FCFA</span>
                                     </div>
                                 </div>
                                 {% endif %}
@@ -216,34 +291,43 @@
                     </div>
 
                     <div class="col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-header bg-secondary text-white">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-teal text-white border-0 py-3">
                                 <h5 class="card-title mb-0">
                                     <i class="fas fa-cogs me-2"></i>Actions
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <div class="d-grid gap-2">
+                                <div class="d-grid gap-3">
                                     {% if commande.statut == 'en_attente' %}
-                                    <button class="btn btn-primary btn-lg">
-                                        <i class="fas fa-play me-2"></i>Commencer le traitement
-                                    </button>
+                                    <form method="post" action="{% url 'prendre_en_charge_commande' commande.id %}" class="d-grid">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-teal btn-lg py-3">
+                                            <i class="fas fa-play me-2"></i>Commencer le traitement
+                                        </button>
+                                    </form>
                                     {% elif commande.statut == 'en_traitement' %}
-                                    <button class="btn btn-success btn-lg">
-                                        <i class="fas fa-check me-2"></i>Marquer comme prête
-                                    </button>
+                                    <form method="post" action="{% url 'changer_statut_commande' commande.id %}" class="d-grid">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="statut" value="expediee">
+                                        <button type="submit" class="btn btn-teal btn-lg py-3">
+                                            <i class="fas fa-check me-2"></i>Marquer comme expédiée
+                                        </button>
+                                    </form>
                                     {% endif %}
                                     
-                                    <button class="btn btn-outline-info">
-                                        <i class="fas fa-phone me-2"></i>Contacter le client
-                                    </button>
-                                    
-                                    <button class="btn btn-outline-warning">
-                                        <i class="fas fa-exclamation-triangle me-2"></i>Signaler un problème
-                                    </button>
+                                    <div class="d-grid gap-2">
+                                        <a href="tel:{{ commande.utilisateur.telephone|default:'' }}" class="btn btn-outline-teal py-2">
+                                            <i class="fas fa-phone me-2"></i>Contacter le client
+                                        </a>
+                                        
+                                        <button class="btn btn-outline-yellow py-2">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>Signaler un problème
+                                        </button>
+                                    </div>
                                 </div>
                                 
-                                <div class="mt-3">
+                                <div class="mt-4 pt-3 border-top">
                                     <small class="text-muted">
                                         <i class="fas fa-info-circle me-1"></i>
                                         Dernière modification: {{ commande.date_modification|date:"d/m/Y à H:i" }}
@@ -254,36 +338,88 @@
                     </div>
                 </div>
 
-                <!-- Timeline de la commande -->
-                <div class="card">
-                    <div class="card-header bg-dark text-white">
+                <!-- Timeline de la commande amélioré -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-teal text-white border-0 py-3">
                         <h5 class="card-title mb-0">
                             <i class="fas fa-history me-2"></i>Historique de la Commande
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div class="timeline">
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-success"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-0">Commande créée</h6>
-                                    <small class="text-muted">{{ commande.date_creation|date:"d/m/Y à H:i" }}</small>
+                        <div class="timeline-advanced">
+                            <div class="timeline-item-advanced">
+                                <div class="timeline-marker-advanced bg-teal">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div class="timeline-content-advanced">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h6 class="mb-1 text-dark">Commande créée</h6>
+                                        <small class="text-muted">{{ commande.date_creation|date:"d/m/Y à H:i" }}</small>
+                                    </div>
+                                    <p class="text-muted mb-0">La commande a été passée par le client</p>
                                 </div>
                             </div>
                             
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-{% if commande.statut != 'en_attente' %}success{% else %}secondary{% endif %}"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-0">Paiement confirmé</h6>
-                                    <small class="text-muted">Statut: {{ commande.get_statut_display }}</small>
+                            <div class="timeline-item-advanced">
+                                <div class="timeline-marker-advanced bg-{% if commande.statut != 'en_attente' %}teal{% else %}light text-muted{% endif %}">
+                                    <i class="fas fa-credit-card"></i>
+                                </div>
+                                <div class="timeline-content-advanced">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h6 class="mb-1 text-dark">Paiement confirmé</h6>
+                                        <small class="text-muted">{{ commande.date_creation|date:"d/m/Y à H:i" }}</small>
+                                    </div>
+                                    <p class="text-muted mb-0">Paiement effectué via {{ commande.methode_paiement }}</p>
                                 </div>
                             </div>
                             
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-secondary"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-0">Livraison</h6>
-                                    <small class="text-muted">En attente de traitement</small>
+                            <div class="timeline-item-advanced">
+                                <div class="timeline-marker-advanced bg-{% if commande.statut == 'expediee' or commande.statut == 'livree' %}teal{% else %}light text-muted{% endif %}">
+                                    <i class="fas fa-truck"></i>
+                                </div>
+                                <div class="timeline-content-advanced">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h6 class="mb-1 text-dark">Expédition</h6>
+                                        <small class="text-muted">
+                                            {% if commande.statut == 'expediee' or commande.statut == 'livree' %}
+                                                {{ commande.date_modification|date:"d/m/Y à H:i" }}
+                                            {% else %}
+                                                En attente
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <p class="text-muted mb-0">
+                                        {% if commande.statut == 'expediee' or commande.statut == 'livree' %}
+                                            Commande expédiée au client
+                                        {% else %}
+                                            En attente d'expédition
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="timeline-item-advanced">
+                                <div class="timeline-marker-advanced bg-{% if commande.statut == 'livree' %}teal{% else %}light text-muted{% endif %}">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="timeline-content-advanced">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <h6 class="mb-1 text-dark">Livraison</h6>
+                                        <small class="text-muted">
+                                            {% if commande.statut == 'livree' %}
+                                                {{ commande.date_livraison|date:"d/m/Y à H:i" }}
+                                            {% else %}
+                                                En cours
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <p class="text-muted mb-0">
+                                        {% if commande.statut == 'livree' %}
+                                            Commande livrée avec succès
+                                        {% else %}
+                                            En cours de livraison
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -294,61 +430,160 @@
     </div>
 </div>
 
+<!-- Styles personnalisés améliorés -->
 <style>
-.timeline {
-    position: relative;
-    padding-left: 30px;
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+    --teal-light: rgba(0, 184, 181, 0.1);
 }
 
-.timeline-item {
-    position: relative;
-    padding-bottom: 20px;
+/* Couleurs utilitaires */
+.bg-teal { background-color: var(--teal-glacier) !important; }
+.text-teal { color: var(--teal-glacier) !important; }
+.bg-pink { background-color: var(--pink-swoosh) !important; }
+.text-pink { color: var(--pink-swoosh) !important; }
+.bg-yellow { background-color: var(--yellow-canaan) !important; }
+.text-yellow { color: var(--yellow-canaan) !important; }
+
+.btn-teal {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
 }
 
-.timeline-marker {
+.btn-teal:hover {
+    background-color: var(--teal-dark);
+    border-color: var(--teal-dark);
+    color: white;
+}
+
+.btn-outline-teal {
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+}
+
+.btn-outline-teal:hover {
+    background-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-outline-yellow {
+    border-color: var(--yellow-canaan);
+    color: var(--yellow-canaan);
+}
+
+.btn-outline-yellow:hover {
+    background-color: var(--yellow-canaan);
+    color: var(--black-shadow);
+}
+
+/* Badges */
+.badge.bg-teal { background-color: var(--teal-glacier) !important; }
+.badge.bg-pink { background-color: var(--pink-swoosh) !important; }
+.badge.bg-yellow { 
+    background-color: var(--yellow-canaan) !important; 
+    color: var(--black-shadow) !important;
+}
+
+/* Timeline avancée */
+.timeline-advanced {
+    position: relative;
+    padding-left: 40px;
+}
+
+.timeline-item-advanced {
+    position: relative;
+    padding-bottom: 30px;
+}
+
+.timeline-marker-advanced {
     position: absolute;
-    left: -30px;
+    left: -40px;
     top: 0;
-    width: 20px;
-    height: 20px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
     z-index: 2;
 }
 
-.timeline-content {
+.timeline-content-advanced {
     padding-left: 20px;
+    border-left: 2px solid var(--teal-light);
+    margin-left: 10px;
 }
 
-.timeline::before {
+.timeline-advanced::before {
     content: '';
     position: absolute;
-    left: -21px;
+    left: -29px;
     top: 0;
     bottom: 0;
     width: 2px;
-    background-color: #dee2e6;
+    background-color: var(--teal-light);
 }
 
-.address-details p {
-    margin-bottom: 0.3rem;
+/* Lignes de tableau avec hover */
+.hover-row {
+    transition: all 0.2s ease;
 }
 
+.hover-row:hover {
+    background-color: var(--teal-light) !important;
+}
+
+/* Cartes */
 .card {
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.card-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+.card:hover {
+    transform: translateY(-2px);
 }
 
-.table th {
-    font-weight: 600;
-    background-color: #f8f9fa;
+/* Responsive */
+@media (max-width: 768px) {
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .timeline-advanced {
+        padding-left: 30px;
+    }
+    
+    .timeline-marker-advanced {
+        left: -30px;
+        width: 24px;
+        height: 24px;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
 }
 
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Impression */
 @media print {
-    .btn {
+    .btn, .breadcrumb, .card-header .badge {
         display: none !important;
     }
     
@@ -356,6 +591,40 @@
         box-shadow: none !important;
         border: 1px solid #dee2e6 !important;
     }
+    
+    .bg-teal {
+        background-color: #00B8B5 !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'entrée pour les éléments
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Confirmation pour les actions critiques
+    const criticalButtons = document.querySelectorAll('button[type="submit"]');
+    criticalButtons.forEach(button => {
+        if (button.textContent.includes('Annuler') || button.textContent.includes('Supprimer')) {
+            button.addEventListener('click', function(e) {
+                if (!confirm('Êtes-vous sûr de vouloir effectuer cette action ?')) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+});
+</script>
 {% endblock %}

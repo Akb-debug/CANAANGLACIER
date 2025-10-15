@@ -5,33 +5,33 @@
 
 {% block body %}
 <div class="container-fluid pt-4 px-4">
-    <!-- Header -->
+<!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 mb-0">
+                    <h1 class="h3 mb-0 teal-glacier-text">
                         <i class="fas fa-tachometer-alt me-2"></i>Dashboard Administrateur
                     </h1>
-                    <p class="mb-0">Vue d'ensemble de votre plateforme</p>
+                    <p class="mb-0 text-muted">Vue d'ensemble de votre plateforme</p>
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-success">Admin</span>
+                    <span class="badge bg-teal-glacier">Admin</span>
                     <p class="mb-0 text-muted small">{{ user.username }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Statistiques principales -->
+<!-- Statistiques principales -->
     <div class="row g-4 mb-4">
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-primary rounded">
+            <div class="card h-100 card-hover">
+                <div class="card-body bg-gradient-teal rounded">
                     <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Total Utilisateurs</div>
-                            <div class="h2 mb-0">{{ total_utilisateurs }}</div>
+                            <div class="h2 mb-0 text-white">{{ total_utilisateurs }}</div>
                         </div>
                         <div class="align-self-center">
                             <i class="fas fa-users fa-2x opacity-75"></i>
@@ -42,12 +42,12 @@
         </div>
 
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-danger rounded">
+            <div class="card h-100 card-hover">
+                <div class="card-body bg-gradient-teal rounded">
                     <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Total Produits</div>
-                            <div class="h2 mb-0">{{ total_produits }}</div>
+                            <div class="h2 mb-0 text-white">{{ total_produits }}</div>
                         </div>
                         <div class="align-self-center">
                             <i class="fas fa-box fa-2x opacity-75"></i>
@@ -58,12 +58,12 @@
         </div>
 
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-info rounded">
+            <div class="card h-100 card-hover">
+                <div class="card-body bg-gradient-teal rounded">
                     <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Total Commandes</div>
-                            <div class="h2 mb-0">{{ total_commandes }}</div>
+                            <div class="h2 mb-0 text-white">{{ total_commandes }}</div>
                         </div>
                         <div class="align-self-center">
                             <i class="fas fa-shopping-cart fa-2x opacity-75"></i>
@@ -74,12 +74,12 @@
         </div>
 
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-success rounded">
+            <div class="card h-100 card-hover">
+                <div class="card-body bg-gradient-teal rounded">
                     <div class="d-flex justify-content-between text-white">
                         <div>
                             <div class="text-white-50 small">Revenus Total</div>
-                            <div class="h2 mb-0">{{ total_revenus|floatformat:0 }}Fcfa</div>
+                            <div class="h2 mb-0 text-white">{{ total_revenus|floatformat:0 }}Fcfa</div>
                         </div>
                         <div class="align-self-center">
                             <i class="fas fa-euro-sign fa-2x opacity-75"></i>
@@ -90,12 +90,12 @@
         </div>
     </div>
 
-    <!-- Section Gestion des Utilisateurs -->
+ <!-- Section Gestion des Utilisateurs -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card h-100 card-hover">
+                <div class="card-header teal-glacier-bg">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-users-cog me-2"></i>Gestion des Utilisateurs
                     </h5>
                 </div>
@@ -103,40 +103,49 @@
                     <div class="row g-3">
                         <!-- Bouton Créer Gérant -->
                         <div class="col-md-3">
-                            <a href="{% url 'creer_gerant' %}" class="btn btn-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
-                                <i class="fas fa-user-tie fa-2x mb-2"></i>
-                                <span class="fw-bold">Créer un Gérant</span>
+                            <a href="{% url 'creer_gerant' %}" class="btn btn-teal-glacier w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
+                                <i class="fas fa-user-tie fa-2x mb-2 text-white"></i>
+                                <span class="fw-bold text-white">Créer un Gérant</span>
                                 <small class="text-white-50">Nouveau gérant</small>
                             </a>
                         </div>
                         
                         <!-- Bouton Créer Serveur -->
                         <div class="col-md-3">
-                            <a href="{% url 'creer_serveur_gerant' %}" class="btn btn-success w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
-                                <i class="fas fa-user-cog fa-2x mb-2"></i>
-                                <span class="fw-bold">Créer un Serveur</span>
+                            <a href="{% url 'creer_serveur_gerant' %}" class="btn btn-teal-glacier w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
+                                <i class="fas fa-user-cog fa-2x mb-2 text-white"></i>
+                                <span class="fw-bold text-white">Créer un Serveur</span>
                                 <small class="text-white-50">Nouveau serveur</small>
+                            </a>
+                        </div>
+
+                         <!-- Bouton Créer Livreur -->
+                        <div class="col-md-3">
+                            <a href="{% url 'ajouter_livreur' %}" class="btn btn-teal-glacier w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
+                                <i class="fas fa-user-cog fa-2x mb-2 text-white"></i>
+                                <span class="fw-bold text-white">Créer un Livreur</span>
+                                <small class="text-white-50">Nouveau livreur</small>
                             </a>
                         </div>
                         
                         <!-- Bouton Liste Utilisateurs -->
                         <div class="col-md-3">
-                            <a href="{% url 'gestion_utilisateurs' %}" class="btn btn-info w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
-                                <i class="fas fa-list-ul fa-2x mb-2"></i>
-                                <span class="fw-bold">Liste Utilisateurs</span>
-                                <small class="text-white-50">Voir tous</small>
+                            <a href="{% url 'gestion_utilisateurs' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
+                                <i class="fas fa-list-ul fa-2x mb-2 "></i>
+                                <span class="fw-bold ">Liste Utilisateurs</span>
+                                <small class="text-muted">Voir tous</small>
                             </a>
                         </div>
                         
                         <!-- Statistiques rapides -->
-                        <div class="col-md-3">
-                            <div class="card h-100">
+                        {% comment %} <div class="col-md-3">
+                            <div class="card h-100 bg-teal-light border-0">
                                 <div class="card-body d-flex flex-column justify-content-center">
                                     <div class="text-center">
-                                        <h6 class="text-muted mb-3">Répartition</h6>
+                                        <h6 class="teal-glacier-text mb-3">Répartition</h6>
                                         <div class="row g-2">
                                             <div class="col-6">
-                                                <div class="text-primary">
+                                                <div class="teal-glacier-text">
                                                     <i class="fas fa-user-tie"></i>
                                                     <span class="fw-bold">{{ stats_roles.gerants }}</span>
                                                 </div>
@@ -149,40 +158,47 @@
                                                 </div>
                                                 <small class="text-muted">Serveurs</small>
                                             </div>
+                                             <div class="col-6">
+                                                <div class="text-success">
+                                                    <i class="fas fa-user-cog"></i>
+                                                    <span class="fw-bold">{{ stats_roles.serveurs }}</span>
+                                                </div>
+                                                <small class="text-muted">Livreur</small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> {% endcomment %}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Section Gestion des Stocks -->
+<!-- Section Gestion des Stocks -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card h-100 card-hover">
+                <div class="card-header teal-glacier-bg">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-boxes me-2"></i>Gestion des Stocks
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <a href="{% url 'gestion_stocks_avancee' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                            <a href="{% url 'gestion_stocks_avancee' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
                                 <i class="fas fa-warehouse fa-2x mb-2"></i>
                                 <span class="fw-bold">Gestion Avancée</span>
                                 <small class="text-muted">Stocks et inventaire</small>
                             </a>
                         </div>
                         <div class="col-md-6">
-                            <div class="card h-100 bg-light border-0 shadow-sm">
+                            <div class="card h-100 bg-teal-light border-0">
                                 <div class="card-body d-flex flex-column justify-content-center text-center">
-                                    <h6 class="text-muted mb-2">Produits en Stock</h6>
-                                    <h3 class="text-info mb-0 fw-bold">{{ total_produits|default:0 }}</h3>
+                                    <h6 class="teal-glacier-text mb-2">Produits en Stock</h6>
+                                    <h3 class="teal-glacier-text mb-0 fw-bold">{{ total_produits|default:0 }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -192,29 +208,29 @@
         </div>
     </div>
 
-    <!-- Section Gestion des Commandes -->
+<!-- Section Gestion des Commandes -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card h-100 card-hover">
+                <div class="card-header teal-glacier-bg">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-shopping-cart me-2"></i>Gestion des Commandes
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <a href="{% url 'gestion_commandes_admin' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                            <a href="{% url 'gestion_commandes_admin' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
                                 <i class="fas fa-clipboard-list fa-2x mb-2"></i>
                                 <span class="fw-bold">Toutes les Commandes</span>
                                 <small class="text-muted">Gérer les commandes</small>
                             </a>
                         </div>
                         <div class="col-md-6">
-                            <div class="card h-100 bg-light border-0 shadow-sm">
+                            <div class="card h-100 bg-teal-light border-0">
                                 <div class="card-body d-flex flex-column justify-content-center text-center">
-                                    <h6 class="text-muted mb-2">Commandes Totales</h6>
-                                    <h3 class="text-success mb-0 fw-bold">{{ total_commandes|default:0 }}</h3>
+                                    <h6 class="teal-glacier-text mb-2">Commandes Totales</h6>
+                                    <h3 class="teal-glacier-text mb-0 fw-bold">{{ total_commandes|default:0 }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -224,36 +240,36 @@
         </div>
     </div>
 
-    <!-- Section Gestion des Catégories -->
+<!-- Section Gestion des Catégories -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card h-100 card-hover">
+                <div class="card-header teal-glacier-bg">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-tags me-2"></i>Gestion des Catégories
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <a href="{% url 'gestion_categories' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
-                                <i class="fas fa-list fa-2x mb-2"></i>
+                            <a href="{% url 'gestion_categories' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
+                                <i class="fas fa-list fa-2x mb-2 "></i>
                                 <span class="fw-bold">Gérer Catégories</span>
                                 <small class="text-muted">Voir toutes les catégories</small>
                             </a>
                         </div>
                         <div class="col-md-4">
-                            <a href="{% url 'ajouter_categorie' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                            <a href="{% url 'ajouter_categorie' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
                                 <i class="fas fa-plus fa-2x mb-2"></i>
                                 <span class="fw-bold">Nouvelle Catégorie</span>
                                 <small class="text-muted">Créer une catégorie</small>
                             </a>
                         </div>
                         <div class="col-md-4">
-                            <div class="card h-100 bg-light border-0 shadow-sm">
+                            <div class="card h-100 bg-teal-light border-0">
                                 <div class="card-body d-flex flex-column justify-content-center text-center">
-                                    <h6 class="text-muted mb-2">Total Catégories</h6>
-                                    <h3 class="text-primary mb-0 fw-bold">{{ total_categories|default:0 }}</h3>
+                                    <h6 class="teal-glacier-text mb-2">Total Catégories</h6>
+                                    <h3 class="teal-glacier-text mb-0 fw-bold">{{ total_categories|default:0 }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -263,36 +279,36 @@
         </div>
     </div>
 
-    <!-- Section Gestion des Coupons -->
+<!-- Section Gestion des Coupons -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card h-100 card-hover">
+                <div class="card-header teal-glacier-bg">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-ticket-alt me-2"></i>Gestion des Coupons
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <a href="{% url 'gestion_coupons' %}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
-                                <i class="fas fa-list fa-2x mb-2"></i>
-                                <span class="fw-bold">Gérer Coupons</span>
+                            <a href="{% url 'gestion_coupons' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
+                                <i class="fas fa-list fa-2x mb-2 "></i>
+                                <span class="fw-bold ">Gérer Coupons</span>
                                 <small class="text-muted">Voir tous les coupons</small>
                             </a>
                         </div>
                         <div class="col-md-4">
-                            <a href="{% url 'ajouter_coupon' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
-                                <i class="fas fa-plus fa-2x mb-2"></i>
-                                <span class="fw-bold">Nouveau Coupon</span>
+                            <a href="{% url 'ajouter_coupon' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
+                                <i class="fas fa-plus fa-2x mb-2 "></i>
+                                <span class="fw-bold ">Nouveau Coupon</span>
                                 <small class="text-muted">Créer un coupon</small>
                             </a>
                         </div>
                         <div class="col-md-4">
-                            <div class="card h-100 bg-light border-0 shadow-sm">
+                            <div class="card h-100 bg-teal-light border-0">
                                 <div class="card-body d-flex flex-column justify-content-center text-center">
-                                    <h6 class="text-muted mb-2">Coupons Actifs</h6>
-                                    <h3 class="text-warning mb-0 fw-bold">{{ total_coupons|default:0 }}</h3>
+                                    <h6 class="teal-glacier-text mb-2">Coupons Actifs</h6>
+                                    <h3 class="teal-glacier-text mb-0 fw-bold">{{ total_coupons|default:0 }}</h3>
                                 </div>
                             </div>
                         </div>
@@ -302,28 +318,28 @@
         </div>
     </div>
 
-    <!-- Section Rapports et Analyses -->
+ <!-- Section Rapports et Analyses -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card h-100 card-hover">
+                <div class="card-header teal-glacier-bg">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-chart-bar me-2"></i>Rapports et Analyses
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <a href="{% url 'rapports_admin' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                            <a href="{% url 'rapports_admin' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
                                 <i class="fas fa-chart-line fa-2x mb-2"></i>
                                 <span class="fw-bold">Rapports Avancés</span>
                                 <small class="text-muted">Analyses détaillées</small>
                             </a>
                         </div>
                         <div class="col-md-6">
-                            <a href="{% url 'historique_actions_gerant' %}" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                            <a href="{% url 'historique_actions_gerant' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
                                 <i class="fas fa-history fa-2x mb-2"></i>
-                                <span class="fw-bold">Historique Actions</span>
+                                <span class="fw-bold ">Historique Actions</span>
                                 <small class="text-muted">Journal des activités</small>
                             </a>
                         </div>
@@ -333,33 +349,33 @@
         </div>
     </div>
 
-    <!-- Section Paramètres et Sécurité -->
+<!-- Section Paramètres et Sécurité -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card h-100 card-hover">
+                <div class="card-header teal-glacier-bg">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-cogs me-2"></i>Paramètres et Sécurité
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <a href="{% url 'parametres_systeme' %}" class="btn btn-outline-dark w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                            <a href="{% url 'parametres_systeme' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
                                 <i class="fas fa-cog fa-2x mb-2"></i>
                                 <span class="fw-bold">Paramètres Système</span>
                                 <small class="text-muted">Configuration générale</small>
                             </a>
                         </div>
                         <div class="col-md-4">
-                            <a href="{% url 'audit_securite' %}" class="btn btn-outline-danger w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                            <a href="{% url 'audit_securite' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
                                 <i class="fas fa-shield-alt fa-2x mb-2"></i>
                                 <span class="fw-bold">Audit & Sécurité</span>
                                 <small class="text-muted">Sécurité et sauvegardes</small>
                             </a>
                         </div>
                         <div class="col-md-4">
-                            <a href="{% url 'sauvegardes_systeme' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none">
+                            <a href="{% url 'sauvegardes_systeme' %}" class="btn btn-outline-teal w-100 h-100 d-flex flex-column justify-content-center align-items-center text-decoration-none card-hover">
                                 <i class="fas fa-database fa-2x mb-2"></i>
                                 <span class="fw-bold">Sauvegardes</span>
                                 <small class="text-muted">Gestion des sauvegardes</small>
@@ -371,39 +387,39 @@
         </div>
     </div>
 
- <!-- Commandes récentes -->
+<!-- Commandes récentes -->
     <div class="row g-4">
         <div class="col-lg-8">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card h-100 card-hover">
+                <div class="card-header teal-glacier-bg">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-clock me-2"></i>Commandes Récentes
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
-                            <thead>
+                            <thead class="teal-glacier-bg">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Client</th>
-                                    <th>Date</th>
-                                    <th>Total</th>
-                                    <th>Statut</th>
+                                    <th class="text-white">ID</th>
+                                    <th class="text-white">Client</th>
+                                    <th class="text-white">Date</th>
+                                    <th class="text-white">Total</th>
+                                    <th class="text-white">Statut</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for commande in commandes_recentes %}
                                 <tr>
-                                    <td><strong>#{{ commande.id }}</strong></td>
+                                    <td><strong class="teal-glacier-text">#{{ commande.id }}</strong></td>
                                     <td>{{ commande.utilisateur.username }}</td>
                                     <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                    <td><strong>{{ commande.total }}Fcfa</strong></td>
+                                    <td><strong class="text-success">{{ commande.total }}Fcfa</strong></td>
                                     <td>
                                         {% if commande.statut == 'en_attente' %}
                                             <span class="badge bg-warning">En attente</span>
                                         {% elif commande.statut == 'en_cours' %}
-                                            <span class="badge bg-info">En cours</span>
+                                            <span class="badge bg-teal-glacier">En cours</span>
                                         {% elif commande.statut == 'livree' %}
                                             <span class="badge bg-success">Livrée</span>
                                         {% else %}
@@ -425,37 +441,37 @@
 
         <!-- Statistiques utilisateurs -->
         <div class="col-lg-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card h-100 card-hover">
+                <div class="card-header teal-glacier-bg">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-chart-pie me-2"></i>Répartition Utilisateurs
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-1">
-                            <span>Clients</span>
-                            <span class="text-primary fw-bold">{{ stats_roles.clients }}</span>
+                            <span class="teal-glacier-text">Clients</span>
+                            <span class="teal-glacier-text fw-bold">{{ stats_roles.clients }}</span>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-primary" style="width: {{ stats_roles.clients|default:0 }}%"></div>
+                            <div class="progress-bar bg-teal-glacier" style="width: {{ stats_roles.clients|default:0 }}%"></div>
                         </div>
                     </div>
                     
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-1">
-                            <span>Serveurs</span>
-                            <span class="text-info fw-bold">{{ stats_roles.serveurs }}</span>
+                            <span class="teal-glacier-text">Serveurs</span>
+                            <span class="teal-glacier-text fw-bold">{{ stats_roles.serveurs }}</span>
                         </div>
                         <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-info" style="width: {{ stats_roles.serveurs|default:0 }}%"></div>
+                            <div class="progress-bar bg-teal-light" style="width: {{ stats_roles.serveurs|default:0 }}%"></div>
                         </div>
                     </div>
                     
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-1">
-                            <span>Gérants</span>
-                            <span class="text-success fw-bold">{{ stats_roles.gerants }}</span>
+                            <span class="teal-glacier-text">Gérants</span>
+                            <span class="teal-glacier-text fw-bold">{{ stats_roles.gerants }}</span>
                         </div>
                         <div class="progress" style="height: 8px;">
                             <div class="progress-bar bg-success" style="width: {{ stats_roles.gerants|default:0 }}%"></div>
@@ -464,8 +480,8 @@
                     
                     <div class="mb-3">
                         <div class="d-flex justify-content-between mb-1">
-                            <span>Admins</span>
-                            <span class="text-danger fw-bold">{{ stats_roles.admins }}</span>
+                            <span class="teal-glacier-text">Admins</span>
+                            <span class="teal-glacier-text fw-bold">{{ stats_roles.admins }}</span>
                         </div>
                         <div class="progress" style="height: 8px;">
                             <div class="progress-bar bg-danger" style="width: {{ stats_roles.admins|default:0 }}%"></div>
@@ -476,25 +492,25 @@
         </div>
     </div>
 
-    <!-- Messages de contact -->
+<!-- Messages de contact -->
     <div class="row g-4 mt-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card h-100 card-hover">
+                <div class="card-header teal-glacier-bg">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-envelope me-2"></i>Messages de Contact Récents
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
-                            <thead>
+                            <thead class="teal-glacier-bg">
                                 <tr>
-                                    <th>Nom</th>
-                                    <th>Email</th>
-                                    <th>Sujet</th>
-                                    <th>Date</th>
-                                    <th>Action</th>
+                                    <th class="text-white">Nom</th>
+                                    <th class="text-white">Email</th>
+                                    <th class="text-white">Sujet</th>
+                                    <th class="text-white">Date</th>
+                                    <th class="text-white">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -505,8 +521,8 @@
                                     <td>{{ message.sujet|truncatechars:50 }}</td>
                                     <td>{{ message.date_contact|date:"d/m/Y H:i" }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#messageModal{{ message.id }}">
-                                            <i class="fas fa-eye"></i>
+                                        <button class="btn btn-sm btn-outline-teal" data-bs-toggle="modal" data-bs-target="#messageModal{{ message.id }}">
+                                            <i class="fas fa-eye teal-glacier-text"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -523,119 +539,179 @@
         </div>
     </div>
 
-
     <!-- Modals pour les messages -->
     {% for message in messages_contact %}
     <div class="modal fade" id="messageModal{{ message.id }}" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Message de {{ message.nom }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header teal-glacier-bg">
+                    <h5 class="modal-title text-white">Message de {{ message.nom }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p><strong>Email:</strong> {{ message.email }}</p>
-                    <p><strong>Sujet:</strong> {{ message.sujet }}</p>
-                    <p><strong>Message:</strong></p>
+                    <p><strong class="teal-glacier-text">Email:</strong> {{ message.email }}</p>
+                    <p><strong class="teal-glacier-text">Sujet:</strong> {{ message.sujet }}</p>
+                    <p><strong class="teal-glacier-text">Message:</strong></p>
                     <p>{{ message.message|linebreaks }}</p>
                     <p class="text-muted"><small>Reçu le {{ message.date_contact|date:"d/m/Y à H:i" }}</small></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <a href="mailto:{{ message.email }}" class="btn btn-primary">Répondre</a>
+                    <button type="button" class="btn btn-outline-teal" data-bs-dismiss="modal">Fermer</button>
+                    <a href="mailto:{{ message.email }}" class="btn btn-teal-glacier">Répondre</a>
                 </div>
             </div>
-        </div>
         </div>
     </div>
     {% endfor %}
 </div>
 
 <style>
+    :root {
+        --teal-glacier: #00B8B5;
+        --teal-dark: #00827F;
+        --pink-swoosh: #E91E63;
+        --yellow-canaan: #FDCB05;
+        --teal-light: rgba(0, 184, 181, 0.1);
+    }
+
+    .teal-glacier-text {
+        color: var(--teal-glacier) !important;
+    }
+
+    .teal-glacier-bg {
+        background-color: var(--teal-glacier) !important;
+    }
+
+    .bg-teal-glacier {
+        background-color: var(--teal-glacier) !important;
+    }
+
+    .bg-teal-light {
+        background-color: var(--teal-light) !important;
+    }
+
+    .btn-teal-glacier {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        color: white;
+    }
+
+    .btn-teal-glacier:hover {
+        background-color: var(--teal-dark);
+        border-color: var(--teal-dark);
+        color: white;
+    }
+
+    .btn-outline-teal {
+        border-color: var(--teal-glacier);
+        color: var(--teal-glacier);
+        background-color: transparent;
+    }
+
+    .btn-outline-teal:hover {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        color: white;
+    }
+
     .card {
         transition: all 0.3s ease;
         border: none !important;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 184, 181, 0.15) !important;
     }
-    .card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 0.5rem 2rem 0 rgba(58, 59, 69, 0.25) !important;
+
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 2rem 0 rgba(0, 184, 181, 0.25) !important;
     }
+
     .progress {
         border-radius: 10px;
         height: 8px;
     }
+
     .progress-bar {
         border-radius: 10px;
     }
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+
+    .bg-gradient-teal {
+        background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--teal-dark) 100%) !important;
     }
+
     .bg-gradient-danger {
         background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
     }
+
     .bg-gradient-info {
         background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
     }
+
     .bg-gradient-success {
         background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%) !important;
     }
+
     .btn {
         transition: all 0.2s ease;
         border-radius: 8px;
     }
+
     .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 184, 181, 0.2);
     }
-    .shadow-sm {
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+
+    .table-hover tbody tr:hover {
+        background-color: var(--teal-light) !important;
     }
-</style>
+
+    .modal-header {
+        border-bottom: 2px solid var(--teal-glacier);
+    }
+    </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Animation pour les cartes au survol
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px)';
-            this.style.boxShadow = '0 0.5rem 2rem 0 rgba(58, 59, 69, 0.3)';
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation pour les cartes au survol
+        const cards = document.querySelectorAll('.card-hover');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 0.5rem 2rem 0 rgba(0, 184, 181, 0.3)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 0.15rem 1.75rem 0 rgba(0, 184, 181, 0.15)';
+            });
         });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = '0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15)';
+
+        // Animation pour les boutons
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.02)';
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
         });
+
+        // Mise à jour automatique des statistiques (simulation)
+        function updateStats() {
+            const statsElements = document.querySelectorAll('.h2');
+            statsElements.forEach(element => {
+                if (element.textContent && !isNaN(element.textContent)) {
+                    element.style.color = 'var(--teal-glacier)';
+                    setTimeout(() => {
+                        element.style.color = '';
+                    }, 1000);
+                }
+            });
+        }
+
+        // Actualiser les stats toutes les 30 secondes
+        setInterval(updateStats, 30000);
     });
-
-    // Animation pour les boutons
-    const buttons = document.querySelectorAll('.btn');
-    buttons.forEach(button => {
-        button.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.02)';
-        });
-        
-        button.addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1)';
-        });
-    });
-
-    // Mise à jour automatique des statistiques (simulation)
-    function updateStats() {
-        const statsElements = document.querySelectorAll('.h2');
-        statsElements.forEach(element => {
-            if (element.textContent && !isNaN(element.textContent)) {
-                element.style.color = '#28a745';
-                setTimeout(() => {
-                    element.style.color = '';
-                }, 1000);
-            }
-        });
-    }
-
-    // Actualiser les stats toutes les 30 secondes
-    setInterval(updateStats, 30000);
-});
 </script>
 {% endblock %}

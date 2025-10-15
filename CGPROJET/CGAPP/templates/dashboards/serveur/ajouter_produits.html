@@ -4,97 +4,182 @@
 {% block body %}
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
-        <!-- Panier du client -->
-        <div class="col-md-8">
-            <div class="bg-light rounded h-100 p-4">
+        <!-- Breadcrumb amélioré -->
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light rounded p-3">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'home' %}" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard_serveur' %}" class="text-decoration-none">Dashboard Serveur</a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <i class="fas fa-shopping-cart me-1"></i>Gestion Panier Client
+                    </li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Panier du client amélioré -->
+        <div class="col-lg-8">
+            <div class="bg-white rounded-3 shadow-sm p-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4>📦 Panier de {{ client.get_full_name|default:client.username }}</h4>
-                    <span class="badge bg-primary">Tél: {{ client.telephone }}</span>
+                    <div>
+                        <h4 class="mb-0 text-teal">
+                            <i class="fas fa-shopping-cart me-2"></i>Panier de {{ client.get_full_name|default:client.username }}
+                        </h4>
+                        <p class="text-muted mb-0">Gestion du panier client en cours</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="bg-teal bg-opacity-10 rounded-circle p-3 me-3">
+                            <i class="fas fa-phone text-white"></i>
+                        </div>
+                        <div class="text-end">
+                            <div class="h6 mb-0 text-dark">{{ client.telephone }}</div>
+                            <small class="text-muted">Contact client</small>
+                        </div>
+                    </div>
                 </div>
 
                 {% if panier.lignes.all %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Produit</th>
-                                <th>Prix unitaire</th>
-                                <th>Quantité</th>
-                                <th>Total</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in lignes_avec_max %}
-                            {% with ligne=item.ligne %}
-                            <tr>
-                                <td>
-                                    <strong>{{ ligne.produit.nom }}</strong>
-                                    {% if ligne.produit.description %}
-                                    <br><small class="text-muted">{{ ligne.produit.description|truncatewords:10 }}</small>
-                                    {% endif %}
-                                    <br>
-                                    <small class="text-info">
-                                        Stock disponible: {{ ligne.produit.quantite_disponible }}
-                                    </small>
-                                </td>
-                                <td>{{ ligne.produit.prix }} FCFA</td>
-                                <td>
-                                    <form method="post" action="{% url 'modifier_quantite_serveur' commande_id=panier.id ligne_id=ligne.id %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <div class="input-group input-group-sm" style="width: 120px;">
-                                            <input type="number" name="quantite" value="{{ ligne.quantite }}" 
-                                                   min="1" max="{{ item.quantite_max }}"
-                                                   class="form-control">
-                                            <button type="submit" class="btn btn-outline-primary">✓</button>
-                                        </div>
-                                    </form>
-                                </td>
-                                <td><strong>{{ ligne.total }} FCFA</strong></td>
-                                <td>
-                                    <form method="post" action="{% url 'supprimer_produit_serveur' commande_id=panier.id ligne_id=ligne.id %}" class="d-inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            {% endwith %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="card bg-primary text-white">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Total Panier</h5>
-                                <h3 class="card-text">{{ panier.total }} FCFA</h3>
-                            </div>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-teal text-white border-0 py-3">
+                        <h5 class="mb-0 text-white">
+                            <i class="fas fa-list me-2"></i>Articles du Panier
+                            <span class="badge bg-white text-teal ms-2">{{ panier.lignes.count }}</span>
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead style="background-color: var(--teal-light);">
+                                    <tr>
+                                        <th class="border-0 ps-4">Produit</th>
+                                        <th class="border-0 text-center">Prix unitaire</th>
+                                        <th class="border-0 text-center">Quantité</th>
+                                        <th class="border-0 text-center">Total</th>
+                                        <th class="border-0 text-end pe-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in lignes_avec_max %}
+                                    {% with ligne=item.ligne %}
+                                    <tr class="border-bottom hover-row">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                {% if ligne.produit.image %}
+                                                <img src="{{ ligne.produit.image.url }}" 
+                                                     alt="{{ ligne.produit.nom }}" 
+                                                     class="rounded me-3" 
+                                                     style="width: 50px; height: 50px; object-fit: cover;">
+                                                {% else %}
+                                                <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" 
+                                                     style="width: 50px; height: 50px;">
+                                                    <i class="fas fa-box text-muted"></i>
+                                                </div>
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="mb-0 text-dark">{{ ligne.produit.nom }}</h6>
+                                                    {% if ligne.produit.description %}
+                                                    <small class="text-muted">{{ ligne.produit.description|truncatewords:8 }}</small>
+                                                    {% endif %}
+                                                    <br>
+                                                    <small class="text-teal">
+                                                        <i class="fas fa-cubes me-1"></i>
+                                                        Stock: {{ ligne.produit.quantite_disponible }}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center text-white">
+                                            <span class="fw-bold text-teal">{{ ligne.produit.prix }} FCFA</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <form method="post" action="{% url 'modifier_quantite_serveur' commande_id=panier.id ligne_id=ligne.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <div class="input-group input-group-sm" style="width: 140px;">
+                                                    <input type="number" name="quantite" value="{{ ligne.quantite }}" 
+                                                           min="1" max="{{ item.quantite_max }}"
+                                                           class="form-control border-teal">
+                                                    <button type="submit" class="btn btn-teal">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                        <td class="text-center">
+                                            <strong class="text-teal">{{ ligne.total }} FCFA</strong>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <form method="post" action="{% url 'supprimer_produit_serveur' commande_id=panier.id ligne_id=ligne.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-outline-pink btn-sm" 
+                                                        onclick="return confirm('Supprimer ce produit du panier ?')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endwith %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <div class="col-md-6 text-end">
-                        <a href="{% url 'finaliser_commande_serveur' commande_id=panier.id %}" class="btn btn-success btn-lg">
-                            <i class="fas fa-check-circle me-2"></i>Finaliser la Commande
-                        </a>
+                </div>
+
+                <!-- Résumé et actions -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-0 shadow-sm h-100 stats-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+                            <div class="card-body text-white text-center p-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="text-start">
+                                        <div class="text-white-75 small">Total Panier</div>
+                                        <div class="h3 mb-0 fw-bold text-white">{{ panier.total }} FCFA</div>
+                                    </div>
+                                    <div class="bg-white bg-opacity-30 rounded-circle p-3 icon-container">
+                                        <i class="fas fa-receipt fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-hover-overlay"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-grid h-100">
+                            <a href="{% url 'finaliser_commande_serveur' commande_id=panier.id %}" class="btn btn-teal btn-lg h-100 d-flex align-items-center justify-content-center">
+                                <div class="text-center">
+                                    <i class="fas fa-check-circle fa-2x mb-2 d-block"></i>
+                                    <span>Finaliser la Commande</span>
+                                </div>
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {% else %}
+                <!-- État vide amélioré -->
                 <div class="text-center py-5">
-                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                    <h5>Panier vide</h5>
-                    <p class="text-muted">Ajoutez des produits pour commencer</p>
+                    <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                        <i class="fas fa-shopping-cart fa-3x text-muted"></i>
+                    </div>
+                    <h5 class="text-muted mb-2">Panier vide</h5>
+                    <p class="text-muted mb-4">Ajoutez des produits pour commencer la commande</p>
                 </div>
                 {% endif %}
 
-                <!-- Messages d'alerte -->
+                <!-- Messages d'alerte améliorés -->
                 {% if messages %}
-                <div class="mt-3">
+                <div class="mt-4">
                     {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show border-0 shadow-sm" role="alert">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                            <div>{{ message }}</div>
+                        </div>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     {% endfor %}
@@ -103,58 +188,75 @@
             </div>
         </div>
 
-        <!-- Ajouter des produits -->
-        <div class="col-md-4">
-            <div class="bg-light rounded h-100 p-4">
-                <h5 class="mb-4">➕ Ajouter un produit</h5>
+        <!-- Ajouter des produits amélioré -->
+        <div class="col-lg-4">
+            <div class="bg-white rounded-3 shadow-sm p-4 h-100">
+                <h5 class="mb-4 text-teal">
+                    <i class="fas fa-plus-circle me-2"></i>Ajouter un produit
+                </h5>
                 
-                <form method="post">
+                <form method="post" class="mb-4">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label">Produit</label>
+                        <label class="form-label fw-medium text-dark">Produit</label>
                         {{ form.produit }}
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Quantité</label>
+                        <label class="form-label fw-medium text-dark">Quantité</label>
                         {{ form.quantite }}
-                        <div class="form-text">
-                            Maximum disponible: <span id="max-stock">Sélectionnez un produit</span>
+                        <div class="form-text text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Maximum disponible: <span id="max-stock" class="fw-bold text-teal">Sélectionnez un produit</span>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">
+                    <button type="submit" class="btn btn-teal w-100 py-2">
                         <i class="fas fa-plus me-2"></i>Ajouter au panier
                     </button>
                 </form>
 
-                <hr>
+                <hr class="my-4">
 
-                <h6 class="mb-3">🛒 Produits Disponibles</h6>
-                <div class="list-group">
+                <h6 class="mb-3 text-teal">
+                    <i class="fas fa-barcode me-2"></i>Produits Disponibles
+                </h6>
+                <div class="list-group-flush">
                     {% for produit in produits_disponibles %}
                     <form method="post" class="mb-2">
                         {% csrf_token %}
                         <input type="hidden" name="produit" value="{{ produit.id }}">
                         <input type="hidden" name="quantite" value="1">
-                        <button type="submit" class="list-group-item list-group-item-action">
+                        <button type="submit" class="list-group-item list-group-item-action border-0 rounded-3 p-3 product-quick-add">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ produit.nom }}</strong>
-                                    <br>
-                                    <small class="text-muted">
-                                        {{ produit.prix }} FCFA • Stock: {{ produit.quantite_disponible }}
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <strong class="text-dark">{{ produit.nom }}</strong>
                                         {% if produit.est_populaire %}
-                                        <span class="badge bg-warning ms-2">Populaire</span>
+                                        <span class="badge bg-yellow text-dark ms-2">
+                                            <i class="fas fa-star me-1"></i>Populaire
+                                        </span>
                                         {% endif %}
-                                    </small>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-teal fw-bold">{{ produit.prix }} FCFA</small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-cubes me-1"></i>{{ produit.quantite_disponible }}
+                                        </small>
+                                    </div>
                                 </div>
-                                <span class="badge bg-primary rounded-pill">+</span>
+                                <div class="ms-3">
+                                    <span class="btn btn-teal btn-sm rounded-circle">
+                                        <i class="fas fa-plus"></i>
+                                    </span>
+                                </div>
                             </div>
                         </button>
                     </form>
                     {% empty %}
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Aucun produit disponible pour le moment.
+                    <div class="alert alert-warning border-0">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <div>Aucun produit disponible pour le moment.</div>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
@@ -162,6 +264,203 @@
         </div>
     </div>
 </div>
+
+<!-- Styles personnalisés améliorés -->
+<style>
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+    --teal-light: rgba(0, 184, 181, 0.1);
+}
+
+/* Couleurs utilitaires */
+.bg-teal { background-color: var(--teal-glacier) !important; }
+.text-teal { color: var(--teal-glacier) !important; }
+.bg-pink { background-color: var(--pink-swoosh) !important; }
+.text-pink { color: var(--pink-swoosh) !important; }
+.bg-yellow { background-color: var(--yellow-canaan) !important; }
+.text-yellow { color: var(--yellow-canaan) !important; }
+
+.btn-teal {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-teal:hover {
+    background-color: var(--teal-dark);
+    border-color: var(--teal-dark);
+    color: white;
+}
+
+.btn-outline-pink {
+    border-color: var(--pink-swoosh);
+    color: var(--pink-swoosh);
+}
+
+.btn-outline-pink:hover {
+    background-color: var(--pink-swoosh);
+    color: white;
+}
+
+/* Cartes de statistiques */
+.stats-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.icon-container {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.stats-card .icon-container i {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Effets de hover pour les cartes de stats */
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.6s ease;
+}
+
+.stats-card:hover::before {
+    left: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 184, 181, 0.4) !important;
+    background: linear-gradient(135deg, var(--teal-dark) 0%, #006664 100%) !important;
+}
+
+.stats-card:hover .icon-container {
+    background: rgba(255, 255, 255, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.1);
+    animation: iconPulse 2s infinite;
+}
+
+.stats-card:hover .icon-container i {
+    transform: scale(1.1);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+}
+
+.card-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(233, 30, 99, 0.05) 0%, rgba(253, 203, 5, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.stats-card:hover .card-hover-overlay {
+    opacity: 1;
+}
+
+/* Lignes de tableau avec hover */
+.hover-row {
+    transition: all 0.2s ease;
+}
+
+.hover-row:hover {
+    background-color: var(--teal-light) !important;
+}
+
+/* Produits rapides */
+.product-quick-add {
+    transition: all 0.2s ease;
+    border: 1px solid transparent !important;
+}
+
+.product-quick-add:hover {
+    background-color: var(--teal-light) !important;
+    border-color: var(--teal-glacier) !important;
+    transform: translateX(5px);
+}
+
+/* Badges */
+.badge.bg-teal { background-color: var(--teal-glacier) !important; }
+.badge.bg-pink { background-color: var(--pink-swoosh) !important; }
+.badge.bg-yellow { 
+    background-color: var(--yellow-canaan) !important; 
+    color: var(--black-shadow) !important;
+}
+
+/* Inputs */
+.form-control.border-teal:focus {
+    border-color: var(--teal-glacier);
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-card .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .stats-card .icon-container {
+        padding: 0.75rem !important;
+    }
+    
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .input-group-sm {
+        width: 120px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .btn-lg {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .product-quick-add .d-flex {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .product-quick-add .ms-3 {
+        margin-left: 0 !important;
+        margin-top: 0.5rem;
+    }
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -171,47 +470,40 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateMaxStock() {
         const selectedOption = produitSelect.options[produitSelect.selectedIndex];
         if (selectedOption && selectedOption.value) {
-            // Extraire le stock du texte de l'option
             const optionText = selectedOption.text;
             const stockMatch = optionText.match(/Stock: (\d+)/);
             if (stockMatch) {
                 maxStockSpan.textContent = stockMatch[1] + ' unités';
+                maxStockSpan.className = 'fw-bold text-teal';
             } else {
                 maxStockSpan.textContent = 'Information non disponible';
+                maxStockSpan.className = 'fw-bold text-muted';
             }
         } else {
             maxStockSpan.textContent = 'Sélectionnez un produit';
+            maxStockSpan.className = 'fw-bold text-muted';
         }
     }
     
     updateMaxStock();
     produitSelect.addEventListener('change', updateMaxStock);
+    
+    // Animation pour les produits ajoutés rapidement
+    const quickAddButtons = document.querySelectorAll('.product-quick-add');
+    quickAddButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const originalText = this.querySelector('.btn').innerHTML;
+            this.querySelector('.btn').innerHTML = '<i class="fas fa-check"></i>';
+            this.querySelector('.btn').classList.remove('btn-teal');
+            this.querySelector('.btn').classList.add('btn-success');
+            
+            setTimeout(() => {
+                this.querySelector('.btn').innerHTML = originalText;
+                this.querySelector('.btn').classList.remove('btn-success');
+                this.querySelector('.btn').classList.add('btn-teal');
+            }, 1000);
+        });
+    });
 });
 </script>
-
-<style>
-.list-group-item {
-    border-radius: 8px;
-    margin-bottom: 5px;
-    border: 1px solid #e9ecef;
-    transition: all 0.2s ease;
-}
-
-.list-group-item:hover {
-    background-color: #f8f9fa;
-    border-color: #0d6efd;
-}
-
-.input-group-sm {
-    width: 120px;
-}
-
-.badge {
-    font-size: 0.85em;
-}
-
-.alert {
-    border-radius: 8px;
-}
-</style>
 {% endblock %}

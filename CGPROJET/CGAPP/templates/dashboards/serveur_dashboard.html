@@ -5,21 +5,21 @@
 
 {% block body %}
 <div class="container-fluid pt-4 px-4">
-    <!-- Header -->
+    <!-- Header amélioré -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 mb-0">
+                    <h1 class="h3 mb-0 text-teal">
                         <i class="fas fa-user-cog me-2"></i>Dashboard Serveur
                     </h1>
-                    <p class="mb-0">Gestion des commandes et suivi des livraisons</p>
+                    <p class="mb-0 text-muted">Gestion des commandes et suivi des livraisons</p>
                 </div>
                 <div class="text-end">
-                    <span class="badge bg-success">Serveur</span>
+                    <span class="badge bg-teal text-white">Serveur</span>
                     <p class="mb-0 text-muted small">{{ user.username }}</p>
                     {% if notifications_non_lues > 0 %}
-                        <a href="{% url 'mes_notifications' %}" class="btn btn-sm btn-outline-warning mt-1">
+                        <a href="{% url 'mes_notifications' %}" class="btn btn-sm btn-outline-yellow mt-1">
                             <i class="fas fa-bell"></i> {{ notifications_non_lues }}
                         </a>
                     {% endif %}
@@ -28,114 +28,126 @@
         </div>
     </div>
 
-    <!-- Statistiques détaillées -->
+    <!-- Statistiques détaillées améliorées -->
     <div class="row g-4 mb-4">
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-primary rounded">
-                    <div class="d-flex justify-content-between text-white">
-                        <div>
-                            <div class="text-white-50 small">Commandes Aujourd'hui</div>
-                            <div class="h2 mb-0">{{ stats_serveur.commandes_jour }}</div>
+            <div class="card border-0 shadow-sm h-100 stats-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+                <div class="card-body text-white text-center p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-start">
+                            <div class="text-white-75 small">Commandes Aujourd'hui</div>
+                            <div class="h2 mb-0 fw-bold text-white">{{ stats_serveur.commandes_jour }}</div>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-calendar-day fa-2x opacity-75"></i>
+                        <div class="bg-white bg-opacity-30 rounded-circle p-3 icon-container">
+                            <i class="fas fa-calendar-day fa-2x"></i>
                         </div>
                     </div>
                 </div>
+                <div class="card-hover-overlay"></div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-danger rounded">
-                    <div class="d-flex justify-content-between text-white">
-                        <div>
-                            <div class="text-white-50 small">Traitées par Moi</div>
-                            <div class="h2 mb-0">{{ stats_serveur.commandes_traitees_aujourd_hui }}</div>
+            <div class="card border-0 shadow-sm h-100 stats-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+                <div class="card-body text-white text-center p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-start">
+                            <div class="text-white-75 small">Traitées par Moi</div>
+                            <div class="h2 mb-0 fw-bold text-white">{{ stats_serveur.commandes_traitees_aujourd_hui }}</div>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-tasks fa-2x opacity-75"></i>
+                        <div class="bg-white bg-opacity-30 rounded-circle p-3 icon-container">
+                            <i class="fas fa-tasks fa-2x"></i>
                         </div>
                     </div>
                 </div>
+                <div class="card-hover-overlay"></div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-info rounded">
-                    <div class="d-flex justify-content-between text-white">
-                        <div>
-                            <div class="text-white-50 small">Cette Semaine</div>
-                            <div class="h2 mb-0">{{ stats_serveur.commandes_semaine }}</div>
+            <div class="card border-0 shadow-sm h-100 stats-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+                <div class="card-body text-white text-center p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-start">
+                            <div class="text-white-75 small">Cette Semaine</div>
+                            <div class="h2 mb-0 fw-bold text-white">{{ stats_serveur.commandes_semaine }}</div>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-calendar-week fa-2x opacity-75"></i>
+                        <div class="bg-white bg-opacity-30 rounded-circle p-3 icon-container">
+                            <i class="fas fa-calendar-week fa-2x"></i>
                         </div>
                     </div>
                 </div>
+                <div class="card-hover-overlay"></div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
-            <div class="card h-100">
-                <div class="card-body bg-gradient-success rounded">
-                    <div class="d-flex justify-content-between text-white">
-                        <div>
-                            <div class="text-white-50 small">Ce Mois</div>
-                            <div class="h2 mb-0">{{ stats_serveur.commandes_mois }}</div>
+            <div class="card border-0 shadow-sm h-100 stats-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+                <div class="card-body text-white text-center p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-start">
+                            <div class="text-white-75 small">Ce Mois</div>
+                            <div class="h2 mb-0 fw-bold text-white">{{ stats_serveur.commandes_mois }}</div>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-calendar-alt fa-2x opacity-75"></i>
+                        <div class="bg-white bg-opacity-30 rounded-circle p-3 icon-container">
+                            <i class="fas fa-calendar-alt fa-2x"></i>
                         </div>
                     </div>
                 </div>
+                <div class="card-hover-overlay"></div>
             </div>
         </div>
     </div>
 
-    <!-- Vue d'ensemble des commandes -->
+    <!-- Vue d'ensemble des commandes améliorée -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0 text-teal">
                         <i class="fas fa-chart-pie me-2"></i>Vue d'Ensemble des Commandes
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-3">
-                            <div class="card bg-warning text-white h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-clock fa-2x mb-2"></i>
-                                    <h4>{{ commandes_par_statut.en_attente }}</h4>
-                                    <small>En Attente</small>
+                            <div class="card border-0 shadow-sm h-100 hover-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+                                <div class="card-body text-dark text-center p-4">
+                                    <div class="bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
+                                        <i class="fas fa-clock fa-2x text-white"></i>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-white">{{ commandes_par_statut.en_attente }}</h4>
+                                    <small class="text-white-75">En Attente</small>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-info text-white h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-cogs fa-2x mb-2"></i>
-                                    <h4>{{ commandes_par_statut.expediee }}</h4>
-                                    <small>En Cours</small>
+                            <div class="card border-0 shadow-sm h-100 hover-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+                                <div class="card-body text-white text-center p-4">
+                                    <div class=" bg-opacity-30 rounded-circle p-3 d-inline-block mb-3">
+                                        <i class="fas fa-cogs fa-2x"></i>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-white">{{ commandes_par_statut.expediee }}</h4>
+                                    <small class="text-white-75">Expédiées</small>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-success text-white h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
-                                    <h4>{{ commandes_par_statut.livree }}</h4>
-                                    <small>Livrées</small>
+                            <div class="card border-0 shadow-sm h-100 hover-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+                                <div class="card-body text-white text-center p-4">
+                                    <div class=" bg-opacity-30 rounded-circle p-3 d-inline-block mb-3">
+                                        <i class="fas fa-check-circle fa-2x"></i>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-white">{{ commandes_par_statut.livree }}</h4>
+                                    <small class="text-white-75">Livrées</small>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="card bg-danger text-white h-100">
-                                <div class="card-body text-center">
-                                    <i class="fas fa-times-circle fa-2x mb-2"></i>
-                                    <h4>{{ commandes_par_statut.annulee }}</h4>
-                                    <small>Annulées</small>
+                            <div class="card border-0 shadow-sm h-100 hover-card" style="background: linear-gradient(135deg, var(--teal-glacier) 0%, #009a97 100%);">
+                                <div class="card-body text-white text-center p-4">
+                                    <div class=" bg-opacity-30 rounded-circle p-3 d-inline-block mb-3">
+                                        <i class="fas fa-times-circle fa-2x"></i>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-white">{{ commandes_par_statut.annulee }}</h4>
+                                    <small class="text-white-75">Annulées</small>
                                 </div>
                             </div>
                         </div>
@@ -145,52 +157,88 @@
         </div>
     </div>
 
-    <!-- Commandes en attente -->
+    <!-- Commandes en attente améliorées -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0 text-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Commandes en Attente - URGENT
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header  bg-teal text-white border-0 py-3">
+                    <h5 class="mb-0 text-white">
+                        <i class="fas fa-exclamation-triangle me-2 "></i>Commandes en Attente - URGENT
+                        {% if commandes_en_attente %}
+                        <span class="badge bg-white text-teal ms-2">{{ commandes_en_attente.count }}</span>
+                        {% endif %}
                     </h5>
                 </div>
                 <div class="card-body">
                     {% if commandes_en_attente %}
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-hover align-middle">
+                                <thead style="background-color: var(--teal-light);">
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Client</th>
-                                        <th>Date</th>
-                                        <th>Total</th>
-                                        <th>Adresse</th>
-                                       
+                                        <th class="border-0">ID</th>
+                                        <th class="border-0">Client</th>
+                                        <th class="border-0">Date</th>
+                                        <th class="border-0">Total</th>
+                                        <th class="border-0">Adresse</th>
+                                        {% comment %} <th class="border-0 text-end">Actions</th> {% endcomment %}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for commande in commandes_en_attente %}
-                                    <tr class="table-warning">
-                                        <td><strong>#{{ commande.id }}</strong></td>
-                                        <td>{{ commande.utilisateur.username }}</td>
-                                        <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                        <td><strong>{{ commande.total }}fcfa</strong></td>
+                                    <tr class="border-bottom hover-row" style="">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-teal bg-opacity-10 rounded-circle p-2 me-3">
+                                                    <i class="fas fa-clock text-white"></i>
+                                                </div>
+                                                <strong>#{{ commande.id }}</strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium">{{ commande.utilisateur.username }}</div>
+                                            <small class="text-muted">{{ commande.utilisateur.email }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium">{{ commande.date_creation|date:"d/m/Y" }}</div>
+                                            <small class="text-muted">{{ commande.date_creation|date:"H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <strong class="text-teal">{{ commande.total }}fcfa</strong>
+                                        </td>
                                         <td>
                                             {% if commande.adresse_livraison %}
-                                                {{ commande.adresse_livraison.rue }}, {{ commande.adresse_livraison.ville }}
+                                                <small class="text-muted">
+                                                    {{ commande.adresse_livraison.rue }}, {{ commande.adresse_livraison.ville }}
+                                                </small>
                                             {% else %}
                                                 <span class="text-muted">Non définie</span>
                                             {% endif %}
                                         </td>
+                                        {% comment %} <td class="text-end">
+                                            <div class="btn-group">
+                                                <a href="" class="btn btn-teal btn-sm">
+                                                    <i class="fas fa-eye me-1"></i>Détails
+                                                </a>
+                                                <form method="post" action="{% url 'changer_statut' commande.id %}" class="d-inline ms-1">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="statut" value="expediee">
+                                                    <button type="submit" class="btn btn-yellow btn-sm">
+                                                        <i class="fas fa-shipping-fast me-1"></i>Expédier
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td> {% endcomment %}
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                            <h5 class="text-success">Aucune commande en attente</h5>
+                        <div class="text-center py-5">
+                            <div class="bg-teal rounded-circle d-inline-flex p-4 mb-3">
+                                <i class="fas fa-check-circle fa-3x text-white"></i>
+                            </div>
+                            <h5 class="text-teal mb-2">Aucune commande en attente</h5>
                             <p class="text-muted">Toutes les commandes sont traitées !</p>
                         </div>
                     {% endif %}
@@ -199,67 +247,92 @@
         </div>
     </div>
 
-    <!-- Commandes en cours -->
+    <!-- Commandes en cours améliorées -->
     <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0 text-info">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-teal text-white border-0 py-3">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-shipping-fast me-2"></i>Commandes en Cours de Livraison
+                        {% if commandes_en_cours %}
+                        <span class="badge bg-white text-teal ms-2">{{ commandes_en_cours.count }}</span>
+                        {% endif %}
                     </h5>
                 </div>
                 <div class="card-body">
                     {% if commandes_en_cours %}
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-hover align-middle">
+                                <thead style="background-color: var(--teal-light);">
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Client</th>
-                                        <th>Date</th>
-                                        <th>Total</th>
-                                        <th>Adresse</th>
+                                        <th class="border-0">ID</th>
+                                        <th class="border-0">Client</th>
+                                        <th class="border-0">Date</th>
+                                        <th class="border-0">Total</th>
+                                        <th class="border-0">Adresse</th>
+                                        <th class="border-0 text-end">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for commande in commandes_en_cours %}
-                                    <tr class="table-info">
-                                        <td><strong>#{{ commande.id }}</strong></td>
-                                        <td>{{ commande.utilisateur.username }}</td>
-                                        <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                        <td><strong>{{ commande.total }}fcfa</strong></td>
+                                    <tr class="border-bottom hover-row" style="background-color: rgba(0, 184, 181, 0.05);">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-teal bg-opacity-10 rounded-circle p-2 me-3">
+                                                    <i class="fas fa-truck text-white"></i>
+                                                </div>
+                                                <strong>#{{ commande.id }}</strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium">{{ commande.utilisateur.username }}</div>
+                                            <small class="text-muted">{{ commande.utilisateur.email }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium">{{ commande.date_creation|date:"d/m/Y" }}</div>
+                                            <small class="text-muted">{{ commande.date_creation|date:"H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <strong class="text-teal">{{ commande.total }}fcfa</strong>
+                                        </td>
                                         <td>
                                             {% if commande.adresse_livraison %}
-                                                {{ commande.adresse_livraison.rue }}, {{ commande.adresse_livraison.ville }}
+                                                <small class="text-muted">
+                                                    {{ commande.adresse_livraison.rue }}, {{ commande.adresse_livraison.ville }}
+                                                </small>
                                             {% else %}
                                                 <span class="text-muted">Non définie</span>
                                             {% endif %}
                                         </td>
-                                        {% comment %} <td>
-                                            <form method="post" action="{% url 'changer_statut' commande.id %}" class="d-inline">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="statut" value="livree">
-                                                <button type="submit" class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-check"></i> Marquer livrée
-                                                </button>
-                                            </form>
-                                            <form method="post" action="{% url 'changer_statut' commande.id %}" class="d-inline ms-1">
-                                                {% csrf_token %}
-                                                <input type="hidden" name="statut" value="annulee">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
-                                                    <i class="fas fa-times"></i> Annuler
-                                                </button>
-                                            </form>
-                                        </td> {% endcomment %}
+                                        <td class="text-end">
+                                            <div class="btn-group">
+                                                <form method="post" action="{% url 'changer_statut' commande.id %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="statut" value="livree">
+                                                    <button type="submit" class="btn btn-teal btn-sm">
+                                                        <i class="fas fa-check me-1"></i> Marquer livrée
+                                                    </button>
+                                                </form>
+                                                <form method="post" action="{% url 'changer_statut' commande.id %}" class="d-inline ms-1">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="statut" value="annulee">
+                                                    <button type="submit" class="btn btn-outline-pink btn-sm" onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                                                        <i class="fas fa-times me-1"></i> Annuler
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-truck fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Aucune commande en cours</h5>
+                        <div class="text-center py-5">
+                            <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                                <i class="fas fa-truck fa-3x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted mb-2">Aucune commande en cours</h5>
                             <p class="text-muted">Les commandes en cours de livraison apparaîtront ici</p>
                         </div>
                     {% endif %}
@@ -268,37 +341,55 @@
         </div>
     </div>
 
-    <!-- Historique des livraisons -->
+    <!-- Historique des livraisons amélioré -->
     <div class="row g-4">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0 text-success">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-teal text-white border-0 py-3">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-history me-2"></i>Dernières Livraisons Effectuées
+                        {% if commandes_livrees %}
+                        <span class="badge bg-white text-teal ms-2">{{ commandes_livrees.count }}</span>
+                        {% endif %}
                     </h5>
                 </div>
                 <div class="card-body">
                     {% if commandes_livrees %}
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-hover align-middle">
+                                <thead style="background-color: var(--teal-light);">
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Client</th>
-                                        <th>Date commande</th>
-                                        <th>Total</th>
-                                        <th>Statut</th>
+                                        <th class="border-0">ID</th>
+                                        <th class="border-0">Client</th>
+                                        <th class="border-0">Date commande</th>
+                                        <th class="border-0">Total</th>
+                                        <th class="border-0">Statut</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for commande in commandes_livrees %}
-                                    <tr class="table-success">
-                                        <td><strong>#{{ commande.id }}</strong></td>
-                                        <td>{{ commande.utilisateur.username }}</td>
-                                        <td>{{ commande.date_creation|date:"d/m/Y H:i" }}</td>
-                                        <td><strong>{{ commande.total }}fcfa</strong></td>
+                                    <tr class="border-bottom hover-row">
                                         <td>
-                                            <span class="badge bg-success">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-teal bg-opacity-10 rounded-circle p-2 me-3">
+                                                    <i class="fas fa-check text-white"></i>
+                                                </div>
+                                                <strong>#{{ commande.id }}</strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium">{{ commande.utilisateur.username }}</div>
+                                            <small class="text-muted">{{ commande.utilisateur.email }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium">{{ commande.date_creation|date:"d/m/Y" }}</div>
+                                            <small class="text-muted">{{ commande.date_creation|date:"H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <strong class="text-teal">{{ commande.total }}fcfa</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-teal text-white">
                                                 <i class="fas fa-check me-1"></i>Livrée
                                             </span>
                                         </td>
@@ -308,9 +399,11 @@
                             </table>
                         </div>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-box fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Aucune livraison récente</h5>
+                        <div class="text-center py-5">
+                            <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                                <i class="fas fa-box fa-3x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted mb-2">Aucune livraison récente</h5>
                             <p class="text-muted">L'historique des livraisons apparaîtra ici</p>
                         </div>
                     {% endif %}
@@ -320,40 +413,211 @@
     </div>
 </div>
 
+<!-- Styles personnalisés améliorés -->
 <style>
-.card {
-    transition: transform 0.2s;
-    border: none;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+    --teal-light: rgba(0, 184, 181, 0.1);
 }
-.card:hover {
-    transform: translateY(-2px);
+
+/* Couleurs utilitaires */
+.bg-teal { background-color: var(--teal-glacier) !important; }
+.text-teal { color: var(--teal-glacier) !important; }
+.bg-pink { background-color: var(--pink-swoosh) !important; }
+.text-pink { color: var(--pink-swoosh) !important; }
+.bg-yellow { background-color: var(--yellow-canaan) !important; }
+.text-yellow { color: var(--yellow-canaan) !important; }
+
+.btn-teal {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
 }
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+.btn-teal:hover {
+    background-color: var(--teal-dark);
+    border-color: var(--teal-dark);
+    color: white;
 }
-.bg-gradient-danger {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+
+.btn-yellow {
+    background-color: var(--yellow-canaan);
+    border-color: var(--yellow-canaan);
+    color: var(--black-shadow);
 }
-.bg-gradient-info {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+
+.btn-yellow:hover {
+    background-color: #fbc02d;
+    border-color: #fbc02d;
+    color: var(--black-shadow);
 }
-.bg-gradient-success {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+
+.btn-outline-yellow {
+    border-color: var(--yellow-canaan);
+    color: var(--yellow-canaan);
 }
-.table-warning {
-    animation: pulse-warning 2s infinite;
+
+.btn-outline-yellow:hover {
+    background-color: var(--yellow-canaan);
+    color: var(--black-shadow);
 }
-@keyframes pulse-warning {
-    0% { background-color: rgba(255, 193, 7, 0.1); }
-    50% { background-color: rgba(255, 193, 7, 0.2); }
-    100% { background-color: rgba(255, 193, 7, 0.1); }
+
+.btn-outline-pink {
+    border-color: var(--pink-swoosh);
+    color: var(--pink-swoosh);
 }
-.btn {
+
+.btn-outline-pink:hover {
+    background-color: var(--pink-swoosh);
+    color: white;
+}
+
+/* Cartes de statistiques */
+.stats-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.icon-container {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.stats-card .icon-container i {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Effets de hover pour les cartes de stats */
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.6s ease;
+}
+
+.stats-card:hover::before {
+    left: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 184, 181, 0.4) !important;
+    background: linear-gradient(135deg, var(--teal-dark) 0%, #006664 100%) !important;
+}
+
+.stats-card:hover .icon-container {
+    background: rgba(255, 255, 255, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.1);
+    animation: iconPulse 2s infinite;
+}
+
+.stats-card:hover .icon-container i {
+    transform: scale(1.1);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+}
+
+.card-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(233, 30, 99, 0.05) 0%, rgba(253, 203, 5, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.stats-card:hover .card-hover-overlay {
+    opacity: 1;
+}
+
+/* Cartes de contenu */
+.hover-card {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Lignes de tableau avec hover */
+.hover-row {
     transition: all 0.2s ease;
 }
-.btn:hover {
-    transform: translateY(-1px);
+
+.hover-row:hover {
+    background-color: var(--teal-light) !important;
+}
+
+/* Badges */
+.badge.bg-teal { background-color: var(--teal-glacier) !important; }
+.badge.bg-pink { background-color: var(--pink-swoosh) !important; }
+.badge.bg-yellow { 
+    background-color: var(--yellow-canaan) !important; 
+    color: var(--black-shadow) !important;
+}
+
+/* Text colors */
+.text-white-75 { color: rgba(255, 255, 255, 0.75) !important; }
+.text-dark-75 { color: rgba(0, 0, 0, 0.75) !important; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-card .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .stats-card .icon-container {
+        padding: 0.75rem !important;
+    }
+    
+    .stats-card .fa-2x {
+        font-size: 1.5em !important;
+    }
+    
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        margin: 0 !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .card-header h5 {
+        font-size: 1rem;
+    }
 }
 </style>
 
@@ -364,6 +628,23 @@ document.addEventListener('DOMContentLoaded', function() {
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
+    
+    // Animation pour les lignes urgentes
+    const urgentRows = document.querySelectorAll('.table-warning');
+    urgentRows.forEach(row => {
+        row.style.animation = 'pulseUrgent 2s infinite';
+    });
 });
+
+// Animation pour les lignes urgentes
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes pulseUrgent {
+        0% { background-color: rgba(253, 203, 5, 0.1); }
+        50% { background-color: rgba(253, 203, 5, 0.2); }
+        100% { background-color: rgba(253, 203, 5, 0.1); }
+    }
+`;
+document.head.appendChild(style);
 </script>
 {% endblock %}

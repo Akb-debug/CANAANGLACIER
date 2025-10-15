@@ -2,76 +2,194 @@
 {% load static %}
 
 {% block content %}
+<!-- Bannière Hero -->
+<section class="payment-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="hero-title">
+                    <i class="fas fa-lock me-3"></i>Paiement Sécurisé
+                </h1>
+                <p class="hero-subtitle">
+                    Finalisez votre commande en toute sécurité
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="payment-meta">
+                    <div class="order-number">Commande #{{ commande.id }}</div>
+                    <div class="order-amount">{{ commande.total }} FCFA</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
+        <div class="col-md-8 col-lg-6">
+            <div class="card payment-card">
                 <div class="card-header bg-glacier text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-credit-card me-2"></i>
-                        Paiement par Carte Bancaire
-                    </h4>
+                    <div class="d-flex align-items-center">
+                        <div class="payment-icon me-3">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1">Paiement par Carte Bancaire</h4>
+                            <small class="opacity-75">Transactions 100% sécurisées</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
+                    <!-- Logos des cartes -->
                     <div class="text-center mb-4">
-                        <img src="{% static 'images/cards.png' %}" alt="Cartes bancaires" height="40">
+                        <div class="card-logos">
+                            <img src="{% static 'images/visa.png' %}" alt="Visa" height="30" class="me-3">
+                            <img src="{% static 'images/mastercard.png' %}" alt="Mastercard" height="30" class="me-3">
+                            <img src="{% static 'images/cb.png' %}" alt="Carte Bleue" height="30">
+                        </div>
                     </div>
                     
-                    <div class="alert alert-info">
-                        <i class="fas fa-lock me-2"></i>
-                        Transactions sécurisées avec cryptage SSL
+                    <!-- Alertes de sécurité -->
+                    <div class="security-alerts mb-4">
+                        <div class="alert alert-success">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-shield-alt me-3 fs-4"></i>
+                                <div>
+                                    <strong>Paiement sécurisé SSL</strong>
+                                    <p class="mb-0 small">Vos données bancaires sont cryptées et protégées</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     
+                    <!-- Récapitulatif -->
                     <div class="payment-summary mb-4">
-                        <h5>Récapitulatif de paiement</h5>
-                        <div class="d-flex justify-content-between">
-                            <span>Montant à payer:</span>
-                            <strong>{{ commande.total }} FCFA</strong>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span>Numéro de commande:</span>
-                            <strong>#{{ commande.id }}</strong>
+                        <h5 class="summary-title">
+                            <i class="fas fa-receipt me-2"></i>Récapitulatif de paiement
+                        </h5>
+                        <div class="summary-content">
+                            <div class="summary-item">
+                                <span>Numéro de commande:</span>
+                                <strong>#{{ commande.id }}</strong>
+                            </div>
+                            <div class="summary-item">
+                                <span>Montant à payer:</span>
+                                <strong class="amount">{{ commande.total }} FCFA</strong>
+                            </div>
+                            <div class="summary-item">
+                                <span>Date:</span>
+                                <strong>{{ commande.date_creation|date:"d/m/Y" }}</strong>
+                            </div>
                         </div>
                     </div>
                     
-                    <form method="post" action="{% url 'traiter_paiement' commande.id %}">
+                    <!-- Formulaire de paiement -->
+                    <form method="post" action="{% url 'traiter_paiement' commande.id %}" class="payment-form">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="cardNumber" class="form-label">Numéro de carte</label>
-                            <input type="text" class="form-control" id="cardNumber" name="cardNumber" 
-                                   placeholder="1234 5678 9012 3456" required pattern="[0-9\s]{13,19}">
-                        </div>
                         
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="expiry" class="form-label">Date d'expiration</label>
-                                <input type="text" class="form-control" id="expiry" name="expiry" 
-                                       placeholder="MM/AA" required pattern="(0[1-9]|1[0-2])\/[0-9]{2}">
+                        <!-- Numéro de carte -->
+                        <div class="form-group mb-4">
+                            <label for="cardNumber" class="form-label fw-bold">
+                                <i class="fas fa-credit-card me-2"></i>Numéro de carte
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control form-control-lg" id="cardNumber" name="cardNumber" 
+                                       placeholder="1234 5678 9012 3456" required pattern="[0-9\s]{13,19}"
+                                       maxlength="19">
+                                <span class="input-group-text">
+                                    <i class="fas fa-credit-card text-muted"></i>
+                                </span>
                             </div>
+                            <small class="form-text text-muted">16 chiffres sans espace</small>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <!-- Date d'expiration -->
                             <div class="col-md-6">
-                                <label for="cvv" class="form-label">CVV</label>
-                                <input type="text" class="form-control" id="cvv" name="cvv" 
-                                       placeholder="123" required pattern="[0-9]{3,4}">
+                                <div class="form-group">
+                                    <label for="expiry" class="form-label fw-bold">
+                                        <i class="fas fa-calendar me-2"></i>Date d'expiration
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="expiry" name="expiry" 
+                                               placeholder="MM/AA" required pattern="(0[1-9]|1[0-2])\/[0-9]{2}"
+                                               maxlength="5">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-calendar-alt text-muted"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Code CVV -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="cvv" class="form-label fw-bold">
+                                        <i class="fas fa-lock me-2"></i>Code de sécurité
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="cvv" name="cvv" 
+                                               placeholder="CVV" required pattern="[0-9]{3,4}"
+                                               maxlength="4">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-question-circle text-muted" 
+                                               data-bs-toggle="tooltip" 
+                                               title="3 chiffres au dos de votre carte"></i>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="cardName" class="form-label">Titulaire de la carte</label>
-                            <input type="text" class="form-control" id="cardName" name="cardName" required>
+                        <!-- Nom du titulaire -->
+                        <div class="form-group mb-4">
+                            <label for="cardName" class="form-label fw-bold">
+                                <i class="fas fa-user me-2"></i>Titulaire de la carte
+                            </label>
+                            <input type="text" class="form-control form-control-lg" id="cardName" name="cardName" 
+                                   placeholder="Nom tel qu'affiché sur la carte" required>
                         </div>
                         
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-glacier btn-lg">
+                        <!-- Boutons d'action -->
+                        <div class="payment-actions">
+                            <button type="submit" class="btn btn-payment btn-lg w-100 mb-3">
                                 <i class="fas fa-lock me-2"></i>
-                                Payer {{ commande.total }} FCFA
+                                Confirmer le paiement de {{ commande.total }} FCFA
                             </button>
                             
-                            <a href="{% url 'commande_detail' commande.id %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>
-                                Retour aux détails de la commande
-                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'commande_detail' commande.id %}" class="btn btn-outline-payment flex-fill">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Retour
+                                </a>
+                                <a href="{% url 'mon_compte' %}" class="btn btn-outline-secondary flex-fill">
+                                    <i class="fas fa-list me-2"></i>
+                                    Mes commandes
+                                </a>
+                            </div>
                         </div>
                     </form>
+                    
+                    <!-- Informations de sécurité -->
+                    <div class="security-info mt-4 pt-3 border-top">
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3">
+                                <i class="fas fa-shield-alt text-success fs-4 mb-2"></i>
+                                <h6 class="mb-1">Sécurisé</h6>
+                                <small class="text-muted">Cryptage SSL 256-bit</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <i class="fas fa-lock text-success fs-4 mb-2"></i>
+                                <h6 class="mb-1">Protégé</h6>
+                                <small class="text-muted">Données confidentielles</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <i class="fas fa-check-circle text-success fs-4 mb-2"></i>
+                                <h6 class="mb-1">Garanti</h6>
+                                <small class="text-muted">Paiement vérifié</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -79,22 +197,334 @@
 </div>
 
 <style>
-.payment-summary {
-    background-color: var(--teal-light);
+/* Bannière Hero */
+.payment-hero {
+    background: url('{% static "images/banner-payment.jpg" %}') center/cover no-repeat;
+    padding: 150px 0 60px;
+    color: white;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.payment-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1;
+}
+
+.payment-hero .container {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+}
+
+.payment-meta {
+    text-align: right;
+}
+
+.order-number {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.order-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--yellow-canaan);
+}
+
+/* Carte de paiement */
+.payment-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.payment-card .card-header {
+    border: none;
+    padding: 25px 30px;
+}
+
+.payment-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.payment-card .card-body {
+    padding: 30px;
+}
+
+/* Logos des cartes */
+.card-logos {
     padding: 15px;
-    border-radius: 8px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+/* Alertes de sécurité */
+.security-alerts .alert {
+    border: none;
+    border-radius: 10px;
+    border-left: 4px solid #28a745;
+}
+
+/* Récapitulatif */
+.payment-summary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+    border-radius: 12px;
     border-left: 4px solid var(--teal-glacier);
 }
 
+.summary-title {
+    color: var(--teal-glacier);
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-item .amount {
+    color: var(--teal-glacier);
+    font-size: 1.2rem;
+}
+
+/* Formulaire */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    color: #333;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
 .form-control {
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
 .form-control:focus {
     border-color: var(--teal-glacier);
-    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.15);
+    transform: translateY(-1px);
+}
+
+.input-group-text {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-left: none;
+}
+
+.input-group .form-control {
+    border-right: none;
+}
+
+/* Boutons */
+.btn-payment {
+    background: linear-gradient(135deg, var(--teal-glacier), #009c99);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 15px 25px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-payment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 184, 181, 0.3);
+    color: white;
+}
+
+.btn-outline-payment {
+    border: 2px solid var(--teal-glacier);
+    color: var(--teal-glacier);
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-payment:hover {
+    background: var(--teal-glacier);
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Informations de sécurité */
+.security-info {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .payment-hero {
+        padding: 60px 0 40px;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .payment-meta {
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .payment-card .card-body {
+        padding: 20px;
+    }
+    
+    .payment-actions .d-flex {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title {
+        font-size: 1.6rem;
+    }
+    
+    .order-amount {
+        font-size: 1.3rem;
+    }
+    
+    .form-control {
+        padding: 10px 12px;
+    }
+    
+    .btn-payment {
+        padding: 12px 20px;
+    }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.payment-card {
+    animation: fadeInUp 0.6s ease;
+}
+
+/* Accessibilité */
+@media (prefers-reduced-motion: reduce) {
+    .payment-card,
+    .form-control,
+    .btn-payment,
+    .btn-outline-payment {
+        transition: none;
+        animation: none;
+    }
+    
+    .btn-payment:hover,
+    .btn-outline-payment:hover {
+        transform: none;
+    }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Formatage du numéro de carte
+    const cardNumberInput = document.getElementById('cardNumber');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ');
+            if (formattedValue) {
+                e.target.value = formattedValue;
+            }
+        });
+    }
+    
+    // Formatage de la date d'expiration
+    const expiryInput = document.getElementById('expiry');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                e.target.value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+        });
+    }
+    
+    // Activation des tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Validation en temps réel
+    const inputs = document.querySelectorAll('input[required]');
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value && !this.checkValidity()) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

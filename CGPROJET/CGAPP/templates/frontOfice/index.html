@@ -245,18 +245,18 @@
     <div class="hero-content-container position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-lg-8 col-md-10 text-center text-white">
-                    <h1 class="hero-title display-3 fw-bold mb-4 animate__animated animate__fadeInDown">
+                <div class="col-12 col-sm-10 col-md-8 col-lg-6 text-center text-white">
+                    <h1 class="hero-title fw-bold mb-3 mb-md-4">
                         Découvrez <span class="text-yellow-canaan">Canaan Glacier</span>
                     </h1>
-                    <p class="hero-subtitle lead mb-5 animate__animated animate__fadeIn animate__delay-1s">
+                    <p class="hero-subtitle mb-4 mb-md-5">
                         L'art de la glace artisanale avec des saveurs locales exceptionnelles
                     </p>
-                    <div class="d-flex justify-content-center gap-3 animate__animated animate__fadeIn animate__delay-2s">
-                        <a href="{% url 'produits' %}" class="btn btn-lg btn-teal rounded-pill px-4 py-2">
+                    <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 gap-sm-3">
+                        <a href="{% url 'produits' %}" class="btn btn-teal rounded-pill px-3 px-md-4 py-2">
                             <i class="fas fa-ice-cream me-2"></i> Nos produits
                         </a>
-                        <a href="#categories" class="btn btn-lg btn-pink-outline rounded-pill px-4 py-2">
+                        <a href="#categories" class="btn btn-pink-outline rounded-pill px-3 px-md-4 py-2">
                             <i class="fas fa-list me-2"></i> Catégories
                         </a>
                     </div>
@@ -266,15 +266,22 @@
     </div>
     
     <!-- Flèche vers le bas -->
-    <a href="#categories" class="position-absolute bottom-0 start-50 translate-middle-x mb-5 z-3 text-white" style="font-size: 2rem;">
+    <a href="#categories" class="position-absolute bottom-0 start-50 translate-middle-x mb-3 mb-md-5 z-3 text-white scroll-indicator">
         <i class="fas fa-chevron-down animate__animated animate__bounce animate__infinite"></i>
     </a>
 </section>
 
 <style>
+    :root {
+        --yellow-canaan: #FFD700;
+        --teal-glacier: #00C2B3;
+        --pink-swoosh: #FF6B9D;
+    }
+    
     .hero-section {
         height: 100vh;
-        min-height: 600px;
+        min-height: 500px;
+        max-height: 900px;
         overflow: hidden;
     }
     
@@ -300,12 +307,14 @@
     
     .hero-title {
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-size: clamp(2rem, 7vw, 4rem);
+        line-height: 1.2;
     }
     
     .hero-subtitle {
         text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-        font-size: clamp(1rem, 2vw, 1.5rem);
+        font-size: clamp(1rem, 3vw, 1.5rem);
+        line-height: 1.4;
     }
     
     .text-yellow-canaan {
@@ -317,40 +326,96 @@
         background-color: var(--teal-glacier);
         border-color: var(--teal-glacier);
         color: white;
+        font-size: clamp(0.9rem, 2vw, 1rem);
+        transition: all 0.3s ease;
     }
     
     .btn-teal:hover {
         background-color: #009c99;
         border-color: #009c99;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
     
     .btn-pink-outline {
-        border-color: var(--pink-swoosh);
+        border: 2px solid var(--pink-swoosh);
         color: white;
+        background-color: transparent;
+        font-size: clamp(0.9rem, 2vw, 1rem);
+        transition: all 0.3s ease;
     }
     
     .btn-pink-outline:hover {
         background-color: var(--pink-swoosh);
         color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
     
-    @media (max-width: 768px) {
+    .scroll-indicator {
+        font-size: 1.5rem;
+    }
+    
+    /* Tablettes */
+    @media (min-width: 768px) and (max-width: 1023px) {
         .hero-section {
-            min-height: 500px;
+            min-height: 600px;
+        }
+        
+        .scroll-indicator {
+            font-size: 1.75rem;
+        }
+    }
+    
+    /* Desktop */
+    @media (min-width: 1024px) {
+        .hero-section {
+            min-height: 700px;
+        }
+        
+        .scroll-indicator {
+            font-size: 2rem;
+        }
+    }
+    
+    /* Mobile en mode paysage */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .hero-section {
+            min-height: 400px;
+            height: 100vh;
         }
         
         .hero-content-container {
-            padding-top: 80px;
+            padding-top: 60px;
         }
         
-        .d-flex {
-            flex-direction: column;
-            gap: 15px !important;
+        .hero-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            margin-bottom: 1rem !important;
+        }
+        
+        .scroll-indicator {
+            display: none;
+        }
+    }
+    
+    /* Très petits écrans */
+    @media (max-width: 360px) {
+        .hero-title {
+            font-size: 1.75rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 0.9rem;
         }
         
         .btn {
-            width: 100%;
-            max-width: 250px;
+            padding: 0.5rem 1rem !important;
         }
     }
 </style>
@@ -465,7 +530,7 @@
                 
                 <!-- Overlay au hover -->
                 <div class="product-overlay d-flex align-items-center justify-content-center">
-                    <a href="{% url 'detail_produit_client' produit.id %}" 
+                    <a href="{% url 'produit_detail' produit.id %}" 
                        class="btn btn-outline-light rounded-pill px-4 py-2 view-details-btn">
                         <i class="fas fa-eye me-2"></i> Voir détails
                     </a>
@@ -808,7 +873,7 @@
                 
                 <!-- Overlay au hover -->
                 <div class="product-overlay d-flex align-items-center justify-content-center">
-                    <a href="#" 
+                    <a href="{% url 'produit_detail' produit.id %}" 
                        class="btn btn-outline-light rounded-pill px-4 py-2 view-details-btn">
                         <i class="fas fa-eye me-2"></i> Voir détails
                     </a>

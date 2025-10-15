@@ -8,8 +8,8 @@
     <div class="row">
         <div class="col-12">
             <div class="card h-100">
-                <div class="card-header bg-gradient-primary text-white">
-                    <h4 class="mb-0">
+                <div class="card-header bg-gradient-teal text-white">
+                    <h4 class="mb-0 text-white">
                         <i class="fas fa-user-plus me-2"></i>
                         Créer un nouveau Gérant
                     </h4>
@@ -17,9 +17,9 @@
                 <div class="card-body">
                     <!-- Bouton retour -->
                     <div class="mb-4">
-                        <a href="{% url 'dashboard_admin' %}" class="btn btn-secondary">
+                        <a href="{% url 'liste_utilisateurs' %}" class="btn btn-outline-teal">
                             <i class="fas fa-arrow-left me-1"></i>
-                            Retour au Dashboard
+                            Retour à la liste
                         </a>
                     </div>
 
@@ -29,7 +29,7 @@
                         
                         <!-- Informations personnelles -->
                         <div class="col-12">
-                            <h5 class="text-primary border-bottom pb-2 mb-3">
+                            <h5 class="text-teal border-bottom pb-2 mb-3">
                                 <i class="fas fa-user me-2"></i>
                                 Informations personnelles
                             </h5>
@@ -98,7 +98,7 @@
 
                         <!-- Informations de connexion -->
                         <div class="col-12 mt-4">
-                            <h5 class="text-primary border-bottom pb-2 mb-3">
+                            <h5 class="text-teal border-bottom pb-2 mb-3">
                                 <i class="fas fa-key me-2"></i>
                                 Informations de connexion
                             </h5>
@@ -159,7 +159,7 @@
                         <!-- Erreurs générales du formulaire -->
                         {% if form.non_field_errors %}
                             <div class="col-12">
-                                <div class="alert alert-danger">
+                                <div class="alert alert-teal">
                                     <i class="fas fa-exclamation-circle me-2"></i>
                                     {{ form.non_field_errors }}
                                 </div>
@@ -169,11 +169,11 @@
                         <!-- Boutons d'action -->
                         <div class="col-12 mt-4">
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-success">
+                                <button type="submit" class="btn btn-teal">
                                     <i class="fas fa-save me-1"></i>
                                     Créer le Gérant
                                 </button>
-                                <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-secondary">
+                                <a href="{% url 'dashboard_admin' %}" class="btn btn-teal-outline">
                                     <i class="fas fa-times me-1"></i>
                                     Annuler
                                 </a>
@@ -187,21 +187,89 @@
 </div>
 
 <style>
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+}
+
 .card {
     transition: transform 0.2s;
     border: none;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 184, 181, 0.15);
 }
 .card:hover {
     transform: translateY(-2px);
 }
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+/* Classes de couleur teal-glacier */
+.bg-gradient-teal {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--teal-dark) 100%) !important;
 }
+
+.text-teal {
+    color: var(--teal-glacier) !important;
+}
+
+.btn-teal {
+    background-color: var(--teal-glacier) !important;
+    border-color: var(--teal-glacier) !important;
+    color: white !important;
+}
+
+.btn-teal:hover {
+    background-color: var(--teal-dark) !important;
+    border-color: var(--teal-dark) !important;
+    color: white !important;
+    transform: translateY(-1px);
+}
+
+.btn-teal-outline {
+    background-color: transparent !important;
+    border-color: var(--teal-glacier) !important;
+    color: var(--teal-glacier) !important;
+}
+
+.btn-teal-outline:hover {
+    background-color: var(--teal-glacier) !important;
+    border-color: var(--teal-glacier) !important;
+    color: white !important;
+}
+.btn-outline-teal {
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+    background-color: transparent;
+}
+
+.btn-outline-teal:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+.btn-teal-secondary {
+    background-color: var(--teal-dark) !important;
+    border-color: var(--teal-dark) !important;
+    color: white !important;
+}
+
+.btn-teal-secondary:hover {
+    background-color: var(--teal-glacier) !important;
+    border-color: var(--teal-glacier) !important;
+    color: white !important;
+}
+
+.alert-teal {
+    background-color: rgba(0, 184, 181, 0.1) !important;
+    border-color: var(--teal-glacier) !important;
+    color: var(--teal-dark) !important;
+}
+
 .form-control:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: var(--teal-glacier) !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25) !important;
 }
+
 .invalid-feedback {
     display: none;
     width: 100%;
@@ -212,9 +280,11 @@
 .invalid-feedback.d-block {
     display: block;
 }
+
 .border-bottom {
     border-bottom: 1px solid #dee2e6 !important;
 }
+
 .btn {
     transition: all 0.2s ease;
 }

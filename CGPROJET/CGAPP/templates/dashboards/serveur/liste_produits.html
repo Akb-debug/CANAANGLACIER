@@ -5,81 +5,121 @@
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-12">
-            <div class="bg-light rounded h-100 p-4">
+            <!-- Breadcrumb amélioré -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb bg-light rounded p-3">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'home' %}" class="text-decoration-none">
+                            <i class="fas fa-home me-1"></i>Accueil
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        <i class="fas fa-box me-1"></i>Catalogue Produits
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="bg-white rounded-3 shadow-sm p-4">
+             
+
+                <!-- En-tête de la liste -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="mb-0">Liste des Produits ({{ total_produits }})</h4>
+                    <div>
+                        <h4 class="mb-0 text-teal">
+                            <i class="fas fa-boxes me-2"></i>Catalogue des Produits
+                        </h4>
+                        <p class="text-muted mb-0">Total: {{ total_produits }} produits</p>
+                    </div>
+
                 </div>
                 
                 {% if produits %}
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
                     {% for produit in produits %}
                     <div class="col">
-                        <div class="card h-100 product-card">
-                            <div class="position-relative">
+                        <div class="card border-0 shadow-sm h-100 product-card">
+                            <div class="position-relative overflow-hidden">
                                 {% if produit.image %}
                                 <img src="{{ produit.image.url }}" class="card-img-top product-image" alt="{{ produit.nom }}">
                                 {% else %}
-                                <div class="card-img-top product-image bg-secondary d-flex align-items-center justify-content-center">
-                                    <i class="fas fa-image fa-3x text-light"></i>
+                                <div class="card-img-top product-image bg-light d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
                                 </div>
                                 {% endif %}
+                                
+                                <!-- Overlay de hover -->
+                                <div class="product-overlay"></div>
                                 
                                 <!-- Badges pour statut promotion et stock -->
                                 <div class="position-absolute top-0 start-0 m-2">
                                     {% if produit.promotion > 0 %}
-                                    <span class="badge bg-danger">-{{ produit.promotion }}%</span>
+                                    <span class="badge bg-pink text-white">
+                                        <i class="fas fa-bolt me-1"></i>-{{ produit.promotion }}%
+                                    </span>
                                     {% endif %}
                                 </div>
                                 <div class="position-absolute top-0 end-0 m-2">
                                     {% if not produit.en_stock %}
-                                    <span class="badge bg-dark">Rupture</span>
+                                    <span class="badge bg-dark">
+                                        <i class="fas fa-times me-1"></i>Rupture
+                                    </span>
                                     {% elif produit.stock_faible %}
-                                    <span class="badge bg-warning text-dark">Faible</span>
+                                    <span class="badge bg-yellow text-dark">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Stock faible
+                                    </span>
                                     {% else %}
-                                    <span class="badge bg-success">Stock</span>
+                                    <span class="badge bg-teal text-white">
+                                        <i class="fas fa-check me-1"></i>En stock
+                                    </span>
                                     {% endif %}
                                 </div>
+                                
                             </div>
                             
                             <div class="card-body">
-                                <h6 class="card-title">{{ produit.nom }}</h6>
-                                <p class="card-text text-muted small mb-2">
-                                    {{ produit.description|truncatewords:10 }}
+                                <h6 class="card-title text-dark mb-2">{{ produit.nom }}</h6>
+                                <p class="card-text text-muted small mb-3">
+                                    {{ produit.description|truncatewords:12 }}
                                 </p>
                                 
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
                                     <div>
                                         {% if produit.promotion > 0 %}
                                         <div>
-                                            <span class="text-danger fw-bold">{{ produit.prix }} FCFA</span>
-                                            <small class="text-muted text-decoration-line-through ms-1">
-                                                {{ produit.ancien_prix }} FCFA
+                                            <span class="text-teal fw-bold fs-5">{{ produit.prix_promotion }} FCFA</span>
+                                            <small class="text-muted text-decoration-line-through ms-2">
+                                                {{ produit.prix }} FCFA
                                             </small>
                                         </div>
                                         {% else %}
-                                        <span class="fw-bold">{{ produit.prix }} FCFA</span>
+                                        <span class="text-teal fw-bold fs-5">{{ produit.prix }} FCFA</span>
                                         {% endif %}
                                     </div>
                                     
                                     <div class="text-end">
-                                        <small class="text-muted d-block">Qté: {{ produit.quantite_disponible }}</small>
+                                        <small class="text-muted d-block">
+                                            <i class="fas fa-cubes me-1"></i>{{ produit.quantite_disponible }} unités
+                                        </small>
                                     </div>
                                 </div>
                                 
                                 {% if produit.categorie %}
                                 <div class="mt-2">
-                                    <span class="badge bg-info text-dark">{{ produit.categorie }}</span>
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="fas fa-tag me-1"></i>{{ produit.categorie.nom }}
+                                    </span>
                                 </div>
                                 {% endif %}
                             </div>
                             
-                            <div class="card-footer bg-transparent">
+                            <div class="card-footer bg-transparent border-0 pt-0">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <small class="text-muted">
-                                        Ajouté le {{ produit.date_creation|date:"d/m/Y" }}
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ produit.date_creation|date:"d/m/Y" }}
                                     </small>
                                     {% if produit.est_populaire %}
-                                    <span class="badge bg-warning text-dark">
+                                    <span class="badge bg-yellow text-dark">
                                         <i class="fas fa-star me-1"></i>Populaire
                                     </span>
                                     {% endif %}
@@ -90,42 +130,57 @@
                     {% endfor %}
                 </div>
                 
-                <!-- Pagination -->
+                <!-- Pagination améliorée -->
                 {% if is_paginated %}
-                <nav class="d-flex justify-content-center mt-4">
+                <nav class="d-flex justify-content-center mt-5">
                     <ul class="pagination">
                         {% if page_obj.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                            <a class="page-link text-teal" href="?page={{ page_obj.previous_page_number }}">
+                                <i class="fas fa-chevron-left me-1"></i>Précédent
+                            </a>
                         </li>
                         {% endif %}
                         
                         {% for num in page_obj.paginator.page_range %}
                         {% if page_obj.number == num %}
                         <li class="page-item active">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            <a class="page-link bg-teal border-teal" href="?page={{ num }}">{{ num }}</a>
                         </li>
-                        {% else %}
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            <a class="page-link text-teal" href="?page={{ num }}">{{ num }}</a>
                         </li>
                         {% endif %}
                         {% endfor %}
                         
                         {% if page_obj.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                            <a class="page-link text-teal" href="?page={{ page_obj.next_page_number }}">
+                                Suivant<i class="fas fa-chevron-right ms-1"></i>
+                            </a>
                         </li>
                         {% endif %}
                     </ul>
                 </nav>
+                
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                    </small>
+                </div>
                 {% endif %}
                 
                 {% else %}
                 <div class="text-center py-5">
-                    <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
-                    <h5 class="text-muted">Aucun produit disponible</h5>
-                    <p class="text-muted">Aucun produit n'a été ajouté pour le moment.</p>
+                    <div class="bg-light rounded-circle d-inline-flex p-4 mb-3">
+                        <i class="fas fa-box-open fa-3x text-muted"></i>
+                    </div>
+                    <h5 class="text-muted mb-2">Aucun produit disponible</h5>
+                    <p class="text-muted mb-4">Aucun produit n'a été ajouté pour le moment.</p>
+                    <button class="btn btn-teal btn-lg">
+                        <i class="fas fa-plus me-2"></i>Ajouter le premier produit
+                    </button>
                 </div>
                 {% endif %}
             </div>
@@ -133,17 +188,247 @@
     </div>
 </div>
 
+<!-- Styles personnalisés améliorés -->
 <style>
-.product-card {
-    transition: transform 0.2s, box-shadow 0.2s;
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
 }
-.product-card:hover {
+
+/* Couleurs utilitaires */
+.bg-teal { background-color: var(--teal-glacier) !important; }
+.text-teal { color: var(--teal-glacier) !important; }
+.bg-pink { background-color: var(--pink-swoosh) !important; }
+.text-pink { color: var(--pink-swoosh) !important; }
+.bg-yellow { background-color: var(--yellow-canaan) !important; }
+.text-yellow { color: var(--yellow-canaan) !important; }
+
+.btn-teal {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-teal:hover {
+    background-color: var(--teal-dark);
+    border-color: var(--teal-dark);
+    color: white;
+}
+
+.btn-outline-teal {
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+}
+
+.btn-outline-teal:hover {
+    background-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-outline-pink {
+    border-color: var(--pink-swoosh);
+    color: var(--pink-swoosh);
+}
+
+.btn-outline-pink:hover {
+    background-color: var(--pink-swoosh);
+    color: white;
+}
+
+/* Cartes de statistiques */
+.stats-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.icon-container {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.stats-card .icon-container i {
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+/* Effets de hover pour les cartes de stats */
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.6s ease;
+}
+
+.stats-card:hover::before {
+    left: 100%;
+}
+
+.stats-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0, 184, 181, 0.4) !important;
+    background: linear-gradient(135deg, var(--teal-dark) 0%, #006664 100%) !important;
 }
+
+.stats-card:hover .icon-container {
+    background: rgba(255, 255, 255, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.1);
+    animation: iconPulse 2s infinite;
+}
+
+.stats-card:hover .icon-container i {
+    transform: scale(1.1);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+}
+
+.card-hover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(233, 30, 99, 0.05) 0%, rgba(253, 203, 5, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.stats-card:hover .card-hover-overlay {
+    opacity: 1;
+}
+
+/* Cartes produits */
+.product-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(0, 184, 181, 0.15) !important;
+    border-color: var(--teal-glacier) !important;
+}
+
 .product-image {
-    height: 200px;
+    height: 220px;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.05);
+}
+
+.product-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(0, 184, 181, 0.1) 0%, rgba(233, 30, 99, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.product-card:hover .product-overlay {
+    opacity: 1;
+}
+
+.product-actions {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.product-card:hover .product-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Badges */
+.badge.bg-teal { background-color: var(--teal-glacier) !important; }
+.badge.bg-pink { background-color: var(--pink-swoosh) !important; }
+.badge.bg-yellow { 
+    background-color: var(--yellow-canaan) !important; 
+    color: var(--black-shadow) !important;
+}
+
+/* Pagination */
+.page-link.text-teal:hover {
+    background-color: var(--teal-glacier);
+    color: white;
+    border-color: var(--teal-glacier);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-card .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .stats-card .icon-container {
+        padding: 0.75rem !important;
+    }
+    
+    .stats-card .fa-2x {
+        font-size: 1.5em !important;
+    }
+    
+    .product-image {
+        height: 180px;
+    }
+    
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .row-cols-md-2 {
+        grid-template-columns: repeat(1, 1fr) !important;
+    }
+    
+    .product-image {
+        height: 160px;
+    }
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation d'entrée pour les cartes produits
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+</script>
 {% endblock %}

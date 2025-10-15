@@ -1,4 +1,3 @@
-<!-- dashboards/livreur_dashboard.html -->
 {% extends "dashboards/base.html" %}
 {% load static %}
 
@@ -7,15 +6,15 @@
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
+            <div class="bg-white rounded p-4 shadow-sm">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h2 class="mb-1">Tableau de Bord Livreur</h2>
+                        <h2 class="mb-1 teal-glacier-text">Tableau de Bord Livreur</h2>
                         <p class="mb-0 text-muted">Bienvenue {{ user.get_full_name|default:user.username }}, voici votre activité du jour</p>
                     </div>
                     <div class="d-flex align-items-center">
-                        <span class="badge bg-primary me-2">Livreur</span>
-                        <span class="badge bg-success">{{ aujourd_hui|date:"d F Y" }}</span>
+                        <span class="badge bg-teal-glacier me-2">Livreur</span>
+                        <span class="badge bg-teal-light text-teal-dark">{{ aujourd_hui|date:"d F Y" }}</span>
                     </div>
                 </div>
             </div>
@@ -25,21 +24,21 @@
     <!-- Statistics Cards -->
     <div class="row g-4 mb-4">
         <div class="col-xl-3 col-sm-6">
-            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+            <div class="bg-white rounded p-4 d-flex align-items-center justify-content-between shadow-sm card-hover">
                 <div>
-                    <h6 class="mb-2">Commandes à Livrer</h6>
-                    <h3 class="mb-0 text-primary">{{ stats.total_a_livrer }}</h3>
+                    <h6 class="mb-2 text-muted">Commandes à Livrer</h6>
+                    <h3 class="mb-0 teal-glacier-text">{{ stats.total_a_livrer }}</h3>
                     <small class="text-muted">Aujourd'hui</small>
                 </div>
-                <div class="bg-primary rounded-circle p-3">
+                <div class="bg-teal-glacier rounded-circle p-3">
                     <i class="fa fa-truck fa-2x text-white"></i>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+            <div class="bg-white rounded p-4 d-flex align-items-center justify-content-between shadow-sm card-hover">
                 <div>
-                    <h6 class="mb-2">Livrées Aujourd'hui</h6>
+                    <h6 class="mb-2 text-muted">Livrées Aujourd'hui</h6>
                     <h3 class="mb-0 text-success">{{ stats.livrees_aujourdhui }}</h3>
                     <small class="text-muted">Total journalier</small>
                 </div>
@@ -49,9 +48,9 @@
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+            <div class="bg-white rounded p-4 d-flex align-items-center justify-content-between shadow-sm card-hover">
                 <div>
-                    <h6 class="mb-2">En Retard</h6>
+                    <h6 class="mb-2 text-muted">En Retard</h6>
                     <h3 class="mb-0 text-warning">{{ stats.en_retard }}</h3>
                     <small class="text-muted">Commandes en attente</small>
                 </div>
@@ -61,10 +60,10 @@
             </div>
         </div>
         <div class="col-xl-3 col-sm-6">
-            <div class="bg-light rounded p-4 d-flex align-items-center justify-content-between">
+            <div class="bg-white rounded p-4 d-flex align-items-center justify-content-between shadow-sm card-hover">
                 <div>
-                    <h6 class="mb-2">Performance</h6>
-                    <h3 class="mb-0 text-info">
+                    <h6 class="mb-2 text-muted">Performance</h6>
+                    <h3 class="mb-0 teal-glacier-text">
                         {% if stats.total_a_livrer > 0 %}
                             {{ stats.livrees_aujourdhui|floatformat:0 }}/{{ stats.total_a_livrer }}
                         {% else %}
@@ -73,8 +72,8 @@
                     </h3>
                     <small class="text-muted">Taux de livraison</small>
                 </div>
-                <div class="bg-info rounded-circle p-3">
-                    <i class="fa fa-chart-line fa-2x text-white"></i>
+                <div class="bg-teal-light rounded-circle p-3">
+                    <i class="fa fa-chart-line fa-2x teal-glacier-text"></i>
                 </div>
             </div>
         </div>
@@ -83,13 +82,13 @@
     <!-- Commandes à Livrer Aujourd'hui -->
     <div class="row">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
+            <div class="bg-white rounded p-4 shadow-sm">
                 <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h5 class="mb-0">
-                        <i class="fa fa-list-alt me-2 text-primary"></i>
+                    <h5 class="mb-0 teal-glacier-text">
+                        <i class="fa fa-list-alt me-2"></i>
                         Commandes à Livrer Aujourd'hui
                     </h5>
-                    <a href="{% url 'commandes_a_livrer' %}" class="btn btn-primary btn-sm">
+                    <a href="{% url 'commandes_a_livrer' %}" class="btn btn-teal-glacier btn-sm">
                         <i class="fa fa-eye me-1"></i>Voir Toutes
                     </a>
                 </div>
@@ -97,24 +96,24 @@
                 {% if commandes_a_livrer %}
                 <div class="table-responsive">
                     <table class="table table-hover">
-                        <thead class="table-light">
+                        <thead class="teal-glacier-bg">
                             <tr>
-                                <th scope="col"># Commande</th>
-                                <th scope="col">Client</th>
-                                <th scope="col">Contact</th>
-                                <th scope="col">Adresse</th>
-                                <th scope="col">Montant</th>
-                                <th scope="col">Heure</th>
-                                <th scope="col">Actions</th>
+                                <th scope="col" class="text-white"># Commande</th>
+                                <th scope="col" class="text-white">Client</th>
+                                <th scope="col" class="text-white">Contact</th>
+                                <th scope="col" class="text-white">Adresse</th>
+                                <th scope="col" class="text-white">Montant</th>
+                                <th scope="col" class="text-white">Heure</th>
+                                <th scope="col" class="text-white">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for commande in commandes_a_livrer|slice:":5" %}
                             <tr>
-                                <th scope="row" class="fw-bold">#{{ commande.id }}</th>
+                                <th scope="row" class="fw-bold teal-glacier-text">#{{ commande.id }}</th>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
+                                        <div class="rounded-circle bg-teal-glacier text-white d-flex align-items-center justify-content-center me-2" 
                                              style="width: 35px; height: 35px; font-size: 14px;">
                                             {{ commande.utilisateur.username|first|upper }}
                                         </div>
@@ -126,7 +125,7 @@
                                 </td>
                                 <td>
                                     {% if commande.utilisateur.telephone %}
-                                        <span class="badge bg-info">{{ commande.utilisateur.telephone }}</span>
+                                        <span class="badge bg-teal-light text-teal-dark">{{ commande.utilisateur.telephone }}</span>
                                     {% else %}
                                         <span class="text-muted">Non renseigné</span>
                                     {% endif %}
@@ -134,21 +133,21 @@
                                 <td>
                                     <small>
                                         {{ commande.adresse_livraison.rue|truncatewords:3 }}<br>
-                                        <span class="badge bg-secondary">{{ commande.adresse_livraison.ville }}</span>
+                                        <span class="badge bg-teal-light text-teal-dark">{{ commande.adresse_livraison.ville }}</span>
                                     </small>
                                 </td>
                                 <td>
                                     <span class="fw-bold text-success">{{ commande.total }} FCFA</span>
                                 </td>
                                 <td>
-                                    <span class="badge bg-light text-dark">{{ commande.date_creation|time }}</span>
+                                    <span class="badge bg-teal-light text-teal-dark">{{ commande.date_creation|time }}</span>
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="{% url 'detail_commande_livreur' commande.id %}" class="btn btn-sm btn-primary">
-                                            <i class="fa fa-eye me-1"></i>Détails
+                                        <a href="{% url 'detail_commande_livreur' commande.id %}" class="btn btn-sm btn-teal-light">
+                                            <i class="fa fa-eye me-1 teal-glacier-text"></i>Détails
                                         </a>
-                                        <a href="{% url 'livrer_commande' commande.id %}" class="btn btn-sm btn-success">
+                                        <a href="{% url 'livrer_commande' commande.id %}" class="btn btn-sm btn-teal-glacier">
                                             <i class="fa fa-check me-1"></i>Livrer
                                         </a>
                                     </div>
@@ -172,51 +171,130 @@
     <!-- Quick Actions -->
     <div class="row mt-4">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
-                <h5 class="mb-4">
-                    <i class="fa fa-bolt me-2 text-warning"></i>
+            <div class="bg-white rounded p-4 shadow-sm">
+                <h5 class="mb-4 teal-glacier-text">
+                    <i class="fa fa-bolt me-2"></i>
                     Actions Rapides
                 </h5>
-                <div class="row g-3">
+                <div class="row g-3 d-flex align-items-center justify-content-center">
                     <div class="col-md-3">
-                        <a href="{% url 'commandes_a_livrer' %}" class="btn btn-outline-primary w-100 d-flex align-items-center justify-content-center py-3">
-                            <i class="fa fa-list-alt fa-2x me-2"></i>
+                        <a href="{% url 'commandes_a_livrer' %}" class="btn btn-outline-teal w-100 d-flex align-items-center justify-content-center py-3 card-hover">
+                            <i class="fa fa-list-alt fa-2x me-2 "></i>
                             <div>
-                                <div class="fw-bold">Voir Toutes</div>
-                                <small>Commandes à livrer</small>
+                                <div class="fw-bold ">Voir Toutes</div>
+                                <small class="text-muted">Commandes à livrer</small>
                             </div>
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{% url 'commandes_livrees' %}" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center py-3">
-                            <i class="fa fa-check-circle fa-2x me-2"></i>
+                        <a href="{% url 'commandes_livrees' %}" class="btn btn-outline-teal w-100 d-flex align-items-center justify-content-center py-3 card-hover">
+                            <i class="fa fa-check-circle fa-2x me-2 "></i>
                             <div>
-                                <div class="fw-bold">Historique</div>
-                                <small>Commandes livrées</small>
+                                <div class="fw-bold ">Historique</div>
+                                <small class="text-muted">Commandes livrées</small>
                             </div>
                         </a>
                     </div>
                     <div class="col-md-3">
-                        <a href="{% url 'historique_actions' %}" class="btn btn-outline-info w-100 d-flex align-items-center justify-content-center py-3">
+                        <a href="{% url 'historique_actions' %}" class="btn btn-outline-teal w-100 d-flex align-items-center justify-content-center py-3 card-hover">
                             <i class="fa fa-history fa-2x me-2"></i>
                             <div>
                                 <div class="fw-bold">Activité</div>
-                                <small>Historique actions</small>
+                                <small class="text-muted">Historique actions</small>
                             </div>
                         </a>
                     </div>
-                    <div class="col-md-3">
-                        <a href="{% url 'profil_livreur' %}" class="btn btn-outline-warning w-100 d-flex align-items-center justify-content-center py-3">
+                    {% comment %} <div class="col-md-3">
+                        <a href="{% url 'profil_livreur' %}" class="btn btn-outline-teal w-100 d-flex align-items-center justify-content-center py-3 card-hover">
                             <i class="fa fa-user fa-2x me-2"></i>
                             <div>
                                 <div class="fw-bold">Profil</div>
-                                <small>Mon compte</small>
+                                <small class="text-muted">Mon compte</small>
                             </div>
                         </a>
-                    </div>
+                    </div> {% endcomment %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.teal-glacier-text {
+    color: var(--teal-glacier) !important;
+}
+
+.teal-glacier-bg {
+    background-color: var(--teal-glacier) !important;
+}
+
+.bg-teal-glacier {
+    background-color: var(--teal-glacier) !important;
+}
+
+.bg-teal-light {
+    background-color: var(--teal-light) !important;
+}
+
+.text-teal-dark {
+    color: var(--teal-dark) !important;
+}
+
+.btn-teal-glacier {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-teal-glacier:hover {
+    background-color: white;
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier) ;
+}
+
+.btn-teal-light {
+    background-color: var(--teal-light);
+    border-color: var(--teal-light);
+    color: var(--teal-dark);
+}
+
+.btn-teal-light:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.btn-outline-teal {
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+    background-color: transparent;
+}
+
+.btn-outline-teal:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+.card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 184, 181, 0.15) !important;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 184, 181, 0.1) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--teal-light) !important;
+}
+
+.bg-white {
+    background-color: white !important;
+}
+</style>
 {% endblock %}
