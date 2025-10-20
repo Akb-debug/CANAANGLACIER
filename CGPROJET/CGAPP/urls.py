@@ -50,7 +50,7 @@ urlpatterns = [
     # Dashboards
     path('dashboard/admin/', views.dashboard_admin, name='dashboard_admin'),
     path('dashboard/serveur/', views.dashboard_serveur, name='dashboard_serveur'),
-    path('dashboard/gerant/', views.dashboard_gerant, name='dashboard_gerant'),
+    # path('dashboard/gerant/', views.dashboard_gerant, name='dashboard_gerant'),
     path('dashboard/client/', views.dashboard_client, name='dashboard_client'),
     
     # Actions pour les dashboards
@@ -215,4 +215,10 @@ urlpatterns = [
     # URLs pour les Clients
     path('gestion_admin/clients/<int:pk>/modifier/', views.modifier_client, name='modifier_client'),
     path('gestion_admin/clients/<int:pk>/supprimer/', views.supprimer_client, name='supprimer_client'),
+    path('stocks/produit/<int:produit_id>/', views.get_produit_details, name='get_produit_details'),
+
+    path('gerant/dashboard/', views.dashboard_gerant, name='dashboard_gerant'),
+path('gerant/statistiques-ventes/', views.statistiques_ventes, name='statistiques_ventes'),
+
+   
 ]

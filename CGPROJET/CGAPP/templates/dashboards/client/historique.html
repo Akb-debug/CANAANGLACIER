@@ -95,135 +95,135 @@
 </div>
 
 <style>
-:root {
-    --teal-glacier: #00B8B5;
-    --teal-dark: #00827F;
-    --pink-swoosh: #E91E63;
-    --yellow-canaan: #FDCB05;
-}
-
-.stats-card {
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-/* Icônes toujours visibles avec bon contraste */
-.icon-container {
-    background: rgba(255, 255, 255, 0.3) !important;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    transition: all 0.3s ease;
-}
-
-.stats-card .icon-container i {
-    color: white;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-}
-
-/* Effets au hover */
-.stats-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-    transition: left 0.6s ease;
-}
-
-.stats-card:hover::before {
-    left: 100%;
-}
-
-.stats-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 184, 181, 0.4) !important;
-    background: linear-gradient(135deg, var(--teal-dark) 0%, #006664 100%) !important;
-}
-
-/* Effet sur les icônes au hover */
-.stats-card:hover .icon-container {
-    background: rgba(255, 255, 255, 0.4) !important;
-    border-color: rgba(255, 255, 255, 0.8);
-    transform: scale(1.1);
-    animation: iconPulse 2s infinite;
-}
-
-.stats-card:hover .icon-container i {
-    transform: scale(1.1);
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-}
-
-@keyframes iconPulse {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+    :root {
+        --teal-glacier: #00B8B5;
+        --teal-dark: #00827F;
+        --pink-swoosh: #E91E63;
+        --yellow-canaan: #FDCB05;
     }
-    50% {
-        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
-    }
-}
 
-/* Overlay de hover subtil */
-.card-hover-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(233, 30, 99, 0.05) 0%, rgba(253, 203, 5, 0.05) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
-}
-
-.stats-card:hover .card-hover-overlay {
-    opacity: 1;
-}
-
-/* Effet de brillance sur le texte au hover */
-.stats-card:hover .card-title {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
-}
-
-.stats-card:hover .card-text {
-    opacity: 0.9 !important;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .stats-card .card-body {
-        padding: 1.5rem !important;
+    .stats-card {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
     }
-    
-    .stats-card .icon-container {
-        padding: 0.75rem !important;
-    }
-    
-    .stats-card .fa-2x {
-        font-size: 1.5em !important;
-    }
-    
-    .stats-card:hover .icon-container {
-        transform: scale(1.05);
-    }
-}
 
-@media (max-width: 576px) {
-    .stats-card .card-body {
-        padding: 1.25rem !important;
-    }
-    
+    /* Icônes toujours visibles avec bon contraste */
     .icon-container {
-        padding: 0.6rem !important;
+        background: rgba(255, 255, 255, 0.3) !important;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        transition: all 0.3s ease;
     }
-    
-    .stats-card .fa-2x {
-        font-size: 1.25em !important;
+
+    .stats-card .icon-container i {
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
     }
-}
+
+    /* Effets au hover */
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .stats-card:hover::before {
+        left: 100%;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 184, 181, 0.4) !important;
+        background: linear-gradient(135deg, var(--teal-dark) 0%, #006664 100%) !important;
+    }
+
+    /* Effet sur les icônes au hover */
+    .stats-card:hover .icon-container {
+        background: rgba(255, 255, 255, 0.4) !important;
+        border-color: rgba(255, 255, 255, 0.8);
+        transform: scale(1.1);
+        animation: iconPulse 2s infinite;
+    }
+
+    .stats-card:hover .icon-container i {
+        transform: scale(1.1);
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
+
+    @keyframes iconPulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+        }
+        50% {
+            box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+        }
+    }
+
+    /* Overlay de hover subtil */
+    .card-hover-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(233, 30, 99, 0.05) 0%, rgba(253, 203, 5, 0.05) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+
+    .stats-card:hover .card-hover-overlay {
+        opacity: 1;
+    }
+
+    /* Effet de brillance sur le texte au hover */
+    .stats-card:hover .card-title {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+    }
+
+    .stats-card:hover .card-text {
+        opacity: 0.9 !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .stats-card .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .stats-card .icon-container {
+            padding: 0.75rem !important;
+        }
+        
+        .stats-card .fa-2x {
+            font-size: 1.5em !important;
+        }
+        
+        .stats-card:hover .icon-container {
+            transform: scale(1.05);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .stats-card .card-body {
+            padding: 1.25rem !important;
+        }
+        
+        .icon-container {
+            padding: 0.6rem !important;
+        }
+        
+        .stats-card .fa-2x {
+            font-size: 1.25em !important;
+        }
+    }
 </style>
 
                 <!-- Navigation améliorée -->
@@ -349,7 +349,7 @@
                             </div>
                             <h5 class="text-muted mb-2">Aucune commande passée</h5>
                             <p class="text-muted mb-4">Vous n'avez pas encore passé de commande.</p>
-                            <a href="{% url 'boutique' %}" class="btn btn-teal btn-lg">
+                            <a href="{% url 'produits' %}" class="btn btn-teal btn-lg">
                                 <i class="fas fa-shopping-cart me-2"></i>Découvrir la boutique
                             </a>
                         </div>
@@ -536,197 +536,197 @@
 
 <!-- Styles personnalisés améliorés -->
 <style>
-:root {
-    --teal-glacier: #00B8B5;
-    --pink-swoosh: #E91E63;
-    --yellow-canaan: #FDCB05;
-    --black-shadow: #000000;
-    --white-bg: #FFFFFF;
-    --teal-light: rgba(0, 184, 181, 0.1);
-    --pink-light: rgba(233, 30, 99, 0.1);
-}
-
-/* Couleurs utilitaires */
-.bg-teal { background-color: var(--teal-glacier) !important; }
-.text-teal { color: var(--teal-glacier) !important; }
-.bg-pink { background-color: var(--pink-swoosh) !important; }
-.text-pink { color: var(--pink-swoosh) !important; }
-.bg-yellow { background-color: var(--yellow-canaan) !important; }
-.text-yellow { color: var(--yellow-canaan) !important; }
-
-.btn-teal {
-    background-color: var(--teal-glacier);
-    border-color: var(--teal-glacier);
-    color: white;
-}
-
-.btn-teal:hover {
-    background-color: #009a97;
-    border-color: #009a97;
-    color: white;
-}
-
-/* Navigation tabs améliorée */
-.nav-tabs .nav-link {
-    font-weight: 600;
-    color: #6c757d;
-    border: none;
-    padding: 1rem 1.5rem;
-    transition: all 0.3s ease;
-}
-
-.nav-tabs .nav-link.active {
-    color: var(--teal-glacier);
-    border-bottom: 3px solid var(--teal-glacier);
-    background: transparent;
-}
-
-.nav-tabs .nav-link:hover {
-    color: var(--teal-glacier);
-}
-
-/* Timeline avancée */
-.timeline-advanced {
-    position: relative;
-    padding-left: 40px;
-}
-
-.timeline-item-advanced {
-    position: relative;
-    padding-bottom: 30px;
-}
-
-.timeline-marker-advanced {
-    position: absolute;
-    left: -40px;
-    top: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    z-index: 2;
-}
-
-.timeline-content-advanced {
-    padding-left: 20px;
-    border-left: 2px solid var(--teal-light);
-    margin-left: 10px;
-}
-
-.timeline-advanced::before {
-    content: '';
-    position: absolute;
-    left: -29px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background-color: var(--teal-light);
-}
-
-/* Animations */
-.card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-    transform: translateY(-2px);
-}
-
-.timeline-item-advanced {
-    animation: fadeInUp 0.5s ease forwards;
-    opacity: 0;
-    transform: translateY(20px);
-}
-
-@keyframes fadeInUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
+    :root {
+        --teal-glacier: #00B8B5;
+        --pink-swoosh: #E91E63;
+        --yellow-canaan: #FDCB05;
+        --black-shadow: #000000;
+        --white-bg: #FFFFFF;
+        --teal-light: rgba(0, 184, 181, 0.1);
+        --pink-light: rgba(233, 30, 99, 0.1);
     }
-}
 
-/* Badges personnalisés */
-.badge.bg-teal { background-color: var(--teal-glacier) !important; }
-.badge.bg-pink { background-color: var(--pink-swoosh) !important; }
-.badge.bg-yellow { 
-    background-color: var(--yellow-canaan) !important; 
-    color: var(--black-shadow) !important;
-}
+    /* Couleurs utilitaires */
+    .bg-teal { background-color: var(--teal-glacier) !important; }
+    .text-teal { color: var(--teal-glacier) !important; }
+    .bg-pink { background-color: var(--pink-swoosh) !important; }
+    .text-pink { color: var(--pink-swoosh) !important; }
+    .bg-yellow { background-color: var(--yellow-canaan) !important; }
+    .text-yellow { color: var(--yellow-canaan) !important; }
 
-/* Opacités */
-.bg-opacity-10 { background-color: rgba(var(--color-rgb), 0.1) !important; }
+    .btn-teal {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        color: white;
+    }
 
-/* Responsive */
-@media (max-width: 768px) {
+    .btn-teal:hover {
+        background-color: #009a97;
+        border-color: #009a97;
+        color: white;
+    }
+
+    /* Navigation tabs améliorée */
     .nav-tabs .nav-link {
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
+        font-weight: 600;
+        color: #6c757d;
+        border: none;
+        padding: 1rem 1.5rem;
+        transition: all 0.3s ease;
     }
-    
-    .timeline-advanced {
-        padding-left: 30px;
-    }
-    
-    .timeline-marker-advanced {
-        left: -30px;
-        width: 24px;
-        height: 24px;
-    }
-    
-    .card-body {
-        padding: 1rem;
-    }
-}
 
-@media (max-width: 576px) {
-    .row.mb-5 > [class*="col-"] {
-        margin-bottom: 1rem;
+    .nav-tabs .nav-link.active {
+        color: var(--teal-glacier);
+        border-bottom: 3px solid var(--teal-glacier);
+        background: transparent;
     }
-    
-    .table-responsive {
-        font-size: 0.875rem;
+
+    .nav-tabs .nav-link:hover {
+        color: var(--teal-glacier);
     }
-}
+
+    /* Timeline avancée */
+    .timeline-advanced {
+        position: relative;
+        padding-left: 40px;
+    }
+
+    .timeline-item-advanced {
+        position: relative;
+        padding-bottom: 30px;
+    }
+
+    .timeline-marker-advanced {
+        position: absolute;
+        left: -40px;
+        top: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        z-index: 2;
+    }
+
+    .timeline-content-advanced {
+        padding-left: 20px;
+        border-left: 2px solid var(--teal-light);
+        margin-left: 10px;
+    }
+
+    .timeline-advanced::before {
+        content: '';
+        position: absolute;
+        left: -29px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: var(--teal-light);
+    }
+
+    /* Animations */
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .timeline-item-advanced {
+        animation: fadeInUp 0.5s ease forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Badges personnalisés */
+    .badge.bg-teal { background-color: var(--teal-glacier) !important; }
+    .badge.bg-pink { background-color: var(--pink-swoosh) !important; }
+    .badge.bg-yellow { 
+        background-color: var(--yellow-canaan) !important; 
+        color: var(--black-shadow) !important;
+    }
+
+    /* Opacités */
+    .bg-opacity-10 { background-color: rgba(var(--color-rgb), 0.1) !important; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .nav-tabs .nav-link {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .timeline-advanced {
+            padding-left: 30px;
+        }
+        
+        .timeline-marker-advanced {
+            left: -30px;
+            width: 24px;
+            height: 24px;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .row.mb-5 > [class*="col-"] {
+            margin-bottom: 1rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+    }
 </style>
 
 <!-- Scripts améliorés -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Sauvegarder l'onglet actif
-    const historyTabs = document.getElementById('historyTabs');
-    const activeTab = localStorage.getItem('activeHistoryTab');
-    
-    if (activeTab) {
-        const tabTrigger = new bootstrap.Tab(document.querySelector(activeTab));
-        tabTrigger.show();
-    }
-    
-    historyTabs.addEventListener('click', function(e) {
-        if (e.target.classList.contains('nav-link')) {
-            localStorage.setItem('activeHistoryTab', e.target.getAttribute('data-bs-target'));
+    document.addEventListener('DOMContentLoaded', function() {
+        // Sauvegarder l'onglet actif
+        const historyTabs = document.getElementById('historyTabs');
+        const activeTab = localStorage.getItem('activeHistoryTab');
+        
+        if (activeTab) {
+            const tabTrigger = new bootstrap.Tab(document.querySelector(activeTab));
+            tabTrigger.show();
         }
-    });
-    
-    // Animation pour les timelines
-    const timelineItems = document.querySelectorAll('.timeline-item-advanced');
-    timelineItems.forEach((item, index) => {
-        item.style.animationDelay = `${index * 0.1}s`;
-    });
-    
-    // Effet de hover sur les lignes du tableau
-    const tableRows = document.querySelectorAll('tbody tr');
-    tableRows.forEach(row => {
-        row.style.transition = 'all 0.2s ease';
-        row.addEventListener('mouseenter', function() {
-            this.style.backgroundColor = 'var(--teal-light)';
+        
+        historyTabs.addEventListener('click', function(e) {
+            if (e.target.classList.contains('nav-link')) {
+                localStorage.setItem('activeHistoryTab', e.target.getAttribute('data-bs-target'));
+            }
         });
-        row.addEventListener('mouseleave', function() {
-            this.style.backgroundColor = '';
+        
+        // Animation pour les timelines
+        const timelineItems = document.querySelectorAll('.timeline-item-advanced');
+        timelineItems.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Effet de hover sur les lignes du tableau
+        const tableRows = document.querySelectorAll('tbody tr');
+        tableRows.forEach(row => {
+            row.style.transition = 'all 0.2s ease';
+            row.addEventListener('mouseenter', function() {
+                this.style.backgroundColor = 'var(--teal-light)';
+            });
+            row.addEventListener('mouseleave', function() {
+                this.style.backgroundColor = '';
+            });
         });
     });
-});
 </script>
 {% endblock %}

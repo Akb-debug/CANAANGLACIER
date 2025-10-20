@@ -8,170 +8,185 @@
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
+            <div class="dashboard-container">
                 <!-- En-tête avec infos serveur -->
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
-                    <div class="mb-3 mb-md-0">
-                        <h3 class="mb-1">
-                            <i class="fas fa-chart-line me-2 text-primary"></i>
-                            Rapport d'activité
-                        </h3>
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
+                <div class="report-header">
+                    <div class="header-main">
+                        <div class="user-profile">
+                            <div class="profile-avatar">
                                 {% if serveur.profile_image %}
-                                    <img src="{{ serveur.profile_image.url }}" class="rounded-circle" width="60" height="60" alt="Photo serveur">
+                                    <img src="{{ serveur.profile_image.url }}" class="avatar-img" alt="Photo serveur">
                                 {% else %}
-                                    <div class="avatar bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                        <i class="fas fa-user text-primary fs-4"></i>
+                                    <div class="avatar-placeholder">
+                                        <i class="fas fa-user"></i>
                                     </div>
                                 {% endif %}
                             </div>
-                            <div>
-                                <h5 class="mb-0">{{ serveur.get_full_name }}</h5>
-                                <span class="badge bg-primary">{{ serveur.get_role_display }}</span>
-                                <p class="text-muted small mb-0">Membre depuis le {{ serveur.date_joined|date:"d/m/Y" }}</p>
+                            <div class="profile-info">
+                                <h1 class="profile-name text-white">{{ serveur.get_full_name }}</h1>
+                                <div class="profile-meta">
+                                    <span class="role-badge">{{ serveur.get_role_display }}</span>
+                                    <span class="join-date">Membre depuis le {{ serveur.date_joined|date:"d/m/Y" }}</span>
+                                </div>
                             </div>
+                        </div>
+                        
+                        <!-- Sélecteur de période -->
+                        <div class="period-selector">
+                            <form method="get" class="period-form">
+                                <label for="periode" class="period-label">Période :</label>
+                                <select name="periode" id="periode" class="period-select" onchange="this.form.submit()">
+                                    <option value="7" {% if periode == 7 %}selected{% endif %}>7 jours</option>
+                                    <option value="30" {% if periode == 30 %}selected{% endif %}>30 jours</option>
+                                    <option value="90" {% if periode == 90 %}selected{% endif %}>3 mois</option>
+                                    <option value="180" {% if periode == 180 %}selected{% endif %}>6 mois</option>
+                                </select>
+                            </form>
                         </div>
                     </div>
                     
-                    <!-- Sélecteur de période -->
-                    <form method="get" class="d-flex align-items-center">
-                        <div class="me-2">
-                            <label for="periode" class="form-label mb-0">Période :</label>
-                        </div>
-                        <select name="periode" id="periode" class="form-select form-select-sm" onchange="this.form.submit()" style="width: 120px;">
-                            <option value="7" {% if periode == 7 %}selected{% endif %}>7 jours</option>
-                            <option value="30" {% if periode == 30 %}selected{% endif %}>30 jours</option>
-                            <option value="90" {% if periode == 90 %}selected{% endif %}>3 mois</option>
-                            <option value="180" {% if periode == 180 %}selected{% endif %}>6 mois</option>
-                        </select>
-                    </form>
+                    <div class="header-title">
+                        <i class="fas fa-chart-line"></i>
+                        <h2 class ="text-white">Rapport d'activité</h2>
+                    </div>
                 </div>
 
                 <!-- Statistiques principales -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="card border-0 bg-primary bg-opacity-10 rounded-3 h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-2">Actions totales</h6>
-                                        <h3 class="mb-0">{{ stats.total_actions|intcomma }}</h3>
-                                    </div>
-                                    <div class="bg-primary bg-opacity-25 rounded-circle p-3">
-                                        <i class="fas fa-tasks fa-2x text-primary"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <span class="text-muted small">Depuis le {{ date_debut|date:"d/m/Y" }}</span>
-                                </div>
-                            </div>
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-number">{{ stats.total_actions|intcomma }}</h3>
+                            <p class="stat-label">Actions totales</p>
+                            <span class="stat-period">Depuis le {{ date_debut|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
                         </div>
                     </div>
                     
-                    <div class="col-md-4">
-                        <div class="card border-0 bg-success bg-opacity-10 rounded-3 h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-2">Commandes traitées</h6>
-                                        <h3 class="mb-0">{{ stats.commandes_traitees|intcomma }}</h3>
-                                    </div>
-                                    <div class="bg-success bg-opacity-25 rounded-circle p-3">
-                                        <i class="fas fa-shopping-basket fa-2x text-success"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <span class="text-muted small">{% widthratio stats.commandes_traitees stats.total_actions 100 %}% des actions</span>
-                                </div>
-                            </div>
+                    <div class="stat-card success">
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-basket"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-number">{{ stats.commandes_traitees|intcomma }}</h3>
+                            <p class="stat-label">Commandes traitées</p>
+                            <span class="stat-percentage">{% widthratio stats.commandes_traitees stats.total_actions 100 %}% des actions</span>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
                         </div>
                     </div>
                     
-                    <div class="col-md-4">
-                        <div class="card border-0 bg-info bg-opacity-10 rounded-3 h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-2">Actions aujourd'hui</h6>
-                                        <h3 class="mb-0">{{ stats.actions_par_jour|intcomma }}</h3>
-                                    </div>
-                                    <div class="bg-info bg-opacity-25 rounded-circle p-3">
-                                        <i class="fas fa-bolt fa-2x text-info"></i>
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <span class="text-muted small">{{ timezone.now|date:"d/m/Y" }}</span>
-                                </div>
-                            </div>
+                    <div class="stat-card accent">
+                        <div class="stat-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-number">{{ stats.actions_par_jour|intcomma }}</h3>
+                            <p class="stat-label">Actions aujourd'hui</p>
+                            <span class="stat-period">{{ timezone.now|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="stat-trend neutral">
+                            <i class="fas fa-minus"></i>
                         </div>
                     </div>
                 </div>
 
                 <!-- Graphique de répartition -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm rounded-3">
-                            <div class="card-header bg-white">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-chart-pie me-2 text-primary"></i>
-                                    Répartition des actions par type
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="actionChart" height="300"></canvas>
-                            </div>
+                <div class="chart-section">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Répartition des actions par type
+                        </h3>
+                        <div class="chart-legend">
+                            <span class="legend-item">
+                                <span class="legend-color primary"></span>
+                                Total: {{ stats.total_actions }}
+                            </span>
                         </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="actionChart"></canvas>
                     </div>
                 </div>
 
                 <!-- Dernières actions -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card border-0 shadow-sm rounded-3">
-                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-history me-2 text-primary"></i>
-                                    Dernières actions ({{ actions|length }})
-                                </h5>
-                                <small class="text-muted">Période : {{ date_debut|date:"d/m/Y" }} - {{ timezone.now|date:"d/m/Y" }}</small>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Date</th>
-                                                <th>Type d'action</th>
-                                                <th>Détails</th>
-                                                <th>Heure</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for action in actions %}
-                                            <tr>
-                                                <td>{{ action.date_action|date:"d/m/Y" }}</td>
-                                                <td>
-                                                    <span class="badge bg-{{ action.get_badge_color }}">
-                                                        {{ action.get_type_action_display }}
-                                                    </span>
-                                                </td>
-                                                <td>{{ action.description|truncatechars:60 }}</td>
-                                                <td>{{ action.date_action|time }}</td>
-                                            </tr>
-                                            {% empty %}
-                                            <tr>
-                                                <td colspan="4" class="text-center py-4">
-                                                    <i class="fas fa-info-circle fa-2x text-muted mb-3"></i>
-                                                    <p class="text-muted">Aucune action enregistrée pour cette période</p>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+                <div class="actions-section">
+                    <div class="section-header">
+                        <h3>
+                            <i class="fas fa-history me-2"></i>
+                            Dernières actions
+                        </h3>
+                        <span class="actions-count">{{ actions|length }} actions</span>
+                    </div>
+                    
+                    <div class="actions-table-container">
+                        <table class="actions-table">
+                            <thead>
+                                <tr>
+                                    <th class="sortable">
+                                        <span>Date</span>
+                                        <i class="fas fa-sort"></i>
+                                    </th>
+                                    <th>Type d'action</th>
+                                    <th>Détails</th>
+                                    <th class="text-center">Heure</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for action in actions %}
+                                <tr class="action-row">
+                                    <td>
+                                        <div class="action-date">
+                                            <span class="date-day">{{ action.date_action|date:"d" }}</span>
+                                            <span class="date-month">{{ action.date_action|date:"M" }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="action-type-badge {{ action.get_type_action|lower }}">
+                                            {{ action.get_type_action_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="action-details">
+                                            <p class="action-description">{{ action.description|truncatechars:60 }}</p>
+                                            {% if action.commande %}
+                                            <span class="action-reference">Ref: #{{ action.commande.id }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="action-time">{{ action.date_action|time }}</span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="empty-state">
+                                        <div class="empty-icon">
+                                            <i class="fas fa-info-circle"></i>
+                                        </div>
+                                        <h4>Aucune action enregistrée</h4>
+                                        <p>Aucune action n'a été enregistrée pour cette période</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="section-footer">
+                        <span class="period-info">
+                            Période : {{ date_debut|date:"d/m/Y" }} - {{ timezone.now|date:"d/m/Y" }}
+                        </span>
+                        <button class="btn-export">
+                            <i class="fas fa-download me-2"></i>
+                            Exporter le rapport
+                        </button>
                     </div>
                 </div>
             </div>
@@ -188,14 +203,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const actionTypes = {{ stats.actions_par_type.keys|safe }};
     const actionCounts = {{ stats.actions_par_type.values|safe }};
     
-    // Couleurs dynamiques
+    // Couleurs teal glacier
     const backgroundColors = [
-        'rgba(54, 162, 235, 0.7)',
-        'rgba(255, 99, 132, 0.7)',
-        'rgba(75, 192, 192, 0.7)',
-        'rgba(255, 159, 64, 0.7)',
-        'rgba(153, 102, 255, 0.7)',
-        'rgba(201, 203, 207, 0.7)'
+        'rgba(0, 184, 181, 0.8)',
+        'rgba(0, 130, 127, 0.8)',
+        'rgba(230, 247, 247, 0.8)',
+        'rgba(253, 203, 5, 0.8)',
+        'rgba(233, 30, 99, 0.8)',
+        'rgba(107, 114, 128, 0.8)'
+    ];
+    
+    const borderColors = [
+        'rgba(0, 184, 181, 1)',
+        'rgba(0, 130, 127, 1)',
+        'rgba(230, 247, 247, 1)',
+        'rgba(253, 203, 5, 1)',
+        'rgba(233, 30, 99, 1)',
+        'rgba(107, 114, 128, 1)'
     ];
     
     // Création du graphique
@@ -206,16 +230,36 @@ document.addEventListener('DOMContentLoaded', function() {
             datasets: [{
                 data: actionCounts,
                 backgroundColor: backgroundColors,
-                borderWidth: 1
+                borderColor: borderColors,
+                borderWidth: 2,
+                hoverOffset: 15
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
             plugins: {
                 legend: {
                     position: 'right',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        },
+                        color: '#00827F'
+                    }
                 },
                 tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    titleColor: '#00827F',
+                    bodyColor: '#00827F',
+                    borderColor: 'rgba(0, 184, 181, 0.2)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
                             const label = context.label || '';
@@ -226,6 +270,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                 }
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
             }
         }
     });
@@ -233,30 +281,516 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-.card {
-    transition: transform 0.3s ease;
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --teal-light: #E6F7F7;
+    --teal-lighter: #F0FCFC;
+    --teal-gradient: linear-gradient(135deg, #00B8B5 0%, #00827F 100%);
+    --teal-shadow: rgba(0, 184, 181, 0.3);
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --accent: #8b5cf6;
+    --secondary: #6b7280;
 }
 
-.card:hover {
-    transform: translateY(-3px);
+.dashboard-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 184, 181, 0.1);
+    overflow: hidden;
 }
 
-.table-hover tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.05);
+/* En-tête du rapport */
+.report-header {
+    padding: 2rem;
+    background: var(--teal-gradient);
+    color: white;
+    position: relative;
+    overflow: hidden;
 }
 
-.badge {
+.report-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(30%, -30%);
+}
+
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+}
+
+.profile-info {
+    color: white;
+}
+
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.profile-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.role-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+}
+
+.join-date {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.period-selector {
+    z-index: 2;
+}
+
+.period-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.period-label {
+    font-weight: 600;
+    margin: 0;
+}
+
+.period-select {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    color: white;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+}
+
+.period-select option {
+    background: white;
+    color: var(--teal-dark);
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 2;
+    position: relative;
+}
+
+.header-title i {
+    font-size: 2rem;
+    opacity: 0.9;
+}
+
+.header-title h2 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+/* Grille de statistiques */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 184, 181, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.stat-card.primary::before { background: var(--teal-glacier); }
+.stat-card.success::before { background: var(--success); }
+.stat-card.accent::before { background: var(--accent); }
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px var(--teal-shadow);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-card.primary .stat-icon { background: rgba(0, 184, 181, 0.1); color: var(--teal-glacier); }
+.stat-card.success .stat-icon { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.stat-card.accent .stat-icon { background: rgba(139, 92, 246, 0.1); color: var(--accent); }
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+}
+
+.stat-card.primary .stat-number { color: var(--teal-glacier); }
+.stat-card.success .stat-number { color: var(--success); }
+.stat-card.accent .stat-number { color: var(--accent); }
+
+.stat-label {
+    color: var(--secondary);
+    margin: 0.5rem 0;
+    font-weight: 600;
+}
+
+.stat-period, .stat-percentage {
+    font-size: 0.875rem;
+    color: var(--secondary);
+}
+
+.stat-trend {
+    font-size: 1.25rem;
+}
+
+.stat-trend.up { color: var(--success); }
+.stat-trend.down { color: #ef4444; }
+.stat-trend.neutral { color: var(--secondary); }
+
+/* Section graphique */
+.chart-section {
+    padding: 0 2rem 2rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h3 {
+    color: var(--teal-dark);
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--secondary);
+    font-weight: 600;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.legend-color.primary { background: var(--teal-glacier); }
+
+.chart-container {
+    height: 400px;
+    background: var(--teal-lighter);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(0, 184, 181, 0.1);
+}
+
+/* Section des actions */
+.actions-section {
+    padding: 0 2rem 2rem;
+}
+
+.actions-count {
+    background: var(--teal-glacier);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.actions-table-container {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 184, 181, 0.1);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.actions-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.actions-table th {
+    background: var(--teal-lighter);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    color: var(--teal-dark);
+    text-align: left;
+    border-bottom: 2px solid var(--teal-glacier);
+}
+
+.actions-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.actions-table th.sortable:hover {
+    background: var(--teal-light);
+}
+
+.actions-table td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 184, 181, 0.1);
+}
+
+.action-row:hover {
+    background: var(--teal-lighter);
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+}
+
+.action-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+}
+
+.date-day {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--teal-glacier);
+    line-height: 1;
+}
+
+.date-month {
+    font-size: 0.75rem;
+    color: var(--secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.action-type-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.action-type-badge.creation { background: rgba(0, 184, 181, 0.1); color: var(--teal-glacier); }
+.action-type-badge.modification { background: rgba(253, 203, 5, 0.1); color: var(--yellow-canaan); }
+.action-type-badge.suppression { background: rgba(233, 30, 99, 0.1); color: var(--pink-swoosh); }
+.action-type-badge.traitement { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+
+.action-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.action-description {
+    margin: 0;
+    color: var(--teal-dark);
     font-weight: 500;
-    padding: 0.35em 0.65em;
-    font-size: 0.85em;
 }
 
-.avatar {
-    transition: transform 0.3s ease;
+.action-reference {
+    font-size: 0.75rem;
+    color: var(--secondary);
+    font-weight: 600;
 }
 
-.avatar:hover {
-    transform: scale(1.05);
+.action-time {
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+/* État vide */
+.empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--teal-light);
+    margin-bottom: 1rem;
+}
+
+.empty-state h4 {
+    color: var(--teal-dark);
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    color: var(--secondary);
+}
+
+/* Pied de section */
+.section-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.period-info {
+    color: var(--secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.btn-export {
+    background: var(--teal-gradient);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-export:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--teal-shadow);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .report-header {
+        padding: 1.5rem;
+    }
+    
+    .header-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+    }
+    
+    .chart-section,
+    .actions-section {
+        padding: 0 1.5rem 1.5rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .section-footer {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .actions-table th,
+    .actions-table td {
+        padding: 0.75rem 1rem;
+    }
 }
 </style>
 {% endblock %}

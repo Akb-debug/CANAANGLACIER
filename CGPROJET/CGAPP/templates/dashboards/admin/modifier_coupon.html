@@ -10,14 +10,17 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 mb-0">
+                    <h1 class="h3 mb-1 text-teal-glacier">
                         <i class="fas fa-edit me-2"></i>Modifier le Coupon
                     </h1>
-                    <p class="mb-0">Code: <strong>{{ coupon.code }}</strong></p>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-ticket-alt me-1 text-teal-glacier"></i>
+                        Code: <strong class="text-teal-dark">{{ coupon.code }}</strong>
+                    </p>
                 </div>
                 <div>
-                    <a href="{% url 'gestion_coupons' %}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    <a href="{% url 'gestion_coupons' %}"style = "background-color :#00B8B5; color : white" class="btn btn-teal-outline">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
                     </a>
                 </div>
             </div>
@@ -25,32 +28,82 @@
     </div>
 
     <!-- Statistiques du coupon -->
-    <div class="row g-4 mb-4">
+    <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card bg-info text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
+            <div class="card stat-card bg-teal-light border-teal-glacier">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-white-50 small">Utilisations</div>
-                            <div class="h4 mb-0">{{ coupon.usage_actuel }}/{{ coupon.usage_max }}</div>
+                            <div class="text-teal-dark small fw-semibold text-uppercase">Utilisations</div>
+                            <div class="h5 mb-0 mt-1 text-teal-glacier">{{ coupon.usage_actuel }}/{{ coupon.usage_max }}</div>
+                            <div class="text-teal-muted small mt-1">
+                                {% widthratio coupon.usage_actuel coupon.usage_max 100 %}% utilisé
+                            </div>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-chart-bar fa-2x opacity-75"></i>
+                        <div class="icon-circle bg-teal-very-light">
+                            <i class="fas fa-chart-bar text-teal-glacier"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card {% if coupon.est_valide %}bg-success{% else %}bg-danger{% endif %} text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
+            <div class="card stat-card {% if coupon.est_valide %}bg-teal-very-light border-teal-glacier{% else %}bg-teal-light border-teal-muted{% endif %}">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-white-50 small">Statut</div>
-                            <div class="h5 mb-0">{% if coupon.est_valide %}Valide{% else %}Expiré{% endif %}</div>
+                            <div class="text-teal-dark small fw-semibold text-uppercase">Statut</div>
+                            <div class="h5 mb-0 mt-1 {% if coupon.est_valide %}text-teal-glacier{% else %}text-teal-muted{% endif %}">
+                                {% if coupon.est_valide %}Valide{% else %}Expiré{% endif %}
+                            </div>
+                            <div class="text-teal-muted small mt-1">
+                                {% if coupon.est_valide %}
+                                    <i class="fas fa-clock me-1"></i>Actif
+                                {% else %}
+                                    <i class="fas fa-ban me-1"></i>Inactif
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas {% if coupon.est_valide %}fa-check-circle{% else %}fa-times-circle{% endif %} fa-2x opacity-75"></i>
+                        <div class="icon-circle {% if coupon.est_valide %}bg-teal-light{% else %}bg-teal-very-light{% endif %}">
+                            <i class="fas {% if coupon.est_valide %}fa-check-circle text-teal-glacier{% else %}fa-times-circle text-teal-muted{% endif %}"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-teal-light border-teal-glacier">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-teal-dark small fw-semibold text-uppercase">Période</div>
+                            <div class="small mb-0 mt-1 text-teal-glacier">
+                                {{ coupon.date_debut|date:"d/m/Y" }}<br>
+                                au {{ coupon.date_fin|date:"d/m/Y" }}
+                            </div>
+                        </div>
+                        <div class="icon-circle bg-teal-very-light">
+                            <i class="fas fa-calendar-alt text-teal-glacier"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card bg-teal-light border-teal-glacier">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-teal-dark small fw-semibold text-uppercase">Type</div>
+                            <div class="h6 mb-0 mt-1 text-teal-glacier text-capitalize">
+                                {{ coupon.type_reduction }}
+                            </div>
+                            <div class="text-teal-muted small mt-1">
+                                {{ coupon.valeur }}{% if coupon.type_reduction == 'pourcentage' %}%{% else %} FCFA{% endif %}
+                            </div>
+                        </div>
+                        <div class="icon-circle bg-teal-very-light">
+                            <i class="fas {% if coupon.type_reduction == 'pourcentage' %}fa-percent{% else %}fa-euro-sign{% endif %} text-teal-glacier"></i>
                         </div>
                     </div>
                 </div>
@@ -60,56 +113,80 @@
 
     <!-- Formulaire -->
     <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
+        <div class="col-lg-10 mx-auto">
+            <div class="card border-teal-glacier shadow-teal">
+                <div class="card-header bg-teal-glacier text-white border-0 py-3">
                     <h5 class="mb-0">
                         <i class="fas fa-ticket-alt me-2"></i>Informations du Coupon
                     </h5>
                 </div>
-                <div class="card-body">
-                    <form method="post">
+                <div class="card-body p-4">
+                    <form method="post" class="needs-validation" novalidate>
                         {% csrf_token %}
                         
-                        <div class="row">
+                        <div class="row g-4">
+                            <!-- Code et Type -->
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.code.id_for_label }}" class="form-label">
-                                        Code du coupon <span class="text-danger">*</span>
+                                <div class="form-group">
+                                    <label for="{{ form.code.id_for_label }}" class="form-label fw-semibold text-teal-dark">
+                                        Code du coupon <span class="text-teal-glacier">*</span>
                                     </label>
-                                    {{ form.code }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-teal-very-light border-teal-glacier">
+                                            <i class="fas fa-tag text-teal-glacier"></i>
+                                        </span>
+                                        {{ form.code }}
+                                    </div>
                                     {% if form.code.errors %}
-                                        <div class="text-danger small mt-1">
+                                        <div class="text-teal-accent small mt-2">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
                                             {{ form.code.errors.0 }}
                                         </div>
                                     {% endif %}
+                                    <div class="form-text text-teal-muted">
+                                        Code unique pour le coupon promotionnel
+                                    </div>
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.type_reduction.id_for_label }}" class="form-label">
-                                        Type de réduction <span class="text-danger">*</span>
+                                <div class="form-group">
+                                    <label for="{{ form.type_reduction.id_for_label }}" class="form-label fw-semibold text-teal-dark">
+                                        Type de réduction <span class="text-teal-glacier">*</span>
                                     </label>
-                                    {{ form.type_reduction }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-teal-very-light border-teal-glacier">
+                                            <i class="fas fa-percentage text-teal-glacier"></i>
+                                        </span>
+                                        {{ form.type_reduction }}
+                                    </div>
                                     {% if form.type_reduction.errors %}
-                                        <div class="text-danger small mt-1">
+                                        <div class="text-teal-accent small mt-2">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
                                             {{ form.type_reduction.errors.0 }}
                                         </div>
                                     {% endif %}
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row">
+                            <!-- Valeur et Usage max -->
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.valeur.id_for_label }}" class="form-label">
-                                        Valeur <span class="text-danger">*</span>
+                                <div class="form-group">
+                                    <label for="{{ form.valeur.id_for_label }}" class="form-label fw-semibold text-teal-dark">
+                                        Valeur <span class="text-teal-glacier">*</span>
                                     </label>
-                                    {{ form.valeur }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-teal-very-light border-teal-glacier">
+                                            <i class="fas fa-euro-sign text-teal-glacier"></i>
+                                        </span>
+                                        {{ form.valeur }}
+                                        <span class="input-group-text bg-teal-light text-teal-dark border-teal-glacier type-indicator fw-bold">
+                                            {% if coupon.type_reduction == 'pourcentage' %}%{% else %}FCFA{% endif %}
+                                        </span>
+                                    </div>
                                     {% if form.valeur.errors %}
-                                        <div class="text-danger small mt-1">
+                                        <div class="text-teal-accent small mt-2">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
                                             {{ form.valeur.errors.0 }}
                                         </div>
                                     {% endif %}
@@ -117,29 +194,43 @@
                             </div>
                             
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.usage_max.id_for_label }}" class="form-label">
-                                        Usage maximum <span class="text-danger">*</span>
+                                <div class="form-group">
+                                    <label for="{{ form.usage_max.id_for_label }}" class="form-label fw-semibold text-teal-dark">
+                                        Usage maximum <span class="text-teal-glacier">*</span>
                                     </label>
-                                    {{ form.usage_max }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-teal-very-light border-teal-glacier">
+                                            <i class="fas fa-users text-teal-glacier"></i>
+                                        </span>
+                                        {{ form.usage_max }}
+                                    </div>
                                     {% if form.usage_max.errors %}
-                                        <div class="text-danger small mt-1">
+                                        <div class="text-teal-accent small mt-2">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
                                             {{ form.usage_max.errors.0 }}
                                         </div>
                                     {% endif %}
+                                    <div class="form-text text-teal-muted">
+                                        Nombre maximum d'utilisations autorisées
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row">
+                            <!-- Dates -->
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.date_debut.id_for_label }}" class="form-label">
-                                        Date de début <span class="text-danger">*</span>
+                                <div class="form-group">
+                                    <label for="{{ form.date_debut.id_for_label }}" class="form-label fw-semibold text-teal-dark">
+                                        Date de début <span class="text-teal-glacier">*</span>
                                     </label>
-                                    {{ form.date_debut }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-teal-very-light border-teal-glacier">
+                                            <i class="fas fa-play text-teal-glacier"></i>
+                                        </span>
+                                        {{ form.date_debut }}
+                                    </div>
                                     {% if form.date_debut.errors %}
-                                        <div class="text-danger small mt-1">
+                                        <div class="text-teal-accent small mt-2">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
                                             {{ form.date_debut.errors.0 }}
                                         </div>
                                     {% endif %}
@@ -147,36 +238,51 @@
                             </div>
                             
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="{{ form.date_fin.id_for_label }}" class="form-label">
-                                        Date de fin <span class="text-danger">*</span>
+                                <div class="form-group">
+                                    <label for="{{ form.date_fin.id_for_label }}" class="form-label fw-semibold text-teal-dark">
+                                        Date de fin <span class="text-teal-glacier">*</span>
                                     </label>
-                                    {{ form.date_fin }}
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-teal-very-light border-teal-glacier">
+                                            <i class="fas fa-flag-checkered text-teal-glacier"></i>
+                                        </span>
+                                        {{ form.date_fin }}
+                                    </div>
                                     {% if form.date_fin.errors %}
-                                        <div class="text-danger small mt-1">
+                                        <div class="text-teal-accent small mt-2">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
                                             {{ form.date_fin.errors.0 }}
                                         </div>
                                     {% endif %}
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="mb-3">
-                            <div class="form-check">
-                                {{ form.actif }}
-                                <label class="form-check-label" for="{{ form.actif.id_for_label }}">
-                                    Coupon actif
-                                </label>
+                            <!-- Statut actif -->
+                            <div class="col-12">
+                                <div class="form-check custom-checkbox bg-teal-very-light p-3 rounded border-teal-glacier">
+                                    {{ form.actif }}
+                                    <label class="form-check-label fw-semibold text-teal-dark" for="{{ form.actif.id_for_label }}">
+                                        <i class="fas fa-power-off me-2 text-teal-glacier"></i>Coupon actif
+                                    </label>
+                                    <div class="form-text text-teal-muted mt-2">
+                                        Désactivez cette option pour rendre le coupon temporairement indisponible
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% url 'gestion_coupons' %}" class="btn btn-secondary">
-                                <i class="fas fa-times me-2"></i>Annuler
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Sauvegarder
-                            </button>
+                        <!-- Actions -->
+                        <div class="row mt-5 pt-4 border-top border-teal-light">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end gap-3">
+                                    <a href="{% url 'gestion_coupons' %}" class="btn btn-teal-outline btn-lg px-4" style = "background-color :#E64545; color : white">
+                                        <i class="fas fa-times me-2"></i>Annuler
+                                    </a>
+                                    <button type="submit" class="btn btn-teal-glacier btn-lg px-4" style = "background-color :#00B8B5; color : white">
+                                        <i class="fas fa-save me-2"></i>Sauvegarder les modifications
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -184,19 +290,296 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mise à jour dynamique de l'indicateur de type
+        const typeSelect = document.getElementById('{{ form.type_reduction.id_for_label }}');
+        const typeIndicator = document.querySelector('.type-indicator');
+        
+        function updateTypeIndicator() {
+            if (typeSelect.value === 'pourcentage') {
+                typeIndicator.textContent = '%';
+                typeIndicator.classList.remove('bg-teal-light', 'text-teal-dark');
+                typeIndicator.classList.add('bg-teal-glacier', 'text-white');
+            } else {
+                typeIndicator.textContent = 'FCFA';
+                typeIndicator.classList.remove('bg-teal-glacier', 'text-white');
+                typeIndicator.classList.add('bg-teal-light', 'text-teal-dark');
+            }
+        }
+        
+        typeSelect.addEventListener('change', updateTypeIndicator);
+        updateTypeIndicator(); // Initialisation
+        
+        // Validation des dates
+        const dateDebut = document.getElementById('{{ form.date_debut.id_for_label }}');
+        const dateFin = document.getElementById('{{ form.date_fin.id_for_label }}');
+        
+        function validateDates() {
+            if (dateDebut.value && dateFin.value) {
+                const debut = new Date(dateDebut.value);
+                const fin = new Date(dateFin.value);
+                
+                if (debut > fin) {
+                    dateFin.setCustomValidity('La date de fin doit être postérieure à la date de début');
+                    dateFin.classList.add('is-invalid');
+                } else {
+                    dateFin.setCustomValidity('');
+                    dateFin.classList.remove('is-invalid');
+                }
+            }
+        }
+        
+        dateDebut.addEventListener('change', validateDates);
+        dateFin.addEventListener('change', validateDates);
+        
+        // Animation des cartes
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Validation en temps réel
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (!this.checkValidity()) {
+                    this.classList.add('is-invalid');
+                } else {
+                    this.classList.remove('is-invalid');
+                }
+            });
+        });
+    });
+</script>
 
 <style>
-.card {
-    border: none;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-}
-.form-control, .form-select {
-    border: 1px solid #d1d3e2;
-    border-radius: 0.35rem;
-}
-.form-control:focus, .form-select:focus {
-    border-color: #5a5c69;
-    box-shadow: 0 0 0 0.2rem rgba(90, 92, 105, 0.25);
-}
+    :root {
+        --teal-glacier: #00B8B5;
+        --teal-dark: #00827F;
+        --teal-light: rgba(0, 184, 181, 0.15);
+        --teal-very-light: rgba(0, 184, 181, 0.08);
+        --teal-muted: #6BB8B6;
+        --teal-accent: #E64545;
+        --white-bg: #FFFFFF;
+        --gray-light: #f8f9fa;
+        --teal-gradient: linear-gradient(135deg, #00B8B5 0%, #00D4D0 100%);
+        --teal-gradient-light: linear-gradient(135deg, rgba(0, 184, 181, 0.1) 0%, rgba(0, 212, 208, 0.1) 100%);
+        --shadow-primary: 0 0.5rem 1.5rem rgba(0, 184, 181, 0.15);
+        --shadow-dark: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+    }
+
+    /* Couleurs principales */
+    .text-teal-glacier { color: var(--teal-glacier) !important; }
+    .text-teal-dark { color: var(--teal-dark) !important; }
+    .text-teal-muted { color: var(--teal-muted) !important; }
+    .text-teal-accent { color: var(--teal-accent) !important; }
+
+    .bg-teal-glacier { background: var(--teal-gradient) !important; }
+    .bg-teal-light { background-color: var(--teal-light) !important; }
+    .bg-teal-very-light { background-color: var(--teal-very-light) !important; }
+
+    .border-teal-glacier { border-color: var(--teal-glacier) !important; }
+    .border-teal-muted { border-color: var(--teal-muted) !important; }
+
+    /* Cartes de statistiques */
+    .stat-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        animation: fadeInUp 0.6s ease-out;
+        border: 1px solid;
+        background: white;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-dark) !important;
+    }
+
+    .icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* Carte principale */
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid;
+        background: white;
+    }
+
+    .shadow-teal {
+        box-shadow: var(--shadow-primary);
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        font-weight: 600;
+    }
+
+    /* Formulaires */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background-color: var(--white-bg);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--teal-glacier);
+        box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.15);
+        outline: none;
+    }
+
+    .form-control.is-invalid, .form-select.is-invalid {
+        border-color: var(--teal-accent);
+        box-shadow: 0 0 0 0.2rem rgba(230, 69, 69, 0.15);
+    }
+
+    .input-group-text {
+        background-color: var(--teal-very-light);
+        border: 1px solid var(--teal-glacier);
+        color: var(--teal-glacier);
+        font-weight: 600;
+    }
+
+    /* Checkbox personnalisée */
+    .custom-checkbox .form-check-input {
+        width: 1.2em;
+        height: 1.2em;
+        margin-top: 0.2em;
+        border: 2px solid var(--teal-muted);
+    }
+
+    .custom-checkbox .form-check-input:checked {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+    }
+
+    .custom-checkbox .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25);
+    }
+
+    /* Boutons */
+    .btn-teal-glacier {
+        background: var(--teal-gradient);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-teal-glacier:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 184, 181, 0.4);
+        color: white;
+        background: var(--teal-dark);
+    }
+
+    .btn-teal-outline {
+        border: 2px solid var(--teal-glacier);
+        color: var(--teal-glacier);
+        background: transparent;
+        font-weight: 600;
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-teal-outline:hover {
+        background: var(--teal-glacier);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .stat-card .card-body {
+            padding: 1rem;
+        }
+        
+        .icon-circle {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .btn-teal-glacier,
+        .btn-teal-outline {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem !important;
+        }
+    }
+
+    /* Textes d'aide */
+    .form-text {
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Indicateur de type */
+    .type-indicator {
+        min-width: 60px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    /* Bordures et séparateurs */
+    .border-teal-light {
+        border-color: var(--teal-light) !important;
+    }
+
+    /* Arrière-plan de la page */
+    body {
+        background-color: var(--gray-light);
+    }
+
+    /* Amélioration de la lisibilité */
+    .text-muted {
+        color: var(--teal-muted) !important;
+    }
+
+    /* États de focus améliorés */
+    .btn:focus, .form-control:focus, .form-select:focus, .form-check-input:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25);
+    }
 </style>
 {% endblock %}

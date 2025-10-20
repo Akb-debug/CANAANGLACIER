@@ -1,422 +1,415 @@
 {% extends 'dashboards/base.html' %}
-{% load static humanize %}
+{% load static %}
 
-{% block title %}Tableau de bord Gérant{% endblock %}
+{% block title %}Dashboard Gérant - Glacier Royale{% endblock %}
 
-{% block body %}  {# Changé de 'content' à 'body' pour correspondre à votre base.html #}
-<!-- Dashboard Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="row g-4">
-        <!-- Statistiques principales -->
-        <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-chart-line fa-3x text-primary"></i>
-                <div class="ms-3">
-                    <p class="mb-2">Chiffre d'affaires</p>
-                    <h6 class="mb-0">{{ chiffre_affaires|default:0|intcomma }} FCFA</h6>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-shopping-cart fa-3x text-success"></i>
-                <div class="ms-3">
-                    <p class="mb-2">Commandes</p>
-                    <h6 class="mb-0">{{ commandes_count|default:0 }}</h6>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-users fa-3x text-info"></i>
-                <div class="ms-3">
-                    <p class="mb-2">Nouveaux clients</p>
-                    <h6 class="mb-0">{{ nouveaux_clients_count|default:0 }}</h6>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
-                <i class="fa fa-exclamation-triangle fa-3x text-warning"></i>
-                <div class="ms-3">
-                    <p class="mb-2">Alertes stock</p>
-                    <h6 class="mb-0">{{ alertes_stock|default:0 }}</h6>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Dashboard End -->
-
-<!-- Actions rapides -->
-<div class="container-fluid pt-4 px-4">
-    <div class="row g-4 mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-bolt me-2"></i>Actions Rapides
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3 quick-actions">
-                        <div class="col-md-3">
-                            <a href="#" class="btn btn-outline-primary">
-                                <i class="fas fa-plus"></i>
-                                <span class="fw-bold">Nouveau Produit</span>
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="#stock" class="btn btn-outline-success">
-                                <i class="fas fa-boxes"></i>
-                                <span class="fw-bold">Gérer Stock</span>
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'gestion_financiere_gerant' %}" class="btn btn-outline-info">
-                                <i class="fas fa-chart-line"></i>
-                                <span class="fw-bold">Gestion Financière</span>
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{% url 'communication_notifications' %}" class="btn btn-outline-warning position-relative">
-                                <i class="fas fa-bell"></i>
-                                <span class="fw-bold">Notifications</span>
-                                {% if notifications_non_lues > 0 %}
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    {{ notifications_non_lues }}
-                                </span>
-                                {% endif %}
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Graphiques et tableaux -->
-<div class="container-fluid px-4">
-    <div class="row g-4">
-        <!-- Graphique des ventes -->
-        <div class="col-xl-8">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-area me-1"></i>
-                    Évolution des ventes (7 derniers jours)
-                </div>
-                <div class="card-body">
-                    <div class="chart-container" style="position: relative; height: 300px;">
-                        <canvas id="ventesChart" 
-                                data-ventes='{{ ventes_7_jours_json|escapejs }}'>
-                        </canvas>
-                    </div>
-                    <div id="ventesData" data-ventes='{{ ventes_7_jours_json|escapejs }}' style="display: none;"></div>
-                </div>
-                <div class="card-footer small text-muted">Mis à jour le {{ aujourd_hui|date:"d/m/Y" }}</div>
-            </div>
-        </div>
-
-        <!-- Dernières commandes -->
-        <div class="col-xl-4">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-shopping-cart me-1"></i>
-                    Dernières commandes
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>N°</th>
-                                    <th>Client</th>
-                                    <th class="text-end">Montant</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for commande in dernieres_commandes|slice:":5" %}
-                                <tr>
-                                    <td>#{{ commande.id }}</td>
-                                    <td>{{ commande.client.nom|default:'Anonyme'|truncatechars:15 }}</td>
-                                    <td class="text-end">{{ commande.total|floatformat:0 }} FCFA</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="3" class="text-center">Aucune commande récente</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer text-end">
-                    <a href="{% url 'gestion_commandes_admin' %}" class="btn btn-sm btn-outline-primary">Voir tout</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Produits et alertes -->
-    <div class="row g-4">
-        <!-- Produits à faible stock -->
-        <div class="col-xl-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-exclamation-triangle me-1"></i>
-                    Produits à réapprovisionner
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Produit</th>
-                                    <th>Stock</th>
-                                    <th>Seuil</th>
-                                    <th class="text-end">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for produit in produits_faible_stock|slice:":5" %}
-                                <tr>
-                                    <td>{{ produit.nom|truncatechars:20 }}</td>
-                                    <td>{{ produit.quantite_stock }}</td>
-                                    <td>{{ produit.seuil_alerte }}</td>
-                                    <td class="text-end">
-                                        <a href="{% url 'modifier_produit' produit.pk %}" class="btn btn-sm btn-outline-primary">
-                                            Réapprovisionner
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center">Aucun produit à réapprovisionner</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer text-end">
-                    <a href="{% url 'gestion_stocks_avancee' %}" class="btn btn-sm btn-outline-primary">Gérer le stock</a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Meilleurs produits -->
-        <div class="col-xl-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <i class="fas fa-star me-1"></i>
-                    Meilleurs produits
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Produit</th>
-                                    <th>Ventes</th>
-                                    <th class="text-end">Revenus</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for produit in meilleurs_produits|slice:":5" %}
-                                <tr>
-                                    <td>{{ produit.nom|truncatechars:20 }}</td>
-                                    <td>{{ produit.quantite_vendue|default:0 }}</td>
-                                    <td class="text-end">{{ produit.chiffre_affaires|default:0|floatformat:0 }} FCFA</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="3" class="text-center">Aucune donnée disponible</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer text-end">
-                    <a href="{% url 'statistiques_admin' %}" class="btn btn-sm btn-outline-primary">Voir les rapports</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+{% block body %}
 
 <style>
-    .quick-actions .btn {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        transition: all 0.3s ease;
-        padding: 1rem 0.5rem;
-        height: 100%;
-    }
-    .quick-actions .btn:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    .quick-actions i {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-    }
-    .stat-card {
-        border-left: 4px solid #0d6efd;
-    }
-    .card {
-        margin-bottom: 1.5rem;
-        border: none;
-        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-    }
-    .card-header {
-        background-color: #f8f9fc;
-        border-bottom: 1px solid #e3e6f0;
-    }
-    .table th {
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.7rem;
-        letter-spacing: 0.5px;
-        color: #4e73df;
-    }
-    .table td, .table th {
-        padding: 0.5rem;
-    }
+.btn-outline-info:hover{
+    color: white
+}
+
+.btn-outline-warning:hover{
+    color: white
+}
+.btn-sm:hover{
+    color: white
+}
 </style>
 
-{% endblock %}
+<div class="container-fluid pt-4 px-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h1 class="h3 mb-0">Dashboard Gérant</h1>
+                    
+                </div>
+                <p class="text-muted mb-0">Bienvenue, {{ request.user.get_full_name|default:request.user.username }}</p>
+            </div>
+        </div>
+    </div>
 
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-// Attendre que le DOM soit entièrement chargé
-document.addEventListener('DOMContentLoaded', function() {
-    // Fonction pour initialiser le graphique des ventes
-    function initVentesChart() {
-        const ventesChartElement = document.getElementById('ventesChart');
-        const ventesDataElement = document.getElementById('ventesData');
-        
-        if (!ventesChartElement || !ventesDataElement) return;
-        
-        try {
-            const ctx = ventesChartElement.getContext('2d');
+    <!-- Statistiques Générales -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="mb-2">Produits Total</h6>
+                    <h4 class="mb-0">{{ stats_generales.total_produits }}</h4>
+                </div>
+                <i class="fas fa-ice-cream fa-3x text-primary"></i>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="mb-2">Stock Faible</h6>
+                    <h4 class="mb-0 text-warning">{{ stats_generales.produits_stock_faible }}</h4>
+                </div>
+                <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="mb-2">Rupture de Stock</h6>
+                    <h4 class="mb-0 text-danger">{{ stats_generales.produits_rupture }}</h4>
+                </div>
+                <i class="fas fa-times-circle fa-3x text-danger"></i>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="mb-2">Commandes Total</h6>
+                    <h4 class="mb-0">{{ stats_generales.total_commandes }}</h4>
+                </div>
+                <i class="fas fa-shopping-cart fa-3x text-success"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deuxième ligne de statistiques -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="mb-2">En Attente</h6>
+                    <h4 class="mb-0 text-warning">{{ stats_generales.commandes_attente }}</h4>
+                </div>
+                <i class="fas fa-clock fa-3x text-warning"></i>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="mb-2">Serveurs Actifs</h6>
+                    <h4 class="mb-0">{{ stats_generales.total_serveurs }}</h4>
+                </div>
+                <i class="fas fa-users fa-3x text-info"></i>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="mb-2">Ventes Aujourd'hui</h6>
+                    <h4 class="mb-0 text-success">{{ stats_ventes.aujourdhui|floatformat:0 }} FCFA</h4>
+                </div>
+                <i class="fas fa-money-bill-wave fa-3x text-success"></i>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h6 class="mb-2">Ventes Ce Mois</h6>
+                    <h4 class="mb-0 text-primary">{{ stats_ventes.mois|floatformat:0 }} FCFA</h4>
+                </div>
+                <i class="fas fa-chart-line fa-3x text-primary"></i>
+            </div>
+        </div>
+    </div>
+
+   <!-- Actions Rapides -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="bg-light rounded p-4">
+            <h5 class="mb-4">
+                <i class="fas fa-bolt text-warning me-2"></i>
+                Actions Rapides
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-3 col-6">
+                    <a href="{% url 'gestion_stocks_avancee' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-boxes fa-2x mb-2"></i>
+                        <span class="text-center">Gestion des Stocks</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="{% url 'liste_serveurs' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-user-tie fa-2x mb-2"></i>
+                        <span class="text-center ">Supervision Serveurs</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="{% url 'liste_produits' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-ice-cream fa-2x mb-2"></i>
+                        <span class="text-center">Gérer Produits</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="{% url 'gestion_commandes_admin' %}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                        <span class="text-center">Gestion Commandes</span>
+                    </a>
+                </div>
+            </div>
             
-            // Récupérer les données depuis l'élément caché
-            const ventesData = JSON.parse(ventesDataElement.getAttribute('data-ventes') || '[]');
-            
-            if (!ventesData || ventesData.length === 0) {
-                console.warn('Aucune donnée de vente disponible pour le graphique');
-                return;
-            }
-            
-            // Préparer les données pour le graphique
-            const labels = ventesData.map(item => {
-                // Convertir la date en objet Date pour un formatage correct
-                const date = new Date(item.date);
-                return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-            });
-            
-            const data = ventesData.map(item => item.total);
-            
-            // Créer le graphique
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Montant des ventes (FCFA)',
-                        data: data,
-                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                        borderColor: 'rgba(13, 110, 253, 1)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointBackgroundColor: 'rgba(13, 110, 253, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(13, 110, 253, 1)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleFont: { size: 14, weight: 'bold' },
-                            bodyFont: { size: 13 },
-                            padding: 12,
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.parsed.y.toLocaleString('fr-FR') + ' FCFA';
-                                },
-                                labelTextColor: function() {
-                                    return '#fff';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)',
-                                drawBorder: false
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return value.toLocaleString('fr-FR') + ' FCFA';
-                                },
-                                padding: 10
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false,
-                                drawBorder: false
-                            },
-                            ticks: {
-                                padding: 10
-                            }
-                        }
-                    }
-                }
-            });
-        } catch (error) {
-            console.error('Erreur lors de l\'initialisation du graphique des ventes:', error);
-        }
-    }
-    
-    // Initialiser les composants
-    function initComponents() {
-        // Initialiser le graphique des ventes
-        initVentesChart();
-        
-        // Initialiser les tooltips Bootstrap
-        if (typeof bootstrap !== 'undefined') {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.forEach(function(tooltipTriggerEl) {
-                new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        }
-    }
-    
-    // Démarrer l'initialisation
-    initComponents();
-});
-</script>
+            {% comment %} <!-- Deuxième ligne d'actions -->
+            <div class="row g-3 mt-2">
+                <div class="col-md-3 col-6">
+                    <a href="{% url 'statistiques_ventes' %}" class="btn btn-outline-danger w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-chart-line fa-2x mb-2"></i>
+                        <span class="text-center">Statistiques Ventes</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="{% url 'gestion_financiere_gerant' %}" class="btn btn-outline-dark w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                        <span class="text-center">Finances</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="{% url 'gestion_categories' %}" class="btn btn-outline-secondary w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-tags fa-2x mb-2"></i>
+                        <span class="text-center">Catégories</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="{% url 'admin:index' %}" class="btn btn-outline-purple w-100 h-100 d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-cogs fa-2x mb-2"></i>
+                        <span class="text-center">Administration</span>
+                    </a>
+                </div>
+            </div> {% endcomment %}
+        </div>
+    </div>
+</div>
+
+    <div class="row g-4">
+        <!-- Produits Populaires -->
+        <div class="col-xl-6">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h5 class="mb-0">Produits Populaires</h5>
+                    <a href="{% url 'liste_produits' %}" class="btn btn-sm btn-primary">Voir tous</a>
+                </div>
+                {% if produits_populaires %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Produit</th>
+                                <th scope="col">Prix</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for produit in produits_populaires %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if produit.image %}
+                                        <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" class="rounded me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                        <div class="bg-secondary rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="fas fa-ice-cream text-white"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-0">{{ produit.nom }}</h6>
+                                            <small class="text-muted">{{ produit.categorie.nom|default:"Non catégorisé" }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ produit.prix }} FCFA</td>
+                                <td>{{ produit.quantite_disponible }}</td>
+                                <td>
+                                    {% if produit.en_stock %}
+                                        {% if produit.stock_faible %}
+                                            <span class="badge bg-warning">Faible</span>
+                                        {% else %}
+                                            <span class="badge bg-success">En stock</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-danger">Rupture</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-ice-cream fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Aucun produit populaire pour le moment</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Commandes Récentes -->
+        <div class="col-xl-6">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h5 class="mb-0">Commandes Récentes</h5>
+                    <a href="{% url 'gestion_commandes_admin' %}" class="btn btn-sm btn-primary">Voir toutes</a>
+                </div>
+                {% if commandes_recentes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">#ID</th>
+                                <th scope="col">Client</th>
+                                <th scope="col">Total</th>
+                                <th scope="col">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commande in commandes_recentes %}
+                            <tr>
+                                <td><strong>#{{ commande.id }}</strong></td>
+                                <td>{{ commande.utilisateur.username }}</td>
+                                <td>{{ commande.total }} FCFA</td>
+                                <td>
+                                    {% if commande.statut == 'livree' %}
+                                        <span class="badge bg-success">Livrée</span>
+                                    {% elif commande.statut == 'en_traitement' %}
+                                        <span class="badge bg-warning">En traitement</span>
+                                    {% elif commande.statut == 'en_attente' %}
+                                        <span class="badge bg-secondary">En attente</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{{ commande.get_statut_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Aucune commande récente</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Supervision Serveurs -->
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h5 class="mb-0">Supervision Serveurs</h5>
+                    <a href="{% url 'liste_serveurs' %}" class="btn btn-sm btn-primary">Voir détails</a>
+                </div>
+                {% if serveurs_actifs %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Serveur</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Commandes Traitées</th>
+                                <th scope="col">Dernière Activité</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for serveur in serveurs_actifs %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ serveur.utilisateur.get_full_name|default:serveur.utilisateur.username }}</h6>
+                                            <small class="text-muted">{{ serveur.utilisateur.role }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ serveur.utilisateur.email }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ serveur.commandes_traitees|default:0 }}</span>
+                                </td>
+                                <td>
+                                    {% if serveur.derniere_action %}
+                                        <small class="text-muted">{{ serveur.derniere_action|timesince }}</small>
+                                    {% else %}
+                                        <span class="text-muted">Aucune activité</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'rapport_serveur' serveur.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-chart-bar me-1"></i>Rapport
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Aucun serveur actif</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Historique des Actions -->
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <h5 class="mb-4">Historique des Actions Récentes</h5>
+                {% if actions_recentes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Utilisateur</th>
+                                <th scope="col">Action</th>
+                                <th scope="col">Objet</th>
+                                <th scope="col">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for action in actions_recentes %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-info rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                        <span>{{ action.utilisateur.username }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge 
+                                        {% if action.type_action == 'creation' %}bg-success
+                                        {% elif action.type_action == 'modification' %}bg-warning
+                                        {% elif action.type_action == 'suppression' %}bg-danger
+                                        {% else %}bg-info{% endif %}">
+                                        {{ action.get_type_action_display }}
+                                    </span>
+                                </td>
+                                <td>{{ action.objet_concerne|default:"Système" }}</td>
+                                <td>
+                                    <small class="text-muted">{{ action.date_action|date:"d/m/Y H:i" }}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Aucune action récente</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

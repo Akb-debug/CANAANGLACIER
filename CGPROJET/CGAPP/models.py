@@ -2,10 +2,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.templatetags.static import static
 from django.utils.text import slugify
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator,RegexValidator, EmailValidator
 from decimal import Decimal, ROUND_HALF_UP
-from django.db import models
-from django.core.validators import RegexValidator, EmailValidator
+from django.contrib.auth import get_user_model
+
+
 
 # -------------------- UTILISATEUR --------------------
 class Utilisateur(AbstractUser):
@@ -118,6 +119,7 @@ class Categorie(models.Model):
 
 # -------------------- PRODUITS --------------------
 
+User = get_user_model()
 
 class Produit(models.Model):
     # Informations de base
@@ -142,11 +144,8 @@ class Produit(models.Model):
         verbose_name="Quantité en stock"
     )
     
-    # Images
-    image = models.ImageField(
-        upload_to='produits/',
-        verbose_name="Image principale"
-    )
+    # Image
+    image = models.ImageField(upload_to='produits/', verbose_name="Image principale")
     
     # Relations
     categorie = models.ForeignKey(
@@ -161,17 +160,23 @@ class Produit(models.Model):
         'Gerant',
         on_delete=models.CASCADE,
         related_name='produits',
-        verbose_name="Gérant responsable"
+        verbose_name="Gérant responsable",
+        null=True,
+        blank=True
+    )
+    admin = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='produits_admin',
+        verbose_name="Admin créateur",
+        null=True,
+        blank=True
     )
     
     # Métadonnées
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)
-    est_populaire = models.BooleanField(
-        default=False,
-        verbose_name="Produit populaire",
-        help_text="Cochez pour afficher ce produit comme populaire"
-    )
+    est_populaire = models.BooleanField(default=False, verbose_name="Produit populaire")
     
     # Caractéristiques
     ingredients = models.TextField(blank=True, verbose_name="Liste des ingrédients")
@@ -188,39 +193,27 @@ class Produit(models.Model):
         verbose_name = "Produit"
         verbose_name_plural = "Produits"
         ordering = ['-date_creation']
-        indexes = [
-            models.Index(fields=['nom']),
-            models.Index(fields=['categorie']),
-            models.Index(fields=['prix']),
-            models.Index(fields=['est_populaire']),
-        ]
 
     def __str__(self):
         return self.nom
 
     @property
     def ancien_prix(self):
-        """Retourne le prix avant promotion si applicable"""
         if self.promotion > 0:
-            # Convertir les valeurs en Decimal
             promotion_decimal = Decimal(self.promotion) / Decimal('100')
             ancien = self.prix / (Decimal('1') - promotion_decimal)
-            # Arrondir à 2 décimales comme un prix
             return ancien.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         return None
 
     @property
     def en_stock(self):
-        """Retourne True si le produit est en stock"""
         return self.quantite_disponible > 0
 
     @property
     def stock_faible(self):
-        """Retourne True si le stock est faible (moins de 5 unités)"""
         return 0 < self.quantite_disponible < 5
 
     def get_statut_stock(self):
-        """Retourne le statut du stock sous forme de texte"""
         if not self.en_stock:
             return "Rupture de stock"
         if self.stock_faible:
@@ -250,7 +243,7 @@ class LignePanier(models.Model):
     @property
     def total(self):
         """Sous-total pour cette ligne du panier"""
-        return self.produit.prix * self.quantite  # ✅ simple et direct
+        return self.produit.prix * self.quantite 
 
 class AdresseLivraison(models.Model):
     utilisateur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)

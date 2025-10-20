@@ -1,454 +1,651 @@
-{% extends 'dashboards/base.html' %}
+{% extends "dashboards/base.html" %}
 {% load static %}
 
-{% block title %}Gestion Avancée des Stocks{% endblock %}
-
 {% block body %}
-<div class="container-fluid pt-4 px-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-0">
-                        <i class="fas fa-boxes me-2"></i>Gestion Avancée des Stocks
-                    </h1>
-                    <p class="mb-0">Suivi détaillé et prévisions de stock</p>
-                </div>
-                <div>
-                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#ajustementStockModal">
-                        <i class="fas fa-plus me-2"></i>Ajustement Stock
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alertes et KPIs -->
-    <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-danger text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="text-white-50 small">Stock Critique</div>
-                            <div class="h3 mb-0">{{ stats.stock_critique }}</div>
-                            <div class="small">Produits en rupture</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-warning text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="text-white-50 small">Stock Faible</div>
-                            <div class="h3 mb-0">{{ stats.stock_faible }}</div>
-                            <div class="small">Réapprovisionnement requis</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-battery-quarter fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-info text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="text-white-50 small">Valeur Stock</div>
-                            <div class="h3 mb-0">{{ stats.valeur_stock|floatformat:0 }} FCFA</div>
-                            <div class="small">Inventaire total</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-coins fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <div class="text-white-50 small">Rotation Stock</div>
-                            <div class="h3 mb-0">{{ stats.rotation_stock|floatformat:1 }}</div>
-                            <div class="small">Fois par mois</div>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-sync-alt fa-2x opacity-75"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filtres -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label">Catégorie</label>
-                            <select name="categorie" class="form-select">
-                                <option value="">Toutes les catégories</option>
-                                {% for cat in categories %}
-                                <option value="{{ cat.id }}" {% if cat.id|stringformat:"s" == categorie_filtre %}selected{% endif %}>
-                                    {{ cat.nom }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Statut Stock</label>
-                            <select name="statut" class="form-select">
-                                <option value="">Tous les statuts</option>
-                                <option value="critique" {% if statut_filtre == 'critique' %}selected{% endif %}>Stock critique</option>
-                                <option value="faible" {% if statut_filtre == 'faible' %}selected{% endif %}>Stock faible</option>
-                                <option value="normal" {% if statut_filtre == 'normal' %}selected{% endif %}>Stock normal</option>
-                                <option value="exces" {% if statut_filtre == 'exces' %}selected{% endif %}>Stock excédentaire</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Tri par</label>
-                            <select name="tri" class="form-select">
-                                <option value="nom" {% if tri == 'nom' %}selected{% endif %}>Nom</option>
-                                <option value="stock" {% if tri == 'stock' %}selected{% endif %}>Quantité stock</option>
-                                <option value="rotation" {% if tri == 'rotation' %}selected{% endif %}>Rotation</option>
-                                <option value="valeur" {% if tri == 'valeur' %}selected{% endif %}>Valeur</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">&nbsp;</label>
-                            <button type="submit" class="btn btn-primary d-block w-100">
-                                <i class="fas fa-filter me-2"></i>Filtrer
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tableau des stocks -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-list me-2"></i>État des Stocks
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Produit</th>
-                                    <th>Stock Actuel</th>
-                                    <th>Stock Min</th>
-                                    <th>Stock Max</th>
-                                    <th>Rotation</th>
-                                    <th>Valeur</th>
-                                    <th>Prévision</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for produit in produits %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            {% if produit.image %}
-                                                <img src="{{ produit.image.url }}" alt="{{ produit.nom }}" 
-                                                     class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                            {% else %}
-                                                <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" 
-                                                     style="width: 40px; height: 40px;">
-                                                    <i class="fas fa-image text-muted"></i>
-                                                </div>
-                                            {% endif %}
-                                            <div>
-                                                <div class="fw-bold">{{ produit.nom }}</div>
-                                                <small class="text-muted">{{ produit.categorie.nom|default:"Non catégorisé" }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-{% if produit.quantite_disponible <= produit.stock_min %}danger{% elif produit.quantite_disponible <= produit.stock_min|add:10 %}warning{% else %}success{% endif %} me-2">
-                                                {{ produit.quantite_disponible }}
-                                            </span>
-                                            <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
-                                                <div class="progress-bar bg-{% if produit.quantite_disponible <= produit.stock_min %}danger{% elif produit.quantite_disponible <= produit.stock_min|add:10 %}warning{% else %}success{% endif %}" 
-                                                     style="width: {{ produit.pourcentage_stock }}%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>{{ produit.stock_min|default:"-" }}</td>
-                                    <td>{{ produit.stock_max|default:"-" }}</td>
-                                    <td>
-                                        <span class="badge bg-{% if produit.rotation > 4 %}success{% elif produit.rotation > 2 %}warning{% else %}danger{% endif %}">
-                                            {{ produit.rotation|floatformat:1 }}x
-                                        </span>
-                                    </td>
-                                    <td class="fw-bold">{{ produit.valeur_stock|floatformat:0 }} FCFA</td>
-                                    <td>
-                                        {% if produit.jours_rupture %}
-                                            <small class="text-{% if produit.jours_rupture <= 7 %}danger{% elif produit.jours_rupture <= 14 %}warning{% else %}success{% endif %}">
-                                                Rupture dans {{ produit.jours_rupture }} jours
-                                            </small>
-                                        {% else %}
-                                            <small class="text-muted">Stock stable</small>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-sm btn-outline-primary" 
-                                                    onclick="ajusterStock({{ produit.id }}, '{{ produit.nom }}', {{ produit.quantite_disponible }})"
-                                                    title="Ajuster stock">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-info" 
-                                                    onclick="voirHistorique({{ produit.id }})"
-                                                    title="Historique">
-                                                <i class="fas fa-history"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-success" 
-                                                    onclick="commanderStock({{ produit.id }})"
-                                                    title="Commander">
-                                                <i class="fas fa-shopping-cart"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="8" class="text-center py-4">
-                                        <i class="fas fa-boxes fa-3x text-muted mb-3"></i>
-                                        <p class="text-muted">Aucun produit trouvé</p>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Graphiques et analyses -->
-    <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-chart-line me-2"></i>Évolution des Stocks
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="stockChart" height="100"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Alertes Stock
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if alertes_stock %}
-                        {% for alerte in alertes_stock %}
-                        <div class="alert alert-{{ alerte.niveau }} d-flex align-items-center mb-2" role="alert">
-                            <i class="fas fa-{{ alerte.icone }} me-2"></i>
-                            <div class="flex-grow-1">
-                                <strong>{{ alerte.produit }}</strong><br>
-                                <small>{{ alerte.message }}</small>
-                            </div>
-                            <button class="btn btn-sm btn-outline-{{ alerte.niveau }}" 
-                                    onclick="ajusterStock({{ alerte.produit_id }}, '{{ alerte.produit }}', {{ alerte.stock_actuel }})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center py-3">
-                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
-                            <p class="text-success mb-0">Tous les stocks sont OK</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Ajustement Stock -->
-<div class="modal fade" id="ajustementStockModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-edit me-2"></i>Ajustement de Stock
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="ajustementForm" method="post" action="{% url 'ajuster_stock' %}">
-                <div class="modal-body">
-                    {% csrf_token %}
-                    <input type="hidden" name="produit_id" id="ajust_produit_id">
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Produit</label>
-                        <input type="text" id="ajust_produit_nom" class="form-control" readonly>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Stock actuel</label>
-                        <input type="number" id="ajust_stock_actuel" class="form-control" readonly>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Type d'ajustement</label>
-                        <select name="type_ajustement" class="form-select" required>
-                            <option value="">Sélectionner le type</option>
-                            <option value="entree">Entrée de stock</option>
-                            <option value="sortie">Sortie de stock</option>
-                            <option value="correction">Correction d'inventaire</option>
-                            <option value="perte">Perte/Casse</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Quantité</label>
-                        <input type="number" name="quantite" class="form-control" min="1" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Motif</label>
-                        <textarea name="motif" class="form-control" rows="3" placeholder="Raison de l'ajustement..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Confirmer l'ajustement</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <style>
-.card {
-    border: none;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-}
-.table th {
-    border-top: none;
-    font-weight: 600;
-    color: #495057;
-}
-.progress {
-    background-color: #e9ecef;
-}
+    :root {
+        --teal-glacier: #00B8B5;
+        --teal-dark: #00827F;
+        --pink-swoosh: #E91E63;
+        --yellow-canaan: #FDCB05;
+    }
+
+    .stat-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+        border: none;
+        margin-bottom: 20px;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-card .card-body {
+        padding: 1.5rem;
+    }
+
+    .stat-card i {
+        font-size: 2rem;
+        margin-bottom: 15px;
+    }
+
+    .stat-card .card-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-card .card-text {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 10px 0;
+    }
+
+    .stat-card.critique { border-left: 4px solid #dc3545; }
+    .stat-card.faible { border-left: 4px solid #ffc107; }
+    .stat-card.rupture { border-left: 4px solid #6c757d; }
+    .stat-card.normal { border-left: 4px solid #28a745; }
+    .stat-card.total { border-left: 4px solid var(--teal-glacier); }
+    .stat-card.valeur { border-left: 4px solid var(--pink-swoosh); }
+
+    .btn-primary {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--teal-dark);
+        border-color: var(--teal-dark);
+    }
+
+    .card-header {
+        background-color: var(--teal-glacier);
+        color: white;
+        border-radius: 10px 10px 0 0 !important;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        border-top: none;
+    }
+
+    .badge-rupture { background-color: #6c757d; }
+    .badge-critique { background-color: #dc3545; }
+    .badge-faible { background-color: #ffc107; color: #212529; }
+    .badge-normal { background-color: #28a745; }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 20px;
+    }
+
+    .product-image {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 5px;
+    }
+
+    .search-box {
+        border-radius: 20px;
+        border: 1px solid #ced4da;
+        padding: 8px 15px;
+    }
+
+    .filter-btn {
+        border-radius: 20px;
+        padding: 8px 20px;
+    }
+
+    .bg-teal-glacier {
+        background-color: var(--teal-glacier) !important;
+    }
+
+    .btn-teal-glacier {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        color: white;
+    }
+
+    .btn-teal-glacier:hover {
+        background-color: var(--teal-dark);
+        border-color: var(--teal-dark);
+        color: white;
+    }
+
+    .btn-check:checked + .btn-outline-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+
+    .btn-check:checked + .btn-outline-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #212529;
+    }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="bg-light rounded p-4">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h4 class="mb-0">Gestion Avancée des Stocks</h4>
+                </div>
+
+                <!-- Cartes de statistiques -->
+                <div class="row mb-4">
+                    <div class="col-xxl-2 col-xl-3 col-md-4 col-sm-6 mb-3">
+                        <div class="card stat-card h-100" style="border-left: 4px solid var(--teal-glacier);">
+                            <div class="card-body text-center p-3">
+                                <i class="fas fa-boxes mb-2" style="color: var(--teal-glacier); font-size: 1.5rem;"></i>
+                                <h6 class="card-title fw-bold mb-1" style="font-size: 0.8rem; color: var(--teal-glacier);">TOTAL PRODUITS</h6>
+                                <p class="card-text fw-bold mb-0" style="font-size: 1.4rem; color: #2c3e50;">{{ stats.total_produits }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-2 col-xl-3 col-md-4 col-sm-6 mb-3">
+                        <div class="card stat-card h-100" style="border-left: 4px solid var(--teal-glacier);">
+                            <div class="card-body text-center p-3">
+                                <i class="fas fa-money-bill-wave mb-2" style="color: var(--teal-glacier); font-size: 1.5rem;"></i>
+                                <h6 class="card-title fw-bold mb-1" style="font-size: 0.8rem; color: var(--teal-glacier);">VALEUR STOCK</h6>
+                                <p class="card-text fw-bold mb-0" style="font-size: 1.1rem; color: #2c3e50;">{{ stats.valeur_stock|floatformat:2 }} Fcfa</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-2 col-xl-3 col-md-4 col-sm-6 mb-3">
+                        <div class="card stat-card h-100" style="border-left: 4px solid var(--teal-glacier);">
+                            <div class="card-body text-center p-3">
+                                <i class="fas fa-times-circle mb-2" style="color: var(--teal-glacier); font-size: 1.5rem;"></i>
+                                <h6 class="card-title fw-bold mb-1" style="font-size: 0.8rem; color: var(--teal-glacier);">RUPTURE STOCK</h6>
+                                <p class="card-text fw-bold mb-0" style="font-size: 1.4rem; color: #2c3e50;">{{ stats.rupture_stock }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-2 col-xl-3 col-md-4 col-sm-6 mb-3">
+                        <div class="card stat-card h-100" style="border-left: 4px solid var(--teal-glacier);">
+                            <div class="card-body text-center p-3">
+                                <i class="fas fa-exclamation-triangle mb-2" style="color: var(--teal-glacier); font-size: 1.5rem;"></i>
+                                <h6 class="card-title fw-bold mb-1" style="font-size: 0.8rem; color: var(--teal-glacier);">STOCK CRITIQUE</h6>
+                                <p class="card-text fw-bold mb-0" style="font-size: 1.4rem; color: #2c3e50;">{{ stats.stock_critique }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-2 col-xl-3 col-md-4 col-sm-6 mb-3">
+                        <div class="card stat-card h-100" style="border-left: 4px solid var(--teal-glacier);">
+                            <div class="card-body text-center p-3">
+                                <i class="fas fa-low-vision mb-2" style="color: var(--teal-glacier); font-size: 1.5rem;"></i>
+                                <h6 class="card-title fw-bold mb-1" style="font-size: 0.8rem; color: var(--teal-glacier);">STOCK FAIBLE</h6>
+                                <p class="card-text fw-bold mb-0" style="font-size: 1.4rem; color: #2c3e50;">{{ stats.stock_faible }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xxl-2 col-xl-3 col-md-4 col-sm-6 mb-3">
+                        <div class="card stat-card h-100" style="border-left: 4px solid var(--teal-glacier);">
+                            <div class="card-body text-center p-3">
+                                <i class="fas fa-check-circle mb-2" style="color: var(--teal-glacier); font-size: 1.5rem;"></i>
+                                <h6 class="card-title fw-bold mb-1" style="font-size: 0.8rem; color: var(--teal-glacier);">STOCK NORMAL</h6>
+                                <p class="card-text fw-bold mb-0" style="font-size: 1.4rem; color: #2c3e50;">{{ stats.stock_normal }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Graphiques -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0"><i class="fas fa-chart-pie me-2"></i>Répartition du Stock par Catégorie</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="stockChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0"><i class="fas fa-chart-bar me-2"></i>Valeur du Stock par Catégorie</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="valeurChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tableau des produits -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="fas fa-list me-2"></i>Liste des Produits</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="productsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th>Catégorie</th>
+                                        <th>Quantité</th>
+                                        <th>Prix</th>
+                                        <th>Valeur</th>
+                                        <th>Statut</th>
+                                        <th>Gérant</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for produit in produits %}
+                                    <tr data-statut="{{ produit.statut_classe }}" data-produit-id="{{ produit.id }}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if produit.image %}
+                                                <img src="{{ produit.image }}" alt="{{ produit.nom }}" class="product-image me-2">
+                                                {% else %}
+                                                <div class="product-image bg-light d-flex align-items-center justify-content-center me-2">
+                                                    <i class="fas fa-box text-muted"></i>
+                                                </div>
+                                                {% endif %}
+                                                <div>
+                                                    <h6 class="mb-0">{{ produit.nom }}</h6>
+                                                    <small class="text-muted">ID: {{ produit.id }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ produit.categorie }}</td>
+                                        <td>
+                                            <span class="fw-bold quantite-stock">{{ produit.quantite_disponible }}</span>
+                                        </td>
+                                        <td>{{ produit.prix }} Fcfa</td>
+                                        <td>
+                                            <span class="valeur-stock">{{ produit.valeur_stock|floatformat:2 }} Fcfa</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-{{ produit.statut_classe }} badge-statut">{{ produit.statut }}</span>
+                                        </td>
+                                        <td>{{ produit.gerant }}</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-primary btn-ajuster-stock" 
+                                                        data-produit-id="{{ produit.id }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'ajustement de stock -->
+<div class="modal fade" id="ajustementStockModal" tabindex="-1" aria-labelledby="ajustementStockModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-teal-glacier text-white">
+                <h5 class="modal-title" id="ajustementStockModalLabel">
+                    <i class="fas fa-edit me-2"></i>Ajuster le Stock
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="ajustementAlert" class="alert d-none"></div>
+                
+                <div class="row">
+                    <!-- Informations du produit -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Informations du Produit</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <img id="produitImage" src="" alt="Image produit" class="img-fluid rounded" style="max-height: 150px; display: none;">
+                                    <div id="noImage" class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 150px;">
+                                        <i class="fas fa-box text-muted" style="font-size: 3rem;"></i>
+                                    </div>
+                                </div>
+                                <table class="table table-sm table-borderless">
+                                    <tr>
+                                        <td><strong>Nom:</strong></td>
+                                        <td id="produitNom">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Catégorie:</strong></td>
+                                        <td id="produitCategorie">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Prix:</strong></td>
+                                        <td id="produitPrix">- Fcfa</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Statut:</strong></td>
+                                        <td><span id="produitStatut" class="badge">-</span></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Formulaire d'ajustement -->
+                    <div class="col-md-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Ajustement du Stock</h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="ajustementStockForm">
+                                    {% csrf_token %}
+                                    <input type="hidden" id="produitId" name="produit_id">
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Stock Actuel</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control text-center fw-bold" id="quantiteActuelle" readonly>
+                                            <span class="input-group-text">unités</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Type d'Ajustement</label>
+                                        <div class="btn-group w-100" role="group">
+                                            <input type="radio" class="btn-check" name="type_ajustement" id="ajoutStock" value="ajout" checked>
+                                            <label class="btn btn-outline-success" for="ajoutStock">
+                                                <i class="fas fa-plus me-1"></i>Ajouter
+                                            </label>
+                                            
+                                            <input type="radio" class="btn-check" name="type_ajustement" id="retraitStock" value="retrait">
+                                            <label class="btn btn-outline-warning" for="retraitStock">
+                                                <i class="fas fa-minus me-1"></i>Retirer
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="quantiteAjustement" class="form-label fw-bold">Quantité</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="quantiteAjustement" name="quantite" min="1" value="1" required>
+                                            <span class="input-group-text">unités</span>
+                                        </div>
+                                        <div class="form-text">Quantité à ajouter ou retirer du stock</div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="nouvelleQuantite" class="form-label fw-bold">Nouveau Stock</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control text-center fw-bold text-success" id="nouvelleQuantite" readonly>
+                                            <span class="input-group-text">unités</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="motifAjustement" class="form-label fw-bold">Motif de l'ajustement</label>
+                                        <textarea class="form-control" id="motifAjustement" name="motif" rows="3" placeholder="Raison de l'ajustement (inventaire, vente, réception...)" required></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-teal-glacier" id="btnSauvegarderAjustement">
+                    <i class="fas fa-save me-1"></i>Sauvegarder
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-// Graphique évolution des stocks
-const stockCtx = document.getElementById('stockChart').getContext('2d');
-new Chart(stockCtx, {
-    type: 'line',
-    data: {
-        labels: {{ stock_labels|safe }},
-        datasets: [{
-            label: 'Valeur Stock Total',
-            data: {{ stock_data|safe }},
-            borderColor: '#4e73df',
-            backgroundColor: 'rgba(78, 115, 223, 0.1)',
-            tension: 0.3,
-            fill: true
-        }, {
-            label: 'Nombre de Produits',
-            data: {{ produits_data|safe }},
-            borderColor: '#1cc88a',
-            backgroundColor: 'rgba(28, 200, 138, 0.1)',
-            tension: 0.3,
-            yAxisID: 'y1'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-            y: {
-                type: 'linear',
-                display: true,
-                position: 'left',
-                ticks: {
-                    callback: function(value) {
-                        return value.toLocaleString() + ' FCFA';
-                    }
-                }
-            },
-            y1: {
-                type: 'linear',
-                display: true,
-                position: 'right',
-                grid: {
-                    drawOnChartArea: false,
+$(document).ready(function() {
+    let produitActuel = null;
+    
+    // Initialiser les graphiques
+    const stockChart = new Chart(document.getElementById('stockChart'), {
+        type: 'pie',
+        data: {
+            labels: JSON.parse('{{ categories_labels|escapejs }}'),
+            datasets: [{
+                data: JSON.parse('{{ categories_stock|escapejs }}'),
+                backgroundColor: [
+                    '#00B8B5', '#E91E63', '#FDCB05', '#00827F', 
+                    '#9C27B0', '#3F51B5', '#009688', '#FF9800'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
                 }
             }
         }
-    }
-});
+    });
 
-function ajusterStock(produitId, produitNom, stockActuel) {
-    document.getElementById('ajust_produit_id').value = produitId;
-    document.getElementById('ajust_produit_nom').value = produitNom;
-    document.getElementById('ajust_stock_actuel').value = stockActuel;
-    
-    const modal = new bootstrap.Modal(document.getElementById('ajustementStockModal'));
-    modal.show();
-}
-
-function voirHistorique(produitId) {
-    window.location.href = `/gerant/historique-stock/${produitId}/`;
-}
-
-function commanderStock(produitId) {
-    if (confirm('Créer une commande de réapprovisionnement pour ce produit ?')) {
-        fetch(`/gerant/commander-stock/${produitId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+    const valeurChart = new Chart(document.getElementById('valeurChart'), {
+        type: 'bar',
+        data: {
+            labels: JSON.parse('{{ categories_labels|escapejs }}'),
+            datasets: [{
+                label: 'Valeur (Fcfa)',
+                data: JSON.parse('{{ categories_valeur|escapejs }}'),
+                backgroundColor: '#00B8B5',
+                borderColor: '#00827F',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Commande de réapprovisionnement créée');
-            } else {
-                alert('Erreur lors de la création de la commande');
+        }
+    });
+    
+    // Ouvrir le modal d'ajustement
+    $(document).on('click', '.btn-ajuster-stock', function() {
+        const produitId = $(this).data('produit-id');
+        chargerDetailsProduit(produitId);
+    });
+    
+    // Calcul automatique du nouveau stock
+    $('#quantiteAjustement, input[name="type_ajustement"]').on('change input', function() {
+        calculerNouveauStock();
+    });
+    
+    // Sauvegarder l'ajustement
+    $('#btnSauvegarderAjustement').click(function() {
+        sauvegarderAjustement();
+    });
+    
+    function chargerDetailsProduit(produitId) {
+        $.ajax({
+            url: "{% url 'get_produit_details' 0 %}".replace('0', produitId),
+            type: 'GET',
+            success: function(response) {
+                produitActuel = response;
+                afficherDetailsProduit(response);
+                $('#ajustementStockModal').modal('show');
+            },
+            error: function(xhr) {
+                showAlert('Erreur lors du chargement du produit', 'danger');
             }
         });
     }
-}
+    
+    function afficherDetailsProduit(produit) {
+        // Informations de base
+        $('#produitId').val(produit.id);
+        $('#produitNom').text(produit.nom);
+        $('#produitCategorie').text(produit.categorie);
+        $('#produitPrix').text(produit.prix + ' Fcfa');
+        $('#quantiteActuelle').val(produit.quantite_actuelle);
+        
+        // Image
+        if (produit.image) {
+            $('#produitImage').attr('src', produit.image).show();
+            $('#noImage').hide();
+        } else {
+            $('#produitImage').hide();
+            $('#noImage').show();
+        }
+        
+        // Statut
+        const statutClass = getStatutClass(produit.quantite_actuelle);
+        $('#produitStatut').removeClass().addClass(`badge badge-${statutClass}`).text(produit.statut);
+        
+        // Réinitialiser le formulaire
+        $('#quantiteAjustement').val(1);
+        $('#motifAjustement').val('');
+        $('input[name="type_ajustement"][value="ajout"]').prop('checked', true);
+        
+        // Calcul initial
+        calculerNouveauStock();
+    }
+    
+    function calculerNouveauStock() {
+        const quantiteActuelle = parseInt($('#quantiteActuelle').val());
+        const quantiteAjustement = parseInt($('#quantiteAjustement').val()) || 0;
+        const typeAjustement = $('input[name="type_ajustement"]:checked').val();
+        
+        let nouvelleQuantite = quantiteActuelle;
+        
+        if (typeAjustement === 'ajout') {
+            nouvelleQuantite = quantiteActuelle + quantiteAjustement;
+        } else if (typeAjustement === 'retrait') {
+            nouvelleQuantite = Math.max(0, quantiteActuelle - quantiteAjustement);
+        }
+        
+        $('#nouvelleQuantite').val(nouvelleQuantite);
+        
+        // Changer la couleur selon le nouveau statut
+        const nouvelleClass = getStatutClass(nouvelleQuantite);
+        $('#nouvelleQuantite').removeClass('text-success text-warning text-danger')
+                             .addClass(nouvelleClass === 'normal' ? 'text-success' : 
+                                      nouvelleClass === 'faible' ? 'text-warning' : 'text-danger');
+    }
+    
+    function getStatutClass(quantite) {
+        if (quantite === 0) return 'rupture';
+        if (quantite <= 5) return 'critique';
+        if (quantite <= 10) return 'faible';
+        return 'normal';
+    }
+    
+    function sauvegarderAjustement() {
+        const formData = {
+            'produit_id': $('#produitId').val(),
+            'quantite': $('#quantiteAjustement').val(),
+            'motif': $('#motifAjustement').val(),
+            'type_ajustement': $('input[name="type_ajustement"]:checked').val()
+        };
+        
+        // Validation
+        if (!formData.motif.trim()) {
+            showAlertInModal('Veuillez saisir un motif pour cet ajustement', 'warning');
+            return;
+        }
+        
+        if (formData.type_ajustement === 'retrait' && parseInt(formData.quantite) > parseInt($('#quantiteActuelle').val())) {
+            showAlertInModal('La quantité de retrait ne peut pas dépasser le stock actuel', 'warning');
+            return;
+        }
+        
+        $.ajax({
+            url: "{% url 'ajuster_stock' %}",
+            type: 'POST',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': getCSRFToken()
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Mettre à jour la ligne du tableau
+                    mettreAJourLigneProduit(response);
+                    $('#ajustementStockModal').modal('hide');
+                    showAlert(response.message, 'success');
+                    
+                    // Recharger la page pour mettre à jour les statistiques
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                } else {
+                    showAlertInModal('Erreur: ' + response.error, 'danger');
+                }
+            },
+            error: function(xhr) {
+                showAlertInModal('Erreur lors de la sauvegarde', 'danger');
+            }
+        });
+    }
+    
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+    
+    function mettreAJourLigneProduit(response) {
+        const ligne = $(`[data-produit-id="${$('#produitId').val()}"]`);
+        
+        // Mettre à jour les données
+        ligne.find('.quantite-stock').text(response.quantite);
+        ligne.find('.valeur-stock').text(response.valeur_stock.toFixed(2) + ' Fcfa');
+        
+        // Mettre à jour le statut
+        const statutBadge = ligne.find('.badge-statut');
+        statutBadge.removeClass().addClass(`badge badge-${response.statut_classe} badge-statut`).text(response.statut);
+    }
+    
+    function showAlertInModal(message, type) {
+        const alertDiv = $('#ajustementAlert');
+        alertDiv.removeClass('d-none alert-success alert-danger alert-warning')
+                .addClass(`alert-${type}`)
+                .html(`
+                    <i class="fas fa-${type === 'success' ? 'check' : 'exclamation-triangle'} me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close float-end" data-bs-dismiss="alert"></button>
+                `);
+    }
+    
+    function showAlert(message, type) {
+        const alertDiv = $(`
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `);
+        
+        $('.bg-light.rounded.p-4').prepend(alertDiv);
+        
+        setTimeout(function() {
+            alertDiv.alert('close');
+        }, 5000);
+    }
+});
 </script>
 {% endblock %}

@@ -4,19 +4,222 @@
 {% block title %}Gestion des Coupons{% endblock %}
 
 {% block body %}
+<style>
+    :root {
+        --teal-glacier: #20B2AA;
+        --teal-light: #48D1CC;
+        --teal-dark: #008B8B;
+        --teal-lighter: #E0F2F1;
+        --teal-gradient: linear-gradient(135deg, #20B2AA 0%, #48D1CC 100%);
+    }
+    .mb-0{
+        color : white;
+    }
+    /* Couleurs principales */
+    .text-teal-glacier { color: var(--teal-glacier) !important; }
+    .bg-teal-glacier { background: var(--teal-glacier) !important; }
+    .bg-teal-light { background-color: var(--teal-light) !important; }
+    .bg-teal-dark { background-color: var(--teal-dark) !important; }
+    .bg-teal-lighter { background-color: var(--teal-lighter) !important; }
+
+    /* Boutons */
+    .btn-teal-glacier {
+        background: var(--teal-gradient);
+        border: none;
+        color: white;
+        font-weight: 600;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-teal-glacier:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(32, 178, 170, 0.4);
+        color: white;
+    }
+
+    .btn-teal-outline {
+        border: 1px solid var(--teal-glacier);
+        color: var(--teal-glacier);
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+
+    .btn-teal-outline:hover {
+        background: var(--teal-glacier);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .btn-teal-danger {
+        border: 1px solid #dc3545;
+        color: #dc3545;
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+
+    .btn-teal-danger:hover {
+        background: #dc3545;
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    /* Cartes de statistiques */
+    .stat-card {
+        border: none;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(32, 178, 170, 0.3);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Carte principale */
+    .card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .shadow-teal {
+        box-shadow: 0 0.5rem 1.5rem rgba(32, 178, 170, 0.15);
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0 !important;
+        padding: 1.25rem 1.5rem;
+    }
+
+    /* Tableau */
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        border: none;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 0.75rem;
+    }
+
+    .table td {
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+        border-color: #f8f9fa;
+    }
+
+    .coupon-row {
+        transition: all 0.3s ease;
+    }
+
+    .coupon-row:hover {
+        background-color: var(--teal-lighter);
+        transform: scale(1.01);
+    }
+
+    /* Badges */
+    .badge {
+        font-weight: 500;
+        padding: 0.5rem 0.75rem;
+        border-radius: 8px;
+    }
+
+    /* Barre de progression */
+    .progress {
+        border-radius: 10px;
+        background-color: #e9ecef;
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+
+    /* État vide */
+    .empty-state {
+        background: linear-gradient(135deg, #f8f9fa 0%, var(--teal-lighter) 100%);
+        border-radius: 15px;
+        margin: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .card-header h5 {
+            font-size: 1rem;
+        }
+        
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    .stat-card {
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .coupon-row {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    /* Amélioration des dates */
+    .date-info i {
+        font-size: 0.7rem;
+    }
+
+    /* États des coupons */
+    .coupon-expiring {
+        border-left: 4px solid #ffc107;
+        background: linear-gradient(135deg, #fff3cd 0%, transparent 100%);
+    }
+
+    .coupon-expired {
+        border-left: 4px solid #dc3545;
+        background: linear-gradient(135deg, #f8d7da 0%, transparent 100%);
+    }
+</style>
+
 <div class="container-fluid pt-4 px-4">
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h3 mb-0">
+                    <h1 class="h3 mb-0 text-teal-glacier">
                         <i class="fas fa-ticket-alt me-2"></i>Gestion des Coupons
                     </h1>
-                    <p class="mb-0">Gérer les codes promotionnels</p>
+                    <p class="mb-0 text-muted">Gérer les codes promotionnels</p>
                 </div>
                 <div>
-                    <a href="{% url 'ajouter_coupon' %}" class="btn btn-primary">
+                    <a href="{% url 'ajouter_coupon' %}" class="btn btn-teal-glacier">
                         <i class="fas fa-plus me-2"></i>Nouveau Coupon
                     </a>
                 </div>
@@ -27,7 +230,7 @@
     <!-- Statistiques -->
     <div class="row g-4 mb-4">
         <div class="col-md-4">
-            <div class="card bg-primary text-white h-100">
+            <div class="card stat-card bg-teal-glacier text-white h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -42,7 +245,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card bg-success text-white h-100">
+            <div class="card stat-card bg-teal-light text-white h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -56,13 +259,32 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="card stat-card bg-teal-dark text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="text-white-50 small">Coupons Expirés</div>
+                            {%if coupons_expires%}
+                            <div class="h3 mb-0">{{ coupons_expires }}</div>
+                            {%else%}
+                             <div class="h3 mb-0">0</div>
+                             {%endif%}
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Liste des coupons -->
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header">
+            <div class="card border-0 shadow-teal">
+                <div class="card-header bg-teal-glacier text-white border-0">
                     <h5 class="mb-0">
                         <i class="fas fa-list me-2"></i>Liste des Coupons
                     </h5>
@@ -71,7 +293,7 @@
                     {% if coupons %}
                         <div class="table-responsive">
                             <table class="table table-hover">
-                                <thead>
+                                <thead class="bg-teal-light text-white">
                                     <tr>
                                         <th>Code</th>
                                         <th>Type</th>
@@ -84,50 +306,76 @@
                                 </thead>
                                 <tbody>
                                     {% for coupon in coupons %}
-                                    <tr>
+                                    <tr class="coupon-row {% if not coupon.est_valide %}coupon-expired{% endif %}">
                                         <td>
-                                            <div class="fw-bold">{{ coupon.code }}</div>
-                                        </td>
-                                        <td>
-                                            {% if coupon.type_reduction == 'pourcentage' %}
-                                                <span class="badge bg-info">Pourcentage</span>
-                                            {% else %}
-                                                <span class="badge bg-warning">Montant fixe</span>
+                                            <div class="fw-bold text-teal-glacier">{{ coupon.code }}</div>
+                                            {% if coupon.description %}
+                                            <small class="text-muted">{{ coupon.description|truncatewords:5 }}</small>
                                             {% endif %}
                                         </td>
                                         <td>
-                                            <strong>
+                                            {% if coupon.type_reduction == 'pourcentage' %}
+                                                <span class="badge bg-teal-light text-white">
+                                                    <i class="fas fa-percent me-1"></i>Pourcentage
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-teal-dark text-white">
+                                                    <i class="fas fa-euro-sign me-1"></i>Montant fixe
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <strong class="text-teal-glacier">
                                                 {{ coupon.valeur }}{% if coupon.type_reduction == 'pourcentage' %}%{% else %} FCFA{% endif %}
                                             </strong>
                                         </td>
                                         <td>
-                                            <small>
-                                                Du {{ coupon.date_debut|date:"d/m/Y" }}<br>
-                                                Au {{ coupon.date_fin|date:"d/m/Y" }}
-                                            </small>
+                                            <div class="date-info">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-play me-1 text-success"></i>{{ coupon.date_debut|date:"d/m/Y" }}<br>
+                                                    <i class="fas fa-flag-checkered me-1 text-danger"></i>{{ coupon.date_fin|date:"d/m/Y" }}
+                                                </small>
+                                            </div>
                                         </td>
                                         <td>
-                                            <span class="badge bg-secondary">
-                                                {{ coupon.usage_actuel }}/{{ coupon.usage_max }}
-                                            </span>
+                                            <div class="usage-progress">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <small class="text-muted text-dark">{{ coupon.usage_actuel }}/{{ coupon.usage_max }}</small>
+                                                    
+                                                </div>
+                                                <div class="progress" style="height: 6px;">
+                                                    <div class="progress-bar bg-teal-glacier" 
+                                                         style="width: {{ coupon.pourcentage_utilisation }}%">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             {% if coupon.est_valide %}
-                                                <span class="badge bg-success">Valide</span>
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Valide
+                                                </span>
                                             {% else %}
-                                                <span class="badge bg-danger">Expiré</span>
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times me-1"></i>Expiré
+                                                </span>
                                             {% endif %}
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <a href="{% url 'modifier_coupon' coupon.id %}" 
-                                                   class="btn btn-sm btn-outline-primary" title="Modifier">
+                                                   class="btn btn-sm btn-teal-outline" 
+                                                   title="Modifier"
+                                                   data-bs-toggle="tooltip">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <a href="{% url 'supprimer_coupon' coupon.id %}" 
-                                                   class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-teal-danger" 
+                                                        title="Supprimer"
+                                                        data-bs-toggle="tooltip"
+                                                        onclick="confirmDelete({{ coupon.id }}, '{{ coupon.code }}')">
                                                     <i class="fas fa-trash"></i>
-                                                </a>
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -136,11 +384,11 @@
                             </table>
                         </div>
                     {% else %}
-                        <div class="text-center py-5">
-                            <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Aucun coupon trouvé</h5>
-                            <p class="text-muted">Commencez par créer votre premier coupon</p>
-                            <a href="{% url 'ajouter_coupon' %}" class="btn btn-primary">
+                        <div class="text-center py-5 empty-state">
+                            <i class="fas fa-ticket-alt fa-4x text-teal-light mb-3"></i>
+                            <h5 class="text-teal-glacier">Aucun coupon trouvé</h5>
+                            <p class="text-muted">Commencez par créer votre premier coupon promotionnel</p>
+                            <a href="{% url 'ajouter_coupon' %}" class="btn btn-teal-glacier btn-lg">
                                 <i class="fas fa-plus me-2"></i>Créer un coupon
                             </a>
                         </div>
@@ -151,15 +399,17 @@
     </div>
 </div>
 
-<style>
-.card {
-    border: none;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-}
-.table th {
-    border-top: none;
-    font-weight: 600;
-    color: #495057;
-}
-</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser les tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
 {% endblock %}

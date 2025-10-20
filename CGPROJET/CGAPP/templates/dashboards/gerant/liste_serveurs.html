@@ -3,178 +3,260 @@
 {% load humanize %}
 {% load serveur_tags %}
 
-<td>
-    <span class="badge bg-{% if serveur|commandes_traitees > 0 %}success{% else %}secondary{% endif %} bg-opacity-10 text-{% if serveur|commandes_traitees > 0 %}success{% else %}secondary{% endif %}">
-        {{ serveur|commandes_traitees|intcomma }}
-    </span>
-</td>
-
 {% block title %}Liste des Serveurs - Gérant{% endblock %}
 
 {% block body %}
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-12">
-            <div class="bg-light rounded p-4">
-                <!-- En-tête -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="mb-0">
-                        <i class="fas fa-users me-2 text-primary"></i>
-                        Gestion des Serveurs
-                    </h3>
-                    <div class="d-flex">
-                        <span class="badge bg-primary me-2">
-                            {{ total_serveurs }} Serveur{{ total_serveurs|pluralize }}
-                        </span>
-                        <span class="badge bg-success">
-                            {{ actions_7j }} Actions (7j)
-                        </span>
+            <!-- En-tête principal -->
+            <div class="dashboard-header mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="header-content">
+                        <h1 class="display-6 fw-bold text-teal-dark mb-2">
+                            <i class="fas fa-users me-3"></i>
+                            Gestion des Serveurs
+                        </h1>
+                        <p class="lead text-teal mb-0">Supervisez l'activité et les performances de votre équipe</p>
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat-badge primary">
+                            <span class="number">{{ total_serveurs }}</span>
+                            <span class="label">Serveur{{ total_serveurs|pluralize }}</span>
+                        </div>
+                        <div class="stat-badge secondary">
+                            <span class="number">{{ actions_7j }}</span>
+                            <span class="label">Actions (7j)</span>
+                        </div>
                     </div>
                 </div>
+            </div>
 
+            <!-- Cartes de statistiques principales -->
+            <div class="row g-4 mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card primary">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-number">{{ total_actions|default:0|intcomma }}</h3>
+                            <p class="stat-label">Actions Total</p>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card success">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-number">{{ total_commandes|default:0|intcomma }}</h3>
+                            <p class="stat-label">Commandes Traitées</p>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card warning">
+                        <div class="stat-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-number">{{ actions_auj|default:0|intcomma }}</h3>
+                            <p class="stat-label">Actions Aujourd'hui</p>
+                        </div>
+                        <div class="stat-trend down">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="stat-card accent">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-number">{{ serveurs_actifs|default:0|intcomma }}</h3>
+                            <p class="stat-label">Serveurs Actifs</p>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                <!-- Tableau des serveurs -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Serveur</th>
-                                        <th>Actions totales</th>
-                                        <th>Commandes traitées</th>
-                                        <th>Activité récente</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for serveur in serveurs %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
+            <!-- Tableau des serveurs -->
+            <div class="main-card">
+                <div class="card-header-modern">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title">
+                            <i class="fas fa-list me-2"></i>
+                            Liste des Serveurs
+                        </h3>
+                        <div class="header-actions">
+                            <button class="btn btn-action" title="Exporter">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn btn-action" title="Filtrer">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body-modern">
+                    <div class="table-modern-container">
+                        <table class="table-modern">
+                            <thead>
+                                <tr>
+                                    <th class="sortable">
+                                        <span>Serveur</span>
+                                        <i class="fas fa-sort"></i>
+                                    </th>
+                                    <th class="text-center">Actions Totales</th>
+                                    <th class="text-center">Commandes Traitées</th>
+                                    <th class="text-center">Activité Récente</th>
+                                    <th class="text-center">Performance</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for serveur in serveurs %}
+                                <tr class="table-row-modern">
+                                    <td>
+                                        <div class="user-info">
+                                            <div class="user-avatar">
                                                 {% if serveur.profile_image %}
-                                                    <img src="{{ serveur.profile_image.url }}" class="rounded-circle me-3" width="40" height="40" alt="Photo serveur">
+                                                    <img src="{{ serveur.profile_image.url }}" alt="{{ serveur.get_full_name }}">
                                                 {% else %}
-                                                    <div class="bg-primary bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                                        <i class="fas fa-user text-primary"></i>
+                                                    <div class="avatar-placeholder">
+                                                        <i class="fas fa-user"></i>
                                                     </div>
                                                 {% endif %}
-                                                <div>
-                                                    <h6 class="mb-0">{{ serveur.get_full_name }}</h6>
-                                                    <small class="text-muted">Membre depuis {{ serveur.date_joined|date:"d/m/Y" }}</small>
+                                            </div>
+                                            <div class="user-details">
+                                                <h6 class="user-name">{{ serveur.get_full_name }}</h6>
+                                                <span class="user-meta">Membre depuis {{ serveur.date_joined|date:"d/m/Y" }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="metric-badge primary">
+                                            <span class="metric-value">{{ serveur.actions.count|intcomma }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="metric-badge {% if serveur|commandes_traitees > 0 %}success{% else %}secondary{% endif %}">
+                                            <span class="metric-value">{{ serveur|commandes_traitees|intcomma }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        {% with last_action=serveur.actions.last %}
+                                            {% if last_action %}
+                                                <div class="activity-indicator active">
+                                                    <i class="fas fa-circle"></i>
+                                                    <span class="activity-time">{{ last_action.date_action|timesince }}</span>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-primary bg-opacity-10 text-primary">
-                                                {{ serveur.actions.count|intcomma }}
+                                            {% else %}
+                                                <div class="activity-indicator inactive">
+                                                    <i class="fas fa-circle"></i>
+                                                    <span class="activity-time">Aucune action</span>
+                                                </div>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="performance-meter">
+                                            <div class="performance-fill" style="width: {% widthratio serveur|commandes_traitees total_commandes 100 %}%"></div>
+                                            <span class="performance-text">
+                                                {% widthratio serveur|commandes_traitees total_commandes 100 %}%
                                             </span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-{% if serveur|commandes_traitees > 0 %}success{% else %}secondary{% endif %} bg-opacity-10 text-{% if serveur|commandes_traitees > 0 %}success{% else %}secondary{% endif %}">
-                                                {{ serveur|commandes_traitees|intcomma }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {% with last_action=serveur.actions.last %}
-                                                {% if last_action %}
-                                                    <small class="text-muted" title="{{ last_action.date_action }}">
-                                                        {{ last_action.date_action|timesince }}
-                                                    </small>
-                                                {% else %}
-                                                    <span class="text-muted">Aucune action</span>
-                                                {% endif %}
-                                            {% endwith %}
-                                        </td>
-                                        <td>
-                                            <div class="d-flex gap-2">
-                                                <a href="{% url 'rapport_serveur' serveur.id %}" class="btn btn-sm btn-outline-primary" title="Générer rapport">
-                                                    <i class="fas fa-chart-line"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <i class="fas fa-user-slash fa-2x text-muted mb-3"></i>
-                                            <p class="text-muted">Aucun serveur enregistré</p>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="action-buttons">
+                                            <a href="{% url 'rapport_serveur' serveur.id %}" class="btn btn-icon primary" title="Générer rapport">
+                                                <i class="fas fa-chart-line"></i>
+                                            </a>
+                                            
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center empty-state">
+                                        <div class="empty-icon">
+                                            <i class="fas fa-user-slash"></i>
+                                        </div>
+                                        <h4>Aucun serveur enregistré</h4>
+                                        <p>Commencez par ajouter des membres à votre équipe de service</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section inférieure -->
+            <div class="row g-4 mt-4">
+                <div class="col-lg-6">
+                    <div class="side-card">
+                        <div class="card-header-modern">
+                            <h3 class="card-title">
+                                <i class="fas fa-trophy me-2"></i>
+                                Top 5 des Serveurs
+                            </h3>
+                        </div>
+                        <div class="card-body-modern">
+                            <div class="leaderboard">
+                                {% for serveur in serveurs|slice:":5" %}
+                                <div class="leaderboard-item {% if forloop.first %}first{% endif %}">
+                                    <div class="rank">#{{ forloop.counter }}</div>
+                                    <div class="user-info compact">
+                                        <div class="user-avatar small">
+                                            {% if serveur.profile_image %}
+                                                <img src="{{ serveur.profile_image.url }}" alt="{{ serveur.get_full_name }}">
+                                            {% else %}
+                                                <div class="avatar-placeholder">
+                                                    <i class="fas fa-user"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="user-details">
+                                            <h6 class="user-name">{{ serveur.get_full_name }}</h6>
+                                            <span class="user-meta">{{ serveur.total_actions|intcomma }} actions</span>
+                                        </div>
+                                    </div>
+                                    <div class="score-badge">
+                                        <span>{{ serveur|commandes_traitees }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Statistiques globales -->
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="card border-0 bg-light shadow-sm">
-                            <div class="card-header bg-white">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-chart-bar me-2 text-primary"></i>
-                                    Top 5 des serveurs
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="list-group list-group-flush">
-                                    {% for serveur in serveurs|slice:":5" %}
-                                    <div class="list-group-item bg-transparent border-0 px-0 py-2">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="d-flex align-items-center">
-                                                {% if serveur.profile_image %}
-                                                    <img src="{{ serveur.profile_image.url }}" class="rounded-circle me-3" width="40" height="40" alt="Photo serveur">
-                                                {% else %}
-                                                    <div class="bg-primary bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                                        <i class="fas fa-user text-primary"></i>
-                                                    </div>
-                                                {% endif %}
-                                                <span>{{ serveur.get_full_name }}</span>
-                                            </div>
-                                            <span class="badge bg-primary">{{ serveur.total_actions|intcomma }} actions</span>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
+                <div class="col-lg-6">
+                    <div class="side-card">
+                        <div class="card-header-modern">
+                            <h3 class="card-title">
+                                <i class="fas fa-chart-pie me-2"></i>
+                                Répartition des Performances
+                            </h3>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-0 bg-light shadow-sm h-100">
-                            <div class="card-header bg-white">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-info-circle me-2 text-primary"></i>
-                                    Statistiques globales
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6 mb-3">
-                                        <div class="p-3 bg-primary bg-opacity-10 rounded-3">
-                                            <h6 class="mb-0">Actions totales</h6>
-                                            <h3 class="mb-0">{{ total_actions|default:0|intcomma }}</h3>
-                                        </div>
-                                    </div>
-                                    <div class="col-6 mb-3">
-                                        <div class="p-3 bg-success bg-opacity-10 rounded-3">
-                                            <h6 class="mb-0">Commandes traitées</h6>
-                                            <h3 class="mb-0">{{ total_commandes|default:0|intcomma }}</h3>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="p-3 bg-info bg-opacity-10 rounded-3">
-                                            <h6 class="mb-0">Actions aujourd'hui</h6>
-                                            <h3 class="mb-0">{{ actions_auj|default:0|intcomma }}</h3>
-                                        </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="p-3 bg-warning bg-opacity-10 rounded-3">
-                                            <h6 class="mb-0">Serveurs actifs</h6>
-                                            <h3 class="mb-0">{{ serveurs_actifs|default:0|intcomma }}</h3>
-                                        </div>
-                                    </div>
+                        <div class="card-body-modern">
+                            <div class="performance-chart">
+                                <div class="chart-placeholder">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <p>Graphique de répartition des performances</p>
                                 </div>
                             </div>
                         </div>
@@ -186,29 +268,526 @@
 </div>
 
 <style>
-.table-hover tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.05);
-}
+    :root {
+        --teal-glacier: #00B8B5;
+        --teal-dark: #00827F;
+        --teal-light: #E6F7F7;
+        --teal-lighter: #F0FCFC;
+        --teal-gradient: linear-gradient(135deg, #00B8B5 0%, #00827F 100%);
+        --teal-shadow: rgba(0, 184, 181, 0.3);
+        --pink-swoosh: #E91E63;
+        --yellow-canaan: #FDCB05;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --accent: #8b5cf6;
+        --secondary: #6b7280;
+    }
 
-.badge {
-    font-weight: 500;
-    padding: 0.35em 0.65em;
-}
+    /* En-tête du dashboard */
+    .dashboard-header {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 184, 181, 0.1);
+    }
 
-.card {
-    transition: transform 0.3s ease;
-}
+    .header-stats {
+        display: flex;
+        gap: 1rem;
+    }
 
-.card:hover {
-    transform: translateY(-3px);
-}
+    .stat-badge {
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
+        text-align: center;
+        min-width: 120px;
+    }
 
-.list-group-item {
-    transition: background-color 0.2s ease;
-}
+    .stat-badge.primary {
+        background: var(--teal-gradient);
+        color: white;
+    }
 
-.list-group-item:hover {
-    background-color: rgba(0, 0, 0, 0.03) !important;
-}
+    .stat-badge.secondary {
+        background: var(--teal-light);
+        color: var(--teal-dark);
+    }
+
+    .stat-badge .number {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .stat-badge .label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+
+    /* Cartes de statistiques */
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 184, 181, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+    }
+
+    .stat-card.primary::before { background: var(--teal-glacier); }
+    .stat-card.success::before { background: var(--success); }
+    .stat-card.warning::before { background: var(--warning); }
+    .stat-card.accent::before { background: var(--accent); }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px var(--teal-shadow);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stat-card.primary .stat-icon { background: rgba(0, 184, 181, 0.1); color: var(--teal-glacier); }
+    .stat-card.success .stat-icon { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+    .stat-card.warning .stat-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+    .stat-card.accent .stat-icon { background: rgba(139, 92, 246, 0.1); color: var(--accent); }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stat-card.primary .stat-number { color: var(--teal-glacier); }
+    .stat-card.success .stat-number { color: var(--success); }
+    .stat-card.warning .stat-number { color: var(--warning); }
+    .stat-card.accent .stat-number { color: var(--accent); }
+
+    .stat-label {
+        color: var(--secondary);
+        margin: 0;
+        font-size: 0.875rem;
+    }
+
+    .stat-trend {
+        font-size: 1.25rem;
+    }
+
+    .stat-trend.up { color: var(--success); }
+    .stat-trend.down { color: #ef4444; }
+
+    /* Carte principale */
+    .main-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 184, 181, 0.1);
+        overflow: hidden;
+    }
+
+    .card-header-modern {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid rgba(0, 184, 181, 0.1);
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--teal-dark);
+        margin: 0;
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-action {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid rgba(0, 184, 181, 0.2);
+        background: white;
+        color: var(--teal-glacier);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-action:hover {
+        background: var(--teal-glacier);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .card-body-modern {
+        padding: 0;
+    }
+
+    /* Table moderne */
+    .table-modern-container {
+        overflow-x: auto;
+    }
+
+    .table-modern {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-modern th {
+        background: var(--teal-lighter);
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        color: var(--teal-dark);
+        text-align: left;
+        border-bottom: 2px solid var(--teal-glacier);
+    }
+
+    .table-modern th.sortable {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .table-modern th.sortable:hover {
+        background: var(--teal-light);
+    }
+
+    .table-modern td {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(0, 184, 181, 0.1);
+    }
+
+    .table-row-modern:hover {
+        background: var(--teal-lighter);
+        transform: scale(1.01);
+        transition: all 0.2s ease;
+    }
+
+    /* Informations utilisateur */
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-info.compact {
+        gap: 0.75rem;
+    }
+
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .user-avatar.small {
+        width: 40px;
+        height: 40px;
+    }
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--teal-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--teal-glacier);
+        border-radius: 12px;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: var(--teal-dark);
+        margin: 0;
+    }
+
+    .user-meta {
+        font-size: 0.875rem;
+        color: var(--secondary);
+    }
+
+    /* Badges métriques */
+    .metric-badge {
+        display: inline-flex;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    .metric-badge.primary {
+        background: rgba(0, 184, 181, 0.1);
+        color: var(--teal-glacier);
+    }
+
+    .metric-badge.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .metric-badge.secondary {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--secondary);
+    }
+
+    /* Indicateur d'activité */
+    .activity-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .activity-indicator.active {
+        color: var(--success);
+    }
+
+    .activity-indicator.inactive {
+        color: var(--secondary);
+    }
+
+    .activity-indicator i {
+        font-size: 0.5rem;
+    }
+
+    /* Mètre de performance */
+    .performance-meter {
+        width: 100px;
+        height: 8px;
+        background: rgba(0, 184, 181, 0.2);
+        border-radius: 4px;
+        position: relative;
+        margin: 0 auto;
+    }
+
+    .performance-fill {
+        height: 100%;
+        background: var(--teal-gradient);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .performance-text {
+        position: absolute;
+        top: -20px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--teal-dark);
+    }
+
+    /* Boutons d'action */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .btn-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-icon.primary {
+        background: rgba(0, 184, 181, 0.1);
+        color: var(--teal-glacier);
+    }
+
+    .btn-icon.secondary {
+        background: rgba(107, 114, 128, 0.1);
+        color: var(--secondary);
+    }
+
+    .btn-icon:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-icon.primary:hover {
+        background: var(--teal-glacier);
+        color: white;
+    }
+
+    .btn-icon.secondary:hover {
+        background: var(--secondary);
+        color: white;
+    }
+
+    /* État vide */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: var(--teal-light);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+        color: var(--teal-dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--secondary);
+    }
+
+    /* Cartes latérales */
+    .side-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 184, 181, 0.1);
+        height: 100%;
+    }
+
+    /* Classement */
+    .leaderboard {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .leaderboard-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background: var(--teal-lighter);
+        transition: all 0.3s ease;
+    }
+
+    .leaderboard-item.first {
+        background: var(--teal-gradient);
+        color: white;
+    }
+
+    .leaderboard-item.first .user-name,
+    .leaderboard-item.first .user-meta {
+        color: white;
+    }
+
+    .leaderboard-item:hover {
+        transform: translateX(5px);
+    }
+
+    .rank {
+        font-weight: 700;
+        font-size: 1.125rem;
+        min-width: 30px;
+    }
+
+    .leaderboard-item.first .rank {
+        color: var(--yellow-canaan);
+    }
+
+    .score-badge {
+        margin-left: auto;
+        padding: 0.5rem 1rem;
+        background: white;
+        border-radius: 20px;
+        font-weight: 600;
+        color: var(--teal-glacier);
+    }
+
+    .leaderboard-item.first .score-badge {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    /* Graphique de performance */
+    .performance-chart {
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--teal-lighter);
+        border-radius: 12px;
+    }
+
+    .chart-placeholder {
+        text-align: center;
+        color: var(--secondary);
+    }
+
+    .chart-placeholder i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--teal-light);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 1.5rem;
+        }
+        
+        .header-stats {
+            flex-direction: column;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .stat-badge {
+            min-width: auto;
+        }
+        
+        .stat-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .table-modern th,
+        .table-modern td {
+            padding: 0.75rem 1rem;
+        }
+    }
 </style>
 {% endblock %}

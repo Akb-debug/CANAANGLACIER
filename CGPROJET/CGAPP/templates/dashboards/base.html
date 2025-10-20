@@ -18,16 +18,11 @@
         <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
     
         <!-- Icon Font Stylesheet -->
-
-
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
 
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
-
     
         <!-- Libraries Stylesheet -->
         <link href="{% static 'admin/lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet">
@@ -38,8 +33,101 @@
     
         <!-- Template Stylesheet -->
         <link href="{% static 'admin/css/style.css' %}" rel="stylesheet">
+        <!-- Bootstrap Icons CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-pap9c0sGZbZoWv6lD9O2k8gy+zj9bV9oF+fnfFQFfWwH92LPHqKvL7l6XK6xZSzqTR9fU+ZT3MwH2HsD+8Tlg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+        <style>
+            /* Variables globales pour la gestion du sidebar */
+            :root {
+                --sidebar-width-expanded: 280px;
+                --sidebar-width-collapsed: 0px;
+                --transition-speed: 0.3s;
+            }
+
+            /* Style pour le contenu principal */
+            .main-content {
+                transition: margin-left var(--transition-speed) ease;
+                min-height: 100vh;
+                width: 100%;
+            }
+
+            /* Sur desktop, le sidebar est toujours visible mais peut être réduit */
+            @media (min-width: 768px) {
+                .sidebar-collapsed .sidebar-custom {
+                    transform: translateX(-100%);
+                    width: var(--sidebar-width-collapsed);
+                }
+
+                .sidebar-collapsed .main-content {
+                    margin-left: 0;
+                }
+
+                .sidebar-expanded .sidebar-custom {
+                    transform: translateX(0);
+                    width: var(--sidebar-width-expanded);
+                }
+
+                .sidebar-expanded .main-content {
+                    margin-left: var(--sidebar-width-expanded);
+                }
+            }
+
+            /* Sur mobile, le sidebar est caché par défaut */
+            @media (max-width: 767px) {
+                .sidebar-custom {
+                    transform: translateX(-100%);
+                }
+
+                .sidebar-expanded .sidebar-custom {
+                    transform: translateX(0);
+                }
+
+                .main-content {
+                    margin-left: 0 !important;
+                }
+            }
+
+            /* Améliorations responsive générales */
+            .container-xxl {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+
+            /* Ajustements pour les très petits écrans */
+            @media (max-width: 576px) {
+                .navbar-nav .dropdown-menu {
+                    position: absolute !important;
+                    right: 0;
+                    left: auto;
+                }
+                
+                .px-4 {
+                    padding-left: 1rem !important;
+                    padding-right: 1rem !important;
+                }
+                
+                .py-0 {
+                    padding-top: 0.5rem !important;
+                    padding-bottom: 0.5rem !important;
+                }
+            }
+
+            /* Pour les tablettes */
+            @media (min-width: 768px) and (max-width: 1024px) {
+                .sidebar-custom {
+                    width: 250px;
+                }
+                
+                .main-content {
+                    margin-left: 250px;
+                }
+            }
+        </style>
     </head>
-    <body>
+    <body class="sidebar-expanded">
         <div class="container-xxl position-relative bg-white d-flex p-0">
 
             <!-- Spinner Start -->
@@ -55,7 +143,7 @@
             <!-- Sidebar End -->
 
             <!-- Content Start -->
-            <div class="content">
+            <div class="content main-content">
             {% include 'frontOfice/partials/messages.html' %}
 
                 <!-- Navbar Start -->
@@ -77,17 +165,89 @@
         </div>
 
     <!-- JavaScript Libraries -->
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'admin/lib/chart/chart.min.js' %}"></script>
-<script src="{% static 'admin/lib/easing/easing.min.js' %}"></script>
-<script src="{% static 'admin/lib/waypoints/waypoints.min.js' %}"></script>
-<script src="{% static 'admin/lib/owlcarousel/owl.carousel.min.js' %}"></script>
-<script src="{% static 'admin/lib/tempusdominus/js/moment.min.js' %}"></script>
-<script src="{% static 'admin/lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
-<script src="{% static 'admin/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'admin/lib/chart/chart.min.js' %}"></script>
+    <script src="{% static 'admin/lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'admin/lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'admin/lib/owlcarousel/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'admin/lib/tempusdominus/js/moment.min.js' %}"></script>
+    <script src="{% static 'admin/lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
+    <script src="{% static 'admin/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
 
-<!-- Template Javascript -->
-<script src="{% static 'admin/js/main.js' %}"></script>
+    <!-- Template Javascript -->
+    <script src="{% static 'admin/js/main.js' %}"></script>
+
+    <script>
+        // Gestion du toggle du sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggler = document.querySelector('.sidebar-toggler');
+            const body = document.body;
+            
+            if (sidebarToggler) {
+                sidebarToggler.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    if (body.classList.contains('sidebar-expanded')) {
+                        body.classList.remove('sidebar-expanded');
+                        body.classList.add('sidebar-collapsed');
+                        // Sauvegarder l'état dans localStorage
+                        localStorage.setItem('sidebarState', 'collapsed');
+                    } else {
+                        body.classList.remove('sidebar-collapsed');
+                        body.classList.add('sidebar-expanded');
+                        // Sauvegarder l'état dans localStorage
+                        localStorage.setItem('sidebarState', 'expanded');
+                    }
+                });
+            }
+            
+            // Restaurer l'état du sidebar au chargement de la page
+            const savedState = localStorage.getItem('sidebarState');
+            if (savedState === 'collapsed') {
+                body.classList.remove('sidebar-expanded');
+                body.classList.add('sidebar-collapsed');
+            } else {
+                body.classList.remove('sidebar-collapsed');
+                body.classList.add('sidebar-expanded');
+            }
+            
+            // Fermer le sidebar sur mobile quand on clique sur un lien
+            const sidebarLinks = document.querySelectorAll('.sidebar-nav-item');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 767) {
+                        body.classList.remove('sidebar-expanded');
+                        body.classList.add('sidebar-collapsed');
+                    }
+                });
+            });
+            
+            // Gestion du redimensionnement
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 767) {
+                    // Sur desktop, on garde l'état sauvegardé
+                    const savedState = localStorage.getItem('sidebarState');
+                    if (savedState === 'collapsed') {
+                        body.classList.remove('sidebar-expanded');
+                        body.classList.add('sidebar-collapsed');
+                    } else {
+                        body.classList.remove('sidebar-collapsed');
+                        body.classList.add('sidebar-expanded');
+                    }
+                } else {
+                    // Sur mobile, le sidebar est toujours fermé par défaut
+                    body.classList.remove('sidebar-expanded');
+                    body.classList.add('sidebar-collapsed');
+                }
+            });
+            
+            // Initialisation au chargement
+            if (window.innerWidth <= 767) {
+                body.classList.remove('sidebar-expanded');
+                body.classList.add('sidebar-collapsed');
+            }
+        });
+    </script>
     </body>
 </html>

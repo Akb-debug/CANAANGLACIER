@@ -16,7 +16,7 @@
                     <p class="mb-0">Gérer les catégories de produits</p>
                 </div>
                 <div>
-                    <a href="{% url 'ajouter_categorie' %}" class="btn btn-primary">
+                    <a href="{% url 'ajouter_categorie' %}" class="btn btn-teal">
                         <i class="fas fa-plus me-2"></i>Nouvelle Catégorie
                     </a>
                 </div>
@@ -27,12 +27,12 @@
     <!-- Statistiques -->
     <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <div class="card bg-primary text-white h-100">
+            <div class="card bg-teal text-white h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
                             <div class="text-white-50 small">Total Catégories</div>
-                            <div class="h3 mb-0">{{ total_categories }}</div>
+                            <div class="h3 mb-0 text-white">{{ total_categories }}</div>
                         </div>
                         <div class="align-self-center">
                             <i class="fas fa-tags fa-2x opacity-75"></i>
@@ -47,8 +47,8 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="card-header bg-teal text-white">
+                    <h5 class="mb-0 text-white">
                         <i class="fas fa-list me-2"></i>Liste des Catégories
                     </h5>
                 </div>
@@ -86,19 +86,19 @@
                                         </td>
                                         <td>{{ categorie.description|truncatechars:50 }}</td>
                                         <td>
-                                            <span class="badge bg-info">{{ categorie.ordre_affichage }}</span>
+                                            <span class="badge bg-teal-light">{{ categorie.ordre_affichage }}</span>
                                         </td>
                                         <td>
-                                            <span class="badge bg-success">{{ categorie.produits.count }}</span>
+                                            <span class="badge bg-teal">{{ categorie.produits.count }}</span>
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
                                                 <a href="{% url 'modifier_categorie' categorie.id %}" 
-                                                   class="btn btn-sm btn-outline-primary" title="Modifier">
+                                                   class="btn btn-sm btn-teal-outline" title="Modifier">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 <a href="{% url 'supprimer_categorie' categorie.id %}" 
-                                                   class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                                   class="btn btn-sm btn-danger-outline" title="Supprimer">
                                                     <i class="fas fa-trash"></i>
                                                 </a>
                                             </div>
@@ -110,10 +110,10 @@
                         </div>
                     {% else %}
                         <div class="text-center py-5">
-                            <i class="fas fa-tags fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Aucune catégorie trouvée</h5>
+                            <i class="fas fa-tags fa-3x text-teal mb-3"></i>
+                            <h5 class="text-teal">Aucune catégorie trouvée</h5>
                             <p class="text-muted">Commencez par créer votre première catégorie</p>
-                            <a href="{% url 'ajouter_categorie' %}" class="btn btn-primary">
+                            <a href="{% url 'ajouter_categorie' %}" class="btn btn-teal">
                                 <i class="fas fa-plus me-2"></i>Créer une catégorie
                             </a>
                         </div>
@@ -125,14 +125,133 @@
 </div>
 
 <style>
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --teal-light: #E6F7F7;
+    --teal-lighter: #F0FCFC;
+    --pink-swoosh: #E91E63;
+    --yellow-canaan: #FDCB05;
+}
+
 .card {
     border: none;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 184, 181, 0.15);
+    border-radius: 12px;
 }
+
+.card-header.bg-teal {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--teal-dark) 100%) !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+.bg-teal {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--teal-dark) 100%) !important;
+}
+
+.bg-teal-light {
+    background-color: var(--teal-light) !important;
+    color: var(--teal-dark);
+}
+
+.text-teal {
+    color: var(--teal-glacier) !important;
+}
+
+.btn-teal {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--teal-dark) 100%);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+.btn-teal:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 184, 181, 0.4);
+    color: white;
+}
+
+.btn-teal-outline {
+    border: 1px solid var(--teal-glacier);
+    color: var(--teal-glacier);
+    background: transparent;
+    border-radius: 6px;
+    padding: 6px 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-teal-outline:hover {
+    background: var(--teal-glacier);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-danger-outline {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    background: transparent;
+    border-radius: 6px;
+    padding: 6px 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-danger-outline:hover {
+    background: #dc3545;
+    color: white;
+    transform: translateY(-1px);
+}
+
 .table th {
     border-top: none;
     font-weight: 600;
-    color: #495057;
+    color: var(--teal-dark);
+    background-color: var(--teal-lighter);
+    padding: 15px 12px;
+}
+
+.table td {
+    padding: 15px 12px;
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--teal-lighter);
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+}
+
+.badge.bg-teal {
+    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--teal-dark) 100%) !important;
+    color: white;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.badge.bg-teal-light {
+    background-color: var(--teal-light) !important;
+    color: var(--teal-dark);
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+/* Animation pour les cartes */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 2rem 0 rgba(0, 184, 181, 0.2) !important;
+}
+
+/* Style pour l'icône dans l'état vide */
+.fa-tags.text-teal {
+    opacity: 0.7;
 }
 </style>
 {% endblock %}
