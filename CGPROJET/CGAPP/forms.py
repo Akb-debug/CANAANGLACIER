@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import RegexValidator,validate_email
 from django.core.exceptions import ValidationError
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import *
 
 from django.contrib.auth import get_user_model
@@ -34,7 +34,7 @@ class CategorieForm(forms.ModelForm):
             })
         }
 
-class CouponForm(forms.ModelForm):
+class CouponModelForm(forms.ModelForm):
     class Meta:
         model = Coupon
         fields = ['code', 'type_reduction', 'valeur', 'date_debut', 'date_fin', 'usage_max', 'actif']
@@ -492,8 +492,6 @@ class CreerServeurForm(UserCreationForm):
 
 # ==================== FORMULAIRES GÉRANT ====================
 
-from django import forms
-from .models import Produit, Gerant
 
 class ProduitForm(forms.ModelForm):
     """
@@ -504,7 +502,7 @@ class ProduitForm(forms.ModelForm):
         model = Produit
         fields = [
             'nom', 'description', 'description_longue', 'prix', 'promotion',
-            'quantite_disponible', 'categorie', 'gerant', 'image',
+            'quantite_disponible', 'categorie', 'image',
             'ingredients', 'allergenes', 'poids_net', 'conseil_conservation',
             'est_populaire'
         ]
@@ -527,7 +525,7 @@ class ProduitForm(forms.ModelForm):
                 'class': 'form-control',
                 'step': '0.01',
                 'min': '0',
-                'placeholder': '0.00'
+                'placeholder': 'Prix'
             }),
             'promotion': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -543,9 +541,7 @@ class ProduitForm(forms.ModelForm):
             'categorie': forms.Select(attrs={
                 'class': 'form-select'
             }),
-            'gerant': forms.Select(attrs={
-                'class': 'form-select'
-            }),
+           
             'image': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*'
@@ -579,7 +575,6 @@ class ProduitForm(forms.ModelForm):
             'promotion': 'Pourcentage de réduction (%)',
             'quantite_disponible': 'Quantité en stock',
             'categorie': 'Catégorie',
-            'gerant': 'Gérant responsable',
             'image': 'Image principale',
             'ingredients': 'Liste des ingrédients',
             'allergenes': 'Allergènes',
@@ -591,18 +586,6 @@ class ProduitForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        
-        # Adapter le formulaire selon le type d'utilisateur
-        if self.user:
-            if hasattr(self.user, 'gerant'):
-                # Pour les gérants : champ gérant caché et valeur automatique
-                self.fields['gerant'].widget = forms.HiddenInput()
-                self.fields['gerant'].required = False
-            elif hasattr(self.user, 'role') and self.user.role == 'admin':
-                # Pour les admins : montrer la liste des gérants
-                self.fields['gerant'].queryset = Gerant.objects.filter(actif=True)
-                self.fields['gerant'].empty_label = "Sélectionnez un gérant"
-                self.fields['gerant'].required = True
         
         # Rendre certains champs facultatifs
         for field in ['description', 'description_longue', 'allergenes', 'poids_net', 
@@ -636,21 +619,6 @@ class ProduitForm(forms.ModelForm):
             return self.user.gerant
         return gerant
     
-
-# class ProduitForm(forms.ModelForm):
-#     class Meta:
-#         model = Produit
-#         fields = ['nom', 'description', 'prix', 'quantite_disponible', 'image', 'categorie']
-#         widgets = {
-#             'description': forms.Textarea(attrs={'rows': 3}),
-#         }
-    
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         for field in self.fields:
-#             self.fields[field].widget.attrs.update({'class': 'form-control'})
-#         self.fields['image'].widget.attrs.update({'class': 'form-control-file'})
-
 #==================================Adresse==================================
 
 class CoordonneesClientForm(forms.Form):
@@ -958,9 +926,6 @@ class ProblemeCommandeForm(forms.ModelForm):
 
 
 #++++++++++++++++++++++++ Gestion livreur par admin +++++++++++++++++++++++++
-from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from .models import Utilisateur, Livreur
 
 class LivreurForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -983,18 +948,275 @@ class LivreurForm(UserCreationForm):
         if commit:
             user.save()
         return user
-
+    
 class LivreurUpdateForm(forms.ModelForm):
-    email = forms.EmailField(required=True)
-    telephone = forms.CharField(max_length=15, required=True)
-    first_name = forms.CharField(max_length=30, required=True, label='Prénom')
-    last_name = forms.CharField(max_length=30, required=True, label='Nom')
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'email@exemple.com'})
+    )
+    telephone = forms.CharField(
+        max_length=15,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '90 12 34 56'})
+    )
+    first_name = forms.CharField(
+        max_length=30,
+        required=True,
+        label='Prénom',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Prénom'})
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        required=True,
+        label='Nom',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom de famille'})
+    )
+    username = forms.CharField(
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Nom d'utilisateur"})
+    )
 
     class Meta:
         model = Utilisateur
-        fields = ['username', 'email', 'first_name', 'last_name', 'telephone', 'is_active']
+        fields = ['username', 'email', 'first_name', 'last_name', 'telephone']
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Rendre le champ username non modifiable si nécessaire
-        self.fields['username'].widget.attrs['readonly'] = True
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Vérifie qu'aucun autre utilisateur n'a ce username
+        if Utilisateur.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ce nom d'utilisateur est déjà utilisé par un autre compte.")
+        return username
+
+
+class ModifierGerantForm(UserChangeForm):
+   
+    password = None  # Suppression du champ mot de passe par défaut
+
+    username = forms.CharField(
+        label="Nom d'utilisateur",
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': "Nom d'utilisateur du gérant"
+        })
+    )
+
+    email = forms.EmailField(
+        label="Email",
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'email@exemple.com'
+        })
+    )
+
+    first_name = forms.CharField(
+        label="Prénom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Prénom'})
+    )
+
+    last_name = forms.CharField(
+        label="Nom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom de famille'})
+    )
+
+    telephone = forms.CharField(
+        label="Téléphone",
+        max_length=15,
+        required=True,
+        help_text='Format: 90 12 34 56',
+        validators=[RegexValidator(
+            regex=r'^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
+            message='Numéro togolais invalide'
+        )],
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '90 12 34 56'})
+    )
+
+    class Meta:
+        model = Utilisateur
+        fields = ['username', 'first_name', 'last_name', 'email', 'telephone']
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Vérifie qu'aucun autre utilisateur n'a ce username
+        if Utilisateur.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ce nom d'utilisateur est déjà utilisé par un autre compte.")
+        return username
+    
+    password = None  # Suppression du champ mot de passe par défaut
+
+    first_name = forms.CharField(
+        label="Prénom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Prénom'})
+    )
+
+    last_name = forms.CharField(
+        label="Nom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom de famille'})
+    )
+
+    telephone = forms.CharField(
+        label="Téléphone",
+        max_length=15,
+        required=True,
+        help_text='Format: 90 12 34 56',
+        validators=[RegexValidator(
+            regex=r'^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
+            message='Numéro togolais invalide'
+        )],
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '90 12 34 56'})
+    )
+
+    class Meta:
+        model = Utilisateur
+        fields = ['username', 'first_name', 'last_name', 'email', 'telephone']
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Vérifie qu'aucun autre utilisateur n'a ce username
+        if Utilisateur.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ce nom d'utilisateur est déjà utilisé par un autre compte.")
+        return username
+    
+class ModifierServeurForm(UserChangeForm):
+   
+    password = None 
+
+    username = forms.CharField(
+        label="Nom d'utilisateur",
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': "Nom d'utilisateur du serveur"
+        })
+    )
+
+    email = forms.EmailField(
+        label="Email",
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'email@exemple.com'
+        })
+    )
+
+    first_name = forms.CharField(
+        label="Prénom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Prénom'})
+    )
+
+    last_name = forms.CharField(
+        label="Nom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nom de famille'})
+    )
+
+    telephone = forms.CharField(
+        label="Téléphone",
+        max_length=15,
+        required=True,
+        help_text='Format: 90 12 34 56',
+        validators=[RegexValidator(
+            regex=r'^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
+            message='Numéro togolais invalide'
+        )],
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '90 12 34 56'})
+    )
+
+    class Meta:
+        model = Utilisateur
+        fields = ['username', 'first_name', 'last_name', 'email', 'telephone']
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Vérifie qu'aucun autre utilisateur n'a ce username
+        if Utilisateur.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ce nom d'utilisateur est déjà utilisé par un autre compte.")
+        return username
+    
+    from django import forms
+
+
+Utilisateur = get_user_model()
+
+class ModifierClientForm(UserChangeForm):
+    password = None  # On supprime le champ mot de passe du formulaire
+
+    username = forms.CharField(
+        label="Nom d'utilisateur",
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': "Nom d'utilisateur du client"
+        })
+    )
+
+    email = forms.EmailField(
+        label="Email",
+        required=True,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'email@exemple.com'
+        })
+    )
+
+    first_name = forms.CharField(
+        label="Prénom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Prénom'
+        })
+    )
+
+    last_name = forms.CharField(
+        label="Nom",
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nom de famille'
+        })
+    )
+
+    telephone = forms.CharField(
+        label="Téléphone",
+        max_length=15,
+        required=True,
+        help_text='Format: 90 12 34 56',
+        validators=[RegexValidator(
+            regex=r'^(90|91|92|93|96|97|98|99)[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$',
+            message='Numéro togolais invalide'
+        )],
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '90 12 34 56'
+        })
+    )
+
+    class Meta:
+        model = Utilisateur
+        fields = ['username', 'first_name', 'last_name', 'email', 'telephone']
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Vérifie qu'aucun autre utilisateur n’a ce nom d’utilisateur
+        if Utilisateur.objects.filter(username=username).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Ce nom d'utilisateur est déjà utilisé par un autre compte.")
+        return username

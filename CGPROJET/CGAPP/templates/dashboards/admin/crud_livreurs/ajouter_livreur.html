@@ -187,122 +187,122 @@
 </div>
 
 <style>
-   :root {
-    --teal-glacier: #00B8B5;
-    --teal-dark: #00827F;
-    --pink-swoosh: #E91E63;
-    --yellow-canaan: #FDCB05;
-}
-.teal-glacier-text {
-    color: var(--teal-glacier) !important;
-}
+    :root {
+        --teal-glacier: #00B8B5;
+        --teal-dark: #00827F;
+        --pink-swoosh: #E91E63;
+        --yellow-canaan: #FDCB05;
+    }
+    .teal-glacier-text {
+        color: var(--teal-glacier) !important;
+    }
 
-.teal-glacier-bg {
-    background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--teal-dark) 100%) !important;
-}
+    .teal-glacier-bg {
+        background: linear-gradient(135deg, var(--teal-glacier) 0%, var(--teal-dark) 100%) !important;
+    }
 
-.btn-teal-glacier {
-    background-color: var(--teal-glacier);
-    border-color: var(--teal-glacier);
-    color: white;
-}
+    .btn-teal-glacier {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        color: white;
+    }
 
-.btn-teal-glacier:hover {
-    background-color: var(--teal-dark);
-    border-color: var(--teal-dark);
-    color: white;
-}
+    .btn-teal-glacier:hover {
+        background-color: var(--teal-dark);
+        border-color: var(--teal-dark);
+        color: white;
+    }
 
-.btn-outline-teal {
-    border-color: var(--teal-glacier);
-    color: var(--teal-glacier);
-    background-color: transparent;
-}
+    .btn-outline-teal {
+        border-color: var(--teal-glacier);
+        color: var(--teal-glacier);
+        background-color: transparent;
+    }
 
-.btn-outline-teal:hover {
-    background-color: var(--teal-glacier);
-    border-color: var(--teal-glacier);
-    color: white;
-}
+    .btn-outline-teal:hover {
+        background-color: var(--teal-glacier);
+        border-color: var(--teal-glacier);
+        color: white;
+    }
 
-.card {
-    transition: transform 0.2s;
-    border: none;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 184, 181, 0.15);
-}
+    .card {
+        transition: transform 0.2s;
+        border: none;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 184, 181, 0.15);
+    }
 
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.5rem 2rem 0 rgba(0, 184, 181, 0.25);
-}
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 2rem 0 rgba(0, 184, 181, 0.25);
+    }
 
-.form-control:focus {
-    border-color: var(--teal-glacier);
-    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25);
-}
+    .form-control:focus {
+        border-color: var(--teal-glacier);
+        box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.25);
+    }
 
-.invalid-feedback {
-    display: none;
-    width: 100%;
-    margin-top: 0.25rem;
-    font-size: 0.875em;
-    color: #dc3545;
-}
+    .invalid-feedback {
+        display: none;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
 
-.invalid-feedback.d-block {
-    display: block;
-}
+    .invalid-feedback.d-block {
+        display: block;
+    }
 
-.border-bottom {
-    border-bottom: 1px solid #dee2e6 !important;
-}
+    .border-bottom {
+        border-bottom: 1px solid #dee2e6 !important;
+    }
 
-.btn {
-    transition: all 0.2s ease;
-}
+    .btn {
+        transition: all 0.2s ease;
+    }
 
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 184, 181, 0.2);
-}
+    .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 184, 181, 0.2);
+    }
 
-.form-text {
-    font-size: 0.875em;
-    color: #6c757d !important;
-}
+    .form-text {
+        font-size: 0.875em;
+        color: #6c757d !important;
+    }
 </style>
 
 <script>
-// Initialiser les tooltips
-document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    // Initialiser les tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
 
-    // Ajouter les classes Bootstrap aux champs de formulaire
-    const formInputs = document.querySelectorAll('input, select, textarea');
-    formInputs.forEach(input => {
-        if (!input.classList.contains('btn')) {
-            input.classList.add('form-control');
+        // Ajouter les classes Bootstrap aux champs de formulaire
+        const formInputs = document.querySelectorAll('input, select, textarea');
+        formInputs.forEach(input => {
+            if (!input.classList.contains('btn')) {
+                input.classList.add('form-control');
+            }
+        });
+
+        // Ajouter des placeholders si nécessaire
+        const usernameField = document.getElementById('{{ form.username.id_for_label }}');
+        if (usernameField && !usernameField.getAttribute('placeholder')) {
+            usernameField.setAttribute('placeholder', 'Nom d\'utilisateur unique');
+        }
+
+        const emailField = document.getElementById('{{ form.email.id_for_label }}');
+        if (emailField && !emailField.getAttribute('placeholder')) {
+            emailField.setAttribute('placeholder', 'email@exemple.com');
+        }
+
+        const telephoneField = document.getElementById('{{ form.telephone.id_for_label }}');
+        if (telephoneField && !telephoneField.getAttribute('placeholder')) {
+            telephoneField.setAttribute('placeholder', '+228 XX XX XX XX');
         }
     });
-
-    // Ajouter des placeholders si nécessaire
-    const usernameField = document.getElementById('{{ form.username.id_for_label }}');
-    if (usernameField && !usernameField.getAttribute('placeholder')) {
-        usernameField.setAttribute('placeholder', 'Nom d\'utilisateur unique');
-    }
-
-    const emailField = document.getElementById('{{ form.email.id_for_label }}');
-    if (emailField && !emailField.getAttribute('placeholder')) {
-        emailField.setAttribute('placeholder', 'email@exemple.com');
-    }
-
-    const telephoneField = document.getElementById('{{ form.telephone.id_for_label }}');
-    if (telephoneField && !telephoneField.getAttribute('placeholder')) {
-        telephoneField.setAttribute('placeholder', '+225 XX XX XX XX');
-    }
-});
 </script>
 {% endblock %}

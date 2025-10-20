@@ -5,206 +5,328 @@
 
 {% block body %}
 <div class="container-fluid pt-4 px-4">
+    <!-- Header avec statistiques -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-white rounded-3 p-4 shadow-sm border-0">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-container bg-teal-glacier bg-opacity-10 rounded-3 p-3 me-3">
+                                <i class="fas fa-history fa-2x text-white"></i>
+                            </div>
+                            <div>
+                                <h1 class="h3 mb-1 fw-bold text-dark">Historique des Actions</h1>
+                                <p class="mb-0 text-muted">Journal complet de toutes les activités sur la plateforme</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end border-2">
+                                    <h3 class="fw-bold text-teal-glacier mb-1">{{ page_obj.paginator.count }}</h3>
+                                    <small class="text-muted">Total Actions</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div>
+                                    <h3 class="fw-bold text-teal-dark mb-1">{{ today_count }}</h3>
+                                    <small class="text-muted">Aujourd'hui</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres avancés -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="bg-white rounded-3 p-4 shadow-sm border-0">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-semibold text-dark mb-0">
+                        <i class="fas fa-sliders-h me-2 text-teal-glacier"></i>
+                        Filtres Avancés
+                    </h5>
+                    <button class="btn btn-sm btn-outline-teal-glacier" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse">
+                        <i class="fas fa-chevron-down me-1"></i>
+                        Options
+                    </button>
+                </div>
+
+                <div class="collapse show" id="filtersCollapse">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-medium text-dark">Type d'action</label>
+                            <select name="type_action" class="form-select border-teal-glacier">
+                                <option value="">Tous les types</option>
+                                {% for value, label in types_actions %}
+                                <option value="{{ value }}" {% if type_action_filtre == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-medium text-dark">Utilisateur</label>
+                            <select name="utilisateur" class="form-select border-teal-glacier">
+                                <option value="">Tous les utilisateurs</option>
+                                {% for user in utilisateurs %}
+                                <option value="{{ user.id }}" {% if user.id|stringformat:"s" == utilisateur_filtre %}selected{% endif %}>
+                                    {{ user.username }} ({{ user.get_role_display }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-medium text-dark">Période</label>
+                            <select name="periode" class="form-select border-teal-glacier">
+                                <option value="">Toute période</option>
+                                <option value="today" {% if periode_filter == 'today' %}selected{% endif %}>Aujourd'hui</option>
+                                <option value="week" {% if periode_filter == 'week' %}selected{% endif %}>Cette semaine</option>
+                                <option value="month" {% if periode_filter == 'month' %}selected{% endif %}>Ce mois</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <div class="d-flex gap-2 w-100">
+                                <button type="submit" class="btn btn-teal-glacier flex-fill">
+                                    <i class="fas fa-search me-1"></i>Appliquer
+                                </button>
+                                <a href="{% url 'historique_actions' %}" class="btn btn-outline-teal-glacier">
+                                    <i class="fas fa-undo me-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {% if type_action_filtre or utilisateur_filtre or periode_filter %}
+                <div class="mt-3 pt-3 border-top">
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-teal-glacier bg-opacity-10 text-teal-glacier border border-teal-glacier">
+                            <i class="fas fa-filter me-1"></i>
+                            Filtres actifs
+                        </span>
+                        <div class="ms-3">
+                            {% if type_action_filtre %}
+                            <span class="badge bg-teal-dark text-white me-1">
+                                Type: {{ type_action_filtre }}
+                            </span>
+                            {% endif %}
+                            {% if utilisateur_filtre %}
+                            <span class="badge bg-teal-dark text-white me-1">
+                                Utilisateur: {{ utilisateur_filtre }}
+                            </span>
+                            {% endif %}
+                            {% if periode_filter %}
+                            <span class="badge bg-teal-dark text-white me-1">
+                                Période: {{ periode_filter }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des actions -->
     <div class="row">
         <div class="col-12">
-            <div class="card h-100">
-                <div class="card-header bg-gradient-dark text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-history me-2"></i>
-                        Historique des Actions
-                    </h4>
+            <div class="bg-white rounded-3 shadow-sm border-0 overflow-hidden">
+                <!-- En-tête du tableau -->
+                <div class="bg-teal-glacier bg-opacity-5 border-bottom p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h5 class="fw-semibold text-white mb-0">
+                                <i class="fas fa-list-alt me-2"></i>
+                                Journal d'Activité
+                            </h5>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-teal-glacier text-white">
+                                {{ page_obj.paginator.count }} résultat(s)
+                            </span>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-teal-glacier dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-download me-1"></i>Exporter
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-file-csv me-2"></i>CSV</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-file-pdf me-2"></i>PDF</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <!-- Bouton retour -->
-                    <div class="mb-4">
-                        <a href="{% url 'dashboard_admin' %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-1"></i>
-                            Retour au Dashboard
-                        </a>
-                    </div>
 
-                    <!-- Filtres -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h6 class="mb-0">
-                                <i class="fas fa-filter me-2"></i>
-                                Filtres
-                            </h6>
-                        </div>
-                        <div class="card-body">
-                            <form method="get" class="row g-3">
-                                <div class="col-md-4">
-                                    <label for="type_action" class="form-label">Type d'action</label>
-                                    <select name="type_action" id="type_action" class="form-select">
-                                        <option value="">Tous les types</option>
-                                        {% for value, label in types_actions %}
-                                            <option value="{{ value }}" {% if value == type_action_filtre %}selected{% endif %}>
-                                                {{ label }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="utilisateur" class="form-label">Utilisateur</label>
-                                    <select name="utilisateur" id="utilisateur" class="form-select">
-                                        <option value="">Tous les utilisateurs</option>
-                                        {% for user in utilisateurs %}
-                                            <option value="{{ user.id }}" {% if user.id|stringformat:"s" == utilisateur_filtre %}selected{% endif %}>
-                                                {{ user.username }} ({{ user.get_role_display }})
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-4 d-flex align-items-end">
-                                    <button type="submit" class="btn btn-primary me-2">
-                                        <i class="fas fa-search me-1"></i>
-                                        Filtrer
-                                    </button>
-                                    <a href="{% url 'historique_actions' %}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-times me-1"></i>
-                                        Réinitialiser
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Tableau des actions -->
+                <!-- Corps du tableau -->
+                <div class="p-0">
+                    {% if page_obj %}
                     <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-teal-glacier text-white">
                                 <tr>
-                                    <th>Date/Heure</th>
-                                    <th>Utilisateur</th>
-                                    <th>Type d'action</th>
-                                    <th>Description</th>
-                                    <th>Objet concerné</th>
-                                    <th>IP</th>
-                                    <th>Détails</th>
+                                    <th scope="col" class="ps-4 py-3 fw-semibold border-0">Date/Heure</th>
+                                    <th scope="col" class="py-3 fw-semibold border-0">Utilisateur</th>
+                                    <th scope="col" class="py-3 fw-semibold border-0">Type</th>
+                                    <th scope="col" class="py-3 fw-semibold border-0">Description</th>
+                                    <th scope="col" class="py-3 fw-semibold border-0">Objet</th>
+                                    <th scope="col" class="pe-4 py-3 fw-semibold border-0 text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for action in page_obj %}
-                                <tr>
-                                    <td>
-                                        <small>{{ action.date_action|date:"d/m/Y H:i:s" }}</small>
-                                    </td>
-                                    <td>
+                                <tr class="action-row">
+                                    <td class="ps-4 py-3">
                                         <div class="d-flex align-items-center">
-                                            {% if action.utilisateur.role == 'admin' %}
-                                                <i class="fas fa-user-shield text-danger me-1"></i>
-                                            {% elif action.utilisateur.role == 'gerant' %}
-                                                <i class="fas fa-user-tie text-primary me-1"></i>
-                                            {% elif action.utilisateur.role == 'serveur' %}
-                                                <i class="fas fa-user-cog text-success me-1"></i>
-                                            {% else %}
-                                                <i class="fas fa-user text-muted me-1"></i>
-                                            {% endif %}
-                                            <span class="fw-bold">{{ action.utilisateur.username }}</span>
+                                            <div class="icon-container bg-teal-glacier bg-opacity-10 rounded-2 p-2 me-3">
+                                                <i class="fas fa-calendar-alt text-white"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold text-dark">{{ action.date_action|date:"d/m/Y" }}</div>
+                                                <small class="text-muted">{{ action.date_action|time:"H:i:s" }}</small>
+                                            </div>
                                         </div>
-                                        <small class="text-muted">{{ action.utilisateur.get_role_display }}</small>
                                     </td>
-                                    <td>
-                                        {% if action.type_action == 'connexion' %}
-                                            <span class="badge bg-info">{{ action.get_type_action_display }}</span>
-                                        {% elif action.type_action == 'commande_statut' %}
-                                            <span class="badge bg-warning">{{ action.get_type_action_display }}</span>
-                                        {% elif action.type_action == 'utilisateur_creation' %}
-                                            <span class="badge bg-success">{{ action.get_type_action_display }}</span>
-                                        {% elif 'produit' in action.type_action %}
-                                            <span class="badge bg-primary">{{ action.get_type_action_display }}</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">{{ action.get_type_action_display }}</span>
-                                        {% endif %}
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar me-3">
+                                                {% if action.utilisateur.role == 'admin' %}
+                                                    <i class="fas fa-user-shield text-danger"></i>
+                                                {% elif action.utilisateur.role == 'gerant' %}
+                                                    <i class="fas fa-user-tie text-primary"></i>
+                                                {% elif action.utilisateur.role == 'serveur' %}
+                                                    <i class="fas fa-user-cog text-success"></i>
+                                                {% else %}
+                                                    <i class="fas fa-user text-muted"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium text-dark">{{ action.utilisateur.username }}</div>
+                                                <small class="text-muted">{{ action.utilisateur.get_role_display }}</small>
+                                            </div>
+                                        </div>
                                     </td>
-                                    <td>{{ action.description|truncatechars:50 }}</td>
-                                    <td>
+                                    <td class="py-3">
+                                        <span class="badge action-type-badge 
+                                            {% if action.type_action == 'connexion' %}bg-info
+                                            {% elif action.type_action == 'commande_statut' %}bg-warning text-dark
+                                            {% elif action.type_action == 'utilisateur_creation' %}bg-success
+                                            {% elif 'produit' in action.type_action %}bg-primary
+                                            {% else %}bg-secondary{% endif %}">
+                                            <i class="fas 
+                                                {% if action.type_action == 'connexion' %}fa-sign-in-alt
+                                                {% elif action.type_action == 'commande_statut' %}fa-shipping-fast
+                                                {% elif action.type_action == 'utilisateur_creation' %}fa-user-plus
+                                                {% elif 'produit' in action.type_action %}fa-box
+                                                {% else %}fa-circle{% endif %} me-1">
+                                            </i>
+                                            {{ action.get_type_action_display }}
+                                        </span>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="action-description">
+                                            <div class="fw-medium text-dark mb-1">{{ action.description }}</div>
+                                            {% if action.adresse_ip %}
+                                            <small class="text-muted">
+                                                <i class="fas fa-globe me-1"></i>
+                                                {{ action.adresse_ip }}
+                                            </small>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
                                         {% if action.objet_concerne %}
-                                            <span class="text-primary">{{ action.objet_concerne|truncatechars:30 }}</span>
+                                        <span class="badge bg-teal-dark bg-opacity-10 text-white border border-teal-dark">
+                                            {{ action.objet_concerne }}
+                                        </span>
                                         {% else %}
-                                            <span class="text-muted">-</span>
+                                        <span class="text-muted fst-italic">Non spécifié</span>
                                         {% endif %}
                                     </td>
-                                    <td>
-                                        {% if action.adresse_ip %}
-                                            <code>{{ action.adresse_ip }}</code>
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if action.details_supplementaires %}
-                                            <button class="btn btn-sm btn-outline-info" 
+                                    <td class="pe-4 py-3 text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            {% if action.details_supplementaires %}
+                                            <button class="btn btn-sm btn-outline-teal-glacier" 
                                                     data-bs-toggle="modal" 
                                                     data-bs-target="#detailsModal{{ action.id }}"
                                                     title="Voir les détails">
-                                                <i class="fas fa-info-circle"></i>
+                                                <i class="fas fa-eye"></i>
                                             </button>
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-outline-secondary" 
+                                                    onclick="copyActionDetails('{{ action.id }}')"
+                                                    title="Copier les détails">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">
-                                        <i class="fas fa-search fa-2x mb-2"></i>
-                                        <br>
-                                        Aucune action trouvée avec ces critères.
+                                    <td colspan="6" class="text-center py-5">
+                                        <div class="empty-state">
+                                            <i class="fas fa-search fa-3x text-teal-glacier mb-3 opacity-50"></i>
+                                            <h5 class="text-dark mb-2">Aucune action trouvée</h5>
+                                            <p class="text-muted">Aucune action ne correspond à vos critères de recherche.</p>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
+                    {% endif %}
+                </div>
 
-                    <!-- Pagination -->
-                    {% if page_obj.has_other_pages %}
-                        <nav aria-label="Pagination">
-                            <ul class="pagination justify-content-center">
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="border-top bg-teal-glacier bg-opacity-5 px-4 py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <small class="text-muted">
+                                Affichage de {{ page_obj.start_index }} à {{ page_obj.end_index }} sur {{ page_obj.paginator.count }} actions
+                            </small>
+                        </div>
+                        <nav aria-label="Navigation des pages">
+                            <ul class="pagination pagination-sm mb-0">
                                 {% if page_obj.has_previous %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=1{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}">
-                                            <i class="fas fa-angle-double-left"></i>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}">
-                                            <i class="fas fa-angle-left"></i>
-                                        </a>
-                                    </li>
+                                <li class="page-item">
+                                    <a class="page-link text-teal-glacier" href="?page={{ page_obj.previous_page_number }}{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}{% if periode_filter %}&periode={{ periode_filter }}{% endif %}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
                                 {% endif %}
-
-                                {% for num in page_obj.paginator.page_range %}
-                                    {% if page_obj.number == num %}
-                                        <li class="page-item active">
-                                            <span class="page-link">{{ num }}</span>
-                                        </li>
-                                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="?page={{ num }}{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}">
-                                                {{ num }}
-                                            </a>
-                                        </li>
+                                
+                                {% for i in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == i %}
+                                    <li class="page-item active">
+                                        <span class="page-link bg-teal-glacier border-teal-glacier">{{ i }}</span>
+                                    </li>
+                                    {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link text-teal-glacier" href="?page={{ i }}{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}{% if periode_filter %}&periode={{ periode_filter }}{% endif %}">{{ i }}</a>
+                                    </li>
                                     {% endif %}
                                 {% endfor %}
-
+                                
                                 {% if page_obj.has_next %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}">
-                                            <i class="fas fa-angle-right"></i>
-                                        </a>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}">
-                                            <i class="fas fa-angle-double-right"></i>
-                                        </a>
-                                    </li>
+                                <li class="page-item">
+                                    <a class="page-link text-teal-glacier" href="?page={{ page_obj.next_page_number }}{% if type_action_filtre %}&type_action={{ type_action_filtre }}{% endif %}{% if utilisateur_filtre %}&utilisateur={{ utilisateur_filtre }}{% endif %}{% if periode_filter %}&periode={{ periode_filter }}{% endif %}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
                                 {% endif %}
                             </ul>
                         </nav>
-                    {% endif %}
+                    </div>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -216,59 +338,81 @@
         <div class="modal fade" id="detailsModal{{ action.id }}" tabindex="-1">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
+                    <div class="modal-header bg-teal-glacier text-white">
+                        <h5 class="modal-title mb-0 text-white">
                             <i class="fas fa-info-circle me-2"></i>
                             Détails de l'action #{{ action.id }}
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="row mb-3">
+                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <div class="card mb-3">
+                                <div class="card border-0 bg-light">
                                     <div class="card-body">
-                                        <h6 class="card-title">Informations de base</h6>
+                                        <h6 class="card-title text-teal-glacier fw-semibold">
+                                            <i class="fas fa-user me-2"></i>Informations de base
+                                        </h6>
                                         <dl class="row mb-0">
-                                            <dt class="col-sm-4">Utilisateur:</dt>
-                                            <dd class="col-sm-8">{{ action.utilisateur.username }}</dd>
+                                            <dt class="col-sm-4 text-muted">Utilisateur:</dt>
+                                            <dd class="col-sm-8 fw-medium">{{ action.utilisateur.username }}</dd>
                                             
-                                            <dt class="col-sm-4">Type:</dt>
-                                            <dd class="col-sm-8">{{ action.get_type_action_display }}</dd>
+                                            <dt class="col-sm-4 text-muted">Type:</dt>
+                                            <dd class="col-sm-8">
+                                                <span class="badge 
+                                                    {% if action.type_action == 'connexion' %}bg-info
+                                                    {% elif action.type_action == 'commande_statut' %}bg-warning text-dark
+                                                    {% elif action.type_action == 'utilisateur_creation' %}bg-success
+                                                    {% elif 'produit' in action.type_action %}bg-primary
+                                                    {% else %}bg-secondary{% endif %}">
+                                                    {{ action.get_type_action_display }}
+                                                </span>
+                                            </dd>
                                             
-                                            <dt class="col-sm-4">Date:</dt>
+                                            <dt class="col-sm-4 text-muted">Date:</dt>
                                             <dd class="col-sm-8">{{ action.date_action|date:"d/m/Y H:i:s" }}</dd>
                                         </dl>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="card">
+                                <div class="card border-0 bg-light">
                                     <div class="card-body">
-                                        <h6 class="card-title">Contexte</h6>
+                                        <h6 class="card-title text-teal-glacier fw-semibold">
+                                            <i class="fas fa-globe me-2"></i>Contexte
+                                        </h6>
                                         <dl class="row mb-0">
-                                            <dt class="col-sm-4">Objet:</dt>
+                                            <dt class="col-sm-4 text-muted">Objet:</dt>
                                             <dd class="col-sm-8">{{ action.objet_concerne|default:"-" }}</dd>
                                             
-                                            <dt class="col-sm-4">IP:</dt>
-                                            <dd class="col-sm-8">{{ action.adresse_ip|default:"-" }}</dd>
+                                            <dt class="col-sm-4 text-muted">IP:</dt>
+                                            <dd class="col-sm-8">
+                                                <code class="text-dark">{{ action.adresse_ip|default:"-" }}</code>
+                                            </dd>
                                         </dl>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="card">
+                        <div class="card border-0">
+                            <div class="card-header bg-white border-bottom-0">
+                                <h6 class="card-title mb-0 text-teal-glacier fw-semibold">
+                                    <i class="fas fa-file-alt me-2"></i>Détails complets
+                                </h6>
+                            </div>
                             <div class="card-body">
-                                <h6 class="card-title">Détails complets</h6>
-                                <div class="bg-light p-3 rounded">
-                                    <pre class="mb-0"><code>{{ action.details_supplementaires|pprint }}</code></pre>
+                                <div class="bg-light p-3 rounded-3 border">
+                                    <pre class="mb-0 text-dark"><code>{{ action.details_supplementaires|pprint }}</code></pre>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-teal-glacier" onclick="copyActionDetails('{{ action.id }}')">
+                            <i class="fas fa-copy me-1"></i>Copier
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fermer</button>
                     </div>
                 </div>
             </div>
@@ -277,48 +421,294 @@
 {% endfor %}
 
 <style>
-.card {
-    transition: transform 0.2s;
-    border: none;
-    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+:root {
+    --teal-glacier: #00B8B5;
+    --teal-dark: #00827F;
+    --teal-light: #E6F7F7;
 }
-.card:hover {
-    transform: translateY(-2px);
+
+/* Styles globaux */
+.bg-teal-glacier { background-color: var(--teal-glacier) !important; }
+.bg-teal-dark { background-color: var(--teal-dark) !important; }
+.bg-teal-light { background-color: var(--teal-light) !important; }
+.text-teal-glacier { color: var(--teal-glacier) !important; }
+.text-teal-dark { color: var(--teal-dark) !important; }
+.border-teal-glacier { border-color: var(--teal-glacier) !important; }
+
+/* Boutons */
+.btn-teal-glacier {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
-.bg-gradient-dark {
-    background: linear-gradient(135deg, #343a40 0%, #212529 100%);
-}
-.table th {
-    border-top: none;
-    font-weight: 600;
-    color: #495057;
-}
-.page-item.active .page-link {
-    background-color: #343a40;
-    border-color: #343a40;
-}
-.page-link {
-    color: #343a40;
-}
-.btn {
-    transition: all 0.2s ease;
-}
-.btn:hover {
+
+.btn-teal-glacier:hover {
+    background-color: var(--teal-dark);
+    border-color: var(--teal-dark);
+    color: white;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 184, 181, 0.3);
 }
+
+.btn-outline-teal-glacier {
+    border-color: var(--teal-glacier);
+    color: var(--teal-glacier);
+    background-color: transparent;
+    font-weight: 500;
+}
+
+.btn-outline-teal-glacier:hover {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+    color: white;
+}
+
+/* Cartes et conteneurs */
+.shadow-sm {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.rounded-3 {
+    border-radius: 12px !important;
+}
+
+.icon-container {
+    transition: transform 0.3s ease;
+}
+
+.icon-container:hover {
+    transform: scale(1.05);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(0, 184, 181, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+/* Tableau */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 184, 181, 0.04) !important;
+    transform: translateX(4px);
+    transition: all 0.3s ease;
+}
+
+.action-type-badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.action-row {
+    border-left: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.action-row:hover {
+    border-left-color: var(--teal-glacier);
+}
+
+/* Pagination */
+.page-link {
+    border: 1px solid #dee2e6;
+    color: var(--teal-glacier);
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background-color: var(--teal-light);
+    border-color: var(--teal-glacier);
+    color: var(--teal-dark);
+}
+
+.page-item.active .page-link {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+}
+
+/* Formulaires */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--teal-glacier);
+    box-shadow: 0 0 0 0.2rem rgba(0, 184, 181, 0.15);
+    background-color: rgba(230, 247, 247, 0.1);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* État vide */
+.empty-state {
+    padding: 3rem 2rem;
+}
+
+.empty-state i {
+    opacity: 0.7;
+}
+
+/* Modal */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    border-radius: 12px 12px 0 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .action-description {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bg-white {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Scrollbar personnalisée */
+.table-responsive::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: var(--teal-glacier);
+    border-radius: 3px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: var(--teal-dark);
+}
+
+/* Code dans les modals */
 pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 0.875rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+code {
+    color: #495057;
+    font-family: 'Courier New', monospace;
 }
 </style>
 
 <script>
-// Initialiser les tooltips
 document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
+    // Animation des lignes du tableau
+    const actionRows = document.querySelectorAll('.action-row');
+    actionRows.forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.05}s`;
+    });
+
+    // Tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
+
+    // Auto-collapse des filtres sur mobile
+    if (window.innerWidth < 768) {
+        const filtersCollapse = document.getElementById('filtersCollapse');
+        if (filtersCollapse) {
+            const bsCollapse = new bootstrap.Collapse(filtersCollapse, {
+                toggle: false
+            });
+            bsCollapse.hide();
+        }
+    }
 });
+
+// Fonction pour copier les détails d'une action
+function copyActionDetails(actionId) {
+    const actionElement = document.querySelector(`[data-action-id="${actionId}"]`);
+    if (actionElement) {
+        const details = actionElement.textContent;
+        navigator.clipboard.writeText(details).then(function() {
+            // Afficher un message de succès
+            const toast = document.createElement('div');
+            toast.className = 'position-fixed bottom-0 end-0 p-3';
+            toast.innerHTML = `
+                <div class="toast show" role="alert">
+                    <div class="toast-header bg-success text-white">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong class="me-auto">Succès</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        Détails copiés dans le presse-papier
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        });
+    }
+}
+
+// Recherche en temps réel (optionnel)
+function setupRealTimeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.action-row');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+}
+
+// Initialiser la recherche en temps réel
+setupRealTimeSearch();
 </script>
 {% endblock %}

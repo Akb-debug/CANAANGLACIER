@@ -11,16 +11,55 @@
     <div class="row g-4">
         <div class="col-12">
             <div class="bg-white rounded h-100 p-4 shadow-sm">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h4 class="mb-0 teal-glacier-text">
-                        <i class="fas fa-users me-2"></i>
-                        Gestion des Utilisateurs
-                    </h4>
-                    <div class="d-flex gap-2">
-                        <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-teal btn-sm">
-                            <i class="fas fa-arrow-left me-1"></i>
-                            Retour
-                        </a>
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4 gap-3">
+                <h4 class="mb-0 teal-glacier-text flex-shrink-0">
+                    <i class="fas fa-users me-2"></i>
+                    Gestion des Utilisateurs
+                </h4>
+                <div class="d-flex flex-wrap gap-2 w-100 w-md-auto justify-content-center justify-content-md-end">
+                    <!-- Bouton Retour - toujours visible -->
+                    <a href="{% url 'dashboard_admin' %}" class="btn btn-outline-teal btn-sm flex-shrink-0">
+                        <i class="fas fa-arrow-left me-1"></i>
+                        <span class="d-none d-sm-inline">Retour</span>
+                    </a>
+                    
+                    <!-- Boutons principaux - visibles sur desktop, menu déroulant sur mobile -->
+                    <div class="dropdown d-md-none">
+                        <button class="btn btn-teal-glacier btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-plus me-1"></i>
+                            Actions
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a href="{% url 'creer_gerant' %}" class="dropdown-item">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    Nouveau Gérant
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'creer_serveur_gerant' %}" class="dropdown-item">
+                                    <i class="fas fa-user-cog me-2"></i>
+                                    Nouveau Serveur
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'ajouter_livreur' %}" class="dropdown-item">
+                                    <i class="fas fa-truck me-2"></i>
+                                    Nouveau Livreur
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a href="{% url 'gestion_utilisateurs' %}" class="dropdown-item">
+                                    <i class="fas fa-users me-2"></i>
+                                    Utilisateurs
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Boutons visibles sur tablette et desktop -->
+                    <div class="d-none d-md-flex gap-2">
                         <a href="{% url 'creer_gerant' %}" class="btn btn-teal-glacier btn-sm">
                             <i class="fas fa-user-tie me-1"></i>
                             Nouveau Gérant
@@ -33,14 +72,13 @@
                             <i class="fas fa-truck me-1"></i>
                             Nouveau Livreur
                         </a>
-
-                          <a href="{% url 'gestion_utilisateurs' %}" class="btn btn-teal-glacier btn-sm">
-                           <i class="fas fa-users me-2"></i>
-                             Utilisateurs
+                        <a href="{% url 'gestion_utilisateurs' %}" class="btn btn-teal-glacier btn-sm">
+                            <i class="fas fa-users me-1"></i>
+                            Utilisateurs
                         </a>
                     </div>
                 </div>
-
+            </div>
                 <!-- Statistiques rapides -->
                 <div class="row mb-4">
                     <div class="col-xl-2 col-md-4 col-sm-6 mb-3">
@@ -282,21 +320,13 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <button type="button" class="btn btn-teal-light" data-bs-toggle="modal" data-bs-target="#serveurModal{{ serveur.id }}" title="Détails">
-                                                    <i class="fas fa-eye teal-glacier-text"></i>
-                                                </button>
-                                                <a href="#" class="btn btn-outline-teal" title="Modifier">
+                                           <div class="btn-group btn-group-sm">
+                                               <a href="{% url 'modifier_serveur' serveur.id %}" class="btn btn-outline-teal" title="Modifier">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <button type="button" 
-                                                    class="btn btn-outline-danger btn-sm btn-supprimer"
-                                                    data-user-id="{{ serveur.id }}"
-                                                    data-username="{{ serveur.username }}"
-                                                    data-role="{{ serveur.get_role_display|default:'Serveur' }}"
-                                                    title="Supprimer">
+                                                <a href="{% url 'supprimer_serveur' serveur.id %}" class="btn btn-outline-danger btn-sm" title="Supprimer">
                                                     <i class="fas fa-trash"></i>
-                                                </button>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -351,20 +381,12 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <button type="button" class="btn btn-teal-light" data-bs-toggle="modal" data-bs-target="#livreurModal{{ livreur.id }}" title="Détails">
-                                                    <i class="fas fa-eye teal-glacier-text"></i>
-                                                </button>
-                                                <a href="{% url 'modifier_livreur' livreur.id %}" class="btn btn-outline-teal" title="Modifier">
+                                               <a href="{% url 'modifier_livreur' livreur.id %}" class="btn btn-outline-teal" title="Modifier">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <button type="button" 
-                                                    class="btn btn-outline-danger btn-sm btn-supprimer"
-                                                    data-user-id="{{ livreur.id }}"
-                                                    data-username="{{ livreur.username }}"
-                                                    data-role="{{ livreur.get_role_display|default:'Livreur' }}"
-                                                    title="Supprimer">
+                                                <a href="{% url 'supprimer_livreur' livreur.id %}" class="btn btn-outline-danger btn-sm" title="Supprimer">
                                                     <i class="fas fa-trash"></i>
-                                                </button>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
@@ -422,20 +444,12 @@
                                         </td>
                                         <td>
                                             <div class="btn-group btn-group-sm">
-                                                <button type="button" class="btn btn-teal-light" data-bs-toggle="modal" data-bs-target="#clientModal{{ client.id }}" title="Détails">
-                                                    <i class="fas fa-eye teal-glacier-text"></i>
-                                                </button>
-                                                <a href="#" class="btn btn-outline-teal" title="Modifier">
+                                               <a href="{% url 'modifier_client' client.id %}" class="btn btn-outline-teal" title="Modifier">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <button type="button" 
-                                                    class="btn btn-outline-danger btn-sm btn-supprimer"
-                                                    data-user-id="{{ client.id }}"
-                                                    data-username="{{ client.username }}"
-                                                    data-role="{{ client.get_role_display|default:'Client' }}"
-                                                    title="Supprimer">
+                                                <a href="{% url 'supprimer_client' client.id %}" class="btn btn-outline-danger btn-sm" title="Supprimer">
                                                     <i class="fas fa-trash"></i>
-                                                </button>
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>

@@ -4,6 +4,65 @@
 {% block title %}Rapports et Analyses{% endblock %}
 
 {% block body %}
+<style>
+:root {
+    --teal-glacier: #20B2AA;
+    --teal-light: #48D1CC;
+    --teal-dark: #008B8B;
+    --teal-lighter: #E0F2F1;
+    --teal-gradient: linear-gradient(135deg, #20B2AA 0%, #48D1CC 100%);
+}
+
+.card-header {
+    background-color: var(--teal-lighter);
+    border-bottom: 1px solid var(--teal-light);
+    color: var(--teal-dark);
+    font-weight: 600;
+}
+
+.bg-primary {
+    background: var(--teal-gradient) !important;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, var(--teal-light) 0%, var(--teal-glacier) 100%) !important;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, var(--teal-dark) 0%, #008080 100%) !important;
+}
+
+.bg-info {
+    background: linear-gradient(135deg, #48D1CC 0%, #20B2AA 100%) !important;
+}
+
+.btn-primary {
+    background-color: var(--teal-glacier);
+    border-color: var(--teal-glacier);
+}
+
+.btn-primary:hover {
+    background-color: var(--teal-dark);
+    border-color: var(--teal-dark);
+}
+
+.breadcrumb-item.active {
+    color: var(--teal-glacier);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--teal-lighter);
+}
+
+.table-light {
+    background-color: var(--teal-lighter);
+}
+
+h1 {
+    color: var(--teal-dark);
+}
+</style>
+
 <div class="container-fluid px-4">
     <h1 class="mt-4">Rapports et Analyses</h1>
     <ol class="breadcrumb mb-4">
@@ -37,60 +96,179 @@
     </div>
 
     <!-- Cartes de synthèse -->
-    <div class="row">
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Revenus totaux</h6>
-                            <h2 class="mt-2">{{ revenus_periode|default:0|intcomma }} FCFA</h2>
+<div class="row g-3">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm professional-card revenue-card">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Revenus totaux</div>
+                        <div class="h4 fw-bold text-dark mb-1">{{ revenus_periode|default:0|intcomma }} <small class="fs-6">FCFA</small></div>
+                        <div class="text-success small fw-medium">
+                            <i class="fas fa-arrow-up fa-xs me-1"></i>Période sélectionnée
                         </div>
-                        <i class="fas fa-chart-line fa-2x"></i>
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-success text-white mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Commandes</h6>
-                            <h2 class="mt-2">{{ nb_commandes_periode|intcomma }}</h2>
-                        </div>
-                        <i class="fas fa-shopping-cart fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-warning text-white mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Produits vendus</h6>
-                            <h2 class="mt-2">{{ top_produits|length|intcomma }}</h2>
-                        </div>
-                        <i class="fas fa-boxes fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-            <div class="card bg-info text-white mb-4">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">Gérants actifs</h6>
-                            <h2 class="mt-2">{{ performance_gerants|length|intcomma }}</h2>
-                        </div>
-                        <i class="fas fa-users fa-2x"></i>
+                    <div class="icon-container bg-primary bg-opacity-10">
+                        <i class="fas fa-chart-line text-white fa-lg"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm professional-card orders-card">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Commandes</div>
+                        <div class="h4 fw-bold text-dark mb-1">{{ nb_commandes_periode|intcomma }}</div>
+                        <div class="text-muted small fw-medium">
+                            <i class="fas fa-shopping-bag fa-xs me-1"></i>Total commandes
+                        </div>
+                    </div>
+                    <div class="icon-container bg-success bg-opacity-10">
+                        <i class="fas fa-shopping-cart text-white fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm professional-card products-card">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Produits vendus</div>
+                        <div class="h4 fw-bold text-dark mb-1">{{ top_produits|length|intcomma }}</div>
+                        <div class="text-muted small fw-medium">
+                            <i class="fas fa-cube fa-xs me-1"></i>Produits distincts
+                        </div>
+                    </div>
+                    <div class="icon-container bg-warning bg-opacity-10">
+                        <i class="fas fa-boxes text-white fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm professional-card managers-card">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small fw-semibold text-uppercase mb-1">Gérants actifs</div>
+                        <div class="h4 fw-bold text-dark mb-1">{{ performance_gerants|length|intcomma }}</div>
+                        <div class="text-muted small fw-medium">
+                            <i class="fas fa-user-check fa-xs me-1"></i>Performance
+                        </div>
+                    </div>
+                    <div class="icon-container bg-info bg-opacity-10">
+                        <i class="fas fa-users text-white fa-lg"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .professional-card {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        background: #ffffff;
+    }
+
+    .professional-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .icon-container {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-left: 12px;
+    }
+
+    /* Couleurs spécifiques pour chaque carte */
+    .revenue-card {
+        border-left: 4px solid #4e73df;
+    }
+
+    .orders-card {
+        border-left: 4px solid #1cc88a;
+    }
+
+    .products-card {
+        border-left: 4px solid #f6c23e;
+    }
+
+    .managers-card {
+        border-left: 4px solid #36b9cc;
+    }
+
+    /* Typographie professionnelle */
+    .professional-card .h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .professional-card .small {
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .professional-card .text-uppercase {
+        letter-spacing: 0.8px;
+        font-size: 0.7rem;
+    }
+
+    /* Espacement optimisé */
+    .professional-card .card-body {
+        padding: 1rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .professional-card .h4 {
+            font-size: 1.25rem;
+        }
+        
+        .icon-container {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .professional-card .fa-lg {
+            font-size: 1rem;
+        }
+    }
+
+    /* Animation subtile au chargement */
+    @keyframes cardFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .professional-card {
+        animation: cardFadeIn 0.5s ease-out;
+    }
+
+    .professional-card:nth-child(2) { animation-delay: 0.1s; }
+    .professional-card:nth-child(3) { animation-delay: 0.2s; }
+    .professional-card:nth-child(4) { animation-delay: 0.3s; }
+</style>
 
     <!-- Graphique des ventes -->
     <div class="row">
@@ -189,101 +367,101 @@
 <!-- Inclure Chart.js depuis les assets statiques -->
 <script src="{% static 'admin/lib/chart/chart.min.js' %}"></script>
 <script>
-// Graphique des ventes
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('ventesChart').getContext('2d');
-    const ventesChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [
-                {% for vente in ventes_par_jour %}
-                    '{{ vente.date|date:"d/m" }}'{% if not forloop.last %},{% endif %}
-                {% endfor %}
-            ],
-            datasets: [{
-                label: 'Ventes (FCFA)',
-                data: [
+    // Graphique des ventes
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('ventesChart').getContext('2d');
+        const ventesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [
                     {% for vente in ventes_par_jour %}
-                        {{ vente.total|default:0|floatformat:2 }}{% if not forloop.last %},{% endif %}
+                        '{{ vente.date|date:"d/m" }}'{% if not forloop.last %},{% endif %}
                     {% endfor %}
                 ],
-                backgroundColor: 'rgba(78, 115, 223, 0.05)',
-                borderColor: 'rgba(78, 115, 223, 1)',
-                pointRadius: 3,
-                pointBackgroundColor: 'rgba(78, 115, 223, 1)',
-                pointBorderColor: 'rgba(78, 115, 223, 1)',
-                pointHoverRadius: 3,
-                pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
-                pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
-                pointHitRadius: 10,
-                pointBorderWidth: 2,
-                tension: 0.3
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: 10
+                datasets: [{
+                    label: 'Ventes (FCFA)',
+                    data: [
+                        {% for vente in ventes_par_jour %}
+                            {{ vente.total|default:0|floatformat:2 }}{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(32, 178, 170, 0.1)',
+                    borderColor: 'rgba(32, 178, 170, 1)',
+                    pointRadius: 3,
+                    pointBackgroundColor: 'rgba(32, 178, 170, 1)',
+                    pointBorderColor: 'rgba(32, 178, 170, 1)',
+                    pointHoverRadius: 3,
+                    pointHoverBackgroundColor: 'rgba(32, 178, 170, 1)',
+                    pointHoverBorderColor: 'rgba(32, 178, 170, 1)',
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    tension: 0.3
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return value.toLocaleString('fr-FR') + ' FCFA';
+            options: {
+                maintainAspectRatio: false,
+                layout: {
+                    padding: 10
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString('fr-FR') + ' FCFA';
+                            },
+                            maxTicksLimit: 5
                         },
-                        maxTicksLimit: 5
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        }
                     },
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.05)',
-                        drawBorder: false
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            maxRotation: 0,
+                            maxTicksLimit: 10
+                        }
                     }
                 },
-                x: {
-                    grid: {
-                        display: false,
-                        drawBorder: false
+                plugins: {
+                    legend: {
+                        display: false
                     },
-                    ticks: {
-                        maxRotation: 0,
-                        maxTicksLimit: 10
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    backgroundColor: 'rgb(255,255,255)',
-                    bodyFontColor: '#858796',
-                    titleMarginBottom: 10,
-                    titleFontColor: '#6e707e',
-                    titleFontSize: 14,
-                    borderColor: '#dddfeb',
-                    borderWidth: 1,
-                    xPadding: 15,
-                    yPadding: 15,
-                    displayColors: false,
-                    intersect: false,
-                    mode: 'index',
-                    caretPadding: 10,
-                    callbacks: {
-                        label: function(context) {
-                            var label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
+                    tooltip: {
+                        backgroundColor: 'rgb(255,255,255)',
+                        bodyFontColor: '#858796',
+                        titleMarginBottom: 10,
+                        titleFontColor: '#6e707e',
+                        titleFontSize: 14,
+                        borderColor: '#dddfeb',
+                        borderWidth: 1,
+                        xPadding: 15,
+                        yPadding: 15,
+                        displayColors: false,
+                        intersect: false,
+                        mode: 'index',
+                        caretPadding: 10,
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('fr-FR', {style: 'currency', currency: 'XOF'}).format(context.parsed.y);
+                                }
+                                return label;
                             }
-                            if (context.parsed.y !== null) {
-                                label += new Intl.NumberFormat('fr-FR', {style: 'currency', currency: 'XOF'}).format(context.parsed.y);
-                            }
-                            return label;
                         }
                     }
                 }
             }
-        }
+        });
     });
-});
 </script>
 {% endblock %}

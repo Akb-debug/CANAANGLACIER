@@ -7,104 +7,148 @@
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-12">
-            <div class="bg-light rounded-top p-4">
+            <div class="bg-white rounded-top p-4" style="background: linear-gradient(135deg, rgba(230, 247, 247, 0.8) 0%, rgba(0, 184, 181, 0.1) 100%);">
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h3 class="mb-0">
-                        <i class="fas fa-edit me-2 text-primary"></i>
+                        <i class="fas fa-edit me-2" style="color: rgba(0, 130, 127, 0.8);"></i>
                         Modifier le Produit
                     </h3>
-                    <a href="{% url 'liste_produits' %}" class="btn btn-outline-secondary btn-sm">
+                    <a href="{% url 'liste_produits' %}" class="btn btn-sm" style="background-color: rgba(107, 114, 128, 0.8); color: white; border: none;">
                         <i class="fas fa-arrow-left me-1"></i>
-                        Retour
+                        Retour aux produits
                     </a>
+                </div>
+                
+                <!-- Indication de modification -->
+                <div class="alert py-2" style="background-color: rgba(253, 203, 5, 0.1); border-left: 4px solid rgba(253, 203, 5, 0.8);">
+                    <small>
+                        <i class="fas fa-info-circle me-1" style="color: rgba(0, 130, 127, 0.8);"></i>
+                        Modification du produit : <strong style="color: rgba(0, 130, 127, 0.9);">{{ produit.nom }}</strong>
+                    </small>
                 </div>
             </div>
 
-            <div class="bg-light rounded-bottom p-4">
+            <div class="bg-white rounded-bottom p-4">
                 <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                     {% csrf_token %}
                     
                     <div class="row g-4">
-                        <!-- Colonne Informations du produit -->
-                        <div class="col-lg-8">
-                            <div class="card border-0 shadow-sm h-100">
-                                <div class="card-header bg-white py-3">
+                        <!-- Colonne Informations principales -->
+                        <div class="col-lg-6">
+                            <div class="card h-100" style="border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                                <div class="card-header py-3" style="background: linear-gradient(135deg, rgba(0, 184, 181, 0.8) 0%, rgba(0, 130, 127, 0.8) 100%); color: white;">
                                     <h5 class="mb-0">
-                                        <i class="fas fa-info-circle me-2 text-primary"></i>
-                                        Informations du produit
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Informations principales
                                     </h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
                                         <!-- Nom du produit -->
                                         <div class="col-12">
-                                            <div class="form-floating">
-                                                {{ form.nom }}
-                                                <label for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
-                                                {% if form.nom.errors %}
-                                                    <div class="invalid-feedback d-block">
-                                                        <i class="fas fa-exclamation-circle me-1"></i>
-                                                        {{ form.nom.errors.0 }}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Description -->
-                                        <div class="col-12">
-                                            <div class="form-floating">
-                                                {{ form.description }}
-                                                <label for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
-                                                {% if form.description.errors %}
-                                                    <div class="invalid-feedback d-block">
-                                                        <i class="fas fa-exclamation-circle me-1"></i>
-                                                        {{ form.description.errors.0 }}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Prix et Quantité -->
-                                        <div class="col-md-6">
-                                            <div class="form-floating">
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white"> FCFA</span>
-                                                    {{ form.prix }}
-                                                    <label for="{{ form.prix.id_for_label }}"> {{ form.prix.label }} </label>
+                                            <label class="form-label fw-bold" style="color: rgba(0, 130, 127, 0.9);">
+                                                {{ form.nom.label }} *
+                                            </label>
+                                            {{ form.nom }}
+                                            {% if form.nom.errors %}
+                                                <div class="invalid-feedback d-block" style="color: rgba(233, 30, 99, 0.8);">
+                                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                                    {{ form.nom.errors.0 }}
                                                 </div>
-                                                {% if form.prix.errors %}
-                                                    <div class="invalid-feedback d-block">
-                                                        <i class="fas fa-exclamation-circle me-1"></i>
-                                                        {{ form.prix.errors.0 }}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-md-6">
-                                            <div class="form-floating">
-                                                {{ form.quantite_disponible }}
-                                                <label for="{{ form.quantite_disponible.id_for_label }}">{{ form.quantite_disponible.label }}</label>
-                                                {% if form.quantite_disponible.errors %}
-                                                    <div class="invalid-feedback d-block">
-                                                        <i class="fas fa-exclamation-circle me-1"></i>
-                                                        {{ form.quantite_disponible.errors.0 }}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
+                                            {% endif %}
                                         </div>
                                         
                                         <!-- Catégorie -->
                                         <div class="col-12">
-                                            <div class="form-floating">
-                                                {{ form.categorie }}
-                                                <label for="{{ form.categorie.id_for_label }}">{{ form.categorie.label }}</label>
-                                                {% if form.categorie.errors %}
-                                                    <div class="invalid-feedback d-block">
-                                                        <i class="fas fa-exclamation-circle me-1"></i>
-                                                        {{ form.categorie.errors.0 }}
+                                            <label class="form-label fw-bold" style="color: rgba(0, 130, 127, 0.9);">
+                                                {{ form.categorie.label }} *
+                                            </label>
+                                            {{ form.categorie }}
+                                            {% if form.categorie.errors %}
+                                                <div class="invalid-feedback d-block" style="color: rgba(233, 30, 99, 0.8);">
+                                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                                    {{ form.categorie.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Description -->
+                                        <div class="col-12">
+                                            <label class="form-label fw-bold" style="color: rgba(0, 130, 127, 0.9);">
+                                                {{ form.description.label }} *
+                                            </label>
+                                            {{ form.description }}
+                                            <div class="form-text">Description courte qui apparaîtra dans les listes</div>
+                                            {% if form.description.errors %}
+                                                <div class="invalid-feedback d-block" style="color: rgba(233, 30, 99, 0.8);">
+                                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                                    {{ form.description.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Colonne Prix et Stock -->
+                        <div class="col-lg-6">
+                            <div class="card h-100" style="border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                                <div class="card-header py-3" style="background: linear-gradient(135deg, rgba(0, 184, 181, 0.8) 0%, rgba(0, 130, 127, 0.8) 100%); color: white;">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Prix & Stock
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <!-- Prix -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold" style="color: rgba(0, 130, 127, 0.9);">
+                                                {{ form.prix.label }} *
+                                            </label>
+                                            <div class="input-group">
+                                                {{ form.prix }}
+                                                <span class="input-group-text" style="background-color: rgba(230, 247, 247, 0.8); color: rgba(0, 130, 127, 0.9); border-color: rgba(0, 184, 181, 0.3);">FCFA</span>
+                                            </div>
+                                            {% if form.prix.errors %}
+                                                <div class="invalid-feedback d-block" style="color: rgba(233, 30, 99, 0.8);">
+                                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                                    {{ form.prix.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Quantité disponible -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold" style="color: rgba(0, 130, 127, 0.9);">
+                                                {{ form.quantite_disponible.label }} *
+                                            </label>
+                                            {{ form.quantite_disponible }}
+                                            {% if form.quantite_disponible.errors %}
+                                                <div class="invalid-feedback d-block" style="color: rgba(233, 30, 99, 0.8);">
+                                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                                    {{ form.quantite_disponible.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Informations statut -->
+                                        <div class="col-12">
+                                            <div class="p-3 rounded-3" style="background-color: rgba(230, 247, 247, 0.3); border: 1px solid rgba(0, 184, 181, 0.2);">
+                                                <h6 class="mb-2" style="color: rgba(0, 130, 127, 0.9);">
+                                                    <i class="fas fa-history me-2"></i>Statut actuel
+                                                </h6>
+                                                <div class="row small">
+                                                    <div class="col-6">
+                                                        <span style="color: rgba(107, 114, 128, 0.8);">Créé le :</span><br>
+                                                        <strong style="color: rgba(0, 130, 127, 0.9);">{{ produit.date_creation|date:"d/m/Y" }}</strong>
                                                     </div>
-                                                {% endif %}
+                                                    <div class="col-6">
+                                                        <span style="color: rgba(107, 114, 128, 0.8);">Modifié le :</span><br>
+                                                        <strong style="color: rgba(0, 130, 127, 0.9);">{{ produit.date_modification|date:"d/m/Y" }}</strong>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -113,11 +157,11 @@
                         </div>
                         
                         <!-- Colonne Image du produit -->
-                        <div class="col-lg-4">
-                            <div class="card border-0 shadow-sm h-100">
-                                <div class="card-header bg-white py-3">
+                        <div class="col-lg-6">
+                            <div class="card h-100" style="border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                                <div class="card-header py-3" style="background: linear-gradient(135deg, rgba(0, 184, 181, 0.8) 0%, rgba(0, 130, 127, 0.8) 100%); color: white;">
                                     <h5 class="mb-0">
-                                        <i class="fas fa-image me-2 text-primary"></i>
+                                        <i class="fas fa-image me-2"></i>
                                         Image du produit
                                     </h5>
                                 </div>
@@ -125,31 +169,101 @@
                                     <div class="d-flex flex-column h-100">
                                         <!-- Upload d'image -->
                                         <div class="mb-4">
-                                            <label for="{{ form.image.id_for_label }}" class="form-label fw-bold mb-3">{{ form.image.label }}</label>
+                                            <label for="{{ form.image.id_for_label }}" class="form-label fw-bold mb-3" style="color: rgba(0, 130, 127, 0.9);">
+                                                {{ form.image.label }}
+                                            </label>
                                             <div class="input-group">
-                                                <input type="file" class="form-control" id="{{ form.image.id_for_label }}" name="{{ form.image.name }}" accept="image/*">
-                                                {% if form.image.errors %}
-                                                    <div class="invalid-feedback d-block">
-                                                        <i class="fas fa-exclamation-circle me-1"></i>
-                                                        {{ form.image.errors.0 }}
-                                                    </div>
-                                                {% endif %}
+                                                <input type="file" class="form-control" id="{{ form.image.id_for_label }}" name="{{ form.image.name }}" accept="image/*" style="border-color: rgba(0, 184, 181, 0.3);">
                                             </div>
-                                            <small class="text-muted">Laissez vide pour conserver l'image actuelle</small>
+                                            <div class="form-text">Laissez vide pour conserver l'image actuelle. Formats : JPG, PNG, WEBP</div>
+                                            {% if form.image.errors %}
+                                                <div class="invalid-feedback d-block" style="color: rgba(233, 30, 99, 0.8);">
+                                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                                    {{ form.image.errors.0 }}
+                                                </div>
+                                            {% endif %}
                                         </div>
                                         
                                         <!-- Aperçu de l'image -->
                                         <div class="flex-grow-1 d-flex flex-column">
-                                            <div id="image-preview" class="border rounded-3 bg-light bg-opacity-50 flex-grow-1 d-flex align-items-center justify-content-center" style="min-height: 250px;">
+                                            <label class="form-label fw-bold mb-3" style="color: rgba(0, 130, 127, 0.9);">
+                                                Aperçu {% if produit.image %}(actuel){% endif %}
+                                            </label>
+                                            <div id="image-preview" class="border rounded-3 flex-grow-1 d-flex align-items-center justify-content-center" style="min-height: 200px; background: linear-gradient(135deg, rgba(230, 247, 247, 0.8) 0%, rgba(0, 184, 181, 0.1) 100%); border-color: rgba(0, 184, 181, 0.3) !important;">
                                                 {% if produit.image %}
-                                                    <img src="{{ produit.image.url }}" alt="Image actuelle" class="img-fluid" style="max-height: 100%;">
+                                                    <img src="{{ produit.image.url }}" alt="Image actuelle de {{ produit.nom }}" class="img-fluid" style="max-height: 100%; border-radius: 8px;">
                                                 {% else %}
                                                     <div class="text-center p-4">
-                                                        <i class="fas fa-image fa-4x text-muted mb-3"></i>
-                                                        <p class="text-muted mb-0">Aucune image disponible</p>
-                                                        <small class="text-muted">(Ratio recommandé : 1:1)</small>
+                                                        <i class="fas fa-image fa-4x mb-3" style="color: rgba(0, 184, 181, 0.5);"></i>
+                                                        <p class="mb-0" style="color: rgba(0, 130, 127, 0.7);">Aucune image disponible</p>
+                                                        <small style="color: rgba(0, 130, 127, 0.6);">Téléchargez une nouvelle image</small>
                                                     </div>
                                                 {% endif %}
+                                            </div>
+                                            
+                                            <!-- Actions image -->
+                                            {% if produit.image %}
+                                            <div class="mt-3 text-center">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    Image actuelle - Téléchargez une nouvelle image pour la remplacer
+                                                </small>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Colonne Actions rapides -->
+                        <div class="col-lg-6">
+                            <div class="card h-100" style="border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                                <div class="card-header py-3" style="background: linear-gradient(135deg, rgba(0, 184, 181, 0.8) 0%, rgba(0, 130, 127, 0.8) 100%); color: white;">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-bolt me-2"></i>
+                                        Actions rapides
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex flex-column h-100 justify-content-between">
+                                        <!-- Statut du produit -->
+                                        <div>
+                                            <h6 class="mb-3" style="color: rgba(0, 130, 127, 0.9);">
+                                                <i class="fas fa-chart-bar me-2"></i>
+                                                Statut du produit
+                                            </h6>
+                                            
+                                            <!-- Indicateur de disponibilité -->
+                                            <div class="mb-3 p-3 rounded-3" style="background-color: {% if produit.quantite_disponible > 0 %}rgba(0, 184, 181, 0.1){% else %}rgba(233, 30, 99, 0.1){% endif %}; border-left: 4px solid {% if produit.quantite_disponible > 0 %}rgba(0, 184, 181, 0.8){% else %}rgba(233, 30, 99, 0.8){% endif %};">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong style="color: rgba(0, 130, 127, 0.9);">Disponibilité</strong>
+                                                        <br>
+                                                        <span class="small" style="color: rgba(107, 114, 128, 0.8);">
+                                                            {% if produit.quantite_disponible > 0 %}
+                                                                {{ produit.quantite_disponible }} unité(s) en stock
+                                                            {% else %}
+                                                                Rupture de stock
+                                                            {% endif %}
+                                                        </span>
+                                                    </div>
+                                                    <span class="badge {% if produit.quantite_disponible > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                                        {% if produit.quantite_disponible > 0 %}Disponible{% else %}Indisponible{% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Actions importantes -->
+                                        <div>
+                                            <h6 class="mb-3" style="color: rgba(0, 130, 127, 0.9);">
+                                                <i class="fas fa-shield-alt me-2"></i>
+                                                Sécurité
+                                            </h6>
+                                            <div class="alert alert-warning py-2 small">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                Toutes les modifications sont enregistrées et traçables.
                                             </div>
                                         </div>
                                     </div>
@@ -161,15 +275,23 @@
                     <!-- Boutons d'action -->
                     <div class="row mt-4">
                         <div class="col-12">
-                            <div class="d-flex justify-content-end gap-3">
-                                <a href="{% url 'liste_produits' %}" class="btn btn-outline-secondary px-4 py-2">
-                                    <i class="fas fa-times me-2"></i>
-                                    Annuler
-                                </a>
-                                <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm">
-                                    <i class="fas fa-save me-2"></i>
-                                    Enregistrer les modifications
-                                </button>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Dernière modification : {{ produit.date_modification|date:"d/m/Y à H:i" }}
+                                    </small>
+                                </div>
+                                <div class="d-flex gap-3">
+                                    <a href="{% url 'liste_produits' %}" class="btn px-4 py-2" style="background-color: rgba(107, 114, 128, 0.8); color: white; border: none;">
+                                        <i class="fas fa-times me-2"></i>
+                                        Annuler
+                                    </a>
+                                    <button type="submit" class="btn px-4 py-2 shadow-sm" style="background: linear-gradient(135deg, rgba(0, 184, 181, 0.8) 0%, rgba(0, 130, 127, 0.8) 100%); color: white; border: none;">
+                                        <i class="fas fa-save me-2"></i>
+                                        Enregistrer les modifications
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -180,34 +302,53 @@
 </div>
 
 <style>
+.mb-0{
+    color:white;
+}
 .card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 12px;
 }
 
 .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
 }
 
-.form-floating label {
-    color: #6c757d;
+.form-control, .form-select {
+    border: 1px solid rgba(0, 184, 181, 0.3);
     transition: all 0.3s ease;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
 }
 
-.form-control:focus {
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    border-color: #86b7fe;
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(0, 184, 181, 0.25);
+    border-color: rgba(0, 184, 181, 0.8);
+    background-color: rgba(230, 247, 247, 0.1);
+}
+
+.form-label {
+    margin-bottom: 0.5rem;
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: rgba(107, 114, 128, 0.8) !important;
+    margin-top: 0.25rem;
 }
 
 #image-preview {
     transition: all 0.3s ease;
     overflow: hidden;
+    border-radius: 8px;
 }
 
 #image-preview img {
-    object-fit: contain;
+    object-fit: cover;
     max-width: 100%;
     max-height: 100%;
+    border-radius: 8px;
 }
 
 .invalid-feedback {
@@ -215,7 +356,37 @@
 }
 
 .input-group-text {
-    background-color: #f8f9fa;
+    background-color: rgba(230, 247, 247, 0.8);
+    color: rgba(0, 130, 127, 0.9);
+    border: 1px solid rgba(0, 184, 181, 0.3);
+    border-radius: 0 8px 8px 0;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Animation pour les boutons */
+.btn {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Indication des champs obligatoires */
+.form-label[for*="nom"]:after,
+.form-label[for*="categorie"]:after,
+.form-label[for*="description"]:after,
+.form-label[for*="prix"]:after,
+.form-label[for*="quantite"]:after {
+    content: " *";
+    color: rgba(233, 30, 99, 0.8);
 }
 </style>
 
@@ -228,18 +399,27 @@ document.getElementById('{{ form.image.id_for_label }}').addEventListener('chang
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            preview.innerHTML = `<img src="${e.target.result}" alt="Nouvelle image" class="img-fluid">`;
+            preview.innerHTML = `
+                <div class="text-center position-relative">
+                    <img src="${e.target.result}" alt="Nouvelle image" class="img-fluid" style="border-radius: 8px; max-height: 100%;">
+                    <div class="position-absolute top-0 start-0 m-2">
+                        <span class="badge bg-warning text-dark">Nouvelle image</span>
+                    </div>
+                </div>
+            `;
         };
         reader.readAsDataURL(file);
     } else {
         {% if produit.image %}
-            preview.innerHTML = `<img src="{{ produit.image.url }}" alt="Image actuelle" class="img-fluid">`;
+            preview.innerHTML = `
+                <img src="{{ produit.image.url }}" alt="Image actuelle de {{ produit.nom }}" class="img-fluid" style="max-height: 100%; border-radius: 8px;">
+            `;
         {% else %}
             preview.innerHTML = `
                 <div class="text-center p-4">
-                    <i class="fas fa-image fa-4x text-muted mb-3"></i>
-                    <p class="text-muted mb-0">Aucune image disponible</p>
-                    <small class="text-muted">(Ratio recommandé : 1:1)</small>
+                    <i class="fas fa-image fa-4x mb-3" style="color: rgba(0, 184, 181, 0.5);"></i>
+                    <p class="mb-0" style="color: rgba(0, 130, 127, 0.7);">Aucune image disponible</p>
+                    <small style="color: rgba(0, 130, 127, 0.6);">Téléchargez une nouvelle image</small>
                 </div>
             `;
         {% endif %}
@@ -263,5 +443,63 @@ document.getElementById('{{ form.image.id_for_label }}').addEventListener('chang
         }, false)
     })
 })();
+
+// Ajustement automatique de la hauteur des textareas
+document.addEventListener('DOMContentLoaded', function() {
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+        
+        // Déclencher l'ajustement initial
+        textarea.dispatchEvent(new Event('input'));
+    });
+});
+
+// Animation d'entrée pour les cartes
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
+
+// Confirmation avant de quitter si des modifications ont été faites
+document.addEventListener('DOMContentLoaded', function() {
+    let formModified = false;
+    const form = document.querySelector('form');
+    const inputs = form.querySelectorAll('input, textarea, select');
+    
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            formModified = true;
+        });
+        
+        input.addEventListener('change', function() {
+            formModified = true;
+        });
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (formModified) {
+            e.preventDefault();
+            e.returnValue = 'Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter ?';
+        }
+    });
+    
+    // Réinitialiser formModified lors de la soumission
+    form.addEventListener('submit', function() {
+        formModified = false;
+    });
+});
 </script>
 {% endblock %}
